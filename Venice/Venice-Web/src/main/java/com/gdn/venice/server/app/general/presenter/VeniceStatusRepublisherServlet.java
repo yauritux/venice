@@ -232,6 +232,37 @@ public class VeniceStatusRepublisherServlet extends HttpServlet {
                     }
                 }
             }
+        }else if (status.equalsIgnoreCase("FC")) {
+            try {
+                locator = new Locator<Object>();
+                orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
+                VenOrder venOrder;
+                for (int i = 0; i < idArray.length; i++) {
+                    venOrder = orderHome.queryByRange("select o from VenOrder o where o.wcsOrderId = '" + idArray[i] + "'", 0, 1).get(0);
+                    String blockingSource = null;
+                    if (venOrder.getVenOrderBlockingSource() != null && venOrder.getVenOrderBlockingSource().getBlockingSourceDesc() != null) {
+                        blockingSource = venOrder.getVenOrderBlockingSource().getBlockingSourceDesc();
+                        _log.debug("blockingSource is exist: " + blockingSource);
+                    }
+                    if (venOrder.getVenOrderStatus().getOrderStatusId() == VeniceConstants.VEN_ORDER_STATUS_FC) {
+                        _log.debug("start republish order status FC for: "+idArray[i]);
+                        if(orderHome.republish(venOrder, blockingSource)){
+                        	_log.debug("done republish order status");
+                        }
+                    }
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (locator != null) {
+                    try {
+                        locator.close();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
         }
     }
 }

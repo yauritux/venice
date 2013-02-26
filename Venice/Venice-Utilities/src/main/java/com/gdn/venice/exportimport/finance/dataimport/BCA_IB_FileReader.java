@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 import org.apache.log4j.Logger;
 
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.venice.finance.dataexportimport.BCA_VA_IB_Record;
 
 /**
  * A class to read the BCA internet banking transaction report file.

@@ -708,6 +708,10 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                                 venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
                                 venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
                                 venOrderPayment.setVenPaymentType(venPaymentType);
+                            }else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VEN_WCS_PAYMENT_TYPE_TelkomselPoin)) {
+                                venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_IB);
+                                venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_IB);
+                                venOrderPayment.setVenPaymentType(venPaymentType);
                             }
                             venOrderPaymentList.add(venOrderPayment);
                         }
@@ -3097,8 +3101,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 if (order.getOrderItems().get(0).getStatus().equals("OS")) {
                     // Enforce the state transition rules
                     if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_PU)
-                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_ES)) {
-                        String errMsg = "updateOrderItemStatus: message received OS status change request for order item that is not status PU or ES: illegal state transition";
+                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_ES)
+                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_BP)) {
+                        String errMsg = "updateOrderItemStatus: message received OS status change request for order item that is not status PU or ES or BP: illegal state transition";
                         _log.error(errMsg);
                         throw new EJBException(errMsg);
                     }
