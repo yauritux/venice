@@ -18,9 +18,9 @@
       <url-pattern>/images/*</url-pattern>
       <url-pattern>/LogisticsChangeShippingNotificationServlet</url-pattern>
       <url-pattern>/TransactionFeeAndSettlementUpdaterJavaServlet</url-pattern>
-      <url-pattern>/VeniceStatusRepublisherServlet</url-pattern>
+      <url-pattern>/VeniceStatusRepublisherServlet</url-pattern>      
     </web-resource-collection>
-  </security-constraint>
+  </security-constraint>  
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>This is not used for FORM login</realm-name>
@@ -560,6 +560,24 @@
     <servlet-name>SalesSettlementReportLauncherServlet</servlet-name>
     <servlet-class>com.gdn.venice.exportimport.finance.dataexport.servlet.SalesSettlementReportLauncherServlet</servlet-class>
   </servlet>
+  <servlet>
+    <description></description>
+    <display-name>WarehouseManagementPresenterServlet</display-name>
+    <servlet-name>WarehouseManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.WarehouseManagementPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>ShelfManagementPresenterServlet</display-name>
+    <servlet-name>ShelfManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.ShelfManagementPresenterServlet</servlet-class>
+  </servlet>  
+  <servlet>
+    <description></description>
+    <display-name>CurrencyManagementPresenterServlet</display-name>
+    <servlet-name>CurrencyManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.CurrencyManagementPresenterServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>FraudBinCreditLimitPresenterServlet</servlet-name>
     <url-pattern>/FraudBinCreditLimitPresenterServlet</url-pattern>
@@ -627,7 +645,7 @@
   <servlet-mapping>
     <servlet-name>UncalculatedCreditCardOrderPresenterServlet</servlet-name>
     <url-pattern>/UncalculatedCreditCardOrderPresenterServlet</url-pattern>
-  </servlet-mapping>
+  </servlet-mapping> 
   <servlet-mapping>
     <servlet-name>InstallmentBCAPresenterServlet</servlet-name>
     <url-pattern>/InstallmentBCAPresenterServlet</url-pattern>
@@ -719,7 +737,7 @@
   <servlet-mapping>
     <servlet-name>ReturDataViewerPresenterServlet</servlet-name>
     <url-pattern>/ReturDataViewerPresenterServlet</url-pattern>
-  </servlet-mapping>
+  </servlet-mapping>  
   <servlet-mapping>
     <servlet-name>TransactionFeeAndSettlementUpdaterJavaServlet</servlet-name>
     <url-pattern>/TransactionFeeAndSettlementUpdaterJavaServlet</url-pattern>
@@ -736,6 +754,18 @@
     <servlet-name>SalesSettlementReportLauncherServlet</servlet-name>
     <url-pattern>/SalesSettlementReportLauncherServlet</url-pattern>
   </servlet-mapping> 
+  <servlet-mapping>
+    <servlet-name>WarehouseManagementPresenterServlet</servlet-name>
+    <url-pattern>/WarehouseManagementPresenterServlet</url-pattern>
+  </servlet-mapping>  
+   <servlet-mapping>
+    <servlet-name>ShelfManagementPresenterServlet</servlet-name>
+    <url-pattern>/ShelfManagementPresenterServlet</url-pattern>
+  </servlet-mapping>  
+   <servlet-mapping>
+    <servlet-name>CurrencyManagementPresenterServlet</servlet-name>
+    <url-pattern>/CurrencyManagementPresenterServlet</url-pattern>
+  </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>
@@ -744,5 +774,5 @@
     <welcome-file>default.html</welcome-file>
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
-  </welcome-file-list>
+  </welcome-file-list>  
 </web-app>

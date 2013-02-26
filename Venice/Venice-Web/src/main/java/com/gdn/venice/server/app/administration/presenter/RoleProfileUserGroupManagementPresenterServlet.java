@@ -38,11 +38,13 @@ import com.gdn.venice.server.app.administration.presenter.commands.FetchProfileD
 import com.gdn.venice.server.app.administration.presenter.commands.FetchProfileDetailDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchRoleComboBoxDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchRoleDataCommand;
+import com.gdn.venice.server.app.administration.presenter.commands.FetchRoleDetailDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchRoleDetailProfileDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchRoleDetailUserDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchScreenComboBoxDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchUserComboBoxDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchUserDataCommand;
+import com.gdn.venice.server.app.administration.presenter.commands.FetchUserDetailDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchUserDetailGroupDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.FetchUserDetailRoleDataCommand;
 import com.gdn.venice.server.app.administration.presenter.commands.UpdateGroupDataCommand;
@@ -91,6 +93,18 @@ public class RoleProfileUserGroupManagementPresenterServlet extends HttpServlet 
 				rafDsRequest = RafDsRequest.convertXmltoRafDsRequest(requestBody);
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			
+			if(request.getParameter(DataNameTokens.RAFUSER_USERID) != null){
+				HashMap<String, String> params = new HashMap<String, String>();
+				params.put(DataNameTokens.RAFUSER_USERID, request.getParameter(DataNameTokens.RAFUSER_USERID));
+				rafDsRequest.setParams(params);
+			}
+			
+			if(request.getParameter(DataNameTokens.RAFROLE_ROLEID) != null){
+				HashMap<String, String> params = new HashMap<String, String>();
+				params.put(DataNameTokens.RAFROLE_ROLEID, request.getParameter(DataNameTokens.RAFROLE_ROLEID));
+				rafDsRequest.setParams(params);
 			}
 			
 			String method = request.getParameter("method");
@@ -196,26 +210,44 @@ public class RoleProfileUserGroupManagementPresenterServlet extends HttpServlet 
 					e.printStackTrace();
 				}
 			}
-			else if(method.equals("addRoleData")){
-				RafDsCommand addRoleDataCommand = new AddRoleDataCommand(rafDsRequest);
-				RafDsResponse rafDsResponse = addRoleDataCommand.execute();
+			else if (method.equals("fetchRoleDetailData")) {		
+				RafDsCommand fetchRoleDetailDataCommand = new FetchRoleDetailDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchRoleDetailDataCommand.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else if(method.equals("addRoleData")){
+				String username = Util.getUserName(request);
+				RafDsCommand addRoleDataCommand = new AddRoleDataCommand(rafDsRequest, username);
+				RafDsResponse rafDsResponse = addRoleDataCommand.execute();
+				try {
+					if (rafDsResponse.getStatus() == 0){
+						retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+					}
+					else if(rafDsResponse.getStatus() == 2){
+						String errorMessage = "Data already exist.";						
+						retVal = "<response><status>-1</status><data>" + errorMessage + "</data></response>";
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 			else if(method.equals("updateRoleData")){			
-				RafDsCommand updateRoleDataCommand = new UpdateRoleDataCommand(rafDsRequest);
+				String username = Util.getUserName(request);
+				RafDsCommand updateRoleDataCommand = new UpdateRoleDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = updateRoleDataCommand.execute();
 				try {
-					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			else if(method.equals("deleteRoleData")){										
-				RafDsCommand deleteRoleDataCommand = new DeleteRoleDataCommand(rafDsRequest);
+			else if(method.equals("deleteRoleData")){	
+				String username = Util.getUserName(request);
+				RafDsCommand deleteRoleDataCommand = new DeleteRoleDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = deleteRoleDataCommand.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
@@ -293,10 +325,11 @@ public class RoleProfileUserGroupManagementPresenterServlet extends HttpServlet 
 				}
 			}
 			else if(method.equals("addRoleDetailUserData")){
+				String username = Util.getUserName(request);
 				HashMap<String, String> params = new HashMap<String, String>();
 				params.put(DataNameTokens.RAFROLE_ROLEID, request.getParameter(DataNameTokens.RAFROLE_ROLEID));
 				rafDsRequest.setParams(params);
-				RafDsCommand addRoleDetailUserDataCommand = new AddRoleDetailUserDataCommand(rafDsRequest);
+				RafDsCommand addRoleDetailUserDataCommand = new AddRoleDetailUserDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = addRoleDetailUserDataCommand.execute();
 				try {
 					if (rafDsResponse.getStatus() == 0){
@@ -328,8 +361,9 @@ public class RoleProfileUserGroupManagementPresenterServlet extends HttpServlet 
 					e.printStackTrace();
 				}
 			}
-			else if(method.equals("deleteRoleDetailUserData")){										
-				RafDsCommand deleteRoleDetailUserDataCommand = new DeleteRoleDetailUserDataCommand(rafDsRequest);
+			else if(method.equals("deleteRoleDetailUserData")){								
+				String username = Util.getUserName(request);
+				RafDsCommand deleteRoleDetailUserDataCommand = new DeleteRoleDetailUserDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = deleteRoleDetailUserDataCommand.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
@@ -346,26 +380,44 @@ public class RoleProfileUserGroupManagementPresenterServlet extends HttpServlet 
 					e.printStackTrace();
 				}
 			}
-			else if(method.equals("addUserData")){
-				RafDsCommand addUserDataCommand = new AddUserDataCommand(rafDsRequest);
-				RafDsResponse rafDsResponse = addUserDataCommand.execute();
+			else if (method.equals("fetchUserDetailData")) {		
+				RafDsCommand fetchUserDetailDataCommand = new FetchUserDetailDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchUserDetailDataCommand.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else if(method.equals("addUserData")){
+				String username = Util.getUserName(request);
+				RafDsCommand addUserDataCommand = new AddUserDataCommand(rafDsRequest, username);
+				RafDsResponse rafDsResponse = addUserDataCommand.execute();
+				try {
+					if (rafDsResponse.getStatus() == 0){
+						retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+					}
+					else if(rafDsResponse.getStatus() == 2){
+						String errorMessage = "Data already exist.";						
+						retVal = "<response><status>-1</status><data>" + errorMessage + "</data></response>";
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 			else if(method.equals("updateUserData")){	
-				RafDsCommand updateUserDataCommand = new UpdateUserDataCommand(rafDsRequest);
+				String username = Util.getUserName(request);
+				RafDsCommand updateUserDataCommand = new UpdateUserDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = updateUserDataCommand.execute();
 				try {
-					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			else if(method.equals("deleteUserData")){										
-				RafDsCommand deleteUserDataCommand = new DeleteUserDataCommand(rafDsRequest);
+			else if(method.equals("deleteUserData")){	
+				String username = Util.getUserName(request);
+				RafDsCommand deleteUserDataCommand = new DeleteUserDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = deleteUserDataCommand.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
@@ -443,10 +495,11 @@ public class RoleProfileUserGroupManagementPresenterServlet extends HttpServlet 
 				}
 			}
 			else if(method.equals("addUserDetailRoleData")){
+				String username = Util.getUserName(request);
 				HashMap<String, String> params = new HashMap<String, String>();
 				params.put(DataNameTokens.RAFUSER_USERID, request.getParameter(DataNameTokens.RAFUSER_USERID));
 				rafDsRequest.setParams(params);
-				RafDsCommand addUserDetailRoleDataCommand = new AddUserDetailRoleDataCommand(rafDsRequest);
+				RafDsCommand addUserDetailRoleDataCommand = new AddUserDetailRoleDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = addUserDetailRoleDataCommand.execute();
 				try {
 					if (rafDsResponse.getStatus() == 0){
@@ -478,8 +531,9 @@ public class RoleProfileUserGroupManagementPresenterServlet extends HttpServlet 
 					e.printStackTrace();
 				}
 			}
-			else if(method.equals("deleteUserDetailRoleData")){										
-				RafDsCommand deleteUserDetailRoleDataCommand = new DeleteUserDetailRoleDataCommand(rafDsRequest);
+			else if(method.equals("deleteUserDetailRoleData")){				
+				String username = Util.getUserName(request);
+				RafDsCommand deleteUserDetailRoleDataCommand = new DeleteUserDetailRoleDataCommand(rafDsRequest, username);
 				RafDsResponse rafDsResponse = deleteUserDetailRoleDataCommand.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);

@@ -25,7 +25,7 @@ public class FetchRoleComboBoxDataCommand implements RafRpcCommand{
 			locator = new Locator<Object>();			
 			RafRoleSessionEJBRemote sessionHome = (RafRoleSessionEJBRemote) locator.lookup(RafRoleSessionEJBRemote.class, "RafRoleSessionEJBBean");			
 			List<RafRole> role = null;
-			String query = "select o from RafRole o";
+			String query = "select o from RafRole o order by o.roleName";
 			role = sessionHome.queryByRange(query, 0, 0);
 			
 			for(int i=0; i<role.size();i++){

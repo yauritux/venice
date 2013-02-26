@@ -25,7 +25,7 @@ public class FetchUserComboBoxDataCommand implements RafRpcCommand{
 			locator = new Locator<Object>();			
 			RafUserSessionEJBRemote sessionHome = (RafUserSessionEJBRemote) locator.lookup(RafUserSessionEJBRemote.class, "RafUserSessionEJBBean");			
 			List<RafUser> user = null;
-			String query = "select o from RafUser o";
+			String query = "select o from RafUser o order by o.loginName";
 			user = sessionHome.queryByRange(query, 0, 0);
 			
 			for(int i=0; i<user.size();i++){

@@ -20,12 +20,18 @@ public class RafUser implements Serializable {
 	@TableGenerator(name="raf_user", table="openjpaseq", pkColumnName="id", valueColumnName="sequence_value", allocationSize=1)  //flush every 1 insert
 	@Column(name="user_id")
 	private Long userId;
-
-	@Column(name="encrypted_password", length=100)
-	private String encryptedPassword;
-
+	
 	@Column(name="login_name", nullable=false, length=100)
 	private String loginName;
+
+	@Column(name="name", length=100)
+	private String name;
+	
+	@Column(name="add_to_stockholm")
+	private Boolean addToStockholm;
+	
+	@Column(name="department")
+	private String department;
 
 	//bi-directional many-to-one association to VenParty
     @ManyToOne
@@ -47,12 +53,12 @@ public class RafUser implements Serializable {
 		this.userId = userId;
 	}
 
-	public String getEncryptedPassword() {
-		return this.encryptedPassword;
+	public String getName() {
+		return this.name;
 	}
 
-	public void setEncryptedPassword(String encryptedPassword) {
-		this.encryptedPassword = encryptedPassword;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getLoginName() {
@@ -77,6 +83,22 @@ public class RafUser implements Serializable {
 
 	public void setRafUserGroupMemberships(List<RafUserGroupMembership> rafUserGroupMemberships) {
 		this.rafUserGroupMemberships = rafUserGroupMemberships;
+	}
+
+	public Boolean getAddToStockholm() {
+		return addToStockholm;
+	}
+
+	public void setAddToStockholm(Boolean addToStockholm) {
+		this.addToStockholm = addToStockholm;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 	
 }

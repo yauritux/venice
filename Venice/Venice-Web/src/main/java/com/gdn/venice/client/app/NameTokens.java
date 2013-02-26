@@ -66,6 +66,18 @@ public class NameTokens {
 
 	public static final String reservationOrderManagement= "!reservationOrderManagement";
 
+    public static final String warehouseListFilterPage = "!warehouseListFilterPage";
+	public static final String warehouseAddWithApprovalPage = "!addWithApprovalPage";
+	public static final String warehouseEditWithApprovalPage = "!editWithApprovalPage";
+	public static final String warehouseNonActiveWithApprovalPage = "!nonActiveWithApprovalPage";
+	
+	public static final String shelfListFilterPage = "!shelfListFilterPage";
+	public static final String shelfAddApprovalPage = "!addApprovalPage";
+	public static final String shelfEditApprovalPage = "!editApprovalPage";
+	public static final String shelfNonActiveApprovalPage = "!nonActiveApprovalPage";
+	
+	public static final String currencyManagementPage = "!currencyManagementPage";
+        
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;
 	}

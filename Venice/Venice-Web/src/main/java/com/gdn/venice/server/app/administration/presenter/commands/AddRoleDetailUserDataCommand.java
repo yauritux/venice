@@ -6,9 +6,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.EJBException;
+
+import org.apache.log4j.Logger;
+
 import com.djarum.raf.utilities.Locator;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.inventory.exchange.entity.Role;
+import com.gdn.inventory.exchange.entity.User;
+import com.gdn.inventory.exchange.entity.UserRole;
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.facade.RafRoleSessionEJBRemote;
 import com.gdn.venice.facade.RafUserRoleSessionEJBRemote;
+import com.gdn.venice.facade.RafUserSessionEJBRemote;
 import com.gdn.venice.persistence.RafRole;
 import com.gdn.venice.persistence.RafUser;
 import com.gdn.venice.persistence.RafUserRole;
@@ -23,11 +33,17 @@ import com.gdn.venice.server.data.RafDsResponse;
  */
 
 public class AddRoleDetailUserDataCommand implements RafDsCommand {
-
 	RafDsRequest request;
+	String username;
 	
-	public AddRoleDetailUserDataCommand(RafDsRequest request){
-		this.request=request;
+	protected static Logger _log = null;
+	
+	public AddRoleDetailUserDataCommand(RafDsRequest request,  String username){
+		this.request=request;		
+		this.username = username;
+		
+        Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.administration.AddRoleDetailUserDataCommand");
 	}
 
 	@Override
@@ -35,8 +51,9 @@ public class AddRoleDetailUserDataCommand implements RafDsCommand {
 		RafDsResponse rafDsResponse = new RafDsResponse();
 		Locator<Object> locator=null;
 		List<RafUserRole> rafUserRoleListCheck = new ArrayList<RafUserRole>();
+		List<RafUser> rafUserListCheck = new ArrayList<RafUser>();
+		List<RafRole> rafRoleListCheck = new ArrayList<RafRole>();
 		List<HashMap<String, String>> dataList=new ArrayList<HashMap<String,String>>();	
-		Boolean status=false;
 		String userId="";
 		
 		//because only user id can be changed in screen, so only user id sent from servlet, role id must be sent as parameter.
@@ -44,9 +61,12 @@ public class AddRoleDetailUserDataCommand implements RafDsCommand {
 		try{
 			locator = new Locator<Object>();
 			RafUserRoleSessionEJBRemote sessionHome = (RafUserRoleSessionEJBRemote) locator.lookup(RafUserRoleSessionEJBRemote.class, "RafUserRoleSessionEJBBean");
+			RafUserSessionEJBRemote userSessionHome = (RafUserSessionEJBRemote) locator.lookup(RafUserSessionEJBRemote.class, "RafUserSessionEJBBean");
+			RafRoleSessionEJBRemote roleSessionHome = (RafRoleSessionEJBRemote) locator.lookup(RafRoleSessionEJBRemote.class, "RafRoleSessionEJBBean");
 			dataList=request.getData();
 			
-			RafUserRole rafUserRole = new RafUserRole();			 
+			RafUserRole userRoleVenice = new RafUserRole();
+			
 			for(int i=0;i< dataList.size();i++){
 				Map<String, String> data = dataList.get(i);
 				Iterator<String> iter=data.keySet().iterator();
@@ -56,33 +76,57 @@ public class AddRoleDetailUserDataCommand implements RafDsCommand {
 					if(key.equals(DataNameTokens.RAFROLE_RAFUSERROLES_USERID)){
 						RafUser user = new RafUser();
 						user.setUserId(new Long(data.get(key)));
-						rafUserRole.setRafUser(user);
+						userRoleVenice.setRafUser(user);
 						userId=new Long(data.get(DataNameTokens.RAFROLE_RAFUSERROLES_USERID)).toString();
 					} else if(key.equals(DataNameTokens.RAFROLE_RAFUSERROLES_ROLEID)){
 						RafRole role =  new RafRole();
 						role.setRoleId(new Long(data.get(key)));
-						rafUserRole.setRafRole(role);
+						userRoleVenice.setRafRole(role);
 					}
 				}
 			}
 			
 			//check first if the user and role already exist in database
-			String query = "select o from RafUserRole o where o.rafUser.userId="+userId+" and o.rafRole.roleId="+roleId;
-			rafUserRoleListCheck = sessionHome.queryByRange(query, 0, 0);
+			rafUserRoleListCheck = sessionHome.queryByRange("select o from RafUserRole o where o.rafUser.userId="+userId+" and o.rafRole.roleId="+roleId, 0, 1);
 			if(rafUserRoleListCheck.size()>0){
-				status=true;
-			}else{
-				status=false;
-			}
-			
-			if(status==false){
-				//data is unique so update the database
-				rafUserRole=sessionHome.persistRafUserRole(rafUserRole);
-				rafDsResponse.setStatus(0);
-			}else{
 				//data already exist
+				_log.info("role user already exist");
 				rafDsResponse.setStatus(2);
-			}
+			}else{
+				//data is unique so update the database				
+				rafUserListCheck = userSessionHome.queryByRange("select o from RafUser o where o.userId="+userId, 0, 1);
+				rafRoleListCheck = roleSessionHome.queryByRange("select o from RafRole o where o.roleId="+roleId, 0, 1);
+								
+				if(rafUserListCheck.size()>0 && rafRoleListCheck.size()>0){
+					if(rafUserListCheck.get(0).getAddToStockholm()!=null && rafUserListCheck.get(0).getAddToStockholm()==true 
+							&& rafRoleListCheck.get(0).getAddToStockholm()!=null && rafRoleListCheck.get(0).getAddToStockholm()==true){
+						_log.info("save add role user in Stockholm");
+						System.out.println("save add role user in Stockholm");
+												
+						User userStockholm = new User();
+						userStockholm.setCode(rafUserListCheck.get(0).getLoginName());
+						
+						Role roleStockholm = new Role();
+						roleStockholm.setCode(rafRoleListCheck.get(0).getRoleName());
+						
+						UserRole userRoleStockholm = new UserRole();
+						userRoleStockholm.setUser(userStockholm);
+						userRoleStockholm.setRole(roleStockholm);
+						
+						AddUpdateUserRoleStockholm addToStockholm = new AddUpdateUserRoleStockholm();
+										
+						Boolean success = addToStockholm.addUserRole(username, userRoleStockholm);
+						if(success==false){
+							throw new EJBException("save add user role in Stockholm failed");
+						}
+					}
+				}
+				
+				_log.info("save add role user in Venice");
+				userRoleVenice=sessionHome.persistRafUserRole(userRoleVenice);
+				
+				rafDsResponse.setStatus(0);
+			}			
 		}catch(Exception e){
 			e.printStackTrace();
 			rafDsResponse.setStatus(-1);
