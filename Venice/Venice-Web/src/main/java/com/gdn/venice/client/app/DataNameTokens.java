@@ -336,6 +336,7 @@ public class DataNameTokens {
 	public static String FINSALESRECORD_VENORDERITEM_VENORDER_WCSORDERID = "FinSalesRecord.venOrderItem.venOrder.wcsOrderId";
 	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_WCSMERCHANTID = "FinSalesRecord.venOrderItem.venMerchantProduct.venMerchant.wcsMerchantId";
 	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_VENPARTY_FULLORLEGALNAME = "FinSalesRecord.venOrderItem.venMerchantProduct.venMerchant.venParty.fullOrLegalName";
+	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_MERCHANTPRODUCTSKU = "FinSalesRecord.venOrderItem.venMerchantProduct.merchantProductSku";
 	public static String FINSALESRECORD_VENORDERITEM_WCSORDERITEMID = "FinSalesRecord.venOrderItem.wcsOrderItemId";	
 	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_WCSPRODUCTNAME = "FinSalesRecord.venOrderItem.venMerchantProduct.wcsProductName";
 	public static String FINSALESRECORD_VENORDERITEM_QUANTITY = "FinSalesRecord.venOrderItem.quantity";
@@ -1869,6 +1870,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENORDER_WCSORDERID, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_WCSMERCHANTID, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_VENPARTY_FULLORLEGALNAME, "java.lang.String");
+		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_MERCHANTPRODUCTSKU, "java.lang.String");		
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_WCSORDERITEMID, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_WCSPRODUCTNAME, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_QUANTITY, "java.lang.Integer");
