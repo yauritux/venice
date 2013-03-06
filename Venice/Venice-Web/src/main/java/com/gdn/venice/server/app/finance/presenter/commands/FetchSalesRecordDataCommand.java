@@ -146,7 +146,8 @@ public class FetchSalesRecordDataCommand implements RafDsCommand {
 				map.put(DataNameTokens.FINSALESRECORD_SALESTIMESTAMP, (salesRecord.getSalesTimestamp() != null)?formatter.format(new Timestamp(salesRecord.getSalesTimestamp().getTime()-25200000)):"");
 				map.put(DataNameTokens.FINSALESRECORD_MCX_DATE, formatter.format(salesRecord.getCxMtaDate()));
 				map.put(DataNameTokens.FINSALESRECORD_CXF_DATE, formatter.format(salesRecord.getCxFinanceDate()));
-	
+				map.put(DataNameTokens.FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_MERCHANTPRODUCTSKU, (salesRecord.getVenOrderItem()!=null && salesRecord.getVenOrderItem().getVenMerchantProduct()!=null )? salesRecord.getVenOrderItem().getVenMerchantProduct().getMerchantProductSku():"");
+
 				BigDecimal shippingCost = new BigDecimal(0);
 				BigDecimal insuranceCost = new BigDecimal(0);
 				BigDecimal shippingAndInsuranceCost = new BigDecimal(0);				

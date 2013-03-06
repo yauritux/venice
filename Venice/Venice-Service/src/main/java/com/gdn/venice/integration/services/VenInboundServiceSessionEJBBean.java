@@ -964,7 +964,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
 
         // Remove the customer and the order items because they need to be ignored at this stage
-        order.setCustomer(null);
+       // order.setCustomer(null);
         order.getOrderItems().clear();
 
         // Map the jaxb Order object to a JPA VenOrder object.
@@ -994,9 +994,20 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
 
         venOrder.setVenOrderStatus(venOrderStatus);
-
+        
+        VenCustomer venCustomer = new VenCustomer();
+        
+        try{
+            venCustomer = persistCustomer(venOrder.getVenCustomer());
+        }catch(MappingException e){
+            String errMsg = "createOrderVAPayment: An Exception occured when mapping customer object:" + e.getMessage();
+            _log.error(errMsg);
+            e.printStackTrace();
+            throw new EJBException(errMsg);
+        }
+        venOrder.setVenCustomer(venCustomer);
         // Synchronize the reference data
-        venOrder = this.synchronizeVenOrderReferenceData(venOrder);
+         venOrder = this.synchronizeVenOrderReferenceData(venOrder);
 
         // Persist the order
         try {
