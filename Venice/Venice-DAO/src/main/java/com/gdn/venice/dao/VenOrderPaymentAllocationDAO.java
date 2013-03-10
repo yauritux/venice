@@ -32,14 +32,29 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 			   " afirr.reconcilliationRecordTimestamp IS NULL";
 	
 	public static final String FIND_BY_INTERNET_BANKING_DETAIL =
+		   "SELECT o " +
+		   "FROM VenOrderPaymentAllocation AS o " +
+		   " JOIN FETCH o.venOrderPayment AS op " +
+		   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
+		   "WHERE " +
+		   " op.referenceId = ?1 AND " +
+		   " op.venPaymentType.paymentTypeId = "+VeniceConstants.VEN_PAYMENT_TYPE_ID_IB;
+	
+	public static final String FIND_BY_VA_DETAIL =
 			   "SELECT o " +
 			   "FROM VenOrderPaymentAllocation AS o " +
 			   " JOIN FETCH o.venOrderPayment AS op " +
 			   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
 			   "WHERE " +
-			   " op.referenceId = ?1 AND " +
-			   " op.venPaymentType.paymentTypeId = "+VeniceConstants.VEN_PAYMENT_TYPE_ID_IB;
+			   " op.referenceId = ?1 ";
 	
+	public static final String FIND_BY_PAYMENTREFERENCEID =
+		   "SELECT o " +
+		   "FROM VenOrderPaymentAllocation AS o " +
+		   " JOIN FETCH o.venOrderPayment AS op " +
+		   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
+		   "WHERE " +
+		   " op.referenceId = ?1 ";
 	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
@@ -49,4 +64,10 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(FIND_BY_INTERNET_BANKING_DETAIL)
 	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByInternetBankingDetail(String referenceId);
+	
+	@Query(FIND_BY_VA_DETAIL)
+	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByVADetail(String referenceId);
+	
+	@Query(FIND_BY_PAYMENTREFERENCEID)
+	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByPaymentReferenceId(String referenceId);
 }

@@ -16,8 +16,8 @@ import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.exception.FundInFileAlreadyUploadedException;
 import com.gdn.venice.exception.FundInFileParserException;
 import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
-import com.gdn.venice.exportimport.finance.dataimport.BCA_IB_FileReader;
-import com.gdn.venice.finance.dataexportimport.BCA_VA_IB_Record;
+import com.gdn.venice.exportimport.finance.dataimport.Niaga_IB_FileReader;
+import com.gdn.venice.finance.dataexportimport.Niaga_IB_Record;
 import com.gdn.venice.hssf.PojoInterface;
 import com.gdn.venice.persistence.FinApprovalStatus;
 import com.gdn.venice.persistence.FinArFundsInActionApplied;
@@ -27,16 +27,17 @@ import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
 import com.gdn.venice.util.CommonUtil;
 
-@Service("KlikPayIBFundInServiceImpl")
-public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
-	private static final FinArFundsInReportTypeConstants REPORT_TYPE = FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB;
-	private static final String CLASS_NAME = KlikPayIBFundInServiceImpl.class.getCanonicalName();
+@Service("NiagaIBFundInServiceImpl")
+public class NiagaIBFundInServiceImpl extends AbstractFundInService{
+	private static final FinArFundsInReportTypeConstants REPORT_TYPE = FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB;
+	private static final String CLASS_NAME = NiagaIBFundInServiceImpl.class.getCanonicalName();
 	
 	@Override
-	public String process(String fileNameAndFullPath, String uploadUserName) throws NoSuchAlgorithmException, 
-																				    IOException,
-																				    FundInFileAlreadyUploadedException,
-																				    FundInNoFinancePeriodFoundException {
+	public String process(String fileNameAndFullPath, String uploadUserName)
+			throws NoSuchAlgorithmException, IOException,
+			FundInFileAlreadyUploadedException,
+			FundInNoFinancePeriodFoundException {
+		
 		if(isFileAlreadyUploaded(fileNameAndFullPath, REPORT_TYPE)){
 			throw new FundInFileAlreadyUploadedException("The file is already uploaded");
 		}
@@ -52,7 +53,7 @@ public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
 			List<FinArFundsInReconRecord> fundInReconReadyToPersistList = new ArrayList<FinArFundsInReconRecord>(fundInData.getFundInList().size());
 			
 			for(PojoInterface pojo : fundInData.getFundInList()){
-				BCA_VA_IB_Record rec = (BCA_VA_IB_Record) pojo;
+				Niaga_IB_Record rec = (Niaga_IB_Record) pojo;
 				
 				if(isPaymentAmountNotLessThanZero(new BigDecimal(rec.getPaymentAmount()))){
 					fundInRecon = processEachFundIn(pojo, finArFundsInReport);
@@ -86,17 +87,18 @@ public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
 	}
 
 	@Override
-	public ArrayList<PojoInterface> parse(String fileNameAndFullPath) throws FundInFileParserException {
+	public ArrayList<PojoInterface> parse(String fileNameAndFullPath)
+			throws FundInFileParserException {
 		ArrayList<PojoInterface> records = null;
 		
-		BCA_IB_FileReader reader = new BCA_IB_FileReader();
+		Niaga_IB_FileReader reader = new Niaga_IB_FileReader();
 		
 		try {
-			ArrayList<BCA_VA_IB_Record> results = reader.readFile(fileNameAndFullPath);
+			ArrayList<Niaga_IB_Record> results = reader.readFile(fileNameAndFullPath);
 			records = new ArrayList<PojoInterface>(results.size());
 			
-			for (BCA_VA_IB_Record bcaVAIBRecord : results) {
-				records.add(bcaVAIBRecord);
+			for (Niaga_IB_Record niagaIBRecord : results) {
+				records.add(niagaIBRecord);
 			}
 			
 		} catch (Exception e) {
@@ -113,26 +115,26 @@ public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
 		CommonUtil.logDebug(CLASS_NAME, "Check for duplicate fund in");
 		FundInData fundInData = new FundInData();
 		
-		BCA_VA_IB_Record currentRecord = null;
-		BCA_VA_IB_Record otherRecord = null;
-		String currentAccountNumber = null;
-		String otherAccountNumber = null;
+		Niaga_IB_Record currentRecord = null;
+		Niaga_IB_Record otherRecord = null;
+		String accountNo = null;
+		String otherAccountNo = null;
 		
 		for(int i = 0 ; i < fundInList.size(); i++){
-			currentRecord = (BCA_VA_IB_Record) fundInList.get(i);
+			currentRecord = (Niaga_IB_Record) fundInList.get(i);
 			
 			fundInList.remove(i);
 			i = -1;
 			
-			currentAccountNumber = currentRecord.getAccountNumber();
+			accountNo = currentRecord.getAccountNumber();
 			
 			for(int j = 0 ; j < fundInList.size(); j++){
-				otherRecord = (BCA_VA_IB_Record) fundInList.get(j);
+				otherRecord = (Niaga_IB_Record) fundInList.get(j);
 				
-				otherAccountNumber = otherRecord.getAccountNumber();
+				otherAccountNo = otherRecord.getAccountNumber();
 				
-				if(currentAccountNumber.equals(otherAccountNumber)){
-					CommonUtil.logDebug(CLASS_NAME, "Duplicate Fund In with Account Number" + currentAccountNumber);
+				if(accountNo.equals(otherAccountNo)){
+					CommonUtil.logDebug(CLASS_NAME, "Duplicate Fund In with Account No " + accountNo);
 					fundInList.remove(j);
 					j = 0;
 					
@@ -150,31 +152,31 @@ public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
 	public FinArFundsInReconRecord processEachFundIn(PojoInterface pojo, FinArFundsInReport finArFundsInReport) throws ParseException{
 		FinArFundsInReconRecord fundInRecon = null;
 		
-		BCA_VA_IB_Record rec = (BCA_VA_IB_Record) pojo;
+		Niaga_IB_Record rec = (Niaga_IB_Record) pojo;
 		
-		String accountNumber = rec.getAccountNumber();
+		String accountNo = rec.getAccountNumber();
 		
 		BigDecimal paymentAmount = new BigDecimal(rec.getPaymentAmount());
 		BigDecimal bankFee = new BigDecimal(rec.getBankFee());
 		
-		if(!isFundInOkToContinue(accountNumber, "", paymentAmount, REPORT_TYPE)) {
+		if(!isFundInOkToContinue(accountNo, "", paymentAmount, REPORT_TYPE)) {
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(accountNumber, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(accountNo, paymentAmount, REPORT_TYPE);
 		
-		if(isInternetBankingFundInAlreadyExist(accountNumber, REPORT_TYPE.id())){
+		if(isInternetBankingFundInAlreadyExist(accountNo, REPORT_TYPE.id())){
 			order = null;
 		}
 		
-		if(order != null && !isOrderPaymentExist(accountNumber, paymentAmount, REPORT_TYPE)){
-			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + accountNumber);
+		if(order != null && !isOrderPaymentExist(accountNo, paymentAmount, REPORT_TYPE)){
+			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + accountNo);
 			return null;
 		}
 		
 		if(order != null){
 			VenOrderPaymentAllocation orderPaymentAllocation 
-				= getPaymentAllocationByRelatedPayment(accountNumber, 
+				= getPaymentAllocationByRelatedPayment(accountNo, 
 						                               paymentAmount, 
 						                               REPORT_TYPE);
 			
@@ -200,7 +202,7 @@ public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
 		}else{
 			BigDecimal remainingAmount = fundInRecon.getRemainingBalanceAmount()!=null?fundInRecon.getRemainingBalanceAmount(): new BigDecimal(0);
 			fundInRecon.setRemainingBalanceAmount(remainingAmount.subtract(paymentAmount));
-			fundInRecon.setNomorReff(accountNumber);
+			fundInRecon.setNomorReff(accountNo);
 		}
 		
 		fundInRecon.setFinArFundsInReport(finArFundsInReport);
@@ -208,7 +210,7 @@ public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
 		BigDecimal paidAmount = fundInRecon.getProviderReportPaidAmount()!=null?fundInRecon.getProviderReportPaidAmount(): new BigDecimal(0);
 		fundInRecon.setProviderReportFeeAmount(feeAmount.add(bankFee));
 		fundInRecon.setProviderReportPaidAmount(paidAmount.add(paymentAmount));		
-		fundInRecon.setProviderReportPaymentId(accountNumber);
+		fundInRecon.setProviderReportPaymentId(accountNo);
 		fundInRecon.setReconcilliationRecordTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
 		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(rec.getPaymentDate().getTime()));
 		fundInRecon.setRefundAmount(new BigDecimal(0));

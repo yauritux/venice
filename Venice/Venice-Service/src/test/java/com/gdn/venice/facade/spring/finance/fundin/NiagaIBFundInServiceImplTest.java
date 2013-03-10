@@ -12,21 +12,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.gdn.venice.constants.VeniceEnvironment;
 import com.gdn.venice.dto.FundInData;
-import com.gdn.venice.finance.dataexportimport.MT942_Record;
+import com.gdn.venice.finance.dataexportimport.Niaga_IB_Record;
 import com.gdn.venice.hssf.PojoInterface;
 import com.gdn.venice.util.CommonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MandiriIBFundInServiceImplTest {
-	private MandiriIBFundInServiceImpl sut;
-	
+public class NiagaIBFundInServiceImplTest {
+
+	NiagaIBFundInServiceImpl sut;
 	VeniceEnvironment veniceEnv;
 	
 	@Before
 	public void setup(){
 		veniceEnv = VeniceEnvironment.TESTING;
 		CommonUtil.veniceEnv = veniceEnv;
-		sut = new MandiriIBFundInServiceImpl();
+		
+		sut = new NiagaIBFundInServiceImpl();
 	}
 	
 	@Test
@@ -40,7 +41,7 @@ public class MandiriIBFundInServiceImplTest {
 	
 	@Test
 	public void mergeDuplicate_1FundIn_returns1FundIn(){
-		MT942_Record fundIn1 = new MT942_Record();
+		Niaga_IB_Record fundIn1 = new Niaga_IB_Record();
 		fundIn1.setAccountNumber("uniquefundin1");
 		fundIn1.setPaymentAmount(new Double(1000));
 		fundIn1.setBankFee(new Double(10));
@@ -55,27 +56,27 @@ public class MandiriIBFundInServiceImplTest {
 	
 	
 	private ArrayList<PojoInterface> get5FundInWith3DuplicateFundIn(){
-		MT942_Record duplicateFundIn1 = new MT942_Record();
+		Niaga_IB_Record duplicateFundIn1 = new Niaga_IB_Record();
 		duplicateFundIn1.setAccountNumber("duplicate");
 		duplicateFundIn1.setPaymentAmount(new Double(1000));
 		duplicateFundIn1.setBankFee(new Double(10));
 		
-		MT942_Record fundIn1 = new MT942_Record();
+		Niaga_IB_Record fundIn1 = new Niaga_IB_Record();
 		fundIn1.setAccountNumber("unique1");
 		fundIn1.setPaymentAmount(new Double(1500));
 		fundIn1.setBankFee(new Double(10));
 		
-		MT942_Record fundIn2 = new MT942_Record();
+		Niaga_IB_Record fundIn2 = new Niaga_IB_Record();
 		fundIn2.setAccountNumber("unique2");
 		fundIn2.setPaymentAmount(new Double(4000));
 		fundIn2.setBankFee(new Double(10));
 		
-		MT942_Record duplicateFundIn2 = new MT942_Record();
+		Niaga_IB_Record duplicateFundIn2 = new Niaga_IB_Record();
 		duplicateFundIn2.setAccountNumber("duplicate");
 		duplicateFundIn2.setPaymentAmount(new Double(2000));
 		duplicateFundIn2.setBankFee(new Double(10));
 		
-		MT942_Record duplicateFundIn3 = new MT942_Record();
+		Niaga_IB_Record duplicateFundIn3 = new Niaga_IB_Record();
 		duplicateFundIn3.setAccountNumber("duplicate");
 		duplicateFundIn3.setPaymentAmount(new Double(3000));
 		duplicateFundIn3.setBankFee(new Double(10));
@@ -96,4 +97,5 @@ public class MandiriIBFundInServiceImplTest {
 		CommonUtil.veniceEnv = veniceEnv;
 		sut = null;
 	}
+	
 }
