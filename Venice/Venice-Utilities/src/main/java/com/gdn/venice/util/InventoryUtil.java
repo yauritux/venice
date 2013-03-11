@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 
@@ -82,4 +84,18 @@ public class InventoryUtil {
             return false;
         }
     }
+    
+    public static HashMap<String, String> convertToHashMap(String s) {
+	    String[] arr = s.split(", ");
+	    String str = null;
+	    HashMap<String, String> map = new HashMap<String, String>();
+	    for (int i=0;i<arr.length;i++) {
+	    	str = arr[i].replace("{", "").replace("}", "");
+	        String[] splited = str.split("=");
+
+	        map.put(splited[0], splited[1]);
+	    }
+	    
+	    return map;
+	}
 }

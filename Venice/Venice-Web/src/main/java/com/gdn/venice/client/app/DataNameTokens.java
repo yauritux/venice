@@ -985,6 +985,7 @@ public class DataNameTokens {
 	public static String TASKTYPE = "taskType";
 	//Added in to support passing of task type to enable differentiation between tasks
 	public static final String TASKTYPEID = "taskTypeId";
+
 	public static String TASKDESCRIPTION = "taskDescription";
 	public static String TASKASSIGNEE = "taskAssignee";
 	public static String TASKCREATEDDATE = "taskCreatedDate";
@@ -1203,6 +1204,41 @@ public class DataNameTokens {
         public static String INV_CURRENCY_ID="id";
         public static String INV_CURRENCY_CURRENCY="currency";
         public static String INV_CURRENCY_RATE="rate";
+        
+    	public static String INV_ASN_ID = "id";
+    	public static String INV_ASN_NUMBER = "asnNumber";
+    	public static String INV_ASN_CREATED_DATE = "createdDate";
+    	public static String INV_ASN_REFF_DATE = "referenceDate";
+    	public static String INV_ASN_EST_DATE = "estimatedDate";
+    	public static String INV_ASN_INVENTORY_TYPE = "referenceType";
+    	public static String INV_ASN_SUPPLIER_CODE = "supplier.code";
+    	public static String INV_ASN_SUPPLIER_NAME = "supplier.name";
+    	public static String INV_ASN_DESTINATION = "destinationWarehouse.name";
+    	public static String INV_ASN_STATUS = "currentStatus";
+    	public static String INV_ASN_SPECIAL_NOTES = "specialNotes";
+    	public static String INV_ASN_REFF_TYPE = "referenceType";
+    	public static String INV_ASN_REFF_NUMBER = "referenceNumber";
+    	    	
+    	public static String INV_ASN_ITEM_ID = "id";
+    	public static String INV_ASN_ITEM_QTY = "quantity";
+    	
+    	public static String INV_PO_NUMBER = "poNumber";
+    	public static String INV_CFF_NUMBER = "cffNumber";
+
+    	public static String INV_POCFF_ITEMCODE = "code";
+    	public static String INV_POCFF_ITEMDESC = "description";
+    	public static String INV_POCFF_QTY = "quantity";
+    	public static String INV_POCFF_ITEMUNIT = "unit";
+    	public static String INV_POCFF_ITEMLENGTH = "length";
+    	public static String INV_POCFF_ITEMWIDTH = "width";
+    	public static String INV_POCFF_ITEMHEIGHT = "height";
+    	public static String INV_POCFF_ITEMWEIGHT = "weight";
+    	public static String INV_POCFF_VOLUME = "volume";
+    	public static String INV_POCFF_QTYGRN = "grnQuantity";
+    	
+    	public static String INV_GRN_ID = "id";
+    	public static String INV_GRN_NUMBER = "grnNumber";
+    	public static String INV_GRN_ITEM_ID = "id";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type

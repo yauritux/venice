@@ -77,7 +77,7 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
 		String storageMap = Util.formXMLfromHashMap(storageDataMap);
 		
-		request.setData(shelfMap+";"+storageMap);
+		request.setData(shelfMap+"#"+storageMap);
 		
 		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=saveShelfData&type=RPC");
 		request.setHttpMethod("POST");
@@ -120,7 +120,7 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		
 		request.setData(shelfMap);
 		
-		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=saveShelfData&type=RPC");
+		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=saveUpdateStatusShelf&type=RPC");
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setWillHandleError(true);

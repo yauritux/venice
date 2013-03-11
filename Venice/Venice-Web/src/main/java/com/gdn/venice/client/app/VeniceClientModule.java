@@ -29,7 +29,6 @@ import com.gdn.venice.client.app.finance.view.PromotionView;
 import com.gdn.venice.client.app.finance.view.ReportsLauncherView;
 import com.gdn.venice.client.app.finance.view.SalesRecordView;
 import com.gdn.venice.client.app.fraud.presenter.BlackListMaintenancePresenter;
-import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.CustomerBlackListMaintenancePresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudBinCreditLimitPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCalculatePresenter;
@@ -43,7 +42,6 @@ import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
 import com.gdn.venice.client.app.fraud.presenter.UncalculatedCreditCardOrderPresenter;
 import com.gdn.venice.client.app.fraud.view.BlackListMaintenanceView;
-import com.gdn.venice.client.app.fraud.view.InstallmentBCAView;
 import com.gdn.venice.client.app.fraud.view.CustomerBlackListMaintenanceView;
 import com.gdn.venice.client.app.fraud.view.FraudBinCreditLimitView;
 import com.gdn.venice.client.app.fraud.view.FraudCalculateView;
@@ -62,20 +60,26 @@ import com.gdn.venice.client.app.general.presenter.ReturDataViewerPresenter;
 import com.gdn.venice.client.app.general.view.OrderDataViewerView;
 import com.gdn.venice.client.app.general.view.PartyMaintenanceView;
 import com.gdn.venice.client.app.general.view.ReturDataViewerView;
+import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
+import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
+import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfNonActiveWithApprovalPresenter;
-import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
 import com.gdn.venice.client.app.inventory.presenter.WarehouseAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.WarehouseEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.WarehouseListFilterPresenter;
 import com.gdn.venice.client.app.inventory.presenter.WarehouseNonActiveWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.view.ASNListView;
+import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
+import com.gdn.venice.client.app.inventory.view.GRNCreateView;
+import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfEditWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfListFilterView;
 import com.gdn.venice.client.app.inventory.view.ShelfNonActiveWithApprovalView;
-import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
 import com.gdn.venice.client.app.inventory.view.WarehouseAddWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.WarehouseEditWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.WarehouseListFilterView;
@@ -418,5 +422,20 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				CurrencyManagementPresenter.MyView.class,
 				CurrencyManagementView.class,
 				CurrencyManagementPresenter.MyProxy.class);
+		
+		bindPresenter(ASNListPresenter.class,
+				ASNListPresenter.MyView.class,
+				ASNListView.class,
+				ASNListPresenter.MyProxy.class);
+		
+		bindPresenter(GRNListPresenter.class,
+				GRNListPresenter.MyView.class,
+				GRNListView.class,
+				GRNListPresenter.MyProxy.class);
+		
+		bindPresenter(GRNCreatePresenter.class,
+				GRNCreatePresenter.MyView.class,
+				GRNCreateView.class,
+				GRNCreatePresenter.MyProxy.class);		
 	}
 }

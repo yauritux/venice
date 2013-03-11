@@ -89,11 +89,9 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
     public void updateShelfWIPData(String username, HashMap<String, String> data) {
         try {
             RPCRequest request = new RPCRequest();
-
             request.setData(Util.formXMLfromHashMap(data));
-
             request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
-                    + "?method=saveUpdateShelfWIP&type=RPC&username=" + username);
+                    + "?method=saveUpdateStatusShelfWIP&type=RPC&username=" + username);
             request.setHttpMethod("POST");
             request.setUseSimpleHttp(true);
             request.setWillHandleError(true);

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import com.gdn.inventory.exchange.entity.Currency;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
-import com.gdn.venice.client.util.Util;
+import com.gdn.venice.server.util.Util;
 import com.gdn.venice.server.app.inventory.service.CurrencyManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
 

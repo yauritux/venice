@@ -7,7 +7,7 @@ import com.gdn.inventory.exchange.entity.WarehouseWIP;
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
-import com.gdn.venice.client.util.Util;
+import com.gdn.venice.server.util.Util;
 import com.gdn.venice.server.app.inventory.service.WarehouseManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
 

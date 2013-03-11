@@ -18,6 +18,7 @@ import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.SelectionAppearance;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -52,7 +53,7 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
     Window shelfDetailWindow, addShelfWindow;
 
     ToolStrip shelfListToolStrip;
-    ToolStripButton addButton, addStorageButton ;
+    ToolStripButton addButton, addStorageButton, removeStorageButton;
 
     @Inject
     public ShelfListFilterView() {
@@ -156,6 +157,7 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
             	if(editButton.getTitle().equals("Edit")){
             		shelfDetailForm.setDisabled(false);
             		addStorageButton.setDisabled(false);
+            		removeStorageButton.setDisabled(false);
             		storageListGrid.setCanEdit(true);
             		editButton.setTitle("Save");
             	} else {
@@ -198,6 +200,8 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
             	shelfDataMap.put(DataNameTokens.INV_SHELF_CODE, shelfCodeItem.getValueAsString());
             	shelfDataMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());
             	shelfDataMap.put(DataNameTokens.INV_SHELF_ACTIVESTATUS, "Non Active");
+            	shelfDataMap.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "CREATED");
+            	shelfDataMap.put(DataNameTokens.INV_SHELF_APPROVALTYPE, "APPROVAL_NON_ACTIVE");
                 getUiHandlers().onNonActiveShelfClicked(shelfDataMap, shelfDetailWindow);
             }
         });
@@ -223,15 +227,28 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
 	    addStorageButton.setTooltip("Add Storage Bin");
 	    addStorageButton.setTitle("Add Storage Bin");
 	    addStorageButton.setDisabled(true);
+	    
+	    removeStorageButton = new ToolStripButton();
+	    removeStorageButton.setIcon("[SKIN]/icons/business_users_delete.png");  
+	    removeStorageButton.setTooltip("Remove Storage Bin");
+	    removeStorageButton.setTitle("Remove Storage Bin");
+	    removeStorageButton.setDisabled(true);
               
 		ToolStrip storageToolStrip = new ToolStrip();
 		storageToolStrip.setWidth100();
 		
 		storageToolStrip.addButton(addStorageButton);
+		storageToolStrip.addButton(removeStorageButton);
 
 		addStorageButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				storageListGrid.startEditingNew();
+			}
+		});
+		
+		removeStorageButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				storageListGrid.removeSelectedData();
 			}
 		});
         		
@@ -289,38 +306,28 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
 				addShelfWindow.destroy();
 			}
 		});
-        
-		addShelfWindow.addCloseClickHandler(new CloseClickHandler() {
-	      public void onCloseClick(CloseClientEvent event) {
-	    	  addShelfWindow.destroy();
-	      }
-        });
   	         
         saveButton.addClickHandler(new ClickHandler() {
 	          @Override
 	          public void onClick(ClickEvent event) {
 	          	if(addShelfForm.validate()){	          		
-					HashMap<String, String> shelfDataMap = new HashMap<String, String>();
 					HashMap<String, String> shelfRowMap = new HashMap<String, String>();
 						
 					//get shelf form values
 					shelfRowMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());
-		              shelfDataMap.put("SHELF"+0, Util.formXMLfromHashMap(shelfRowMap));
 		                
 		            //get storage listgrid values
 		            HashMap<String, String> storageDataMap = new HashMap<String, String>();
 					ListGridRecord[] storageRecords = storageListGrid.getRecords();
 
-					HashMap<String, String> storageMap = new HashMap<String, String>();
 					HashMap<String, String> storageRowMap = new HashMap<String, String>();
 										
 					for (int i=0;i<storageRecords.length;i++) {
 						storageRowMap.put(DataNameTokens.INV_STORAGE_DESCRIPTION, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_DESCRIPTION));
 						storageRowMap.put(DataNameTokens.INV_STORAGE_TYPE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_TYPE));
-						storageMap.put("STORAGE" + i, Util.formXMLfromHashMap(storageRowMap));
+						storageDataMap.put("STORAGE"+i, storageRowMap.toString());
 					}
-					storageDataMap.put("STORAGE", Util.formXMLfromHashMap(storageMap));
-					getUiHandlers().onSaveShelfClicked(shelfDataMap, storageDataMap, addShelfWindow);
+					getUiHandlers().onSaveShelfClicked(shelfRowMap, storageDataMap, addShelfWindow);
           		}
           	}
         });
@@ -337,15 +344,27 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
 	    addStorageButton.setIcon("[SKIN]/icons/business_users_add.png");  
 	    addStorageButton.setTooltip("Add Storage Bin");
 	    addStorageButton.setTitle("Add Storage Bin");
+	    
+	    removeStorageButton = new ToolStripButton();
+	    removeStorageButton.setIcon("[SKIN]/icons/business_users_delete.png");  
+	    removeStorageButton.setTooltip("Remove Storage Bin");
+	    removeStorageButton.setTitle("Remove Storage Bin");
               
 		ToolStrip storageToolStrip = new ToolStrip();
 		storageToolStrip.setWidth100();
 		
 		storageToolStrip.addButton(addStorageButton);
+		storageToolStrip.addButton(removeStorageButton);
 
 		addStorageButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				storageListGrid.startEditingNew();
+			}
+		});
+		
+		removeStorageButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				storageListGrid.removeSelectedData();
 			}
 		});
         		
@@ -366,6 +385,7 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
     	storageListGrid.setCanResizeFields(true);
     	storageListGrid.setShowRowNumbers(true);
     	storageListGrid.setShowFilterEditor(true);
+    	storageListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
     	    	
     	if(shelfId==null){
     		ListGridField codeField = new ListGridField(DataNameTokens.INV_STORAGE_CODE, "Code");  

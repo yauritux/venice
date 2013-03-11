@@ -77,6 +77,11 @@ public class NameTokens {
 	public static final String shelfNonActiveApprovalPage = "!nonActiveApprovalPage";
 	
 	public static final String currencyManagementPage = "!currencyManagementPage";
+	
+	public static final String asnListPage = "!asnListPage";
+
+	public static final String grnCreatePage = "!grnCreatePage";
+	public static final String grnListPage = "!grnListPage";
         
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;

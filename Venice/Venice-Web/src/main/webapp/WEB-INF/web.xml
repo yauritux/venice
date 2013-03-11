@@ -578,6 +578,18 @@
     <servlet-name>CurrencyManagementPresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.inventory.presenter.CurrencyManagementPresenterServlet</servlet-class>
   </servlet>
+  <servlet>
+    <description></description>
+    <display-name>ASNManagementPresenterServlet</display-name>
+    <servlet-name>ASNManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.ASNManagementPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>GRNManagementPresenterServlet</display-name>
+    <servlet-name>GRNManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.GRNManagementPresenterServlet</servlet-class>
+  </servlet>  
   <servlet-mapping>
     <servlet-name>FraudBinCreditLimitPresenterServlet</servlet-name>
     <url-pattern>/FraudBinCreditLimitPresenterServlet</url-pattern>
@@ -766,6 +778,14 @@
     <servlet-name>CurrencyManagementPresenterServlet</servlet-name>
     <url-pattern>/CurrencyManagementPresenterServlet</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ASNManagementPresenterServlet</servlet-name>
+    <url-pattern>/ASNManagementPresenterServlet</url-pattern>
+  </servlet-mapping>  
+  <servlet-mapping>
+    <servlet-name>GRNManagementPresenterServlet</servlet-name>
+    <url-pattern>/GRNManagementPresenterServlet</url-pattern>
+  </servlet-mapping>    
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>

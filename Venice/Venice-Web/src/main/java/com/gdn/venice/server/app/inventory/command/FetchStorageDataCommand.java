@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.gdn.inventory.exchange.entity.Storage;
+import com.gdn.inventory.exchange.entity.StorageWIP;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.ShelfManagementService;
@@ -33,11 +34,11 @@ public class FetchStorageDataCommand implements RafDsCommand {
         
         try {
         		shelfService = new ShelfManagementService();
-                InventoryPagingWrapper<Storage> storageWrapper = shelfService.getStorageData(request, new Long(request.getParams().get(DataNameTokens.INV_SHELF_ID)));
+                InventoryPagingWrapper<StorageWIP> storageWrapper = shelfService.getStorageData(request, new Long(request.getParams().get(DataNameTokens.INV_SHELF_ID)));
                 if(storageWrapper != null){
 
                 System.out.println("storageWrapper size: "+storageWrapper.getContent().size());
-                for(Storage storage : storageWrapper.getContent()){
+                for(StorageWIP storage : storageWrapper.getContent()){
                     HashMap<String, String> map = new HashMap<String, String>();
                     map.put(DataNameTokens.INV_STORAGE_ID, storage.getId().toString());
                     map.put(DataNameTokens.INV_STORAGE_CODE, storage.getCode());
