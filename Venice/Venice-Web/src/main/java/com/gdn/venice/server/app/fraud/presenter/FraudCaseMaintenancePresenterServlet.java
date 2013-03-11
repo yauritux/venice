@@ -792,6 +792,11 @@ public class FraudCaseMaintenancePresenterServlet extends HttpServlet {
 			} else if(method.equalsIgnoreCase("saveGenuine")){		
 				RafRpcCommand saveGenuine = new SaveGenuineDataCommand(requestBody);
 				retVal = saveGenuine.execute();
+			} else if(method.equalsIgnoreCase("fraudCaseViewerAddToBlackList")){
+				String username=Util.getUserName(request);
+				String wcsOrderId=request.getParameter("wcsOrderId");
+				UpdateOrderStatusDataCommand updateOrderStatusDataCommand = new UpdateOrderStatusDataCommand(requestBody,method,username);
+				retVal = updateOrderStatusDataCommand.addToBlackList(wcsOrderId,username);
 			} 
 		}
 		response.getOutputStream().println(retVal);

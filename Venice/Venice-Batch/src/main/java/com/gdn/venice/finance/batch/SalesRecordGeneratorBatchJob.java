@@ -445,8 +445,9 @@ public class SalesRecordGeneratorBatchJob {
 
             boolean isPPh23 = (venSettlementRecord.getPph23() != null) ? venSettlementRecord.getPph23() : false;
             if (isPPh23) {
-                pph23Amount = (finSalesRecord.getGdnCommissionAmount().add(finSalesRecord.getGdnTransactionFeeAmount())).multiply(new BigDecimal(0.02));
+                pph23Amount = ((finSalesRecord.getGdnCommissionAmount().add(finSalesRecord.getGdnTransactionFeeAmount())).divide(new BigDecimal(1.1),RoundingMode.HALF_UP)).multiply(new BigDecimal(0.02));
             }
+            pph23Amount.setScale(2, RoundingMode.HALF_UP);
             _log.debug("pph 23 amount: " + pph23Amount);
             finSalesRecord.setPph23Amount(pph23Amount);
 

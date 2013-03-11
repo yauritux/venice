@@ -277,10 +277,16 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
                         psAirwayBill.close();
                     }
 
-                    _log.debug("start publish order item status");
-                    Publisher publisher = new Publisher();
-                    publisher.publishUpdateOrderItemStatus(venOrderItem, conn);
-                    _log.debug("done publish order item status");
+                    //pengecekan pubish D tidak boleh untuk BigProduct dan BOPIS
+                    if((newStatus == VeniceConstants.VEN_ORDER_STATUS_D  
+                    	&& !existingVenOrderItem.getLogLogisticService().getLogisticsServiceId().equals(VeniceConstants.LOG_LOGISTICS_SERVICE_CODE_BOPIS_ID) 
+	                    && !existingVenOrderItem.getLogLogisticService().getLogisticsServiceId().equals(VeniceConstants.LOG_LOGISTICS_SERVICE_CODE_BIG_PRODUCT_ID))
+	                    || newStatus != VeniceConstants.VEN_ORDER_STATUS_D ){			                    	
+			                    _log.debug("start publish order item status");
+			                    Publisher publisher = new Publisher();
+			                    publisher.publishUpdateOrderItemStatus(venOrderItem, conn);
+			                    _log.debug("done publish order item status");
+                    }
                 }
 
                 if (newStatus == VeniceConstants.VEN_ORDER_STATUS_PU

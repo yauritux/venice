@@ -22,7 +22,9 @@ import org.codehaus.jackson.type.TypeReference;
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.AdvanceShipNoticeItem;
+import com.gdn.inventory.exchange.entity.Attribute;
 import com.gdn.inventory.exchange.entity.GrnRequest;
+import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNote;
 import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNoteItem;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
@@ -222,6 +224,56 @@ public class GRNManagementService{
             _log.debug(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<AdvanceShipNoticeItem>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public List<WarehouseItem> getWarehouseItemDataList(String itemId) throws HttpException, IOException{
+		_log.info("getWarehouseItemDataList");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "goodReceivedNote/getWarehouseItemByItem?itemId=" +itemId;
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<List<WarehouseItem>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public List<Attribute> getAttributeDataList(String itemId) throws HttpException, IOException{
+		_log.info("getAttributeDataList");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "goodReceivedNote/getAttributeByItem?itemId=" +itemId;
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<List<Attribute>>() {});
         } else {
         	return null;
         }

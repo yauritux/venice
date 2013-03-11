@@ -125,5 +125,32 @@ public class GRNData {
 		}
 
 		return dataSource;		 
+	}
+
+	public static DataSource getItemAttributeData(String asnItemId) {
+		System.out.println("asnItemId: "+asnItemId);
+		DataSourceField[] dataSourceFields = {
+				new DataSourceTextField(DataNameTokens.INV_ASN_ITEM_ID, "ASN Item ID"),
+				new DataSourceTextField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID, "Attribute ID"),
+				new DataSourceTextField(DataNameTokens.INV_ITEM_ATTRIBUTE_IMEI, "Imei"),
+				new DataSourceTextField(DataNameTokens.INV_ITEM_ATTRIBUTE_SERIALNUMBER, "Serial Number"),
+				new DataSourceTextField(DataNameTokens.INV_ITEM_ATTRIBUTE_EXPIREDDATE, "Expired Date")};
+
+		dataSourceFields[0].setPrimaryKey(true);
+
+		RafDataSource dataSource = new RafDataSource("/response/data/*",
+				GWT.getHostPageBaseURL() + GRNListPresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeData&type=DataSource",
+				GWT.getHostPageBaseURL() + GRNListPresenter.grnManagementPresenterServlet + "?method=addItemAttributeData&type=DataSource",
+				GWT.getHostPageBaseURL() + GRNListPresenter.grnManagementPresenterServlet + "?method=editItemAttributeData&type=DataSource",
+				GWT.getHostPageBaseURL() + GRNListPresenter.grnManagementPresenterServlet + "?method=deleteItemAttributeData&type=DataSource", 
+				dataSourceFields);
+		HashMap<String, String> params = new HashMap<String, String>();
+		
+		if(asnItemId != null) {
+			params.put(DataNameTokens.INV_ASN_ITEM_ID, asnItemId);
+			dataSource.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
+		}
+
+		return dataSource;	
 	}		
 }

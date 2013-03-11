@@ -22,8 +22,12 @@ import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.SelectionAppearance;
+import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.ImgButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
@@ -32,6 +36,7 @@ import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.TextItem;
+import com.smartgwt.client.widgets.form.validator.LengthRangeValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -54,8 +59,8 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 	GRNCreatePresenter.MyView {
 
     RafViewLayout layout;
-    ListGrid asnListGrid, itemListGrid;
-    Window createGRNWindow;
+    ListGrid asnListGrid, itemListGrid, attributeListGrid;
+    Window createGRNWindow, attributeWindow;
     Boolean canSave=true;
 
     ToolStrip toolStrip;
@@ -179,7 +184,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
                 });				
 			}
 		});
-        
+                
         saveButton.addClickHandler(new ClickHandler() {
 	          @Override
 	          public void onClick(ClickEvent event) {   
@@ -246,8 +251,47 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         return createGRNWindow;
     }
             
-    private ListGrid buildItemListGrid(String asnId){
-    	itemListGrid = new ListGrid();
+    private ListGrid buildItemListGrid(String asnId){  	
+    	final DataSource grnItemData = GRNData.getASNItemData(asnId, 1, 20);
+    	
+    	final ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
+		ListGridField attributeField = new ListGridField("ATTRIBUTEFIELD", "Add Attribute");  
+		attributeField.setWidth(35);
+		attributeField.setCanFilter(false);
+		attributeField.setCanSort(false);
+		attributeField.setCanEdit(false);
+		attributeField.setWidth(100);
+		attributeField.setAlign(Alignment.CENTER);
+        ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2], listGridField[3], listGridField[4], attributeField};
+               		
+        itemListGrid = new ListGrid()  {  
+			@Override
+			protected Canvas createRecordComponent(final ListGridRecord record, Integer colNum) {
+				if (this.getFieldName(colNum).equals("ATTRIBUTEFIELD")) {
+					ImgButton attributeImg = new ImgButton();
+					attributeImg.setShowDown(false);
+					attributeImg.setShowRollOver(false);
+					attributeImg.setLayoutAlign(Alignment.CENTER);
+					attributeImg.setSrc("[SKIN]/icons/book_add.png");
+					attributeImg.setPrompt("Add/Edit Attribute");
+					attributeImg.setHeight(16);
+					attributeImg.setWidth(16);
+					attributeImg.addClickHandler(new ClickHandler() {
+						public void onClick(ClickEvent event) {		
+					        attributeWindow = buildAttributeWindow(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID));	
+					        attributeWindow.show();
+						}
+					});
+
+					return attributeImg;
+				} else {
+					return null;
+				}
+			}
+		};
+    	
+		itemListGrid.setDataSource(grnItemData);
+				
     	itemListGrid.setWidth100();
     	itemListGrid.setHeight100();
     	itemListGrid.setShowAllRecords(true);
@@ -258,12 +302,8 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     	itemListGrid.setCanResizeFields(true);
     	itemListGrid.setShowRowNumbers(true);
     	itemListGrid.setShowFilterEditor(false);
-
-    	DataSource grnItemData = GRNData.getASNItemData(asnId, 1, 20);
-		itemListGrid.setDataSource(grnItemData);
-		
-		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
-		ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2], listGridField[3], listGridField[4]};
+    	itemListGrid.setShowRecordComponents(true);          
+    	itemListGrid.setShowRecordComponentsByCell(true); 
 				        
 		itemListGrid.setFields(finalListGridField);
 		itemListGrid.getField(DataNameTokens.INV_ASN_ITEM_ID).setCanEdit(false);
@@ -298,6 +338,88 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 
         layout.setMembers(toolStrip, asnListGrid);
     }
+    
+    private Window buildAttributeWindow(String itemId) {
+		final Window addEditAttributeWindow = new Window();
+		addEditAttributeWindow.setWidth(400);
+		addEditAttributeWindow.setHeight(200);
+		addEditAttributeWindow.setShowMinimizeButton(false);
+		addEditAttributeWindow.setIsModal(true);
+		addEditAttributeWindow.setShowModalMask(true);
+		addEditAttributeWindow.centerInPage();
+		addEditAttributeWindow.setTitle("Add/Edit Attribute");
+		
+		ToolStripButton addButton = new ToolStripButton();
+		addButton.setIcon("[SKIN]/icons/business_users_add.png");
+		addButton.setTitle("Add");
+		
+		ToolStripButton removeButton = new ToolStripButton();
+		removeButton.setIcon("[SKIN]/icons/business_users_delete.png");
+		removeButton.setTitle("Remove");
+
+		ToolStrip attributeToolStrip = new ToolStrip();
+		attributeToolStrip.setWidth100();
+		attributeToolStrip.addButton(addButton);
+		attributeToolStrip.addButton(removeButton);
+
+		final DataSource attributeData = GRNData.getItemAttributeData(itemId);			
+		
+		attributeListGrid = new ListGrid();
+		attributeListGrid.setDataSource(attributeData);
+		attributeListGrid.setUseAllDataSourceFields(true);
+		attributeListGrid.setAutoFetchData(true);
+		attributeListGrid.setCanEdit(true);
+		attributeListGrid.setShowFilterEditor(false);
+		attributeListGrid.setSelectionType(SelectionStyle.SIMPLE);
+		attributeListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
+		attributeListGrid.setShowRowNumbers(true);
+
+//		attributeListGrid.getField(DataNameTokens.INV_ASN_ITEM_ID).setHidden(true);
+//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID).setHidden(true);
+						
+//		LengthRangeValidator lengthRangeValidator = new LengthRangeValidator();  
+//		lengthRangeValidator.setMax(255);  
+//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_IMEI).setValidators(lengthRangeValidator);
+//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_SERIALNUMBER).setValidators(lengthRangeValidator);
+//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_EXPIREDDATE).setValidators(lengthRangeValidator);
+		 
+		VLayout attributeLayout = new VLayout();
+		attributeLayout.setHeight100();
+		attributeLayout.setWidth100();
+		attributeLayout.setMembers(attributeToolStrip, attributeListGrid);
+		addEditAttributeWindow.addItem(attributeLayout);
+		
+		attributeListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
+			@Override
+			public void onEditComplete(EditCompleteEvent event) {
+				attributeListGrid.saveAllEdits();
+				if(event.getDsResponse().getStatus()==0){
+					SC.say("Attribute Added/Edited");
+				}				
+			}
+		});
+
+		addButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				attributeListGrid.startEditingNew();
+			}
+		});
+		
+		removeButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				attributeListGrid.removeSelectedData();
+				SC.say("Attribute Removed");
+			}
+		});
+		
+		addEditAttributeWindow.addCloseClickHandler(new CloseClickHandler() {
+			public void onCloseClick(CloseClientEvent event) {
+				addEditAttributeWindow.destroy();
+			}
+		});
+
+		return addEditAttributeWindow;
+	}
 
     @Override
     public void refreshASNData() {
