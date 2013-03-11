@@ -13,9 +13,9 @@
     <!--   <version>1.0</version> -->
     <name>Venice-Web</name>
     <url>http://maven.apache.org</url>
-
+    
     <repositories>
-    	<repository>
+        <repository>
             <id>org.ourproject.kune</id>
             <url>http://kune.ourproject.org/mavenrepo/</url>
         </repository>
@@ -23,6 +23,7 @@
     <properties>
         <lib.dir>${project.basedir}/src/main/webapp/WEB-INF/lib</lib.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <inventory-exchange-model.version>0.1.2</inventory-exchange-model.version>
     </properties>
 
     <dependencies>
@@ -142,12 +143,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>Venice-Interface-Model</artifactId>
             <version>${project.version}</version>
-	        <scope>provided</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.gdn.inventory</groupId>
             <artifactId>inventory-exchange-model</artifactId>
-            <version>0.1.2</version>
+            <version>${inventory-exchange-model.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -188,9 +189,9 @@
                                     <version>${project.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-									<groupId>com.gdn.inventory</groupId>
-									<artifactId>inventory-exchange-model</artifactId>
-									<version>0.0.1-SNAPSHOT</version>
+                                    <groupId>com.gdn.inventory</groupId>
+                                    <artifactId>inventory-exchange-model</artifactId>
+                                    <version>${inventory-exchange-model.version}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -267,24 +268,24 @@
                         </goals>
                     </execution>
                 </executions>
-                 <configuration>
-                   	   <runTarget>Venice.html</runTarget>
-                       <hostedWebapp>${project.build.directory}/war</hostedWebapp> 
-                       <webappDirectory>${project.build.directory}/war</webappDirectory>                                                       
-                       <buildDir>${project.build.directory}/war/WEB-INF</buildDir> 
-                       <gwtVersion>${gwt.version}</gwtVersion>
-                       <extraJvmArgs>-Xmx1024M -Xss1024k -Dgwt.jjs.permutationWorkerFactory=com.google.gwt.dev.ThreadedPermutationWorkerFactory</extraJvmArgs>
-                       <logLevel>INFO</logLevel>
-                       <style>OBF</style>
-                       <copyWebapp>true</copyWebapp>
-                       <webappDirectory>src/main/webapp</webappDirectory>
-                       <force>true</force>
-                       <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
-                       <buildOutputDirectory>${project.build.outputDirectory}</buildOutputDirectory>
-       				   <generateDirectory>${project.build.directory}/generated-sources/gwt</generateDirectory>
-      				   <webXml>${basedir}/src/main/webapp/WEB-INF/web.xml</webXml>
-      				   <port>8889</port>
-                   </configuration>
+                <configuration>
+                    <runTarget>Venice.html</runTarget>
+                    <hostedWebapp>${project.build.directory}/war</hostedWebapp> 
+                    <webappDirectory>${project.build.directory}/war</webappDirectory>                                                       
+                    <buildDir>${project.build.directory}/war/WEB-INF</buildDir> 
+                    <gwtVersion>${gwt.version}</gwtVersion>
+                    <extraJvmArgs>-Xmx1024M -Xss1024k -Dgwt.jjs.permutationWorkerFactory=com.google.gwt.dev.ThreadedPermutationWorkerFactory</extraJvmArgs>
+                    <logLevel>INFO</logLevel>
+                    <style>OBF</style>
+                    <copyWebapp>true</copyWebapp>
+                    <webappDirectory>src/main/webapp</webappDirectory>
+                    <force>true</force>
+                    <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
+                    <buildOutputDirectory>${project.build.outputDirectory}</buildOutputDirectory>
+                    <generateDirectory>${project.build.directory}/generated-sources/gwt</generateDirectory>
+                    <webXml>${basedir}/src/main/webapp/WEB-INF/web.xml</webXml>
+                    <port>8889</port>
+                </configuration>
             </plugin>
               
         </plugins>
