@@ -183,8 +183,8 @@ public class DataConstantNameTokens {
 	public static String FRAUD_RULE_38="Rule 38 - MIGS History with different credit card";	
 	public static String FRAUD_RULE_39="Rule 39 - Pasca bayar";
 	public static String FRAUD_RULE_40="Rule 40 - Handphone area vs customer location";
-	public static String FRAUD_RULE_41="Rule 41 - Cek Dana Fund In MIGS";
-	public static String FRAUD_RULE_42="Rule 42 - Attem CC";
+	public static String FRAUD_RULE_41="Rule 41 - Attempt CC";
+	public static String FRAUD_RULE_42="Rule 42 - Cek Dana Fund In MIGS";
 	public static String FRAUD_RULE_43="Rule 43 - Total Payment < 1jt";
 	public static String FRAUD_RULE_44="Rule 44 - Slow moving product category";
 	public static String FRAUD_RULE_26_ID="26";
