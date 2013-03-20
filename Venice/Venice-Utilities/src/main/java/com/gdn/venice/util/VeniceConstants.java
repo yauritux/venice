@@ -58,6 +58,7 @@ public interface VeniceConstants {
 	public static final String VEN_WCS_PAYMENT_TYPE_TelkomselPoin = "TelkomselPoin";
 	public static final String VEN_WCS_PAYMENT_TYPE_BCACreditCard = "BCACreditCard";
 	public static final String VEN_WCS_PAYMENT_TYPE_ANZ = "ANZ";
+	public static final String VEN_WCS_PAYMENT_TYPE_CIMBCreditCard = "CIMBCreditCard";
 	
 	//this is only for wcs
 	public static final String VEN_WCS_PAYMENT_TYPE_PartialFulfillment = "PartialFulfillment";
@@ -83,6 +84,7 @@ public interface VeniceConstants {
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_TelkomselPoin = 18;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_BCACreditCard = 19;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_ANZ = 20;
+	public static final long VEN_WCS_PAYMENT_TYPE_ID_CIMBCreditCard = 21;	
 	
 	public static final Integer VEN_FULFILLMENT_STATUS_ZERO = 0;
 	public static final Integer VEN_FULFILLMENT_STATUS_ONE = 1;
