@@ -922,7 +922,7 @@ public class DataNameTokens {
 	public static String FINARFUNDSINREFUND_REFUNDTIMESTAMP = "FinArFundsInRefund.refundTimestamp";	
 	public static String FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME = "FinArFundsInRefund.venOrder.venCustomer.venParty.fullOrLegalName";
 	public static String FINARFUNDSINREFUND_ACTION_TAKEN = "FinArFundsInRefund.refundType";
-	public static String FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE = "FinArFundsInRefund.finArFundsInReconRecord.providerReportFeeAmount";
+	public static String FINARFUNDSINREFUND_BANKFEE = "FinArFundsInRefund.feeAmount";
 	public static String FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON = "FinArFundsInRefund.finArFundsInReconRecord.comment";
 	public static String FINARFUNDSINREFUND_FEEAMOUNT= "FinArFundsInRefund.feeAmount";
 	//This is handled in the client/server side by code
@@ -1932,7 +1932,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINREFUND_REFUNDTIMESTAMP, "java.sql.Timestamp");		
 		fieldClassMap.put(FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME, "java.lang.String");
 		fieldClassMap.put(FINARFUNDSINREFUND_ACTION_TAKEN, "java.lang.String");
-		fieldClassMap.put(FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE, "java.math.BigDecimal");
+		fieldClassMap.put(FINARFUNDSINREFUND_BANKFEE, "java.math.BigDecimal");
 		fieldClassMap.put(FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON, "java.lang.String");
 		fieldClassMap.put(FINARFUNDSINREFUND_FEEAMOUNT, "java.math.BigDecimal");		
 		
