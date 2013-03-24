@@ -1,9 +1,16 @@
 package com.gdn.venice.persistence;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 
 /**
@@ -28,12 +35,16 @@ public class VenPromotion implements Serializable {
 	private String promotionName;
 
 	//bi-directional many-to-one association to VenOrderItemAdjustment
+	/*
 	@OneToMany(mappedBy="venPromotion")
 	private List<VenOrderItemAdjustment> venOrderItemAdjustments;
+	*/
 
 	//bi-directional many-to-one association to VenPartyPromotionShare
+	/*
 	@OneToMany(mappedBy="venPromotion")
 	private List<VenPartyPromotionShare> venPartyPromotionShares;
+	*/
 		
 	@ManyToOne
 	@JoinColumn(name="promotion_type")
@@ -75,6 +86,7 @@ public class VenPromotion implements Serializable {
 		this.promotionName = promotionName;
 	}
 
+	/*
 	public List<VenOrderItemAdjustment> getVenOrderItemAdjustments() {
 		return this.venOrderItemAdjustments;
 	}
@@ -90,6 +102,7 @@ public class VenPromotion implements Serializable {
 	public void setVenPartyPromotionShares(List<VenPartyPromotionShare> venPartyPromotionShares) {
 		this.venPartyPromotionShares = venPartyPromotionShares;
 	}
+	*/
 
 	public VenPromotionType getVenPromotionType() {
 		return venPromotionType;

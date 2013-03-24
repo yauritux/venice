@@ -8,6 +8,7 @@ package com.gdn.venice.constants;
 public enum VeniceExceptionConstants {
 
 	VEN_EX_000001("Invalid Order"),
+	VEN_EX_000111("Cannot create Order"),
 	VEN_EX_000002("No Order Received"),
 	VEN_EX_000003("No Order Amount"),
 	VEN_EX_000004("No Customer Record"),
@@ -47,6 +48,7 @@ public enum VeniceExceptionConstants {
 	VEN_EX_400002("Payment Type does not exist"),
 	VEN_EX_400003("WCS Payment Type does not exist"),
 	VEN_EX_500001("LogLogisticService does not exist"),
+	VEN_EX_800001("Error occured while persisting FinArFundsInReconRecord"),
 	VEN_EX_999999("Unknown Exception");
 	
 	private String message;

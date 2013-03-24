@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,6 +39,9 @@ public class OrderItemAdjustmentServiceImpl implements OrderItemAdjustmentServic
 	
 	@Autowired
 	private PromotionService promotionService;
+	
+	@PersistenceContext
+	private EntityManager em;
 	
 	/**
 	 * Persists a list of order item marginPromo
@@ -85,9 +91,19 @@ public class OrderItemAdjustmentServiceImpl implements OrderItemAdjustmentServic
 							CommonUtil.logInfo(CommonUtil.getLogger(this.getClass().getCanonicalName())
 									, "OrderServiceImpl::persistOrderItemAdjustmentList::Set adminDesc to (-) if null or empty");
 						}
-						newVenOrderItemAdjustmentList.add((VenOrderItemAdjustment) venOrderItemAdjustmentDAO.save(next));
+						VenOrderItemAdjustment venOrderItemAdjustment = next;
+						if (em.contains(venOrderItemAdjustment)) {
+							em.detach(venOrderItemAdjustment);
+						}
+						//newVenOrderItemAdjustmentList.add((VenOrderItemAdjustment) venOrderItemAdjustmentDAO.save(next));
+						newVenOrderItemAdjustmentList.add(venOrderItemAdjustment);
 					}else{
-						newVenOrderItemAdjustmentList.add((VenOrderItemAdjustment) next);
+						VenOrderItemAdjustment venOrderItemAdjustment = next;						
+						if (em.contains(venOrderItemAdjustment)) {
+							em.detach(venOrderItemAdjustment);
+						}						
+						//newVenOrderItemAdjustmentList.add((VenOrderItemAdjustment) next);
+						newVenOrderItemAdjustmentList.add(venOrderItemAdjustment);						
 					}					
 				}
 			} catch (Exception e) {
@@ -123,6 +139,9 @@ public class OrderItemAdjustmentServiceImpl implements OrderItemAdjustmentServic
 				promotion.setPromotionCode("-");
 			}
 			List<VenPromotion> promotionRefs = new ArrayList<VenPromotion>();
+			if (em.contains(promotion)) {
+				em.detach(promotion);
+			}
 			promotionRefs.add(promotion);
 			
 			promotionRefs = promotionService.synchronizeVenPromotionReferences(promotionRefs);

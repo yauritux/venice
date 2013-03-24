@@ -12,6 +12,8 @@ import com.gdn.venice.persistence.VenWcsPaymentType;
  */
 public interface WcsPaymentTypeService {
 
+	public VenWcsPaymentType synchronizeVenWcsPaymentType(VenWcsPaymentType venWcsPaymentType)
+	  throws VeniceInternalException;
 	public List<VenWcsPaymentType> synchronizeVenWcsPaymentTypeReferences
 	   (List<VenWcsPaymentType> wcsPaymentTypeReferences) throws VeniceInternalException;
 }

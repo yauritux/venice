@@ -119,8 +119,10 @@ public class VenParty implements Serializable {
 	private List<VenPartyPromotionShare> venPartyPromotionShares;
 
 	//bi-directional many-to-one association to VenRecipient
+	/*
 	@OneToMany(mappedBy="venParty")
 	private List<VenRecipient> venRecipients;
+	*/
 
     public VenParty() {
     }
@@ -317,6 +319,7 @@ public class VenParty implements Serializable {
 		this.venPartyPromotionShares = venPartyPromotionShares;
 	}
 	
+	/*
 	public List<VenRecipient> getVenRecipients() {
 		return this.venRecipients;
 	}
@@ -324,5 +327,6 @@ public class VenParty implements Serializable {
 	public void setVenRecipients(List<VenRecipient> venRecipients) {
 		this.venRecipients = venRecipients;
 	}
+	*/
 	
 }

@@ -36,7 +36,6 @@ public class OrderBlockingSourceServiceImpl implements OrderBlockingSourceServic
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderBlockingSourceReferences::BEGIN, orderBlockingSourceReferences="
 				  + orderBlockingSourceReferences);
-		//if (orderBlockingSourceReferences == null || orderBlockingSourceReferences.isEmpty()) return null;
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderBlockingSourceReferences::preparing synchronizedOrderBlockingSource");
@@ -45,6 +44,7 @@ public class OrderBlockingSourceServiceImpl implements OrderBlockingSourceServic
 		
 		if (orderBlockingSourceReferences != null) {
 			for (VenOrderBlockingSource orderBlockingSource : orderBlockingSourceReferences) {
+				//em.detach(orderBlockingSource);
 				if (orderBlockingSource.getBlockingSourceDesc() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenOrderBlockingSourceReferences::Restricting VenOrderBlockingSource... :" 

@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -40,6 +43,9 @@ import com.gdn.venice.util.VeniceConstants;
 @Service
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class PartyServiceImpl implements PartyService {
+	
+	@PersistenceContext
+	EntityManager em;
 
 	@Autowired
 	private VenPartyDAO venPartyDAO;
@@ -71,7 +77,7 @@ public class PartyServiceImpl implements PartyService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(),
 				"persistParty::BEGIN, venParty=" + venParty + ", type=" + type);
 		if (venParty != null) {
-			VenParty existingParty;
+			VenParty existingParty = null;
 			if (type.equals("Customer")) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName(),
 						"persistParty::Persisting VenParty (PartyType = Customer)... :"
@@ -307,9 +313,11 @@ public class PartyServiceImpl implements PartyService {
 			// Persist the object
 
 			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"persistParty::persist VenParty ");
-			// Merge the party object
-			venParty = venPartyDAO.save(venParty);
+					"persistParty::persist VenParty ");			
+			if (!em.contains(venParty)) {
+				//venParty is in detach mode, hence we need to call save explicitly here
+				venParty = venPartyDAO.save(venParty);
+			}			
 
 			VenAddressType venAddressType = new VenAddressType();
 			venAddressType
@@ -380,18 +388,6 @@ public class PartyServiceImpl implements PartyService {
 					.synchronizeVenPartyTypeReferenceData(partyTypeReferences);
 		}
 
-		/*
-		 * // Synchronize the data references references =
-		 * this.synchronizeReferenceData(references);
-		 * 
-		 * // Push the keys back into the record Iterator<Object>
-		 * referencesIterator = references.iterator(); while
-		 * (referencesIterator.hasNext()) { Object next =
-		 * referencesIterator.next(); if (next instanceof VenParty) {
-		 * venParty.setVenParty((VenParty) next); } else if (next instanceof
-		 * VenPartyType) { venParty.setVenPartyType((VenPartyType) next); } }
-		 */
-
 		for (VenParty party : partyReferences) {
 			venParty.setVenParty(party);
 		}
@@ -412,12 +408,7 @@ public class PartyServiceImpl implements PartyService {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenPartyReferenceData::BEGIN,venParties=" + venParties);
-		/*
-		if (venParties == null || venParties.size() == 0) {
-			return null;
-		}
-		*/
-
+		
 		List<VenParty> venPartyList = new ArrayList<VenParty>();
 
 		if (venParties != null) {
