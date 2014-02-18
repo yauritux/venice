@@ -1,0 +1,129 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>FusionCharts Free Documentation</title>
+<script language="JavaScript" src="JSClass/FusionCharts.js"></script>
+</head>
+
+<body>
+<table width="98%" border="0" cellspacing="0" cellpadding="3" align="center">
+  <tr> 
+    <td valign="top" class="text" align="center"> Order Processing History (The Volume of Orders) <div id="chartdiv" align="center"> FusionCharts. </div></td>
+    <td valign="top" class="text" align="center"> Order Processing History (The Rupiah Value of Orders) <div id="chartdiv2" align="center"> FusionCharts. </div></td>
+    </tr>
+</table>
+      <script type="text/javascript">
+		  var sURL = window.document.URL.toString().replace(/%20/gi," ").replace(/{/gi,"").replace(/}/gi,"").replace(/,/gi,"");
+		  
+		  var tempSplitURLs=sURL.split("?");
+      		  //2012-01-30= Commission : 80.0/Transaction Fee : 40.0/Handling Fee : 50.0 & 2012-01-29= Commission : 0.0/Transaction Fee : 0.0/Handling Fee : 0.0&
+      		  var tempSplitURL=tempSplitURLs[1].split("&");  
+      		   if(tempSplitURL[0]!=""){  
+      		  	 for(var i=0;i<tempSplitURL.length;i++){
+      		  	 	 //2012-01-30= Commission : 80.0/Transaction Fee : 40.0/Handling Fee : 50.0
+				tempSplitURL[i]=tempSplitURL[i].split("=");
+				//Commission : 80.0/Transaction Fee : 40.0/Handling Fee : 50.0
+				tempSplitURL[i][2]=tempSplitURL[i][2].split("/");
+				for(var j=0;j<tempSplitURL[i][2].length;j++){
+					//Commission : 80.0
+					tempSplitURL[i][2][j]=tempSplitURL[i][2][j].split(":");
+				}
+				
+			}    			
+			
+		   }		   
+      		        		 
+		   //var value from http		 
+		   var seriesName=new Array("Fraud Passed (FP)","Picked Up (PU)","Delivered (CX)","Returned (RT)");
+		   var col=new Array("FFFF00","FF0000","00FF00","0000FF");
+		   var val=0;
+		   if(tempSplitURL[0]!=""){  
+			   //make XML
+			   var xmlVol="<graph xaxisname='Date' yaxisname='No. of Orders' hovercapbg='DEDEBE' hovercapborder='889E6D' rotateNames='0'  numdivlines='5' divLineColor='CCCCCC' divLineAlpha='80' decimalPrecision='0' showAlternateHGridColor='1' AlternateHGridAlpha='30' AlternateHGridColor='CCCCCC'>";
+			   xmlVol+="<categories font='Arial' fontSize='11' fontColor='000000'>";
+			   for(var i=0;i<tempSplitURL.length;i++){
+					   xmlVol+="<category name='"+tempSplitURL[i][1]+"' />";
+				   }   
+			   xmlVol+="</categories>";
+			   for(var i=0;i<tempSplitURL[0][2].length;i++){		   	  
+				xmlVol+="<dataset seriesname='"+tempSplitURL[0][2][i][0]+"' color='"+col[i]+"'>";
+				for(var k=0;k<tempSplitURL.length;k++){	
+					if(tempSplitURL[k][2][i][1]==0.0){
+						xmlVol+="<set value='' />";
+					}else xmlVol+="<set value='"+tempSplitURL[k][2][i][1]+"' />";
+				}
+				 xmlVol+="</dataset>";				   
+			   }
+			   xmlVol+="</graph>";
+			   
+			   var xmlPrice="<graph xaxisname='Date' yaxisname='Rupiah (Rp)' hovercapbg='DEDEBE' hovercapborder='889E6D' rotateNames='0'  numdivlines='5' divLineColor='CCCCCC' divLineAlpha='80' decimalPrecision='0' showAlternateHGridColor='1' AlternateHGridAlpha='30' AlternateHGridColor='CCCCCC'>";
+			   xmlPrice+="<categories font='Arial' fontSize='11' fontColor='000000'>";
+			   for(var i=0;i<tempSplitURL.length;i++){
+					   xmlPrice+="<category name='"+tempSplitURL[i][1]+"' />";
+				   }   
+			   xmlPrice+="</categories>";
+			   for(var i=0;i<tempSplitURL[0][2].length;i++){		   	  
+				xmlPrice+="<dataset seriesname='"+tempSplitURL[0][2][i][0]+"' color='"+col[i]+"'>";
+				for(var k=0;k<tempSplitURL.length;k++){	
+					if(tempSplitURL[k][2][i][2]==0.0){
+						xmlPrice+="<set value='' />";
+					}else	xmlPrice+="<set value='"+tempSplitURL[k][2][i][2]+"' />";
+				}
+				 xmlPrice+="</dataset>";				   
+			   }
+			   xmlPrice+="</graph>";
+			   //End XML
+		   }else{
+		   	    //make XML
+			   var xmlVol="<graph xaxisname='Date' yaxisname='No. of Orders' hovercapbg='DEDEBE' hovercapborder='889E6D' rotateNames='0'  numdivlines='5' divLineColor='CCCCCC' divLineAlpha='80' decimalPrecision='0' showAlternateHGridColor='1' AlternateHGridAlpha='30' AlternateHGridColor='CCCCCC'>";
+			   xmlVol+="<categories font='Arial' fontSize='11' fontColor='000000'>";
+			   for(var i=0;i<5;i++){
+			   	   xmlVol+="<category name='' />";
+				   }   
+			   xmlVol+="</categories>";
+			   for(var i=0;i<seriesName.length;i++){		   	  
+			   	   xmlVol+="<dataset seriesname='"+seriesName[i]+"' color='"+col[i]+"'>";
+				for(var k=0;k<tempSplitURL.length;k++){				    	  
+					xmlVol+="<set value='' />";
+				}
+				 xmlVol+="</dataset>";				   
+			   }
+			   xmlVol+="</graph>";
+			   
+			   var xmlPrice="<graph xaxisname='Date' yaxisname='Rupiah (Rp)' hovercapbg='DEDEBE' hovercapborder='889E6D' rotateNames='0'  numdivlines='5' divLineColor='CCCCCC' divLineAlpha='80' decimalPrecision='0' showAlternateHGridColor='1' AlternateHGridAlpha='30' AlternateHGridColor='CCCCCC'>";
+			   xmlPrice+="<categories font='Arial' fontSize='11' fontColor='000000'>";
+			   for(var i=0;i<5;i++){
+			   	   xmlPrice+="<category name='' />";
+				   }   
+			   xmlPrice+="</categories>";
+			   for(var i=0;i<seriesName.length;i++){		   	  
+				xmlPrice+="<dataset seriesname='"+seriesName[i]+"' color='"+col[i]+"'>";
+				for(var k=0;k<tempSplitURL.length;k++){				    	  
+					xmlPrice+="<set value='' />";
+				}
+				 xmlPrice+="</dataset>";				   
+			   }
+			   xmlPrice+="</graph>";
+			   //End XML
+		   	   
+		   }
+		   
+		   var chart = new FusionCharts("Charts/FCF_StackedColumn3D.swf", "ChartId", "500", "380");
+		   chart.setDataXML(xmlVol);
+		   chart.render("chartdiv");		   
+		   //chart.setDataURL("data/logisticsOrderStatusMoney.xml"); 
+		   var chartPrice = new FusionCharts("Charts/FCF_StackedColumn3D.swf", "ChartId", "500", "380");
+		   chartPrice.setDataXML(xmlPrice);
+		   chartPrice.render("chartdiv2");
+		   
+		   
+		   function get_random_color() {		   	 
+		   	   var rint = Math.round(0xffffff * Math.random());
+		   	   return ('#0' + rint.toString(16)).replace(/^#0([0-9a-f]{6})$/i, '#$1');
+		   	 
+		   }      	   
+		   
+		</script> 
+  
+</body>
+</html>

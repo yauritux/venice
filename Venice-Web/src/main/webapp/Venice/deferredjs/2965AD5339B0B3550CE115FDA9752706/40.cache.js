@@ -1,0 +1,21 @@
+function X7(){}
+function b8(){}
+function bnb(){}
+function Nmb(){}
+function Tmb(){}
+function Ymb(){}
+function V2d(){}
+function P2d(){}
+function d8(b){this.b=b}
+function dnb(b){this.b=b}
+function Vmb(b){this.b=b}
+function $mb(b){this.b=b}
+function iV(b){b.c.df(mM(b.b.b))}
+function UH(b,c,d){return new $7(b,c,d)}
+function X2d(){S2d=new V2d;p6c((m6c(),l6c),40);!!$stats&&$stats(e7c(Hkg,Wcf,-1,-1));S2d.Re();!!$stats&&$stats(e7c(Hkg,Qzf,-1,-1))}
+function $7(b,c,d){dX.call(this,b,c);this.d=d;Xgd(this.j,15).Tc(this);Xgd(Xgd(this.j,15).Uc(),3).b=Xgd(this.d,16).Qc();Iwb(Xgd(this.j,15).d,$4())}
+function U2d(){var b,d,e;while(Q2d){d=v4c;e=Q2d;Q2d=Q2d.c;!Q2d&&(R2d=null);if(!d){iV(e.b)}else{try{iV(e.b)}catch(b){b=nQd(b);if(!$gd(b,209))throw b}}}}
+function mM(b){var c;!b.t&&(b.t=(c=UH((!b.Gc&&(b.Gc=new Hie),b.Gc),(!b.K&&(b.K=new Qmb),b.K),(!b.s&&(b.s=new k8),b.s),!b.Fc&&(b.Fc=(new yhe).lf(new hhe,new lhe))),c.Mc(),c));return b.t}
+function Z7(b,c){var d,e,f,g;g=new ane;f=new S$e;for(e=0;e<c.c;++e){f.sl(K3f+(e+1),Xgd(($Xe(e,c.c),c.b[e]),1))}d=oWe(f);g.M[c8e]=d;g.M[d8e]=q7c()+Dkg;g.M[f8e]=g8e;PCe(g.M,h8e,(yPe(),yPe(),xPe));PCe(g.M,lDf,xPe);$wnd.isc.RPCManager.addClassProperties({promptStyle:(Kze(),Jze).Xk()});TBe();$wnd.isc.RPCManager.defaultPrompt=Ekg;$wnd.isc.RPCManager.showPrompt=true;Iue(g,new d8(b))}
+function Qmb(){var b,e,f,g;this.c=new P3c;b=new gOe;Dgb(b)?(e=b.cd(),e.setProperty(p7e,m7e),undefined):(b.o[p7e]=m7e,undefined);Igb(b,R8e,lRe(2));this.f=new mOe;Egb(this.f,yzf,VJf,true);Ghb(this.f,J$f);Egb(this.f,zcf,XJf,true);f=this.f.rd();f.disable();eOe(b,this.f);this.e=new mOe;Egb(this.e,yzf,zBf,true);Ghb(this.e,Fkg);Egb(this.e,zcf,jkf,true);eOe(b,this.e);this.b=new mOe;Egb(this.b,yzf,SDf,true);Ghb(this.b,CMf);Egb(this.b,zcf,ubf,true);g=this.b.rd();g.disable();eOe(b,this.b);this.d=new Nwb(this);ktb(this.c,Jgd(PPd,{267:1,316:1},137,[b,this.d]));qhb(this.f,new Vmb(this));qhb(this.b,new $mb(this));qhb(this.e,new dnb(this));Ewb(this.d)}
+var Okg='AsyncLoader40',Ikg='JournalPresenter',Jkg='JournalPresenter$1',Dkg='JournalPresenterServlet?method=submitJournalForApproval&type=RPC',Kkg='JournalView',Lkg='JournalView$1',Mkg='JournalView$2',Nkg='JournalView$3',Fkg='Print Journal Details',Ekg='Submitting journals for approval...',Gkg='Venice/JournalReportLauncherServlet?journalGroupId=',Hkg='runCallbacks40';_=$7.prototype=X7.prototype=new IW;_.gC=function _7(){return hld};_.Oc=function a8(){Gie(this.g,this,new Fle((j_c(),h_c),this))};_.cM={35:1,87:1,303:1};_=d8.prototype=b8.prototype=new mH;_.Pc=function e8(b,c,d){var e,f;e=c.tM==v1e||c.cM&&!!c.cM[1]?c.tS():c.toString?c.toString():g7e;if(e.indexOf(Xdf)==0){Jwb(Xgd(Xgd(this.b.j,15),17).d);$wnd.isc.say(rJf)}else{f=ySe(e,l8e,0);f.length>1?wDe(f[1],null):wDe(vBf,null)}TBe();$wnd.isc.RPCManager.defaultPrompt=BDf;$wnd.isc.RPCManager.showPrompt=false};_.gC=function f8(){return eld};_.cM={};_.b=null;_=Qmb.prototype=Nmb.prototype=new tY;_.Uc=function Rmb(){return this.c};_.gC=function Smb(){return bnd};_.cM={15:1,17:1};_.b=null;_.c=null;_.d=null;_.e=null;_.f=null;_=Vmb.prototype=Tmb.prototype=new mH;_.gC=function Wmb(){return $md};_.Vc=function Xmb(b){var c,d,e,f,g,i;e=(f=this.b.d.f.rd(),g=f.getSelection(),$ib(g));d=new FZe;for(c=0;c<e.length;++c){sZe(d,(i=e[c].M[pDf],i===undefined||i==null?null:String(i)))}Z7(Xgd(this.b.A,35),d)};_.cM={286:1,318:1};_.b=null;_=$mb.prototype=Ymb.prototype=new mH;_.gC=function _mb(){return _md};_.Vc=function anb(b){var c,d,e,f,g,i;e=(f=this.b.d.f.rd(),g=f.getSelection(),$ib(g));d=(i=e[0].M[pDf],i===undefined||i==null?null:String(i));c=q7c();c.indexOf(UEf)!=-1&&(c=VEf);c.indexOf(WEf)!=-1&&(c=c.substr(0,c.indexOf(WEf)-0));$wnd.open(c+Gkg+d,oEf,null)};_.cM={286:1,318:1};_.b=null;_=dnb.prototype=bnb.prototype=new mH;_.gC=function enb(){return and};_.Vc=function fnb(b){X0c(this.b.d)};_.cM={286:1,318:1};_.b=null;_=V2d.prototype=P2d.prototype=new mH;_.gC=function W2d(){return IId};_.Re=function $2d(){U2d()};_.cM={};var hld=PPe(qof,Ikg),eld=PPe(qof,Jkg),bnd=PPe(wAf,Kkg),$md=PPe(wAf,Lkg),_md=PPe(wAf,Mkg),and=PPe(wAf,Nkg),IId=PPe(Rtf,Okg);$entry(X2d)();

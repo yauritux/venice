@@ -1,0 +1,137 @@
+package com.gdn.venice.inbound.services.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.gdn.venice.dao.VenMerchantProductDAO;
+import com.gdn.venice.exception.VeniceInternalException;
+import com.gdn.venice.inbound.services.MerchantProductService;
+import com.gdn.venice.inbound.services.ProductTypeService;
+import com.gdn.venice.persistence.VenMerchant;
+import com.gdn.venice.persistence.VenMerchantProduct;
+import com.gdn.venice.persistence.VenProductType;
+import com.gdn.venice.util.CommonUtil;
+
+/**
+ * 
+ * @author yauritux
+ *
+ */
+@Service
+@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+public class MerchantProductServiceImpl implements MerchantProductService {
+
+	@Autowired
+	private VenMerchantProductDAO venMerchantProductDAO;
+	
+	@Autowired
+	private ProductTypeService productTypeService;
+	
+	@Override
+	public List<VenMerchantProduct> synchronizeVenMerchantProductRefs(
+			List<VenMerchantProduct> merchantProductRefs)
+			throws VeniceInternalException {
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductRefs::BEGIN, merchantProductRefs = " + merchantProductRefs);
+		
+		List<VenMerchantProduct> synchronizedMerchantProductRefs = new ArrayList<VenMerchantProduct>();
+		
+		for (VenMerchantProduct merchantProduct : merchantProductRefs) {
+			if (merchantProduct.getWcsProductSku() != null) {
+				
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductRefs::Synchronizing VenMerchantProduct... :" 
+				          + merchantProduct.getWcsProductSku());
+				
+				merchantProduct = synchronizeVenMerchantProductReferenceData(merchantProduct);
+				
+				List<VenMerchantProduct> merchantProductList = venMerchantProductDAO.findByWcsProductSku(merchantProduct.getWcsProductSku());
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductReferences::merchantProductList = " 
+								+ merchantProductList);
+				if (merchantProductList == null || (merchantProductList.size() == 0)) {
+					VenMerchantProduct venMerchantProduct = venMerchantProductDAO.save(merchantProduct);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeVenMerchantProductReferences::adding venMerchantProduct into synchronizedMerchantProductRefs");
+					synchronizedMerchantProductRefs.add(venMerchantProduct);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
+				} else {
+					VenMerchantProduct venMerchantProduct = merchantProductList.get(0);
+					synchronizedMerchantProductRefs.add(venMerchantProduct);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
+				}
+			}
+		} //end of 'for'
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductRefs::EOM, returning synchronizedMerchantProductRefs = "
+				  + synchronizedMerchantProductRefs.size());
+		return synchronizedMerchantProductRefs;
+	}
+	
+	/**
+	 * Synchronizes the data for the direct VenMerchantProduct references
+	 * 
+	 * @param venMerchantProduct
+	 * @return the synchronized data object
+	 */	
+	@Override
+	public VenMerchantProduct synchronizeVenMerchantProductReferenceData(
+			VenMerchantProduct venMerchantProduct) throws VeniceInternalException {
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductReferenceData::BEGIN, venMerchantProduct = " + venMerchantProduct);
+		
+		if (venMerchantProduct.getVenProductType() != null) {
+			List<VenProductType> productTypeRefs = new ArrayList<VenProductType>();
+			productTypeRefs.add(venMerchantProduct.getVenProductType());
+			productTypeRefs = productTypeService.synchronizeVenProductTypeReferences(productTypeRefs);
+			for (VenProductType productType : productTypeRefs) {
+				venMerchantProduct.setVenProductType(productType);
+			}
+		}
+		
+		if (venMerchantProduct.getVenMerchant() != null) {
+			List<VenMerchant> merchantRefs = new ArrayList<VenMerchant>();
+			merchantRefs.add(venMerchantProduct.getVenMerchant());
+			//merchantRefs = discuss with team whether method synchronized for this particular class should be implemented or not
+			for (VenMerchant merchant : merchantRefs) {
+				venMerchantProduct.setVenMerchant(merchant);
+			}
+		}
+		
+		/*
+		List<Object> references = new ArrayList<Object>();
+		references.add(venMerchantProduct.getVenProductType());
+		references.add(venMerchantProduct.getVenMerchant());
+
+		// Synchronize the data references
+		references = this.synchronizeReferenceData(references);
+
+		// Push the keys back into the record
+		Iterator<Object> referencesIterator = references.iterator();
+		while (referencesIterator.hasNext()) {
+			Object next = referencesIterator.next();
+			if (next instanceof VenProductType) {
+				venMerchantProduct.setVenProductType((VenProductType) next);
+			}else if(next instanceof VenMerchant){
+				venMerchantProduct.setVenMerchant((VenMerchant) next);
+			}
+		}
+		*/
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductReferenceData::EOM, returning venMerchantProduct = "
+				  + venMerchantProduct);
+		return venMerchantProduct;
+	}
+
+}
