@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.axis.providers.java.MsgProvider;
 import org.apache.log4j.Logger;
 
 import com.djarum.raf.utilities.Locator;
@@ -51,6 +50,7 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 	String caseId;
 	String method;
 	String username;
+	String wcsOrderId;
     protected static Logger _log = null;
 	
 	public UpdateOrderStatusDataCommand(String caseId, String method, String username) {
@@ -81,6 +81,7 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 			
 			fraudCaseSuspicion = suspicionCaseList.get(0);
 			orderId = fraudCaseSuspicion.getVenOrder().getOrderId().toString();
+			wcsOrderId= fraudCaseSuspicion.getVenOrder().getWcsOrderId().toString();
 			
 			order = orderSessionHome.queryByRange("select o from VenOrder o where o.orderId="+new Long(orderId), 0, 1).get(0);
 						
@@ -178,7 +179,30 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 			}			
 
 			if (method.equals("updateOrderStatusToFC")){
-				//if order status is FC, insert new customer blacklist record.
+				addToBlackList(wcsOrderId, username);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return "-1";
+		} finally {
+			try {
+				historyLocator.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}	
+		
+		return "0";
+	}
+	
+	
+		public String addToBlackList(String wcsOrderId, String username){
+			
+			Locator<Object> historyLocator=null;
+			
+			try{
+
+				historyLocator=new Locator<Object>();
 				System.out.println("order status is set  to FC, insert new customer blacklist record");
 				String tempAddress="", tempPhone="",tempHandPhone="", tempEmail="",tempShippingPhone="",tempShippingHandPhone="",tempShippingAddress="",noCreditCard="",descFraud="";
 				FrdCustomerWhitelistBlacklistSessionEJBRemote sessionHome = (FrdCustomerWhitelistBlacklistSessionEJBRemote) historyLocator.lookup(FrdCustomerWhitelistBlacklistSessionEJBRemote.class, "FrdCustomerWhitelistBlacklistSessionEJBBean");
@@ -189,8 +213,9 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 				VenAddressSessionEJBRemote shippingAddressSessionHome = (VenAddressSessionEJBRemote) historyLocator.lookup(VenAddressSessionEJBRemote.class, "VenAddressSessionEJBBean");
 				VenOrderPaymentAllocationSessionEJBRemote allocationSessionHome = (VenOrderPaymentAllocationSessionEJBRemote) historyLocator.lookup(VenOrderPaymentAllocationSessionEJBRemote.class, "VenOrderPaymentAllocationSessionEJBBean");
 				FrdFraudSuspicionCaseSessionEJBRemote fraudCaseSessionHome = (FrdFraudSuspicionCaseSessionEJBRemote) historyLocator.lookup(FrdFraudSuspicionCaseSessionEJBRemote.class, "FrdFraudSuspicionCaseSessionEJBBean");
+				VenOrderSessionEJBRemote orderSessionHome = (VenOrderSessionEJBRemote) historyLocator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
 				
-				List<VenOrder> orderList = orderSessionHome.queryByRange("select o from VenOrder o where o.orderId = "+orderId, 0, 0);
+				List<VenOrder> orderList = orderSessionHome.queryByRange("select o from VenOrder o where o.wcsOrderId = '"+wcsOrderId+"'", 0, 0);
 			
 				if(orderList.size()>0){
 					_log.debug("get customer address");
@@ -300,19 +325,18 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 						
 					}
 				}
+			} catch(Exception ex){
+					ex.printStackTrace();
+					return "-1";
+			} finally{
+				try{
+					historyLocator.close();
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return "-1";
-		} finally {
-			try {
-				historyLocator.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}	
-		
-		return "0";
-	}
+			return "0";
+		}
+	
 }
 
