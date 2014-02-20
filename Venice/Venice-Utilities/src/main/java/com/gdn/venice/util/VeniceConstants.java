@@ -55,6 +55,7 @@ public interface VeniceConstants {
 	public static final String VEN_WCS_PAYMENT_TYPE_BRI = "BRI";
 	public static final String VEN_WCS_PAYMENT_TYPE_MandiriDebit = "MandiriDebit";
 	public static final String VEN_WCS_PAYMENT_TYPE_CSPayment = "CSPayment";
+	public static final String VEN_WCS_PAYMENT_TYPE_TelkomselPoin = "TelkomselPoin";
 	
 	//this is only for wcs
 	public static final String VEN_WCS_PAYMENT_TYPE_PartialFulfillment = "PartialFulfillment";
@@ -77,6 +78,7 @@ public interface VeniceConstants {
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_CSPayment = 15;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_KlikPAYKartuKredit = 16;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_KlikPAYKlikBCA = 17;
+	public static final long VEN_WCS_PAYMENT_TYPE_ID_TelkomselPoin = 18;
 	
 	public static final Integer VEN_FULFILLMENT_STATUS_ZERO = 0;
 	public static final Integer VEN_FULFILLMENT_STATUS_ONE = 1;
@@ -146,6 +148,8 @@ public interface VeniceConstants {
 	public static final String LOG_LOGISTICS_SERVICE_CODE_NCS_EXP = "NCS_EXP";
 	public static final String LOG_LOGISTICS_SERVICE_CODE_RPX_REG = "RPX_REG";
 	public static final String LOG_LOGISTICS_SERVICE_CODE_RPX_EXP = "RPX_EXP";
+	public static final long LOG_LOGISTICS_SERVICE_CODE_BOPIS_ID = 0;
+	public static final long LOG_LOGISTICS_SERVICE_CODE_BIG_PRODUCT_ID = 1;
 
 	
 	public static final String LOG_LOGISTICS_STATUS_CODE_POD = "POD";
@@ -377,6 +381,7 @@ public interface VeniceConstants {
 	public static final long VEN_BANK_ID_XLAXIATA = 3;
 	public static final long VEN_BANK_ID_BII = 4;
 	public static final long VEN_BANK_ID_BRI = 5;
+	public static final long VEN_BANK_ID_TELKOMSEL= 6;
 	
 	public static final double VEN_GDN_PPN_RATE = 10; //This is the global tax rate 
 	
