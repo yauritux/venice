@@ -64,6 +64,18 @@ public class FinArFundsInReportSessionEJBBean implements FinArFundsInReportSessi
 	@Qualifier("KlikPayInstallmentCCFundInServiceImpl")
 	FundInService fundInServiceKlikPayInstallmentCC;
 	
+	@Autowired
+	@Qualifier("BCAIBFundInServiceImpl")
+	FundInService fundInServiceBCAIB;
+	
+	@Autowired
+	@Qualifier("MandiriIBFundInServiceImpl")
+	FundInService fundInServiceMandiriIB;
+	
+	@Autowired
+	@Qualifier("KlikPayIBFundInServiceImpl")
+	FundInService fundInServiceKlikPayIB;
+	
 	/*
 	 * Implements an IOC model for pre/post callbacks to persist, merge, and
 	 * remove operations. The onPrePersist, onPostPersist, onPreMerge,
@@ -602,22 +614,31 @@ public class FinArFundsInReportSessionEJBBean implements FinArFundsInReportSessi
 				case FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC:
 					result = fundInServiceKlikPayInstallmentCC.process(fileNameAndFullPath, userName);
 					break;
+				case FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB:
+					result = fundInServiceBCAIB.process(fileNameAndFullPath, userName);
+					break;
+				case FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB:
+					result = fundInServiceMandiriIB.process(fileNameAndFullPath, userName);
+					break;
+				case FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB:
+					result = fundInServiceKlikPayIB.process(fileNameAndFullPath, userName);
+					break;
 				default:
 					break;
 			}
 		
 		} catch (NoSuchAlgorithmException e) {
 			_log.error(e);
-			return "An exeption occured while creating the funds in report record. Please contact the systems administrator.";
+			return "An exception occured while creating the funds in report record. Please contact the systems administrator.";
 		} catch (FundInFileAlreadyUploadedException e) {
 			_log.error(e);
 			return e.getMessage();
 		} catch (IOException e) {
 			_log.error(e);
-			return "An exeption occured while creating the funds in report record. Please contact the systems administrator.";
+			return "An exception occured while creating the funds in report record. Please contact the systems administrator.";
 		} catch (FundInNoFinancePeriodFoundException e) {
 			_log.error(e);
-			return "An exeption occured while creating the funds in report record. Please contact the systems administrator.";
+			return "An exception occured while creating the funds in report record. Please contact the systems administrator.";
 		}
 		
 		return result;

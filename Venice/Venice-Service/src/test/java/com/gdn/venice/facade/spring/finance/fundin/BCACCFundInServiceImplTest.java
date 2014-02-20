@@ -4,6 +4,7 @@ import static junit.framework.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
@@ -15,12 +16,15 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
+import com.gdn.venice.constants.FinArReconResultConstants;
 import com.gdn.venice.constants.VeniceEnvironment;
 import com.gdn.venice.dao.FinArFundsInReportDAO;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
 import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.finance.dataexportimport.BCA_CC_Record;
 import com.gdn.venice.hssf.PojoInterface;
+import com.gdn.venice.persistence.FinArFundsInReconRecord;
+import com.gdn.venice.persistence.FinArReconResult;
 import com.gdn.venice.util.CommonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -216,13 +220,89 @@ public class BCACCFundInServiceImplTest {
 		assertEquals("123, 124, 125, 126, 127", string);
 	}
 	
+	@Test
+	public void getReconResult_remainingBalanceIsZero_reconResultAllFundIn(){
+		FinArFundsInReconRecord fundInRecon = new FinArFundsInReconRecord();
+		fundInRecon.setRemainingBalanceAmount(new BigDecimal(0));
+		fundInRecon.setWcsOrderId("1");
+		
+		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
+		
+		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id(), reconResult.getReconResultId().longValue());
+	}
+	
+	@Test
+	public void getReconResult_remainingBalanceIs5000_reconResultAllFundIn(){
+		FinArFundsInReconRecord fundInRecon = new FinArFundsInReconRecord();
+		fundInRecon.setRemainingBalanceAmount(new BigDecimal(5000));
+		fundInRecon.setWcsOrderId("1");
+		
+		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
+		
+		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id(), reconResult.getReconResultId().longValue());
+	}
+	
+	@Test
+	public void getReconResult_remainingBalanceIs10000_reconResultPartialFundIn(){
+		FinArFundsInReconRecord fundInRecon = new FinArFundsInReconRecord();
+		fundInRecon.setRemainingBalanceAmount(new BigDecimal(10000));
+		fundInRecon.setWcsOrderId("1");
+		
+		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
+		
+		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_PARTIAL.id(), reconResult.getReconResultId().longValue());
+	}
+	
+	@Test
+	public void getReconResult_remainingBalanceIsMinus5000AndWcsOrderIdNull_reconResultNotRecognizeFundIn(){
+		FinArFundsInReconRecord fundInRecon = new FinArFundsInReconRecord();
+		fundInRecon.setRemainingBalanceAmount(new BigDecimal(-5000));
+		
+		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
+		
+		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id(), reconResult.getReconResultId().longValue());
+	}
+	
+	@Test
+	public void getReconResult_remainingBalanceIsMinus5000_reconResultAllFundIn(){
+		FinArFundsInReconRecord fundInRecon = new FinArFundsInReconRecord();
+		fundInRecon.setRemainingBalanceAmount(new BigDecimal(-5000));
+		fundInRecon.setWcsOrderId("1");
+		
+		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
+		
+		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id(), reconResult.getReconResultId().longValue());
+	}
+	
+	@Test
+	public void getReconResult_remainingBalanceIsPlus5000_reconResultAllFundIn(){
+		FinArFundsInReconRecord fundInRecon = new FinArFundsInReconRecord();
+		fundInRecon.setRemainingBalanceAmount(new BigDecimal(5000));
+		fundInRecon.setWcsOrderId("1");
+		
+		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
+		
+		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id(), reconResult.getReconResultId().longValue());
+	}
+	
+	@Test
+	public void getReconResult_remainingBalanceIsMinus10000_reconResultOverPaidFundIn(){
+		FinArFundsInReconRecord fundInRecon = new FinArFundsInReconRecord();
+		fundInRecon.setRemainingBalanceAmount(new BigDecimal(-10000));
+		fundInRecon.setWcsOrderId("1");
+		
+		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
+		
+		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id(), reconResult.getReconResultId().longValue());
+	}
+	
 	@After
 	public void shutdown(){
 		veniceEnv = VeniceEnvironment.PRODUCTION;
 		CommonUtil.veniceEnv = veniceEnv;
 		finArFundsInReportDAOMock = null;
 		fileNameAndFullPath = null;
-		sut = null;;
+		sut = null;
 	}
 	
 }

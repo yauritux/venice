@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
@@ -27,6 +26,7 @@ import com.gdn.venice.dao.VenOrderPaymentDAO;
 import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.exception.FundInFileParserException;
 import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
+import com.gdn.venice.exportimport.finance.dataimport.BCA_IB_FileReader;
 import com.gdn.venice.finance.dataexportimport.BCA_CC_Record;
 import com.gdn.venice.hssf.ExcelToPojo;
 import com.gdn.venice.hssf.PojoInterface;
@@ -108,6 +108,15 @@ public abstract class AbstractFundInService implements FundInService{
 			orderPayment = venOrderPaymentDAO.findByReferenceIdAndAmount(referenceId, paymentAmount);
 		}
 		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){			
+			
+			orderPayment = venOrderPaymentDAO.findWithBankByReferenceIdAndBankId(referenceId, reportType.id());
+		}
+		
 		return orderPayment;
 	}
 	
@@ -128,6 +137,21 @@ public abstract class AbstractFundInService implements FundInService{
 			orderPaymentAllocation = orderPaymentAllocationList.size() > 0 ? orderPaymentAllocationList.get(0) : null;
 		}
 		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){			
+					
+			List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findWithVenOrderPaymentFinArFundsInReconRecordByInternetBankingDetail(referenceId);
+			orderPaymentAllocation = orderPaymentAllocationList.size() > 0 ? orderPaymentAllocationList.get(0) : null;
+			
+			if(orderPaymentAllocation == null){
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+						"A record in the BCA or Mandiri IB or Niaga IB report being processed contains an order id that has no corresponding order record in the Venice database:" + referenceId);
+			}
+		}
+		
 		return orderPaymentAllocation;
 	}
 	
@@ -136,7 +160,7 @@ public abstract class AbstractFundInService implements FundInService{
 		
 		if(orderPaymentAllocation == null){
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), 
-					            "A record in the report being processed contains an reference Id that has no corresponding order/payment record in the Venice database:" + referenceId);
+					            "A record in the report being processed contains an reference Id that has no corresponding order/payment " + reportType + " record in the Venice database:" + referenceId);
 			return null;
 		}
 		
@@ -144,15 +168,27 @@ public abstract class AbstractFundInService implements FundInService{
 	}
 	
 	public boolean isPaymentAlreadyProcessed(String paymentIdentifier, String uniquePayment, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType) throws ParseException{
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		Date uniquePaymentDate = df.parse(uniquePayment);
+		
 		List<FinArFundsInReconRecord> fundInReconList = null;
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC){
 			
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			Date uniquePaymentDate = df.parse(uniquePayment);
+			
 			fundInReconList = finArFundsInReconRecordDAO.findForCreditCardDetail(paymentIdentifier, paymentAmount, uniquePaymentDate);
+			return fundInReconList.size() > 0 ? true : false;
+		}
+		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){			
+			
+			fundInReconList = finArFundsInReconRecordDAO.findForInternetBankingDetail(paymentIdentifier);
 			return fundInReconList.size() > 0 ? true : false;
 		}
 		
@@ -252,6 +288,17 @@ public abstract class AbstractFundInService implements FundInService{
 			uniqueContent = getUniqueContentFromCCFile(fileNameAndFullPath, reportType);
 		}
 		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB){
+			BCA_IB_FileReader reader = new BCA_IB_FileReader();
+			try {
+				uniqueContent = reader.getUniqueReportIdentifier(fileNameAndFullPath);
+			} catch (Exception e) {
+				CommonUtil.logError(CLASS_NAME, "Unable to retrieve unique content from file");
+				e.printStackTrace();
+			}
+		}
+			
+		
 		CommonUtil.logDebug(CLASS_NAME, "Unique content for " + reportType + " : " + uniqueContent);
 		
 		return uniqueContent;
@@ -347,6 +394,12 @@ public abstract class AbstractFundInService implements FundInService{
 		sb.append(fundInData.getRefundFundInList().size());
 		
 		return sb.toString();
+	}
+	
+	public boolean isInternetBankingFundInAlreadyExist(String referenceId, long reportTypeId){
+		int total = finArFundsInReconRecordDAO.countByNomorReffAndPaymentReportTypeId(referenceId, reportTypeId);
+		
+		return total > 0 ? true : false;
 	}
 	
 }

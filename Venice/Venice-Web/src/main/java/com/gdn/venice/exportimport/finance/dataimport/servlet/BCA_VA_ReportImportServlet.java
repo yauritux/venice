@@ -21,7 +21,7 @@ import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.facade.FinArFundsInReconRecordSessionEJBRemote;
 import com.gdn.venice.exportimport.finance.dataimport.BCA_VA_FileReader;
-import com.gdn.venice.exportimport.finance.dataimport.BCA_VA_IB_Record;
+import com.gdn.venice.finance.dataexportimport.BCA_VA_IB_Record;
 import com.gdn.venice.persistence.FinApprovalStatus;
 import com.gdn.venice.persistence.FinArFundsIdReportTime;
 import com.gdn.venice.persistence.FinArFundsInActionApplied;
