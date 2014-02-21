@@ -114,27 +114,10 @@ public abstract class AbstractFundInService implements FundInService{
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){			
 			
-			orderPayment = venOrderPaymentDAO.findWithBankByReferenceIdAndBankId(referenceId, getBankId(reportType));
+			orderPayment = venOrderPaymentDAO.findWithBankByReferenceIdAndBankId(referenceId, reportType.id());
 		}
 		
 		return orderPayment;
-	}
-	
-	public long getBankId(FinArFundsInReportTypeConstants reportType){
-		switch (reportType) {
-			case FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB:
-				return VeniceConstants.VEN_BANK_ID_BCA;
-			case FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB:
-				return VeniceConstants.VEN_BANK_ID_BRI;
-			case FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB:
-				return VeniceConstants.VEN_BANK_ID_BCA;
-			case FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB:
-				return VeniceConstants.VEN_BANK_ID_MANDIRI;
-			case FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB:
-				return VeniceConstants.VEN_BANK_ID_NIAGA;
-			default:
-				return -1;
-		}
 	}
 	
 	public boolean isOrderPaymentExist(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType){
