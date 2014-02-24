@@ -27,6 +27,7 @@ import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.exception.FundInFileParserException;
 import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
 import com.gdn.venice.exportimport.finance.dataimport.BCA_IB_FileReader;
+import com.gdn.venice.exportimport.finance.dataimport.MT942_FileReader;
 import com.gdn.venice.finance.dataexportimport.BCA_CC_Record;
 import com.gdn.venice.hssf.ExcelToPojo;
 import com.gdn.venice.hssf.PojoInterface;
@@ -70,7 +71,7 @@ public abstract class AbstractFundInService implements FundInService{
 		
 		int result = finArFundsInReportDAO.countByReportDesc(uniqueId);
 		
-		return (result > 0)? true : false;
+		return (result > 0);
 	}
 	
 	public FinArFundsInReport createFundInReportRecord(FinArFundsInReportTypeConstants reportType,String fileNameAndFullPath, String userName) throws IOException, FundInNoFinancePeriodFoundException{
@@ -140,7 +141,7 @@ public abstract class AbstractFundInService implements FundInService{
 	public boolean isOrderPaymentExist(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType){
 		VenOrderPayment orderPayment = getRelatedPayment(referenceId, paymentAmount, reportType);
 		
-		return orderPayment != null ? true : false;
+		return (orderPayment != null);
 	}
 	
 	public VenOrderPaymentAllocation getPaymentAllocationByRelatedPayment(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType){
@@ -196,7 +197,7 @@ public abstract class AbstractFundInService implements FundInService{
 			Date uniquePaymentDate = df.parse(uniquePayment);
 			
 			fundInReconList = finArFundsInReconRecordDAO.findForCreditCardDetail(paymentIdentifier, paymentAmount, uniquePaymentDate);
-			return fundInReconList.size() > 0 ? true : false;
+			return (fundInReconList.size() > 0);
 		}
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB||
@@ -206,7 +207,7 @@ public abstract class AbstractFundInService implements FundInService{
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){			
 			
 			fundInReconList = finArFundsInReconRecordDAO.findForInternetBankingDetail(paymentIdentifier);
-			return fundInReconList.size() > 0 ? true : false;
+			return (fundInReconList.size() > 0);
 		}
 		
 		return true;
@@ -305,8 +306,19 @@ public abstract class AbstractFundInService implements FundInService{
 			uniqueContent = getUniqueContentFromCCFile(fileNameAndFullPath, reportType);
 		}
 		
-		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB){
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB || 
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB){
 			BCA_IB_FileReader reader = new BCA_IB_FileReader();
+			try {
+				uniqueContent = reader.getUniqueReportIdentifier(fileNameAndFullPath);
+			} catch (Exception e) {
+				CommonUtil.logError(CLASS_NAME, "Unable to retrieve unique content from file");
+				e.printStackTrace();
+			}
+		}
+			
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB){
+			MT942_FileReader reader = new MT942_FileReader();
 			try {
 				uniqueContent = reader.getUniqueReportIdentifier(fileNameAndFullPath);
 			} catch (Exception e) {
@@ -416,7 +428,7 @@ public abstract class AbstractFundInService implements FundInService{
 	public boolean isInternetBankingFundInAlreadyExist(String referenceId, long reportTypeId){
 		int total = finArFundsInReconRecordDAO.countByNomorReffAndPaymentReportTypeId(referenceId, reportTypeId);
 		
-		return total > 0 ? true : false;
+		return (total > 0);
 	}
 	
 }

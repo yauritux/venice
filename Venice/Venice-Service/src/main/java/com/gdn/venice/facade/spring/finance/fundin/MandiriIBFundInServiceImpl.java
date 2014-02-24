@@ -30,7 +30,7 @@ import com.gdn.venice.util.CommonUtil;
 @Service("MandiriIBFundInServiceImpl")
 public class MandiriIBFundInServiceImpl extends AbstractFundInService{
 	private static final FinArFundsInReportTypeConstants REPORT_TYPE = FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB;
-	private static final String CLASS_NAME = BCACCFundInServiceImpl.class.getCanonicalName();
+	private static final String CLASS_NAME = MandiriIBFundInServiceImpl.class.getCanonicalName();
 	
 	@Override
 	public String process(String fileNameAndFullPath, String uploadUserName) throws NoSuchAlgorithmException, 
