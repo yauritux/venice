@@ -280,9 +280,9 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 						descFraud=fraudCaseList.get(0).getSuspicionReason();
 					}
 					
-					String sql = "select o from FrdCustomerWhitelistBlacklist o where o.customerFullName = trim('" + orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName() + 
-						"') and o.address = trim('"+ tempAddress +"') and o.phoneNumber = trim('" + tempPhone + "') and o.email = trim('"+ tempEmail +"') and o.handphoneNumber = trim('"+ tempHandPhone +"') and o.shippingPhoneNumber= trim('"+ tempShippingPhone +
-						"') and o.shippingHandphoneNumber = trim('"+ tempShippingHandPhone +"') and o.shippingAddress = trim('"+ tempShippingAddress +"') and o.ccNumber = '"+ noCreditCard + "'";
+					String sql = "select o from FrdCustomerWhitelistBlacklist o where trim(o.customerFullName) = trim('" + orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName() + 
+						"') and trim(o.address) = trim('"+ tempAddress +"') and trim(o.phoneNumber) = trim('" + tempPhone + "') and trim(o.email) = trim('"+ tempEmail +"') and trim(o.handphoneNumber) = trim('"+ tempHandPhone +"') and trim(o.shippingPhoneNumber)= trim('"+ tempShippingPhone +
+						"') and trim(o.shippingHandphoneNumber) = trim('"+ tempShippingHandPhone +"') and trim(o.shippingAddress) = trim('"+ tempShippingAddress +"') and o.ccNumber = '"+ noCreditCard + "'";
 			
 					List<FrdFraudSuspicionCase> fraudCaseCheck = fraudCaseSessionHome.queryByRange(sql,0,1);//
 				
@@ -290,18 +290,55 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 					{
 						
 						FrdCustomerWhitelistBlacklist customerBlacklist = new FrdCustomerWhitelistBlacklist();
-						customerBlacklist.setCustomerFullName(orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName());
-						customerBlacklist.setAddress(tempAddress);
-						customerBlacklist.setPhoneNumber(tempPhone);
-						customerBlacklist.setHandphoneNumber(tempHandPhone);
-						customerBlacklist.setShippingPhoneNumber(tempShippingPhone);
-						customerBlacklist.setShippingHandphoneNumber(tempShippingHandPhone);
-						customerBlacklist.setShippingAddress(tempShippingAddress);
-						customerBlacklist.setCcNumber(noCreditCard);
-						customerBlacklist.setEmail(tempEmail);
-						customerBlacklist.setDescription(descFraud);
-						customerBlacklist.setCreatedBy(username);
-						customerBlacklist.setOrderTimestamp(orderList.get(0).getOrderDate());
+						
+						if(orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName()!=null){
+							customerBlacklist.setCustomerFullName(orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName().trim());
+						}
+						
+						if(tempAddress!=null){
+							customerBlacklist.setAddress(tempAddress.trim());
+						}
+						
+						if(tempPhone!=null){
+							customerBlacklist.setPhoneNumber(tempPhone.trim());
+						}
+						
+						if(tempHandPhone!=null){
+							customerBlacklist.setHandphoneNumber(tempHandPhone.trim());
+						}
+						
+						if(tempShippingPhone!=null){
+							customerBlacklist.setShippingPhoneNumber(tempShippingPhone.trim());
+						}
+						
+						if(tempShippingHandPhone!=null){
+							customerBlacklist.setShippingHandphoneNumber(tempShippingHandPhone.trim());
+						}
+						
+						if(tempShippingAddress!=null){
+							customerBlacklist.setShippingAddress(tempShippingAddress.trim());
+						}
+						
+						if(noCreditCard!=null){
+							customerBlacklist.setCcNumber(noCreditCard.trim());
+						}
+						
+						if(tempEmail!=null){
+							customerBlacklist.setEmail(tempEmail.trim());
+						}
+						
+						if(descFraud!=null){
+							customerBlacklist.setDescription(descFraud.trim());
+						}
+						
+						if(username!=null){
+							customerBlacklist.setCreatedBy(username.trim());
+						}
+						
+						if(orderList.get(0).getOrderDate()!=null){
+							customerBlacklist.setOrderTimestamp(orderList.get(0).getOrderDate());
+						}
+						
 						customerBlacklist.setTimestamp(new Timestamp(System.currentTimeMillis()));
 						
 						sessionHome.persistFrdCustomerWhitelistBlacklist(customerBlacklist);
