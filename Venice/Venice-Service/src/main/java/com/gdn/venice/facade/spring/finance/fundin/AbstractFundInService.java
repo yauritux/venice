@@ -431,4 +431,8 @@ public abstract class AbstractFundInService implements FundInService{
 		return (total > 0);
 	}
 	
+	public boolean isPaymentAmountNotLessThanZero(BigDecimal paymentAmount){
+		return !(paymentAmount.compareTo(new BigDecimal(0)) < 0);
+	}
+	
 }
