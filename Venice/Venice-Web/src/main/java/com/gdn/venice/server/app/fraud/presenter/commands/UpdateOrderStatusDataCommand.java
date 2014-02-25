@@ -37,7 +37,6 @@ import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenOrderStatusHistory;
 import com.gdn.venice.persistence.VenOrderStatusHistoryPK;
 import com.gdn.venice.server.command.RafRpcCommand;
-import com.sun.mail.handlers.message_rfc822;
 
 /**
  * Update Command for Update Order Status
@@ -202,25 +201,26 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 			
 			try{
 
-				historyLocator=new Locator<Object>();
-				System.out.println("order status is set  to FC, insert new customer blacklist record");
-				String tempAddress="", tempPhone="",tempHandPhone="", tempEmail="",tempShippingPhone="",tempShippingHandPhone="",tempShippingAddress="",noCreditCard="",descFraud="";
-				FrdCustomerWhitelistBlacklistSessionEJBRemote sessionHome = (FrdCustomerWhitelistBlacklistSessionEJBRemote) historyLocator.lookup(FrdCustomerWhitelistBlacklistSessionEJBRemote.class, "FrdCustomerWhitelistBlacklistSessionEJBBean");
-				FrdEntityBlacklistSessionEJBRemote ipBlacklistsessionHome = (FrdEntityBlacklistSessionEJBRemote) historyLocator.lookup(FrdEntityBlacklistSessionEJBRemote.class, "FrdEntityBlacklistSessionEJBBean");
-				VenOrderContactDetailSessionEJBRemote orderContactDetailSessionHome = (VenOrderContactDetailSessionEJBRemote) historyLocator.lookup(VenOrderContactDetailSessionEJBRemote.class, "VenOrderContactDetailSessionEJBBean");
-				VenOrderAddressSessionEJBRemote orderAddressSessionHome = (VenOrderAddressSessionEJBRemote) historyLocator.lookup(VenOrderAddressSessionEJBRemote.class, "VenOrderAddressSessionEJBBean");
-				VenOrderItemContactDetailSessionEJBRemote orderItemContactDetailSessionHome = (VenOrderItemContactDetailSessionEJBRemote) historyLocator.lookup(VenOrderItemContactDetailSessionEJBRemote.class, "VenOrderItemContactDetailSessionEJBBean");
-				VenAddressSessionEJBRemote shippingAddressSessionHome = (VenAddressSessionEJBRemote) historyLocator.lookup(VenAddressSessionEJBRemote.class, "VenAddressSessionEJBBean");
-				VenOrderPaymentAllocationSessionEJBRemote allocationSessionHome = (VenOrderPaymentAllocationSessionEJBRemote) historyLocator.lookup(VenOrderPaymentAllocationSessionEJBRemote.class, "VenOrderPaymentAllocationSessionEJBBean");
-				FrdFraudSuspicionCaseSessionEJBRemote fraudCaseSessionHome = (FrdFraudSuspicionCaseSessionEJBRemote) historyLocator.lookup(FrdFraudSuspicionCaseSessionEJBRemote.class, "FrdFraudSuspicionCaseSessionEJBBean");
-				VenOrderSessionEJBRemote orderSessionHome = (VenOrderSessionEJBRemote) historyLocator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
+				historyLocator=new Locator<Object>();VenOrderSessionEJBRemote orderSessionHome = (VenOrderSessionEJBRemote) historyLocator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
 				
 				List<VenOrder> orderList = orderSessionHome.queryByRange("select o from VenOrder o where o.wcsOrderId = '"+wcsOrderId+"'", 0, 0);
 			
 				if(orderList.size()>0){
+					String tempAddress="", tempPhone="",tempHandPhone="", tempEmail="",tempShippingPhone="",tempShippingHandPhone="",tempShippingAddress="",noCreditCard="",descFraud="";
+
+					FrdCustomerWhitelistBlacklistSessionEJBRemote sessionHome = (FrdCustomerWhitelistBlacklistSessionEJBRemote) historyLocator.lookup(FrdCustomerWhitelistBlacklistSessionEJBRemote.class, "FrdCustomerWhitelistBlacklistSessionEJBBean");
+					FrdEntityBlacklistSessionEJBRemote ipBlacklistsessionHome = (FrdEntityBlacklistSessionEJBRemote) historyLocator.lookup(FrdEntityBlacklistSessionEJBRemote.class, "FrdEntityBlacklistSessionEJBBean");
+					VenOrderContactDetailSessionEJBRemote orderContactDetailSessionHome = (VenOrderContactDetailSessionEJBRemote) historyLocator.lookup(VenOrderContactDetailSessionEJBRemote.class, "VenOrderContactDetailSessionEJBBean");
+					VenOrderAddressSessionEJBRemote orderAddressSessionHome = (VenOrderAddressSessionEJBRemote) historyLocator.lookup(VenOrderAddressSessionEJBRemote.class, "VenOrderAddressSessionEJBBean");
+					VenOrderItemContactDetailSessionEJBRemote orderItemContactDetailSessionHome = (VenOrderItemContactDetailSessionEJBRemote) historyLocator.lookup(VenOrderItemContactDetailSessionEJBRemote.class, "VenOrderItemContactDetailSessionEJBBean");
+					VenAddressSessionEJBRemote shippingAddressSessionHome = (VenAddressSessionEJBRemote) historyLocator.lookup(VenAddressSessionEJBRemote.class, "VenAddressSessionEJBBean");
+					VenOrderPaymentAllocationSessionEJBRemote allocationSessionHome = (VenOrderPaymentAllocationSessionEJBRemote) historyLocator.lookup(VenOrderPaymentAllocationSessionEJBRemote.class, "VenOrderPaymentAllocationSessionEJBBean");
+					FrdFraudSuspicionCaseSessionEJBRemote fraudCaseSessionHome = (FrdFraudSuspicionCaseSessionEJBRemote) historyLocator.lookup(FrdFraudSuspicionCaseSessionEJBRemote.class, "FrdFraudSuspicionCaseSessionEJBBean");
+					
 					_log.debug("get customer address");
 					List<VenOrderAddress> orderAddressBlacklistList = orderAddressSessionHome.queryByRange("select o from VenOrderAddress o where o.venOrder.orderId ="+orderList.get(0).getOrderId(), 0, 1);
 						if(orderAddressBlacklistList.size()>0){
+							tempAddress="";
 						for(int i=0;i<orderAddressBlacklistList.size();i++){
 							tempAddress+=orderAddressBlacklistList.get(i).getVenAddress().getStreetAddress1()+" ";
 						}
@@ -229,6 +229,7 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 					_log.debug("get customer email");
 					List<VenOrderContactDetail> contactDetailEmailBlacklistList = orderContactDetailSessionHome.queryByRange("select o from VenOrderContactDetail o where o.venOrder.orderId = "+orderList.get(0).getOrderId()+" and o.venContactDetail.venContactDetailType.contactDetailTypeId ="+DataConstantNameTokens.VEN_CONTACT_DETAIL_ID_EMAIL, 0, 1);
 					if(contactDetailEmailBlacklistList.size()>0){
+						tempEmail="";
 						for(int i=0;i<contactDetailEmailBlacklistList.size();i++){			
 							tempEmail+=contactDetailEmailBlacklistList.get(i).getVenContactDetail().getContactDetail()+" ";
 						}
@@ -290,55 +291,18 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 					{
 						
 						FrdCustomerWhitelistBlacklist customerBlacklist = new FrdCustomerWhitelistBlacklist();
-						
-						if(orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName()!=null){
-							customerBlacklist.setCustomerFullName(orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName().trim());
-						}
-						
-						if(tempAddress!=null){
-							customerBlacklist.setAddress(tempAddress.trim());
-						}
-						
-						if(tempPhone!=null){
-							customerBlacklist.setPhoneNumber(tempPhone.trim());
-						}
-						
-						if(tempHandPhone!=null){
-							customerBlacklist.setHandphoneNumber(tempHandPhone.trim());
-						}
-						
-						if(tempShippingPhone!=null){
-							customerBlacklist.setShippingPhoneNumber(tempShippingPhone.trim());
-						}
-						
-						if(tempShippingHandPhone!=null){
-							customerBlacklist.setShippingHandphoneNumber(tempShippingHandPhone.trim());
-						}
-						
-						if(tempShippingAddress!=null){
-							customerBlacklist.setShippingAddress(tempShippingAddress.trim());
-						}
-						
-						if(noCreditCard!=null){
-							customerBlacklist.setCcNumber(noCreditCard.trim());
-						}
-						
-						if(tempEmail!=null){
-							customerBlacklist.setEmail(tempEmail.trim());
-						}
-						
-						if(descFraud!=null){
-							customerBlacklist.setDescription(descFraud.trim());
-						}
-						
-						if(username!=null){
-							customerBlacklist.setCreatedBy(username.trim());
-						}
-						
-						if(orderList.get(0).getOrderDate()!=null){
-							customerBlacklist.setOrderTimestamp(orderList.get(0).getOrderDate());
-						}
-						
+						customerBlacklist.setCustomerFullName(orderList.get(0).getVenCustomer().getVenParty().getFullOrLegalName().trim());
+						customerBlacklist.setAddress(tempAddress.trim());
+						customerBlacklist.setPhoneNumber(tempPhone.trim());
+						customerBlacklist.setHandphoneNumber(tempHandPhone.trim());
+						customerBlacklist.setShippingPhoneNumber(tempShippingPhone.trim());
+						customerBlacklist.setShippingHandphoneNumber(tempShippingHandPhone.trim());
+						customerBlacklist.setShippingAddress(tempShippingAddress.trim());
+						customerBlacklist.setCcNumber(noCreditCard.trim());
+						customerBlacklist.setEmail(tempEmail.trim());
+						customerBlacklist.setDescription(descFraud.trim());
+						customerBlacklist.setCreatedBy(username.trim());
+						customerBlacklist.setOrderTimestamp(orderList.get(0).getOrderDate());
 						customerBlacklist.setTimestamp(new Timestamp(System.currentTimeMillis()));
 						
 						sessionHome.persistFrdCustomerWhitelistBlacklist(customerBlacklist);
