@@ -12,6 +12,9 @@
 	<!-- Inherit the core Web Toolkit stuff. -->
 	<inherits name='com.google.gwt.user.User' />
 
+	<!-- To use XML on the client side, you need to add -->
+	<inherits name='com.google.gwt.xml.XML' />
+	
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->
 	<!-- any one of the following lines. -->

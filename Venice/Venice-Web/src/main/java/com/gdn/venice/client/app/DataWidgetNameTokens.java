@@ -5,6 +5,7 @@ public class DataWidgetNameTokens {
 	public static String  VENICE_TASKMANAGEMENTSECTION = "VeniceTaskManagementSection";
 	public static String  VENICE_FRAUDMODULESECTION = "VeniceFraudModuleSection";
 	public static String  VENICE_LOGISTICSMODULESECTION = "VeniceLogisticsModuleSection";
+	public static String  VENICE_INVENTORYMODULESECTION = "VeniceInventoryModuleSection";
 	public static String  VENICE_FINANCEMODULESECTION = "VeniceFinanceModuleSection";
 	public static String  VENICE_KPIMODULESECTION = "VeniceKPIModuleSection";
 	public static String  VENICE_ADMINISTRATIONMODULESECTION = "VeniceAdministrationModuleSection";
@@ -75,5 +76,18 @@ public class DataWidgetNameTokens {
 
 	public static String  RSV_SALESCENTERMODULETREENODE = "RsvSalesCenterTreeNode";
 	public static String  RSV_ORDERMANAGEMENTMODULETREENODE = "RsvOrderManagementTreeNode";
-
+	
+	public static String  INV_MASTERWAREHOUSETREENODE = "InvMasterWarehouseTreeNode";
+	public static String  INV_WAREHOUSELISTFILTERTREENODE = "InvWarehouseListFilterTreeNode";
+	public static String  INV_ADDWITHAPPROVALTREENODE = "InvAddWithApprovalTreeNode";
+	public static String  INV_EDITWITHAPPROVALTREENODE = "InvEditWithApprovalTreeNode";
+	public static String  INV_NONACTIVEWITHAPPROVALTREENODE = "InvNonActiveWithApprovalTreeNode";
+	
+	public static String  INV_SHELFMANAGEMENTTREENODE = "InvShelfManagementTreeNode";
+	public static String  INV_SHELFLISTFILTERTREENODE = "InvShelfListFilterTreeNode";
+	public static String  INV_SHELFADDAPPROVALTREENODE = "InvShelfAddApprovalTreeNode";
+	public static String  INV_SHELFEDITAPPROVALTREENODE = "InvShelfEditApprovalTreeNode";
+	public static String  INV_SHELFNONACTIVEAPPROVALTREENODE = "InvShelfNonActiveApprovalTreeNode";
+	
+	public static String  INV_CURRENCYMANAGEMENTTREENODE = "InvCurrencyManagementTreeNode";
 }

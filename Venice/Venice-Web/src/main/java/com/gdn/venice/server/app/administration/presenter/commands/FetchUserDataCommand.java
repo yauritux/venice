@@ -15,7 +15,7 @@ import com.gdn.venice.server.data.RafDsResponse;
 import com.gdn.venice.server.util.Util;
 
 /**
- * Fetch Command for Profile Maintenance
+ * Fetch Command for User Maintenance
  * 
  * @author Anto
  */
@@ -51,6 +51,9 @@ public class FetchUserDataCommand implements RafDsCommand {
 				RafUser list = rafUser.get(i);				
 				map.put(DataNameTokens.RAFUSER_USERID, Util.isNull(list.getUserId(), "").toString());
 				map.put(DataNameTokens.RAFUSER_LOGINNAME, Util.isNull(list.getLoginName(), "").toString());
+				map.put(DataNameTokens.RAFUSER_NAME, Util.isNull(list.getName(), "").toString());
+				map.put(DataNameTokens.RAFUSER_ADDTOSTOCKHOLM, list.getAddToStockholm()!=null?list.getAddToStockholm()==true?"Yes":"No":"");
+				map.put(DataNameTokens.RAFUSER_DEPARTMENT, Util.isNull(list.getDepartment(), "").toString());
 				dataList.add(map);				
 			}
 			rafDsResponse.setStatus(0);

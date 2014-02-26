@@ -28,6 +28,9 @@ public class RafRole implements Serializable {
 
 	@Column(name="role_name", nullable=false, length=100)
 	private String roleName;
+	
+	@Column(name="add_to_stockholm")
+	private Boolean addToStockholm;
 
 	//bi-directional many-to-one association to RafRole
     @ManyToOne
@@ -92,5 +95,12 @@ public class RafRole implements Serializable {
 	public void setRafRoleProfiles(List<RafRoleProfile> rafRoleProfiles) {
 		this.rafRoleProfiles = rafRoleProfiles;
 	}
-	
+
+	public void setAddToStockholm(Boolean addToStockholm) {
+		this.addToStockholm = addToStockholm;
+	}
+
+	public Boolean getAddToStockholm() {
+		return addToStockholm;
+	}
 }

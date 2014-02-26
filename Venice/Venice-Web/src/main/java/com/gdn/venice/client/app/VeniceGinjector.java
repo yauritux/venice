@@ -30,6 +30,15 @@ import com.gdn.venice.client.app.fraud.presenter.UncalculatedCreditCardOrderPres
 import com.gdn.venice.client.app.general.presenter.OrderDataViewerPresenter;
 import com.gdn.venice.client.app.general.presenter.PartyMaintenancePresenter;
 import com.gdn.venice.client.app.general.presenter.ReturDataViewerPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ShelfNonActiveWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseAddWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseEditWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseListFilterPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseNonActiveWithApprovalPresenter;
 import com.gdn.venice.client.app.kpi.presenter.KpiDashboardPresenter;
 import com.gdn.venice.client.app.kpi.presenter.KpiDetailViewerPresenter;
 import com.gdn.venice.client.app.kpi.presenter.KpiSetupPresenter;
@@ -168,4 +177,22 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<FraudParameterRule31Presenter> getFraudParameterRule31Presenter();
   
   AsyncProvider<FinSalesSettlementReportPresenter> getFinSalesSettlementReportPresenter();
+  
+  AsyncProvider<WarehouseListFilterPresenter> getWarehouseListFilterPresenter();
+  
+  AsyncProvider<WarehouseAddWithApprovalPresenter> getWarehouseAddWithApprovalPresenter();
+  
+  AsyncProvider<WarehouseEditWithApprovalPresenter> getWarehouseEditWithApprovalPresenter();
+  
+  AsyncProvider<WarehouseNonActiveWithApprovalPresenter> getWarehouseNonActiveWithApprovalPresenter();
+  
+  AsyncProvider<ShelfListFilterPresenter> getShelfListFilterPresenter();
+  
+  AsyncProvider<ShelfAddWithApprovalPresenter> getShelfAddWithApprovalPresenter();
+  
+  AsyncProvider<ShelfEditWithApprovalPresenter> getShelfEditWithApprovalPresenter();
+  
+  AsyncProvider<ShelfNonActiveWithApprovalPresenter> getShelfNonActiveWithApprovalPresenter();
+  
+  AsyncProvider<CurrencyManagementPresenter> getCurrencyManagementPresenter();
 }

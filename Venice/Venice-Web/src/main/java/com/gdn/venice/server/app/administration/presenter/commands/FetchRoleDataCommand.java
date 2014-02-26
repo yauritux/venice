@@ -52,9 +52,8 @@ public class FetchRoleDataCommand implements RafDsCommand {
 				map.put(DataNameTokens.RAFROLE_ROLEID, Util.isNull(list.getRoleId(), "").toString());
 				map.put(DataNameTokens.RAFROLE_ROLENAME, Util.isNull(list.getRoleName(), "").toString());
 				map.put(DataNameTokens.RAFROLE_ROLEDESC, Util.isNull(list.getRoleDesc(), "").toString());
-				if(list.getRafRole()!=null){
-					map.put(DataNameTokens.RAFROLE_PARENTROLE, Util.isNull(list.getRafRole().getRoleId(), "").toString());
-				}
+				map.put(DataNameTokens.RAFROLE_ADDTOSTOCKHOLM, list.getAddToStockholm()!=null?list.getAddToStockholm()==true?"Yes":"No":"");
+
 				dataList.add(map);				
 			}
 			rafDsResponse.setStatus(0);

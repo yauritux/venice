@@ -1020,6 +1020,7 @@ public class DataNameTokens {
 	public static String RAFROLE_ROLENAME = "RafRole.roleName";
 	public static String RAFROLE_ROLEDESC = "RafRole.roleDesc";
 	public static String RAFROLE_PARENTROLE = "RafRole.rafRole.roleId";
+	public static String RAFROLE_ADDTOSTOCKHOLM = "RafRole.addToStockholm";
 	
 	//Administration - Role User Detail
 	public static String RAFROLE_RAFUSERROLES_USERID = "RafRole.rafUserRoles.userId";
@@ -1033,6 +1034,9 @@ public class DataNameTokens {
 	//Administration - User
 	public static String RAFUSER_USERID = "RafUser.userId";
 	public static String RAFUSER_LOGINNAME = "RafUser.loginName";
+	public static String RAFUSER_NAME = "RafUser.name";
+	public static String RAFUSER_ADDTOSTOCKHOLM = "RafUser.addToStockholm";
+	public static String RAFUSER_DEPARTMENT = "RafUser.department";
 	
 	//Administration - User Role Detail
 	public static String RAFUSERROLE_RAFUSERROLEID = "RafUserRole.rafUserRoleId";
@@ -1167,6 +1171,39 @@ public class DataNameTokens {
 	public static String FINARFUNDSINACTIONAPPLIEDHISTORY_DATE="FinArFundsInActionAppliedHistory.actionTakenTimestamp";
 	public static String FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT="FinArFundsInActionAppliedHistory.amount";
 	
+        
+        //Inventory Warehouse
+        public static String INV_WAREHOUSE_ID="id";
+        public static String INV_WAREHOUSE_CODE="code";
+        public static String INV_WAREHOUSE_NAME="name";
+        public static String INV_WAREHOUSE_DESCRIPTION="description";
+        public static String INV_WAREHOUSE_ADDRESS="address";
+        public static String INV_WAREHOUSE_CITY="city";
+        public static String INV_WAREHOUSE_ZIPCODE="zipcode";
+        public static String INV_WAREHOUSE_ACTIVESTATUS="activeStatus";
+        public static String INV_WAREHOUSE_APPROVALTYPE="approvalType";
+        public static String INV_WAREHOUSE_APPROVALSTATUS="approvalStatus";
+        public static String INV_WAREHOUSE_APPROVAL_IN_PROCESS="approvalInProcess";
+        public static String INV_WAREHOUSE_ORIGINALID="originId";
+        
+        public static String INV_SHELF_ID="id";
+        public static String INV_SHELF_CODE="code";
+        public static String INV_SHELF_DESCRIPTION="description";
+        public static String INV_SHELF_ACTIVESTATUS="activeStatus";
+        public static String INV_SHELF_APPROVALTYPE="approvalType";
+        public static String INV_SHELF_APPROVALSTATUS="approvalStatus";
+        public static String INV_SHELF_APPROVAL_IN_PROCESS="approvalInProcess";
+        public static String INV_SHELF_ORIGINID="originId";
+        
+        public static String INV_STORAGE_ID="id";
+        public static String INV_STORAGE_CODE="code";
+        public static String INV_STORAGE_DESCRIPTION="description";
+        public static String INV_STORAGE_TYPE="type";
+                
+        public static String INV_CURRENCY_ID="id";
+        public static String INV_CURRENCY_CURRENCY="currency";
+        public static String INV_CURRENCY_RATE="rate";
+                
 	/**
 	 * This constructor adds all of the name token and the wrapper type
 	 * definitions into the Map. This should really be removed so that the 
@@ -1895,7 +1932,6 @@ public class DataNameTokens {
 		fieldClassMap.put(FINSALESRECORD_JUMLAH, "java.math.BigDecimal");
 		fieldClassMap.put(FINSALESRECORD_FINAPPAYMENT_FINAPPROVALSTATUS_APPROVALID, "java.lang.Long");
 		
-		
 		fieldClassMap.put(FINSALESRECORD_MCX_DATE, "java.sql.Timestamp");
 		fieldClassMap.put(FINSALESRECORD_CXF_DATE, "java.sql.Timestamp");
 		fieldClassMap.put(FINSALESRECORD_MERCHANTPAYMENTAMOUNT, "java.math.BigDecimal");
@@ -1941,7 +1977,8 @@ public class DataNameTokens {
 		fieldClassMap.put(FINAPMANUALJOURNALTRANSACTION_FINJOURNALTRANSACTION_COMMENTS, "java.lang.String");
 		fieldClassMap.put(FINAPPAYMENT_FINAPPROVALSTATUS_APPROVALSTATUSDESC,"java.lang.String");
 		fieldClassMap.put(FINAPPAYMENT_FINAPPROVALSTATUS_APPROVALSTATUSID, "java.lang.Long");
-
+		
+		
 		fieldClassMap.put(FINJOURNALAPPROVALGROUP_JOURNALGROUPID, "java.lang.Long");
 		fieldClassMap.put(FINJOURNALAPPROVALGROUP_FINJOURNAL_JOURNALID, "java.lang.Long");
 		fieldClassMap.put(FINJOURNALAPPROVALGROUP_FINJOURNAL_JOURNALDESC, "java.lang.String");
@@ -2066,6 +2103,7 @@ public class DataNameTokens {
 		fieldClassMap.put(RAFROLE_ROLENAME, "java.lang.String");
 		fieldClassMap.put(RAFROLE_ROLEDESC, "java.lang.String");
 		fieldClassMap.put(RAFROLE_PARENTROLE, "java.lang.Long");
+		fieldClassMap.put(RAFROLE_ADDTOSTOCKHOLM, "java.lang.Boolean");
 		
 		fieldClassMap.put(RAFROLE_RAFUSERROLES_USERID, "java.lang.Long");
 		fieldClassMap.put(RAFROLE_RAFUSERROLES_ROLEID, "java.lang.Long");
@@ -2088,6 +2126,9 @@ public class DataNameTokens {
 		//Administration - User Field Class Mapping
 		fieldClassMap.put(RAFUSER_USERID, "java.lang.Long");
 		fieldClassMap.put(RAFUSER_LOGINNAME, "java.lang.String");
+		fieldClassMap.put(RAFUSER_NAME, "java.lang.String");
+		fieldClassMap.put(RAFUSER_ADDTOSTOCKHOLM, "java.lang.Boolean");
+		fieldClassMap.put(RAFUSER_DEPARTMENT, "java.lang.String");
 		
 		//Administration - User Role Detail Field Class Mapping
 		fieldClassMap.put(RAFUSERROLE_RAFUSERROLEID, "java.lang.Long");

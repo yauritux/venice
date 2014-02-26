@@ -11,7 +11,6 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.DSOperationType;
-import com.smartgwt.client.widgets.tree.TreeNode;
 
 /**
  * Defines the data sources for the user, group, role and profile data for testing purposes.
@@ -22,19 +21,37 @@ public class AdministrationData {
 	public static RafDataSource getRoleData() {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.RAFROLE_ROLEID, "Role ID"),
-				new DataSourceTextField(DataNameTokens.RAFROLE_ROLENAME, "Role Name"),
-				new DataSourceTextField(DataNameTokens.RAFROLE_ROLEDESC, "Description"),
-				new DataSourceTextField(DataNameTokens.RAFROLE_PARENTROLE, "Reports to")
+				new DataSourceTextField(DataNameTokens.RAFROLE_ROLENAME, "Role Code"),
+				new DataSourceTextField(DataNameTokens.RAFROLE_ROLEDESC, "Role Name"),
+				new DataSourceTextField(DataNameTokens.RAFROLE_ADDTOSTOCKHOLM, "Add to Stockholm")
 		};
 		dataSourceFields[0].setPrimaryKey(true);
 		RafDataSource retVal = new RafDataSource(
 				"/response/data/*",
 				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=fetchRoleData&type=DataSource",
-				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=addRoleData&type=DataSource",
-				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=updateRoleData&type=DataSource",
+				null,
+				null,
 				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=deleteRoleData&type=DataSource",
 				dataSourceFields); 
 				
+		return retVal;
+	}
+	
+	public static RafDataSource getRoleDetailData() {
+		DataSourceField[] dataSourceFields = {
+				new DataSourceTextField(DataNameTokens.RAFROLE_ROLEID, "Role ID"),
+				new DataSourceTextField(DataNameTokens.RAFROLE_ROLENAME, "Role Code"),
+				new DataSourceTextField(DataNameTokens.RAFROLE_ROLEDESC, "Role Name"),
+				new DataSourceTextField(DataNameTokens.RAFROLE_ADDTOSTOCKHOLM, "Add to Stockholm")
+		};
+		dataSourceFields[0].setPrimaryKey(true);
+		RafDataSource retVal = new RafDataSource(
+				"/response/data/*",
+				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=fetchRoleDetailData&type=DataSource",
+				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=addRoleData&type=DataSource",
+				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=updateRoleData&type=DataSource",
+				null,
+				dataSourceFields); 
 		return retVal;
 	}
 	
@@ -123,50 +140,50 @@ public class AdministrationData {
 		return retVal;
 	}
 	
-//	public static DataSource getProfileScreenData() {
-//		if (profileScreenDataDs != null) {
-//			return profileScreenDataDs;
-//		} else {
-//			profileScreenDataDs = new DataSource();
-//			profileScreenDataDs.setRecordXPath("/admin/screens/screen");
-//			
-//			DataSourceTextField screenNameField = new DataSourceTextField("name", "Screen");
-//			DataSourceTextField fieldNameField = new DataSourceTextField("field", "Field");
-//			DataSourceBooleanField editField = new DataSourceBooleanField("edit", "Edit");
-//			DataSourceBooleanField viewField = new DataSourceBooleanField("view", "View");
-//			DataSourceBooleanField deleteField = new DataSourceBooleanField("delete", "Delete");
-//			
-//			profileScreenDataDs.setFields(screenNameField, fieldNameField, editField, viewField, deleteField);
-//			profileScreenDataDs.setDataURL("ds/test_data/admin.data.xml");
-//			profileScreenDataDs.setClientOnly(true);
-//	        
-//	        return profileScreenDataDs;
-//		}    
-//		
-//	}
-	
 	public static RafDataSource getUserData() {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.RAFUSER_USERID, "User ID"),
-				new DataSourceTextField(DataNameTokens.RAFUSER_LOGINNAME, "User Name")
+				new DataSourceTextField(DataNameTokens.RAFUSER_LOGINNAME, "User Name"),
+				new DataSourceTextField(DataNameTokens.RAFUSER_NAME, "Full Name"),
+				new DataSourceTextField(DataNameTokens.RAFUSER_ADDTOSTOCKHOLM, "Add to Stockholm"),
+				new DataSourceTextField(DataNameTokens.RAFUSER_DEPARTMENT, "Department")
 		};
 		dataSourceFields[0].setPrimaryKey(true);
 		RafDataSource retVal = new RafDataSource(
 				"/response/data/*",
 				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=fetchUserData&type=DataSource",
-				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=addUserData&type=DataSource",
-				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=updateUserData&type=DataSource",
+				null,
+				null,
 				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=deleteUserData&type=DataSource",
 				dataSourceFields); 
 				
 		return retVal;
 	}
 	
+	public static RafDataSource getUserDetailData() {
+		DataSourceField[] dataSourceFields = {
+				new DataSourceTextField(DataNameTokens.RAFUSER_USERID, "User ID"),
+				new DataSourceTextField(DataNameTokens.RAFUSER_LOGINNAME, "User Name"),
+				new DataSourceTextField(DataNameTokens.RAFUSER_NAME, "Full Name"),
+				new DataSourceTextField(DataNameTokens.RAFUSER_ADDTOSTOCKHOLM, "Add to Stockholm"),
+				new DataSourceTextField(DataNameTokens.RAFUSER_DEPARTMENT, "Stockholm Department")
+		};
+		dataSourceFields[0].setPrimaryKey(true);
+		RafDataSource retVal = new RafDataSource(
+				"/response/data/*",
+				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=fetchUserDetailData&type=DataSource",
+				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=addUserData&type=DataSource",
+				GWT.getHostPageBaseURL() + RoleProfileUserGroupManagementPresenter.roleProfileUserGroupManagementPresenterServlet + "?method=updateUserData&type=DataSource",
+				null,
+				dataSourceFields); 
+		return retVal;
+	}
+	
 	public static DataSource getUserDetailGroupData(String userId) {
 		DataSourceField[] dataSourceFields = {
-				new DataSourceTextField(DataNameTokens.RAFUSERGROUP_RAFUSERGROUPID, "User Group ID"),
+				new DataSourceTextField(DataNameTokens.RAFUSERGROUP_RAFUSERGROUPID, "User Department ID"),
 				new DataSourceTextField(DataNameTokens.RAFUSER_RAFUSERGROUP_USERID, "User Name"),
-				new DataSourceTextField(DataNameTokens.RAFUSER_RAFUSERGROUP_GROUPID, "Assigned Group")
+				new DataSourceTextField(DataNameTokens.RAFUSER_RAFUSERGROUP_GROUPID, "Assigned Department")
 		};
 		dataSourceFields[0].setPrimaryKey(true);
 		RafDataSource retVal = new RafDataSource(
@@ -208,9 +225,9 @@ public class AdministrationData {
 	
 	public static RafDataSource getGroupData() {
 		DataSourceField[] dataSourceFields = {
-				new DataSourceTextField(DataNameTokens.RAFGROUP_GROUPID, "Group ID"),
-				new DataSourceTextField(DataNameTokens.RAFGROUP_GROUPNAME, "Group Name"),
-				new DataSourceTextField(DataNameTokens.RAFGROUP_GROUPDESC, "Description")
+				new DataSourceTextField(DataNameTokens.RAFGROUP_GROUPID, "Department ID"),
+				new DataSourceTextField(DataNameTokens.RAFGROUP_GROUPNAME, "Department Code"),
+				new DataSourceTextField(DataNameTokens.RAFGROUP_GROUPDESC, "Department Name")
 		};
 		dataSourceFields[0].setPrimaryKey(true);
 		RafDataSource retVal = new RafDataSource(
@@ -226,8 +243,8 @@ public class AdministrationData {
 	
 	public static RafDataSource getGroupDetailData(String groupId) {
 		DataSourceField[] dataSourceFields = {
-				new DataSourceTextField(DataNameTokens.RAFGROUPROLE_RAFGROUPROLEID, "Group Role ID"),
-				new DataSourceTextField(DataNameTokens.RAFGROUP_RAFGROUPROLES_GROUPID, "Group"),
+				new DataSourceTextField(DataNameTokens.RAFGROUPROLE_RAFGROUPROLEID, "Department Role ID"),
+				new DataSourceTextField(DataNameTokens.RAFGROUP_RAFGROUPROLES_GROUPID, "Department"),
 				new DataSourceTextField(DataNameTokens.RAFGROUP_RAFGROUPROLES_ROLEID, "Assigned Role")
 		};
 		dataSourceFields[0].setPrimaryKey(true);
@@ -265,59 +282,4 @@ public class AdministrationData {
 				
 		return retVal;
 	}
-	
-	public static TreeNode[] getRoleTreeData() {
-		return new RoleTreeNode[]{
-			  new RoleTreeNode("2", "1", "CEO"),
-			  new RoleTreeNode("3", "2", "Operations Head"),
-			  new RoleTreeNode("4", "3", "Operations Officer"),
-			  new RoleTreeNode("5", "4", "Operations Staff"),
-			  new RoleTreeNode("6", "2", "Finance Head"),
-			  new RoleTreeNode("7", "6", "Finance Officer"),
-			  new RoleTreeNode("8", "7", "Finance Staff")
-			};
-	}
-	
-	private static class RoleTreeNode extends TreeNode{
-		public RoleTreeNode(String roleId, String roleParent, String roleName) {
-			setNavigationId(roleId);
-			setNavigationParent(roleParent);
-			setNavigationName(roleName);
-		}
-
-		public void setNavigationId(String id) {
-			setAttribute("RoleId", id);
-		}
-
-		public void setNavigationParent(String navigationParent) {
-			setAttribute("RoleParent", navigationParent);
-		}
-
-		public void setNavigationName(String navigationName) {
-			setAttribute("RoleName", navigationName);
-		}
-	}
-	
-//	public static DataSource getModuleData() {
-//		if (moduleDataDs != null) {
-//			return moduleDataDs;
-//		} else {
-//			moduleDataDs = new DataSource();
-//			moduleDataDs.setRecordXPath("/admin/modules/module");
-//			
-//			DataSourceTextField moduleIdField = new DataSourceTextField("moduleid", "Module Id");
-//			DataSourceTextField moduleUuidField = new DataSourceTextField("uuid", "UUID");
-//			DataSourceTextField moduleTypeField = new DataSourceTextField("type", "Module Type");
-//			DataSourceTextField moduleNameField = new DataSourceTextField("name", "Module Name");
-//			
-//			moduleDataDs.setFields(moduleIdField, moduleUuidField,moduleTypeField, moduleNameField);
-//			moduleDataDs.setDataURL("ds/test_data/admin.data.xml");
-//			moduleDataDs.setClientOnly(true);
-//	        
-//	        return moduleDataDs;
-//		}    
-//		
-//	}
-
-
 }

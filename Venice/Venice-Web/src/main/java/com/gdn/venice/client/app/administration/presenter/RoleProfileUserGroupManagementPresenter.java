@@ -27,6 +27,7 @@ public class RoleProfileUserGroupManagementPresenter
 		extends
 		Presenter<RoleProfileUserGroupManagementPresenter.MyView, RoleProfileUserGroupManagementPresenter.MyProxy>
 		implements RoleProfileUserGroupManagementUiHandlers {
+	@SuppressWarnings("unused")
 	private final DispatchAsync dispatcher;
 
 	public final static String roleProfileUserGroupManagementPresenterServlet = "RoleProfileUserGroupManagementPresenterServlet";
@@ -44,7 +45,7 @@ public class RoleProfileUserGroupManagementPresenter
 	 */
 	public interface MyView extends View,
 			HasUiHandlers<RoleProfileUserGroupManagementUiHandlers> {
-		public void loadAdministrationData(DataSource dsProfile, DataSource dsUser, DataSource dsGroup, DataSource dsRole);
+		public void loadAdministrationData(DataSource dsProfile, DataSource dsGroup);
 		void refreshProfileData();
 		void refreshUserData();
 		void refreshGroupData();
@@ -57,23 +58,12 @@ public class RoleProfileUserGroupManagementPresenter
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		getView().loadAdministrationData(AdministrationData.getProfileData(), AdministrationData.getUserData(), AdministrationData.getGroupData(), AdministrationData.getRoleData());
+		getView().loadAdministrationData(AdministrationData.getProfileData(), AdministrationData.getGroupData());
 		this.dispatcher = dispatcher;
 	}
 
 	@Override
 	protected void revealInParent() {
-		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetContextArea,
-				this);
+		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetContextArea, this);
 	}
-
-//	@Override
-//	public List<DataSource> onRoleProfileUserGroupData() {
-//		ArrayList<DataSource> dataSources = new ArrayList<DataSource>();
-//		dataSources.add(AdministrationData.getProfileData());
-//		dataSources.add(AdministrationData.getUserData());
-//		dataSources.add(AdministrationData.getGroupData());
-//		return dataSources;
-//	}
-		
 }

@@ -10,6 +10,7 @@ import com.gdn.venice.client.ui.data.AdministrationNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.FinanceNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.FraudNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.GeneralNavigationPaneSectionData;
+import com.gdn.venice.client.ui.data.InventoryNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.KpiNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.LogisticNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.NavigationPaneTreeNodeRecord;
@@ -21,190 +22,195 @@ import com.smartgwt.client.widgets.grid.events.RecordClickHandler;
 import com.smartgwt.client.widgets.layout.SectionStack;
 
 public class NavigationPaneStack extends SectionStack {
-	
-	static NavigationPaneStackSection taskManagementSection;
-	static NavigationPaneStackSection fraudModuleSection;
-	static NavigationPaneStackSection logisticsModuleSection;
-	static NavigationPaneStackSection financeModuleSection;
-	static NavigationPaneStackSection kpiModuleSection;
-	static NavigationPaneStackSection administrationModuleSection;
-	static NavigationPaneStackSection reservationModuleSection;
-	static NavigationPaneStackSection generalModuleSection;
-	List<NavigationPaneStackSection> navigationPaneStackSectionArrayList;
-	
-	boolean autorizationReady = false;
-	
-	String currentPageName = null;
 
-	/*
-	 * This is used to extract the menu permissions
-	 */
-	private HashMap<String, String> userPermissionBundle;
+    static NavigationPaneStackSection taskManagementSection;
+    static NavigationPaneStackSection fraudModuleSection;
+    static NavigationPaneStackSection logisticsModuleSection;
+    static NavigationPaneStackSection inventoryModuleSection;
+    static NavigationPaneStackSection financeModuleSection;
+    static NavigationPaneStackSection kpiModuleSection;
+    static NavigationPaneStackSection administrationModuleSection;
+    static NavigationPaneStackSection reservationModuleSection;
+    static NavigationPaneStackSection generalModuleSection;
+    List<NavigationPaneStackSection> navigationPaneStackSectionArrayList;
+    boolean autorizationReady = false;
+    String currentPageName = null;
 
-	public NavigationPaneStack() {
-		super();
-		
-		// initialise the Section Stack
-		this.setWidth100();
-		this.setVisibilityMode(VisibilityMode.MUTEX);
-		this.setShowExpandControls(false);
-		this.setAnimateSections(true);	
-		this.setID(DataWidgetNameTokens.VENICE_NAVIGATIONPANESTACK);
-		
-		navigationPaneStackSectionArrayList = new ArrayList<NavigationPaneStackSection>();
+    /*
+     * This is used to extract the menu permissions
+     */
+    private HashMap<String, String> userPermissionBundle;
 
-		// initialise the Task Management section 
-		taskManagementSection = new NavigationPaneStackSection("Task Management", DataWidgetNameTokens.VENICE_TASKMANAGEMENTSECTION, TaskManagementNavigationPaneSectionData.getRecords());
-		taskManagementSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(taskManagementSection);
+    public NavigationPaneStack() {
+        super();
 
-		// initialise the Fraud Module section 
-		fraudModuleSection = new NavigationPaneStackSection("Fraud Module", DataWidgetNameTokens.VENICE_FRAUDMODULESECTION, FraudNavigationPaneSectionData.getRecords());
-		fraudModuleSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(fraudModuleSection);
+        // initialise the Section Stack
+        this.setWidth100();
+        this.setVisibilityMode(VisibilityMode.MUTEX);
+        this.setShowExpandControls(false);
+        this.setAnimateSections(true);
+        this.setID(DataWidgetNameTokens.VENICE_NAVIGATIONPANESTACK);
 
-		// initialise the Logistic Module section 
-		logisticsModuleSection = new NavigationPaneStackSection("Logistics Module", DataWidgetNameTokens.VENICE_LOGISTICSMODULESECTION, LogisticNavigationPaneSectionData.getRecords());
-		logisticsModuleSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(logisticsModuleSection);
+        navigationPaneStackSectionArrayList = new ArrayList<NavigationPaneStackSection>();
 
-		// initialise the Finance Module section 
-		financeModuleSection = new NavigationPaneStackSection("Finance Module", DataWidgetNameTokens.VENICE_FINANCEMODULESECTION, FinanceNavigationPaneSectionData.getRecords()); 
-		financeModuleSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(financeModuleSection);
-		
-		
-		// initialise the KPI Module section 
-		kpiModuleSection = new NavigationPaneStackSection("KPI Module", DataWidgetNameTokens.VENICE_KPIMODULESECTION, KpiNavigationPaneSectionData.getRecords());
-		kpiModuleSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(kpiModuleSection);
+        // initialise the Task Management section 
+        taskManagementSection = new NavigationPaneStackSection("Task Management", DataWidgetNameTokens.VENICE_TASKMANAGEMENTSECTION, TaskManagementNavigationPaneSectionData.getRecords());
+        taskManagementSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(taskManagementSection);
 
-		// initialise the Administration Module section 
-		administrationModuleSection = new NavigationPaneStackSection("Administration Module", DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION, AdministrationNavigationPaneSectionData.getRecords());
-		administrationModuleSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(administrationModuleSection);
-		
-		// initialise the Administration Module section 
-		reservationModuleSection = new NavigationPaneStackSection("Reservation Module", DataWidgetNameTokens.VENICE_RESERVATIONMODULESECTION, ReservationNavigationPaneSectionData.getRecords());
-		reservationModuleSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(reservationModuleSection);
-		
-		// initialise the General Module section 
-		generalModuleSection = new NavigationPaneStackSection("General", DataWidgetNameTokens.VENICE_GENERALMODULESECTION, GeneralNavigationPaneSectionData.getRecords());
-		generalModuleSection.setExpanded(true);
-		navigationPaneStackSectionArrayList.add(generalModuleSection);
+        // initialise the Fraud Module section 
+        fraudModuleSection = new NavigationPaneStackSection("Fraud Module", DataWidgetNameTokens.VENICE_FRAUDMODULESECTION, FraudNavigationPaneSectionData.getRecords());
+        fraudModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(fraudModuleSection);
 
-		
+        // initialise the Logistic Module section 
+        logisticsModuleSection = new NavigationPaneStackSection("Logistics Module", DataWidgetNameTokens.VENICE_LOGISTICSMODULESECTION, LogisticNavigationPaneSectionData.getRecords());
+        logisticsModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(logisticsModuleSection);
 
-		//This is temporary: shall be replaced by user permission!
-		// add the sections to the Section Stack
-		addSection(taskManagementSection);  
-		addSection(reservationModuleSection);
-		addSection(fraudModuleSection);  
-		addSection(logisticsModuleSection);
-		addSection(financeModuleSection); 
-		addSection(kpiModuleSection); 
-		addSection(administrationModuleSection);		
-		addSection(generalModuleSection);
-		
-		expandSection(0);
-		
-	}
-	
-	public void updateMenuBasedOnUserPermission(
-			HashMap<String, String> userPermission, 
-			RecordClickHandler clickHandler) {
-		
-		
-		/*
-		 * This is where the menus can be enabled and disabled.
-		 * Need a utility class to call the RafPermissionSessionEJB class
-		 * and get the permissions for the menu from the DB
-		 * based on the canonical name that is equal to the menuCode
-		 * 
-		 * --See below.
-		 */
-		for(NavigationPaneStackSection section:navigationPaneStackSectionArrayList){
-			for(int i = 0; i < section.getSectionData().length; ++i){
-				
-				/*
-				 * Determine if the user has any permission 
-				 * on the menu. If they have then enable it
-				 * else disable it.
-				 */
-				NavigationPaneTreeNodeRecord node = section.getSectionData()[i];
-				if(DataNameTokens.GLOBAL_SECURITY_ENABLED){
-					node.setEnabled(false);
-				}else{
-					node.setEnabled(true);
-				}
-				
-				if(userPermissionBundle != null && userPermissionBundle.containsKey(node.getMenuShortcut())){
-					Integer permissions = new Integer(userPermissionBundle.get(node.getMenuShortcut()));
-					if(PermissionsUtil.hasAny(permissions)){
-						node.setEnabled(true);
-					}
-				}
-			}
-		}
+        // initialise the Logistic Module section 
+        inventoryModuleSection = new NavigationPaneStackSection("Inventory Module", DataWidgetNameTokens.VENICE_INVENTORYMODULESECTION, InventoryNavigationPaneSectionData.getRecords());
+        inventoryModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(inventoryModuleSection);
 
-		
-		String navigationPaneStackSectionClass = "com.gdn.venice.client.widgets.NavigationPaneStackSection";
+        // initialise the Finance Module section 
+        financeModuleSection = new NavigationPaneStackSection("Finance Module", DataWidgetNameTokens.VENICE_FINANCEMODULESECTION, FinanceNavigationPaneSectionData.getRecords());
+        financeModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(financeModuleSection);
 
-		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_TASKMANAGEMENTSECTION)) {
-			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_TASKMANAGEMENTSECTION)).longValue();
-			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
-				if (getSection(taskManagementSection.getID()) == null ){
-					addSection(taskManagementSection);
-					taskManagementSection.getTreeGrid().addRecordClickHandler(clickHandler);
-				}
-			}
-		}
-		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FRAUDMODULESECTION)) {
-			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FRAUDMODULESECTION)).longValue();
-			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
-				if (getSection(fraudModuleSection.getID()) == null ){
-					addSection(fraudModuleSection);
-					fraudModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-				}
-			}
-		}
-		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_LOGISTICSMODULESECTION)) {
-			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_LOGISTICSMODULESECTION)).longValue();
-			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
-				if (getSection(logisticsModuleSection.getID()) == null ){
-					addSection(logisticsModuleSection);
-					logisticsModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-				}
-			}
-		}
-		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FINANCEMODULESECTION)) {
-			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FINANCEMODULESECTION)).longValue();
-			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
-				if (getSection(financeModuleSection.getID()) == null ){
-					addSection(financeModuleSection);
-					financeModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-				}
-			}
-		}
-		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_KPIMODULESECTION)) {
-			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_KPIMODULESECTION)).longValue();
-			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
-				if (getSection(kpiModuleSection.getID()) == null ){
-					addSection(kpiModuleSection);
-					kpiModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-				}
-			}
-		}
-		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)) {
-			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)).longValue();
-			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
-				if (getSection(administrationModuleSection.getID()) == null ){
-					addSection(administrationModuleSection);
-					administrationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-				}
-			}
-		}
+
+        // initialise the KPI Module section 
+        kpiModuleSection = new NavigationPaneStackSection("KPI Module", DataWidgetNameTokens.VENICE_KPIMODULESECTION, KpiNavigationPaneSectionData.getRecords());
+        kpiModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(kpiModuleSection);
+
+        // initialise the Administration Module section 
+        administrationModuleSection = new NavigationPaneStackSection("Administration Module", DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION, AdministrationNavigationPaneSectionData.getRecords());
+        administrationModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(administrationModuleSection);
+
+        // initialise the Administration Module section 
+        reservationModuleSection = new NavigationPaneStackSection("Reservation Module", DataWidgetNameTokens.VENICE_RESERVATIONMODULESECTION, ReservationNavigationPaneSectionData.getRecords());
+        reservationModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(reservationModuleSection);
+
+        // initialise the General Module section 
+        generalModuleSection = new NavigationPaneStackSection("General", DataWidgetNameTokens.VENICE_GENERALMODULESECTION, GeneralNavigationPaneSectionData.getRecords());
+        generalModuleSection.setExpanded(true);
+        navigationPaneStackSectionArrayList.add(generalModuleSection);
+
+
+
+        //This is temporary: shall be replaced by user permission!
+        // add the sections to the Section Stack
+        addSection(taskManagementSection);
+        addSection(reservationModuleSection);
+        addSection(fraudModuleSection);
+        addSection(logisticsModuleSection);
+        addSection(inventoryModuleSection);
+        addSection(financeModuleSection);
+        addSection(kpiModuleSection);
+        addSection(administrationModuleSection);
+        addSection(generalModuleSection);
+
+        expandSection(0);
+
+    }
+
+    public void updateMenuBasedOnUserPermission(
+            HashMap<String, String> userPermission,
+            RecordClickHandler clickHandler) {
+
+
+        /*
+         * This is where the menus can be enabled and disabled.
+         * Need a utility class to call the RafPermissionSessionEJB class
+         * and get the permissions for the menu from the DB
+         * based on the canonical name that is equal to the menuCode
+         * 
+         * --See below.
+         */
+        for (NavigationPaneStackSection section : navigationPaneStackSectionArrayList) {
+            for (int i = 0; i < section.getSectionData().length; ++i) {
+
+                /*
+                 * Determine if the user has any permission 
+                 * on the menu. If they have then enable it
+                 * else disable it.
+                 */
+                NavigationPaneTreeNodeRecord node = section.getSectionData()[i];
+                if (DataNameTokens.GLOBAL_SECURITY_ENABLED) {
+                    node.setEnabled(false);
+                } else {
+                    node.setEnabled(true);
+                }
+
+                if (userPermissionBundle != null && userPermissionBundle.containsKey(node.getMenuShortcut())) {
+                    Integer permissions = new Integer(userPermissionBundle.get(node.getMenuShortcut()));
+                    if (PermissionsUtil.hasAny(permissions)) {
+                        node.setEnabled(true);
+                    }
+                }
+            }
+        }
+
+
+        String navigationPaneStackSectionClass = "com.gdn.venice.client.widgets.NavigationPaneStackSection";
+
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_TASKMANAGEMENTSECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_TASKMANAGEMENTSECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(taskManagementSection.getID()) == null) {
+                    addSection(taskManagementSection);
+                    taskManagementSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FRAUDMODULESECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FRAUDMODULESECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(fraudModuleSection.getID()) == null) {
+                    addSection(fraudModuleSection);
+                    fraudModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_LOGISTICSMODULESECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_LOGISTICSMODULESECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(logisticsModuleSection.getID()) == null) {
+                    addSection(logisticsModuleSection);
+                    logisticsModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FINANCEMODULESECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_FINANCEMODULESECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(financeModuleSection.getID()) == null) {
+                    addSection(financeModuleSection);
+                    financeModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_KPIMODULESECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_KPIMODULESECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(kpiModuleSection.getID()) == null) {
+                    addSection(kpiModuleSection);
+                    kpiModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(administrationModuleSection.getID()) == null) {
+                    addSection(administrationModuleSection);
+                    administrationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
 //		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)) {
 //			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)).longValue();
 //			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
@@ -215,43 +221,51 @@ public class NavigationPaneStack extends SectionStack {
 //			}
 //		}
 
-		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_GENERALMODULESECTION)) {
-			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_GENERALMODULESECTION)).longValue();
-			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
-				if (getSection(generalModuleSection.getID()) == null ){
-					addSection(generalModuleSection);
-					generalModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-				}
-			}
-		}
-	}
-	
-	//This is temporary: shall be replaced by user permission!
-	public void addTreeNodeClickHandler(RecordClickHandler clickHandler) {
-		taskManagementSection.getTreeGrid().addRecordClickHandler(clickHandler);
-		fraudModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-		logisticsModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-		financeModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-		kpiModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-		administrationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-		reservationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-		generalModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
-	}
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_GENERALMODULESECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_GENERALMODULESECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(generalModuleSection.getID()) == null) {
+                    addSection(generalModuleSection);
+                    generalModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
+        
+        if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_INVENTORYMODULESECTION)) {
+            long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_INVENTORYMODULESECTION)).longValue();
+            if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+                if (getSection(inventoryModuleSection.getID()) == null) {
+                    addSection(inventoryModuleSection);
+                    inventoryModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+                }
+            }
+        }
+    }
 
-	/**
-	 * @return the userPermissionBundle
-	 */
-	public HashMap<String, String> getUserPermissionBundle() {
-		return userPermissionBundle;
-	}
+    //This is temporary: shall be replaced by user permission!
+    public void addTreeNodeClickHandler(RecordClickHandler clickHandler) {
+        taskManagementSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        fraudModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        logisticsModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        inventoryModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        financeModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        kpiModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        administrationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        reservationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+        generalModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+    }
 
-	/**
-	 * @param userPermissionBundle the userPermissionBundle to set
-	 */
-	public void setUserPermissionBundle(HashMap<String, String> userPermissionBundle) {
-		this.userPermissionBundle = userPermissionBundle;
-	}
-	
+    /**
+     * @return the userPermissionBundle
+     */
+    public HashMap<String, String> getUserPermissionBundle() {
+        return userPermissionBundle;
+    }
 
-
+    /**
+     * @param userPermissionBundle the userPermissionBundle to set
+     */
+    public void setUserPermissionBundle(HashMap<String, String> userPermissionBundle) {
+        this.userPermissionBundle = userPermissionBundle;
+    }
 }

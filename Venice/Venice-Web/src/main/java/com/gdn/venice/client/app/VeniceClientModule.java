@@ -38,6 +38,7 @@ import com.gdn.venice.client.app.fraud.presenter.FraudCaseViewerPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCustomerWhitelistPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudDashboardPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule31Presenter;
+import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
 import com.gdn.venice.client.app.fraud.presenter.UncalculatedCreditCardOrderPresenter;
@@ -51,6 +52,7 @@ import com.gdn.venice.client.app.fraud.view.FraudCaseViewerView;
 import com.gdn.venice.client.app.fraud.view.FraudCustomerWhitelistView;
 import com.gdn.venice.client.app.fraud.view.FraudDashboardView;
 import com.gdn.venice.client.app.fraud.view.FraudParameterRule31View;
+import com.gdn.venice.client.app.fraud.view.InstallmentBCAView;
 import com.gdn.venice.client.app.fraud.view.MigsMasterView;
 import com.gdn.venice.client.app.fraud.view.MigsUploadView;
 import com.gdn.venice.client.app.fraud.view.UncalculatedCreditCardOrderView;
@@ -60,6 +62,24 @@ import com.gdn.venice.client.app.general.presenter.ReturDataViewerPresenter;
 import com.gdn.venice.client.app.general.view.OrderDataViewerView;
 import com.gdn.venice.client.app.general.view.PartyMaintenanceView;
 import com.gdn.venice.client.app.general.view.ReturDataViewerView;
+import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ShelfNonActiveWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseAddWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseEditWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseListFilterPresenter;
+import com.gdn.venice.client.app.inventory.presenter.WarehouseNonActiveWithApprovalPresenter;
+import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
+import com.gdn.venice.client.app.inventory.view.ShelfEditWithApprovalView;
+import com.gdn.venice.client.app.inventory.view.ShelfListFilterView;
+import com.gdn.venice.client.app.inventory.view.ShelfNonActiveWithApprovalView;
+import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
+import com.gdn.venice.client.app.inventory.view.WarehouseAddWithApprovalView;
+import com.gdn.venice.client.app.inventory.view.WarehouseEditWithApprovalView;
+import com.gdn.venice.client.app.inventory.view.WarehouseListFilterView;
+import com.gdn.venice.client.app.inventory.view.WarehouseNonActiveWithApprovalView;
 import com.gdn.venice.client.app.kpi.presenter.KpiDashboardPresenter;
 import com.gdn.venice.client.app.kpi.presenter.KpiDetailViewerPresenter;
 import com.gdn.venice.client.app.kpi.presenter.KpiSetupPresenter;
@@ -175,32 +195,32 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				FraudBinCreditLimitPresenter.MyView.class,
 				FraudBinCreditLimitView.class,
 				FraudBinCreditLimitPresenter.MyProxy.class);
-		
+
 		bindPresenter(BlackListMaintenancePresenter.class,
 				BlackListMaintenancePresenter.MyView.class,
 				BlackListMaintenanceView.class,
 				BlackListMaintenancePresenter.MyProxy.class);
-		
+
 		bindPresenter(CustomerBlackListMaintenancePresenter.class,
 				CustomerBlackListMaintenancePresenter.MyView.class,
 				CustomerBlackListMaintenanceView.class,
 				CustomerBlackListMaintenancePresenter.MyProxy.class);
-		
+
 		bindPresenter(FraudCalculatePresenter.class,
 				FraudCalculatePresenter.MyView.class, 
 				FraudCalculateView.class,
 				FraudCalculatePresenter.MyProxy.class);
-		
+
 		bindPresenter(MigsUploadPresenter.class,
 				MigsUploadPresenter.MyView.class, 
 				MigsUploadView.class,
 				MigsUploadPresenter.MyProxy.class);
-		
+
 		bindPresenter(UncalculatedCreditCardOrderPresenter.class,
 				UncalculatedCreditCardOrderPresenter.MyView.class, 
 				UncalculatedCreditCardOrderView.class,
 				UncalculatedCreditCardOrderPresenter.MyProxy.class);
-		
+
 		bindPresenter(InstallmentBCAPresenter.class,
 				InstallmentBCAPresenter.MyView.class, 
 				InstallmentBCAView.class,
@@ -288,12 +308,12 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				OrderDataViewerPresenter.MyView.class,
 				OrderDataViewerView.class,
 				OrderDataViewerPresenter.MyProxy.class);
-		
+
 		bindPresenter(ReturDataViewerPresenter.class,
 				ReturDataViewerPresenter.MyView.class,
 				ReturDataViewerView.class,
 				ReturDataViewerPresenter.MyProxy.class);
-		
+
 		bindPresenter(ReportsLauncherPresenter.class,
 				ReportsLauncherPresenter.MyView.class,
 				ReportsLauncherView.class,
@@ -303,55 +323,100 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				PromotionPresenter.MyView.class,
 				PromotionView.class,
 				PromotionPresenter.MyProxy.class);
-		
+
 		bindPresenter(PartyMaintenancePresenter.class,
 				PartyMaintenancePresenter.MyView.class,
 				PartyMaintenanceView.class,
 				PartyMaintenancePresenter.MyProxy.class);
-		
+
 		bindPresenter(ExportPresenter.class,
 				ExportPresenter.MyView.class,
 				ExportView.class,
 				ExportPresenter.MyProxy.class);
-		
+
 		bindPresenter(PeriodSetupPresenter.class,
 				PeriodSetupPresenter.MyView.class,
 				PeriodSetupView.class,
 				PeriodSetupPresenter.MyProxy.class);
-		
+
 		bindPresenter(CoaSetupPresenter.class,
 				CoaSetupPresenter.MyView.class,
 				CoaSetupView.class,
 				CoaSetupPresenter.MyProxy.class);
-		
+
 		bindPresenter(MigsMasterPresenter.class,
 				MigsMasterPresenter.MyView.class,
 				MigsMasterView.class,
 				MigsMasterPresenter.MyProxy.class);
-		
+
 		bindPresenter(FraudCustomerWhitelistPresenter.class,
 				FraudCustomerWhitelistPresenter.MyView.class,
 				FraudCustomerWhitelistView.class,
 				FraudCustomerWhitelistPresenter.MyProxy.class);
-		
+
 		bindPresenter(InventoryPresenter.class, 
 				InventoryPresenter.MyView.class,
 				InventoryView.class,
 				InventoryPresenter.MyProxy.class);
-		
+
 		bindPresenter(ExportReportPresenter.class, 
 				ExportReportPresenter.MyView.class,
 				ExportReportView.class,
 				ExportReportPresenter.MyProxy.class);	
-		
+
 		bindPresenter(FraudParameterRule31Presenter.class, 
 				FraudParameterRule31Presenter.MyView.class,
 				FraudParameterRule31View.class,
 				FraudParameterRule31Presenter.MyProxy.class);	
-				
+
 		bindPresenter(FinSalesSettlementReportPresenter.class, 
 				FinSalesSettlementReportPresenter.MyView.class,
 				FinSalesSettlementReportView.class,
-				FinSalesSettlementReportPresenter.MyProxy.class);	
+				FinSalesSettlementReportPresenter.MyProxy.class);
+					
+		bindPresenter(WarehouseListFilterPresenter.class,
+				WarehouseListFilterPresenter.MyView.class,
+				WarehouseListFilterView.class,
+				WarehouseListFilterPresenter.MyProxy.class);
+
+		bindPresenter(WarehouseAddWithApprovalPresenter.class,
+				WarehouseAddWithApprovalPresenter.MyView.class,
+				WarehouseAddWithApprovalView.class,
+				WarehouseAddWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(WarehouseEditWithApprovalPresenter.class,
+				WarehouseEditWithApprovalPresenter.MyView.class,
+				WarehouseEditWithApprovalView.class,
+				WarehouseEditWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(WarehouseNonActiveWithApprovalPresenter.class,
+				WarehouseNonActiveWithApprovalPresenter.MyView.class,
+				WarehouseNonActiveWithApprovalView.class,
+				WarehouseNonActiveWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfListFilterPresenter.class,
+				ShelfListFilterPresenter.MyView.class,
+				ShelfListFilterView.class,
+				ShelfListFilterPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfAddWithApprovalPresenter.class,
+				ShelfAddWithApprovalPresenter.MyView.class,
+				ShelfAddWithApprovalView.class,
+				ShelfAddWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfEditWithApprovalPresenter.class,
+				ShelfEditWithApprovalPresenter.MyView.class,
+				ShelfEditWithApprovalView.class,
+				ShelfEditWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfNonActiveWithApprovalPresenter.class,
+				ShelfNonActiveWithApprovalPresenter.MyView.class,
+				ShelfNonActiveWithApprovalView.class,
+				ShelfNonActiveWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(CurrencyManagementPresenter.class,
+				CurrencyManagementPresenter.MyView.class,
+				CurrencyManagementView.class,
+				CurrencyManagementPresenter.MyProxy.class);
 	}
 }
