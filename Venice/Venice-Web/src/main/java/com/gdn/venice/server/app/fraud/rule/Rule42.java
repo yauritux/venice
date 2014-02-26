@@ -13,7 +13,7 @@ import com.gdn.venice.persistence.VenMigsUploadMaster;
 import com.gdn.venice.util.VeniceConstants;
 
 /**
- * Class for calculate fraud rule 41: Cek dana fund in MIGS (multiple fund in)
+ * Class for calculate fraud rule 42: Cek dana fund in MIGS (multiple fund in)
  *
  * @author Daniel Hutama Putra
  */
@@ -24,7 +24,7 @@ public class Rule42 {
     public Rule42() {
         super();
 		Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-		_log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.fraud.rule.Rule41");
+		_log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.fraud.rule.Rule42");
     }
     
     public int execute(String wcsOrderId) throws Exception{
