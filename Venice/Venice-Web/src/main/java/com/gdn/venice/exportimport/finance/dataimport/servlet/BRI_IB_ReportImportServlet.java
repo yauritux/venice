@@ -1,8 +1,6 @@
 package com.gdn.venice.exportimport.finance.dataimport.servlet;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,18 +16,7 @@ import org.apache.log4j.Logger;
 import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
-import com.gdn.venice.exportimport.finance.dataimport.BRI_IB_FileReader;
-import com.gdn.venice.exportimport.finance.dataimport.BRI_IB_Record;
-import com.gdn.venice.facade.FinArFundsInReconRecordSessionEJBRemote;
 import com.gdn.venice.facade.FinArFundsInReportSessionEJBRemote;
-import com.gdn.venice.persistence.FinApprovalStatus;
-import com.gdn.venice.persistence.FinArFundsInActionApplied;
-import com.gdn.venice.persistence.FinArFundsInReconRecord;
-import com.gdn.venice.persistence.FinArFundsInReport;
-import com.gdn.venice.persistence.FinArReconResult;
-import com.gdn.venice.persistence.VenOrder;
-import com.gdn.venice.persistence.VenOrderPayment;
-import com.gdn.venice.util.VeniceConstants;
 
 /**
  * Servlet class for importing BRI internet banking transaction reports.
