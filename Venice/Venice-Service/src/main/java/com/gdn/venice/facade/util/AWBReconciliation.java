@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.djarum.raf.utilities.ModuleConfigUtility;
+import com.gdn.awb.exchange.model.AirwayBillTransactionItemResource;
 import com.gdn.awb.exchange.model.AirwayBillTransactionResource;
 import com.gdn.venice.dao.LogActivityReconRecordDAO;
 import com.gdn.venice.facade.LogActivityReconRecordSessionEJBRemote;
@@ -987,7 +988,10 @@ public class AWBReconciliation {
             // 01 - Weight Mismatch
             BigDecimal correctWeight = new BigDecimal("0");
             correctWeight = correctWeight.setScale(2, RoundingMode.UP);
-            correctWeight = BigDecimal.valueOf(mtaAirwayBill.getTotalWeight());
+            correctWeight = BigDecimal.valueOf(0);
+            for( AirwayBillTransactionItemResource airwayBillTransactionItemResourceList:  mtaAirwayBill.getItems()){
+            	 correctWeight = correctWeight.add(BigDecimal.valueOf(airwayBillTransactionItemResourceList.getPrintedWeight()));
+            }
 
             BigDecimal providerWeight = new BigDecimal("0");
             providerWeight = providerWeight.setScale(2, RoundingMode.UP);
