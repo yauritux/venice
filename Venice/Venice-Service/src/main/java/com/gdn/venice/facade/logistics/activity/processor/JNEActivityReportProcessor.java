@@ -39,7 +39,6 @@ import com.gdn.venice.persistence.LogAirwayBill;
 import com.gdn.venice.persistence.LogFileUploadLog;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.VenOrderItem;
-import com.gdn.venice.persistence.VenReturItem;
 import com.gdn.venice.util.VeniceConstants;
 
 @Service("JNEActivityReportProcessor")

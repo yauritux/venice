@@ -56,9 +56,6 @@ public class Mandiri_IB_ReportImportServlet extends HttpServlet {
 
 	protected static Logger _log = null;
 	
-	@PersistenceContext(unitName = "GDN-Venice-Persistence", type = PersistenceContextType.TRANSACTION)
-	protected EntityManager em;
-	
 	private String notificationText = "";
 
 	/**

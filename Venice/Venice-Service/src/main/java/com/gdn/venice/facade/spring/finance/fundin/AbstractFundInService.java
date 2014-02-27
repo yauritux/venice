@@ -45,6 +45,7 @@ import com.gdn.venice.util.VeniceConstants;
 public abstract class AbstractFundInService implements FundInService{
 	
 	public static final SimpleDateFormat SDF_yyyyMMdd_HHmmss = new SimpleDateFormat("yyyyMMdd HHmmss");
+	public static final SimpleDateFormat SDF_dd_MMM_yyyy = new SimpleDateFormat("dd-MMM-yyyy");
 	private static final String CLASS_NAME = AbstractFundInService.class.getCanonicalName();
 	
 	@Autowired
@@ -276,6 +277,9 @@ public abstract class AbstractFundInService implements FundInService{
 				break;
 			case FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC:
 				sb.append("BCA_CC_Record.xml");
+				break;
+			case FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB:
+				sb.append("XL_IB_Record.xml");
 				break;
 		}
 		
