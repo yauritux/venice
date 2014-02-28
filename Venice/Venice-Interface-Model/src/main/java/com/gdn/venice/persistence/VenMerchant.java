@@ -38,8 +38,10 @@ public class VenMerchant implements Serializable {
 	private List<VenMerchantAgreement> venMerchantAgreements;
 
 	//bi-directional many-to-one association to VenMerchantProduct
+	/*
 	@OneToMany(mappedBy="venMerchant")
 	private List<VenMerchantProduct> venMerchantProducts;
+	*/
 
 	//bi-directional many-to-one association to VenTransactionFee
 	@OneToMany(mappedBy="venMerchant")
@@ -88,6 +90,7 @@ public class VenMerchant implements Serializable {
 		this.venMerchantAgreements = venMerchantAgreements;
 	}
 	
+	/*
 	public List<VenMerchantProduct> getVenMerchantProducts() {
 		return this.venMerchantProducts;
 	}
@@ -95,6 +98,7 @@ public class VenMerchant implements Serializable {
 	public void setVenMerchantProducts(List<VenMerchantProduct> venMerchantProducts) {
 		this.venMerchantProducts = venMerchantProducts;
 	}
+	*/
 	
 	public List<VenTransactionFee> getVenTransactionFees() {
 		return this.venTransactionFees;

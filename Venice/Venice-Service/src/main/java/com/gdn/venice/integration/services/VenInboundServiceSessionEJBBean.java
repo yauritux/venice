@@ -57,6 +57,7 @@ import com.gdn.venice.dao.VenOrderStatusDAO;
 import com.gdn.venice.dao.VenOrderStatusHistoryDAO;
 import com.gdn.venice.dao.VenTransactionFeeDAO;
 import com.gdn.venice.dao.VenWcsPaymentTypeDAO;
+import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.facade.FinArFundsInReconRecordSessionEJBLocal;
 import com.gdn.venice.facade.FinSalesRecordSessionEJBLocal;
 import com.gdn.venice.facade.KpiPartyPeriodActualSessionEJBLocal;
@@ -283,15 +284,15 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
             return Boolean.TRUE;
         }
 
-//		try {
-//			orderService.createOrder(order);
-//		} catch (VeniceInternalException e) {
-//			e.printStackTrace();
-//			_log.error(e);
-//			throw new EJBException(e.getMessage());
-//		}
+		try {
+			orderService.createOrder(order);
+		} catch (VeniceInternalException e) {
+			e.printStackTrace();
+			_log.error(e);
+			throw new EJBException(e.getMessage());
+		}
 
-        oldCreateOrder(order);
+        //oldCreateOrder(order);
 
         Long endTime = System.currentTimeMillis();
         Long duration = endTime - startTime;

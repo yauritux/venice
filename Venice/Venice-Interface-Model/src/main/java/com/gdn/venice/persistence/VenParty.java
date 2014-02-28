@@ -72,13 +72,15 @@ public class VenParty implements Serializable {
 	@OneToMany(mappedBy="venParty")
 	private List<VenContactDetail> venContactDetails;
 
-	//bi-directional many-to-one association to VenCustomer
+	//bi-directional many-to-one association to VenCustomer	
 	@OneToMany(mappedBy="venParty")
 	private List<VenCustomer> venCustomers;
 
 	//bi-directional many-to-one association to VenMerchant
+	/*
 	@OneToMany(mappedBy="venParty")
 	private List<VenMerchant> venMerchants;
+	*/
 
 	//bi-directional many-to-many association to KpiMeasurementPeriod
     @ManyToMany//(fetch=FetchType.EAGER)
@@ -244,15 +246,16 @@ public class VenParty implements Serializable {
 	public void setVenContactDetails(List<VenContactDetail> venContactDetails) {
 		this.venContactDetails = venContactDetails;
 	}
-	
+				
 	public List<VenCustomer> getVenCustomers() {
 		return this.venCustomers;
 	}
 
 	public void setVenCustomers(List<VenCustomer> venCustomers) {
 		this.venCustomers = venCustomers;
-	}
+	}	
 	
+	/*
 	public List<VenMerchant> getVenMerchants() {
 		return this.venMerchants;
 	}
@@ -260,6 +263,7 @@ public class VenParty implements Serializable {
 	public void setVenMerchants(List<VenMerchant> venMerchants) {
 		this.venMerchants = venMerchants;
 	}
+	*/
 	
 	public List<KpiMeasurementPeriod> getKpiMeasurementPeriods() {
 		return this.kpiMeasurementPeriods;

@@ -28,6 +28,7 @@ public class VenOrderStatus implements Serializable {
 	private String orderStatusShortDesc;
 
 	//bi-directional many-to-one association to VenOrder
+	/*
 	@OneToMany(mappedBy="venOrderStatus")
 	private List<VenOrder> venOrders;
 
@@ -42,6 +43,7 @@ public class VenOrderStatus implements Serializable {
 	//bi-directional many-to-one association to VenOrderStatusHistory
 	@OneToMany(mappedBy="venOrderStatus")
 	private List<VenOrderStatusHistory> venOrderStatusHistories;
+	*/
 
     public VenOrderStatus() {
     }
@@ -70,6 +72,7 @@ public class VenOrderStatus implements Serializable {
 		this.orderStatusShortDesc = orderStatusShortDesc;
 	}
 
+	/*
 	public List<VenOrder> getVenOrders() {
 		return this.venOrders;
 	}
@@ -97,9 +100,10 @@ public class VenOrderStatus implements Serializable {
 	public List<VenOrderStatusHistory> getVenOrderStatusHistories() {
 		return this.venOrderStatusHistories;
 	}
+	
 
 	public void setVenOrderStatusHistories(List<VenOrderStatusHistory> venOrderStatusHistories) {
 		this.venOrderStatusHistories = venOrderStatusHistories;
 	}
-	
+	*/
 }

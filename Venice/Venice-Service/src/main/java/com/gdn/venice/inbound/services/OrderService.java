@@ -20,7 +20,7 @@ public interface OrderService {
 	public boolean isOrderExist(String wcsOrderId);
 	public VenOrder persistOrder(
 			Boolean vaPaymentExists, Boolean csPaymentExists
-			, VenOrder venOrder) throws VeniceInternalException;	
+			, VenOrder venOrder, List<String> merchantProduct) throws VeniceInternalException;	
 	public VenOrder synchronizeVenOrderReferenceData(VenOrder venOrder)
 			throws VeniceInternalException;
 	public List<VenOrder> synchronizeVenOrderReferences(List<VenOrder> orderReferences) 

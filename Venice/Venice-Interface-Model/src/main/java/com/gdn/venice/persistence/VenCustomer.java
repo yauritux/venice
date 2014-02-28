@@ -44,8 +44,10 @@ public class VenCustomer implements Serializable {
 	private VenParty venParty;
 
 	//bi-directional many-to-one association to VenOrder
+    /*
 	@OneToMany(mappedBy="venCustomer")
 	private List<VenOrder> venOrders;
+	*/
 
     public VenCustomer() {
     }
@@ -106,6 +108,7 @@ public class VenCustomer implements Serializable {
 		this.venParty = venParty;
 	}
 	
+	/*
 	public List<VenOrder> getVenOrders() {
 		return this.venOrders;
 	}
@@ -113,5 +116,5 @@ public class VenCustomer implements Serializable {
 	public void setVenOrders(List<VenOrder> venOrders) {
 		this.venOrders = venOrders;
 	}
-	
+	*/
 }

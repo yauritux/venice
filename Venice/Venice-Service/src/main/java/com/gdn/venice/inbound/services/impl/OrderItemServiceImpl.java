@@ -115,6 +115,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 			try {
 				Iterator<VenOrderItem> i = venOrderItemList.iterator();
 				
+				/*
 				// Synchronize the references before persisting anything
 				while(i.hasNext()){
 					VenOrderItem venOrderItem = i.next();
@@ -123,6 +124,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 							+ venOrderItem.getVenMerchantProduct().getVenOrderItems());
 					venOrderItem = synchronizeVenOrderItemReferenceData(venOrderItem);
 				}
+				*/
 				
 				//Main processing loop
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -131,6 +133,13 @@ public class OrderItemServiceImpl implements OrderItemService {
 				while (i.hasNext()) {
 					VenOrderItem orderItem = i.next();
 
+                    /*
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::inside while i.hashNext() loop,merchant OrderItems="
+							+ orderItem.getVenMerchantProduct().getVenOrderItems());
+				    */
+					orderItem = synchronizeVenOrderItemReferenceData(orderItem);
+					
 					// Attach the order
 					orderItem.setVenOrder(venOrder);
 
@@ -160,13 +169,16 @@ public class OrderItemServiceImpl implements OrderItemService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::check venMerchantProduct (value = "
 							+ orderItem.getVenMerchantProduct() + ") before persisting into DB");
+					
+					/*
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::venMerchantProduct venOrderItems "
 							+ orderItem.getVenMerchantProduct().getVenOrderItems());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::venMerchantProduct venOrderItems size "
 							+ orderItem.getVenMerchantProduct().getVenOrderItems().size());
-
+					*/
+					
 					// Persist the object
 				    orderItem = venOrderItemDAO.save(orderItem);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -242,9 +254,11 @@ public class OrderItemServiceImpl implements OrderItemService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::BEGIN, venOrderItem=" + venOrderItem);
 		
+		/*
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::merchantProduct orderItems="
 				+ venOrderItem.getVenMerchantProduct().getVenOrderItems());
+		*/
 
 		if (venOrderItem.getLogLogisticService() != null) {
 			List<LogLogisticService> logLogisticServiceRefs = new ArrayList<LogLogisticService>();
@@ -255,6 +269,9 @@ public class OrderItemServiceImpl implements OrderItemService {
 			}
 		}
 		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenOrderItemReferenceData::LogLogisticService is synchronized now");
+		
 		if (venOrderItem.getVenMerchantProduct() != null) {
 			List<VenMerchantProduct> merchantProductRefs = new ArrayList<VenMerchantProduct>();
 			merchantProductRefs.add(venOrderItem.getVenMerchantProduct());
@@ -264,6 +281,9 @@ public class OrderItemServiceImpl implements OrderItemService {
 			}
 		}
 		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenOrderItemReferenceData::VenMerchantProduct is synchronized now");
+				
 		if (venOrderItem.getVenOrderStatus() != null) {
 			List<VenOrderStatus> orderStatusRefs = new ArrayList<VenOrderStatus>();
 			orderStatusRefs.add(venOrderItem.getVenOrderStatus());
@@ -272,6 +292,9 @@ public class OrderItemServiceImpl implements OrderItemService {
 				venOrderItem.setVenOrderStatus(orderStatus);
 			}
 		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenOrderItemReferenceData::VenOrderStatus is synchronized now");
 		/*
 		List<Object> references = new ArrayList<Object>();
 		references.add(venOrderItem.getLogLogisticService());
@@ -306,9 +329,11 @@ public class OrderItemServiceImpl implements OrderItemService {
 		}
 		*/
 		
+		/*
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::EOM, returning venOrderItem = " + venOrderItem
 				+ ", merchantProduct orderItems = " + venOrderItem.getVenMerchantProduct().getVenOrderItems());
+		*/
 		return venOrderItem;
 	}
 }
