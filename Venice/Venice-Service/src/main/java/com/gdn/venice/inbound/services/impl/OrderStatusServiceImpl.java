@@ -41,40 +41,27 @@ public class OrderStatusServiceImpl implements OrderStatusService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderStatusReferences::BEGIN, orderStatusReferences=" + orderStatusReferences);
 		
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenOrderStatusReferences::preparing synchronizedOrderStatus");
-		
 		List<VenOrderStatus> synchronizedOrderStatus = new ArrayList<VenOrderStatus>();
 		
-		try {
-			if (orderStatusReferences != null) {
-				for (VenOrderStatus orderStatus : orderStatusReferences) {
-					if (orderStatus.getOrderStatusCode() != null) {
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenOrderStatusReferences::Restricting VenOrderStatus... :" 
-										+ orderStatus.getOrderStatusCode());
+		if (orderStatusReferences != null) {
+			for (VenOrderStatus orderStatus : orderStatusReferences) {
+				if (orderStatus.getOrderStatusCode() != null) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeVenOrderStatusReferences::Restricting VenOrderStatus... :" 
+									+ orderStatus.getOrderStatusCode());
 
-						//VenOrderStatus venOrderStatus = venOrderStatusDAO.findByOrderStatusCode(orderStatus.getOrderStatusCode());
-						
-						//CommonUtil.logDebug(this.getClass().getCanonicalName()
-							//	, "synchronizeVenOrderStatusReferences::found venOrderStatus= "+ venOrderStatus);
-						//if (venOrderStatus == null) {
-							//throw CommonUtil.logAndReturnException(new OrderStatusNotFoundException("Order status does not exist", 
-								//	VeniceExceptionConstants.VEN_EX_000025)
-							//, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-						//} else {
-							//synchronizedOrderStatus.add(venOrderStatus);
-							synchronizedOrderStatus.add(orderStatus);
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "synchronizeVenOrderStatusReferences::successfully added venOrderStatus into synchronizedOrderStatus");
-						//}
-					}			
-				} // end of 'for'
-			}
-		} catch (Exception e) {
-			CommonUtil.logError(this.getClass().getCanonicalName(), e);
-			throw CommonUtil.logAndReturnException(new VeniceInternalException("error occured when synchronizing order status", e)
-			, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);			
+					VenOrderStatus venOrderStatus = venOrderStatusDAO.findByOrderStatusCode(orderStatus.getOrderStatusCode());
+					if (venOrderStatus == null) {
+						throw CommonUtil.logAndReturnException(new OrderStatusNotFoundException("Order status does not exist", 
+								VeniceExceptionConstants.VEN_EX_000025)
+						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+					} else {
+						synchronizedOrderStatus.add(venOrderStatus);
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "synchronizeVenOrderStatusReferences::successfully added venOrderStatus into synchronizedOrderStatus");
+					}
+				}			
+			} // end of 'for'
 		}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()

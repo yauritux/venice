@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -20,6 +21,7 @@ import com.gdn.integration.jaxb.OrderItem;
 import com.gdn.integration.jaxb.Payment;
 import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VenOrderStatusConstants;
+import com.gdn.venice.constants.VenPartyTypeConstants;
 import com.gdn.venice.constants.VenWCSPaymentTypeConstants;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.FinArFundsInReconRecordDAO;
@@ -72,7 +74,6 @@ import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.factory.VeninboundFactory;
 import com.gdn.venice.inbound.services.AddressService;
 import com.gdn.venice.inbound.services.CustomerService;
-import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.MerchantService;
 import com.gdn.venice.inbound.services.OrderAddressService;
 import com.gdn.venice.inbound.services.OrderBlockingSourceService;
@@ -94,6 +95,7 @@ import com.gdn.venice.persistence.VenAddressType;
 import com.gdn.venice.persistence.VenContactDetail;
 import com.gdn.venice.persistence.VenCustomer;
 import com.gdn.venice.persistence.VenFraudCheckStatus;
+import com.gdn.venice.persistence.VenMerchant;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderAddress;
 import com.gdn.venice.persistence.VenOrderBlockingSource;
@@ -213,9 +215,6 @@ public class OrderServiceImpl implements OrderService {
 	private AddressService addressService;
 	
 	@Autowired
-	private MerchantProductService merchantProductService;
-	
-	@Autowired
 	private OrderAddressService orderAddressService;
 	
 	@Autowired
@@ -284,7 +283,7 @@ public class OrderServiceImpl implements OrderService {
 			// Remove party from merchant
 			if (item.getProduct().getMerchant().getParty() != null) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "OrderServiceImpl::createOrder::merchant party is not NULL, going to remove it...");
+						, "createOrder::merchant party is not NULL, going to remove it...");
 				String merchantSKU = item.getProduct().getMerchant().getMerchantId().getCode()
 						+ "&" 
 						+(item.getProduct().getMerchant().getParty().getFullOrLegalName()!=null
@@ -295,7 +294,7 @@ public class OrderServiceImpl implements OrderService {
 		}				
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "OrderServiceImpl::createOrder::checking payment type");
+				, "createOrder::checking payment type");
 		
 		boolean vaPaymentExists = false;
 		boolean csPaymentExists = false;
@@ -314,7 +313,7 @@ public class OrderServiceImpl implements OrderService {
 					if (this.isOrderExist(order.getOrderId().getCode())) {
 						throw CommonUtil.logAndReturnException(
 								new InvalidOrderException(
-										"OrderServiceImpl::createOrder:An order with this WCS orderId already exists: "
+										"createOrder:An order with this WCS orderId already exists: "
 										           + order.getOrderId().getCode(), VeniceExceptionConstants.VEN_EX_000017)
 						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 					}					
@@ -399,13 +398,6 @@ public class OrderServiceImpl implements OrderService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "createOrder::orderItems member = " + orderItems.size());
 		
-		/*
-		for (VenOrderItem item : orderItems) {
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "merchant order items : " + item.getVenMerchantProduct().getVenOrderItems());
-		}
-		*/
-	
 		// Set the defaults for all of the boolean values in venOrder
 		if (venOrder.getBlockedFlag() == null) venOrder.setBlockedFlag(false);
 		if (venOrder.getRmaFlag() == null) venOrder.setRmaFlag(false);
@@ -418,17 +410,10 @@ public class OrderServiceImpl implements OrderService {
 		//This method call will persist the order if there has been no VA payment else it will merge
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::persisting order");
 		
-		/*
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "venOrder merchantProduct orderItems = "
-				+ venOrder.getVenOrderItems().get(0).getVenMerchantProduct().getVenOrderItems());
-		*/
-		
-		venOrder = persistOrder(vaPaymentExists, csPaymentExists, venOrder, merchantProduct);
+		venOrder = persistOrder(vaPaymentExists, csPaymentExists, venOrder);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::Persisted VenOrder = " + venOrder);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::done persist order");
-
-		/*
+		
 		Pattern pattern = Pattern.compile("&");
 		for(String party : merchantProduct){				
 			String[] temp = pattern.split(party, 0);
@@ -457,6 +442,7 @@ public class OrderServiceImpl implements OrderService {
 							, "createOrder::wcsMerchantId = " 
 							+ orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId());
 					if(orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId().equals(temp[0].trim())){
+						//List<VenMerchant> venMerchantList = venMerchantDAO.findByWcsMerchantId(temp[0]);
 						List<VenMerchant> venMerchantList = merchantService.findByWcsMerchantId(temp[0]);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "createOrder::venMerchantList found = " + venMerchantList);
@@ -464,6 +450,7 @@ public class OrderServiceImpl implements OrderService {
 							CommonUtil.logDebug(this.getClass().getCanonicalName()
 									, "createOrder::venMerchantList size = " + venMerchantList.size());
 							if (venMerchantList.get(0).getVenParty() == null) {
+								//List<VenParty> venPartyList = venPartyDAO.findByLegalName(temp[1].trim());
 								List<VenParty> venPartyList = partyService.findByLegalName(temp[1]);
 								CommonUtil.logDebug(this.getClass().getCanonicalName()
 										, "createOrder::venPartyList found = " + venPartyList);
@@ -473,14 +460,16 @@ public class OrderServiceImpl implements OrderService {
 										VenParty venPartyitem = new VenParty();
 										VenPartyType venPartyType = new VenPartyType();
 										// set party type id = 1 adalah merchant
+										//venPartyType.setPartyTypeId(new Long(1));
 										venPartyType.setPartyTypeId(VenPartyTypeConstants.VEN_PARTY_TYPE_MERCHANT.code());
 										venPartyitem.setVenPartyType(venPartyType);
 										venPartyitem.setFullOrLegalName(temp[1]);	
 										CommonUtil.logDebug(this.getClass().getCanonicalName()
 												, "createOrder::persist venParty :  "+venPartyitem.getFullOrLegalName());
-										//venPartyitem = venPartyDAO.save(venPartyitem);
-										venPartyitem = partyService.persistParty(venPartyitem, venPartyitem.getVenPartyType().getPartyTypeDesc());
+										venPartyitem = venPartyDAO.save(venPartyitem);
 										venMerchantList.get(0).setVenParty(venPartyitem);
+										//venMerchantHome.mergeVenMerchant(venMechantList.get(0));
+										//venMerchantDAO.save(venMerchantListCloned.get(0));
 										VenMerchant venMerchant = venMerchantList.get(0);
 										merchantService.persist(venMerchant);
 										CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -507,7 +496,6 @@ public class OrderServiceImpl implements OrderService {
 				}
 					
 			} //EOF for
-        */
 
 		// If the order is RMA do nothing with payments because there are none
 		if (!venOrder.getRmaFlag()) {
@@ -661,6 +649,7 @@ public class OrderServiceImpl implements OrderService {
 						reconRecord.setRemainingBalanceAmount(orderPayment.getAmount());
 						reconRecord.setUserLogonName("System");
 						finArFundsInReconRecordDAO.save(reconRecord);
+						//reconRecordHome.persistFinArFundsInReconRecord(reconRecord);
 					}
 				}
 			}			
@@ -678,35 +667,195 @@ public class OrderServiceImpl implements OrderService {
 		return Boolean.TRUE;
 	}
 	
+	/**
+	 * Synchronizes the data for the direct VenOrderPayment references
+	 * 
+	 * @param venOrderPayment
+	 * @return the synchronized data object
+	 */
+	/*
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRES_NEW)
+	private VenOrderPayment synchronizeVenOrderPaymentReferenceData(
+			VenOrderPayment venOrderPayment) throws VeniceInternalException {
+
+		List<Object> references = new ArrayList<Object>();
+		references.add(venOrderPayment.getVenBank());
+		references.add(venOrderPayment.getVenPaymentStatus());
+		references.add(venOrderPayment.getVenPaymentType());
+		references.add(venOrderPayment.getVenAddress());
+		references.add(venOrderPayment.getVenWcsPaymentType());
+		references.add(venOrderPayment.getOldVenOrder());
+
+		// Synchronize the data references
+		references = this.synchronizeReferenceData(references);
+
+		// Push the keys back into the record
+		Iterator<Object> referencesIterator = references.iterator();
+		while (referencesIterator.hasNext()) {
+			Object next = referencesIterator.next();
+			if (next instanceof VenBank) {
+				venOrderPayment.setVenBank((VenBank) next);
+			} else if (next instanceof VenPaymentStatus) {
+				venOrderPayment.setVenPaymentStatus((VenPaymentStatus) next);
+			} else if (next instanceof VenPaymentType) {
+				venOrderPayment.setVenPaymentType((VenPaymentType) next);
+			} else if (next instanceof VenAddress) {
+				venOrderPayment.setVenAddress((VenAddress) next);
+			} else if (next instanceof VenWcsPaymentType) {
+				venOrderPayment.setVenWcsPaymentType((VenWcsPaymentType) next);
+			} else if (next instanceof VenOrder) {
+				venOrderPayment.setOldVenOrder((VenOrder) next);
+			}
+		}
+		return venOrderPayment;
+	}
+	*/	
+	
+	/**
+	 * Persists a list of order payments using the session tier.
+	 * 
+	 * @param orderPayments
+	 * @return the persisted object
+	 */
+	/*
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	private List<VenOrderPayment> persistOrderPaymentList(List<VenOrderPayment> venOrderPaymentList) throws VeniceInternalException {
+		List<VenOrderPayment> newVenOrderPaymentList = new ArrayList<VenOrderPayment>();
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "OrderServiceImpl::persistOrderPaymentList::BEGIN,venOrderPaymentList=" + venOrderPaymentList);
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "OrderServiceImpl::persistOrderPaymentList::venOrderPaymentList size = " + venOrderPaymentList.size());
+		if (venOrderPaymentList != null && (venOrderPaymentList.size() > 0)) {
+			try {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "OrderServiceImpl::persistOrderPaymentList::Persisting VenOrderPayment list...:"+ venOrderPaymentList.size());
+				Iterator<VenOrderPayment> i = venOrderPaymentList.iterator();
+				while (i.hasNext()) {
+					VenOrderPayment next = i.next();
+					
+					// Detach the allocations before persisting
+					List<VenOrderPaymentAllocation> venOrderPaymentAllocationList = (List<VenOrderPaymentAllocation>)next.getVenOrderPaymentAllocations();
+					//List<VenOrderPaymentAllocation> venOrderPaymentAllocationListCloned = cloner.deepClone(venOrderPaymentAllocationList);
+					//em.detach(venOrderPaymentAllocationList);
+					
+					next.setVenOrderPaymentAllocations(null);
+
+					// Synchronize the references
+					next = this.synchronizeVenOrderPaymentReferenceData(next);
+
+					// Persist the billing address
+					next.setVenAddress(this.persistAddress(next.getVenAddress()));
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "OrderServiceImpl::persistOrderPaymentList::venaddress has successfully persisted");
+
+					//Check to see if the payment is already in the cache and
+					//if it is then assume it is a VA payment and should not be
+					//changed because it was APPROVED by Venice
+					
+					//List<VenOrderPayment> paymentList = paymentHome.queryByRange("select o from VenOrderPayment o where o.wcsPaymentId = '" + next.getWcsPaymentId() + "'", 0, 1);
+					List<VenOrderPayment> paymentList = venOrderPaymentDAO.findByWcsPaymentId(next.getWcsPaymentId());
+					//em.detach(paymentList);
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "OrderServiceImpl::persistOrderPaymentList::paymentList found : " + paymentList.size());
+
+					if (paymentList.isEmpty()) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "OrderServiceImpl::persistOrderPaymentList::Payment not found so persisting it...");
+						// Persist the object
+						//newVenOrderPaymentList.add((VenOrderPayment) paymentHome.persistVenOrderPayment(next));
+						VenOrderPayment venOrderPaymentPersisted = venOrderPaymentDAO.save(next);
+						//em.detach(venOrderPaymentPersisted);
+						//newVenOrderPaymentList.add(venOrderPaymentDAO.save(next));
+						newVenOrderPaymentList.add(venOrderPaymentPersisted);
+						// Persist the allocations
+						//List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted = this.persistOrderPaymentAllocationList(venOrderPaymentAllocationListCloned);
+						List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted = this.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
+						//List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersistedCloned = cloner.deepClone(venOrderPaymentAllocationPersisted);
+						//em.detach(venOrderPaymentAllocationPersisted);
+						//next.setVenOrderPaymentAllocations(this.persistOrderPaymentAllocationList(venOrderPaymentAllocationList));
+						//next.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersistedCloned);
+						next.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersisted);
+					} else {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "OrderServiceImpl::persistOrderPaymentList::persist the allocations");
+						// Persist the allocations
+						List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted = this.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
+						//List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersistedCloned = cloner.deepClone(venOrderPaymentAllocationPersisted);
+						//em.detach(venOrderPaymentAllocationPersisted);
+						next.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersisted);
+						// Just put it back into the new list
+						newVenOrderPaymentList.add(next);
+					}
+				}
+			} catch (Exception e) {
+				String errMsg = "An exception occured when persisting VenOrderItem:";
+				throw CommonUtil.logAndReturnException(new VeniceInternalException(errMsg, e)
+						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			}
+			List<VenOrderPayment> newVenOrderPaymentListCloned = cloner.deepClone(newVenOrderPaymentList);
+			return newVenOrderPaymentListCloned;
+		}
+		return venOrderPaymentList;
+	}
+	*/
+	
+	/**
+	 * Persists the payment allocation list to the cache
+	 * 
+	 * @param venOrderPaymentAllocationList
+	 * @return
+	 */
+	/*
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	private List<VenOrderPaymentAllocation> persistOrderPaymentAllocationList(
+			List<VenOrderPaymentAllocation> venOrderPaymentAllocationList) throws VeniceInternalException {
+		List<VenOrderPaymentAllocation> newVenOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>();
+		//em.detach(newVenOrderPaymentAllocationList);
+		if (venOrderPaymentAllocationList != null	&& venOrderPaymentAllocationList.size() > 0) {
+			try {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "OrderServiceImpl::persistOrderPaymentAllocationList::Persisting VenOrderPaymentAllocation list...:"
+				+ venOrderPaymentAllocationList.size());
+				Iterator<VenOrderPaymentAllocation> i = venOrderPaymentAllocationList.iterator();
+				while (i.hasNext()) {
+					VenOrderPaymentAllocation next = i.next();
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "OrderServiceImpl::persistOrderPaymentAllocationList::value of paymentAllocation ......: order_id = "
+					   + next.getVenOrder().getOrderId() +" and wcs_code_payment = "
+					   + next.getVenOrderPayment().getWcsPaymentId());
+					// Persist the object
+					newVenOrderPaymentAllocationList.add(venOrderPaymentAllocationDAO.save(next));
+				}
+			} catch (Exception e) {
+				String errMsg = "An exception occured when persisting VenOrderPaymentAllocation:";
+				e.printStackTrace();
+				throw CommonUtil.logAndReturnException(new CannotPersistOrderPaymentException(errMsg, VeniceExceptionConstants.VEN_EX_000023)
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			}
+		}else{
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "OrderServiceImpl::persistOrderPaymentAllocationList::Persisting VenOrderPaymentAllocation list is null");
+		}
+		return newVenOrderPaymentAllocationList;
+	}	
+	*/	
+	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public VenOrder persistOrder(Boolean vaPaymentExists, Boolean csPaymentExists, VenOrder venOrder
-			, List<String> merchantProduct) throws VeniceInternalException {	    
+	public VenOrder persistOrder(Boolean vaPaymentExists, Boolean csPaymentExists, VenOrder venOrder) throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrder::vaPaymentExists: "+vaPaymentExists);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrder::csPaymentExists: "+csPaymentExists);
 		if (venOrder != null) {
-			//try {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistOrder::Persisting VenOrder... :" + venOrder.getWcsOrderId());	
-								
+						, "persistOrder::Persisting VenOrder... :" + venOrder.getWcsOrderId());				
+				
 				// Save the order items before persisting as it will be detached
-				//List<VenOrderItem> venOrderItemList = venOrder.getVenOrderItems();
-				List<VenOrderItem> venOrderItemList = new ArrayList<VenOrderItem>();
-				for (VenOrderItem orderItem : venOrder.getVenOrderItems()) {
-					venOrderItemList.add(orderItem);
-				}
-				
-				// added on Feb 27, 2014 8:39AM as workaround solution for transient exception faced in refactoring-phase 3
-				venOrderItemList = merchantProductService.processMerchantProduct(merchantProduct, venOrderItemList);
+				List<VenOrderItem> venOrderItemList = venOrder.getVenOrderItems();
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistOrder::successfully proceed MerchantProduct, result = " + venOrderItemList);
-				// end of line added
-				
-				/*
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "OrderServiceImpl::persistOrder::venOrderItem merchantProduct orderItems="
+						, "persistOrder::venOrderItem merchantProduct orderItems="
 						+ venOrderItemList.get(0).getVenMerchantProduct().getVenOrderItems());
-				*/
 
 				// Detach the order items prior to persisting the order.
 				venOrder.setVenOrderItems(null);

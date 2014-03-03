@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,20 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public VenCustomer findByWcsCustomerId(String wcsCustomerId) {
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "findByWcsCustomerId::wcsCustomerId to find : "+ wcsCustomerId);
-		
-		List<VenCustomer> venCustomers = null;
-		
-		try {
-			venCustomers = venCustomerDAO.findByWcsCustomerId(wcsCustomerId);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "customers found : "+ (venCustomers != null ? venCustomers.size() : 0));
-		} catch (Exception e) {
-			CommonUtil.logError(this.getClass().getCanonicalName()
-					, e);
-		}
-		
+		List<VenCustomer> venCustomers = venCustomerDAO.findByWcsCustomerId(wcsCustomerId);
 		return ((venCustomers != null && venCustomers.size() > 0) 
 				? venCustomers.get(0) : null);
 	}
@@ -64,7 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED, isolation = Isolation.READ_UNCOMMITTED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenCustomer persistCustomer(VenCustomer venCustomer)
 			throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -73,11 +59,8 @@ public class CustomerServiceImpl implements CustomerService {
 			try {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::Persisting VenCustomer... :" + venCustomer.getCustomerUserName());
-				// If the customer already exists then return it, else persist everything				
-				//VenCustomer existingVenCustomer = findByWcsCustomerId(venCustomer.getWcsCustomerId());
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistCustomer::find Customer for WCS ID : 4965578");
-				VenCustomer existingVenCustomer = findByWcsCustomerId("4965578");
+				// If the customer already exists then return it, else persist everything
+				VenCustomer existingVenCustomer = findByWcsCustomerId(venCustomer.getWcsCustomerId());
 				if (existingVenCustomer != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistCustomer::existingVenCustomer NOT NULL --> " + existingVenCustomer);
@@ -103,8 +86,7 @@ public class CustomerServiceImpl implements CustomerService {
 				party.setVenCustomers(venCustomers);
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::Customer's party successfully set");
-				//venCustomer.setVenParty(partyService.persistParty(party, "Customer"));
-				venCustomer.setVenParty(partyService.persistParty(party, VenPartyTypeConstants.VEN_PARTY_TYPE_CUSTOMER.description()));
+				venCustomer.setVenParty(partyService.persistParty(party, "Customer"));
 				// Synchronize the reference data
 				//venCustomer = synchronizeVenCustomerReferenceData(venCustomer);
 
@@ -112,9 +94,9 @@ public class CustomerServiceImpl implements CustomerService {
 				VenCustomer customer = venCustomer;
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::persisting venCustomer");
-				venCustomer.setVenParty(customer.getVenParty());
-				venCustomer = venCustomerDAO.save(venCustomer);
 				//venCustomer.setVenParty(customer.getVenParty());
+				venCustomer = venCustomerDAO.save(venCustomer);
+				venCustomer.setVenParty(customer.getVenParty());
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw CommonUtil.logAndReturnException(new CannotPersistCustomerException(

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.persistence.VenMerchantProduct;
-import com.gdn.venice.persistence.VenOrderItem;
 
 /**
  * 
@@ -17,6 +16,5 @@ public interface MerchantProductService {
 			List<VenMerchantProduct> merchantProductRefs) throws VeniceInternalException;
 	public VenMerchantProduct synchronizeVenMerchantProductReferenceData(
 			VenMerchantProduct venMerchantProduct) throws VeniceInternalException;	
-	public List<VenOrderItem> processMerchantProduct(List<String> merchantProduct
-			, List<VenOrderItem> orderItems) throws VeniceInternalException;
+	public List<VenMerchantProduct> findByWcsProductSku(String wcsProductSku);
 }

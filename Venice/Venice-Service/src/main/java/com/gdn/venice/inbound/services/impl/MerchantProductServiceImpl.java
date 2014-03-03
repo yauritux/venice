@@ -2,26 +2,18 @@ package com.gdn.venice.inbound.services.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gdn.venice.constants.VenPartyTypeConstants;
 import com.gdn.venice.dao.VenMerchantProductDAO;
-import com.gdn.venice.dao.VenPartyDAO;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.MerchantProductService;
-import com.gdn.venice.inbound.services.MerchantService;
-import com.gdn.venice.inbound.services.PartyService;
 import com.gdn.venice.inbound.services.ProductTypeService;
 import com.gdn.venice.persistence.VenMerchant;
 import com.gdn.venice.persistence.VenMerchantProduct;
-import com.gdn.venice.persistence.VenOrderItem;
-import com.gdn.venice.persistence.VenParty;
-import com.gdn.venice.persistence.VenPartyType;
 import com.gdn.venice.persistence.VenProductType;
 import com.gdn.venice.util.CommonUtil;
 
@@ -36,15 +28,6 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 
 	@Autowired
 	private VenMerchantProductDAO venMerchantProductDAO;
-	
-	@Autowired
-	private VenPartyDAO venPartyDAO;
-	
-	@Autowired 
-	private MerchantService merchantService;
-	
-	@Autowired
-	private PartyService partyService;
 	
 	@Autowired
 	private ProductTypeService productTypeService;
@@ -101,7 +84,6 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 	 * @return the synchronized data object
 	 */	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenMerchantProduct synchronizeVenMerchantProductReferenceData(
 			VenMerchantProduct venMerchantProduct) throws VeniceInternalException {
 		
@@ -117,7 +99,6 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 			}
 		}
 		
-		/*
 		if (venMerchantProduct.getVenMerchant() != null) {
 			List<VenMerchant> merchantRefs = new ArrayList<VenMerchant>();
 			merchantRefs.add(venMerchantProduct.getVenMerchant());
@@ -126,7 +107,6 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				venMerchantProduct.setVenMerchant(merchant);
 			}
 		}
-		*/
 		
 		/*
 		List<Object> references = new ArrayList<Object>();
@@ -147,122 +127,27 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 			}
 		}
 		*/
-				
-		venMerchantProduct = venMerchantProductDAO.save(venMerchantProduct);
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenMerchantProductReferenceData::EOM, returning venMerchantProduct = "
-				  + venMerchantProduct);		
-		
+				  + venMerchantProduct);
 		return venMerchantProduct;
 	}
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public List<VenOrderItem> processMerchantProduct(List<String> merchantProduct, List<VenOrderItem> orderItems) 
-	  throws VeniceInternalException {
-		Pattern pattern = Pattern.compile("&");
-		for(String party : merchantProduct){				
-			String[] temp = pattern.split(party, 0);
-
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "processMerchantProduct::show venParty in orderItem :  "+party);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "processMerchantProduct::string merchant :  "+temp[0]+" and "+temp[1]);
-
-			if((temp[1] != null) && (!temp[1].trim().equals(""))){
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "processMerchantProduct::temp[1] not empty");
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "processMerchantProduct::orderItems = " + orderItems);
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "processMerchantProduct::orderItems size = " + (orderItems != null ? orderItems.size() : 0));
-				
-				for(int h =0; h < orderItems.size(); h++){
-					
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processMerchantProduct::h=" + h + ",orderItems=" + orderItems.get(h));
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processMerchantProduct::venMerchantProduct SKU = " + orderItems.get(h).getVenMerchantProduct().getWcsProductSku());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processMerchantProduct::venMerchant = " 
-									+ orderItems.get(h).getVenMerchantProduct().getVenMerchant());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processMerchantProduct::wcsMerchantId = " 
-									+ orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId());
-					if(orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId().equals(temp[0].trim())){
-						List<VenMerchant> venMerchantList = merchantService.findByWcsMerchantId(temp[0]);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "processMerchantProduct::venMerchantList found = " + venMerchantList);
-						if (venMerchantList != null && venMerchantList.size() > 0) {
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "processMerchantProduct::venMerchantList size = " + venMerchantList.size());
-							if (venMerchantList.get(0).getVenParty() == null) {
-								List<VenParty> venPartyList = partyService.findByLegalName(temp[1]);
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "processMerchantProduct::venPartyList found = " + venPartyList);
-								if (venPartyList == null || venPartyList.size() == 0) { 
-									CommonUtil.logDebug(this.getClass().getCanonicalName()
-											, "processMerchantProduct::venPartyList is empty, creating new one");
-									VenParty venPartyitem = new VenParty();
-									VenPartyType venPartyType = new VenPartyType();
-									// set party type id = 1 adalah merchant
-									venPartyType.setPartyTypeId(VenPartyTypeConstants.VEN_PARTY_TYPE_MERCHANT.code());
-									venPartyitem.setVenPartyType(venPartyType);
-									venPartyitem.setFullOrLegalName(temp[1]);	
-									CommonUtil.logDebug(this.getClass().getCanonicalName()
-											, "processMerchantProduct::persist venParty :  "+venPartyitem.getFullOrLegalName());
-									venPartyitem = venPartyDAO.save(venPartyitem);
-									//venPartyitem = partyService.persistParty(venPartyitem, venPartyitem.getVenPartyType().getPartyTypeDesc());
-									CommonUtil.logDebug(this.getClass().getCanonicalName()
-											, "processMerchantProduct::venPartyItem Type = " + venPartyitem.getVenPartyType().getPartyTypeDesc());
-									venMerchantList.get(0).setVenParty(venPartyitem);
-									VenMerchant venMerchant = venMerchantList.get(0);
-									venMerchant = merchantService.persist(venMerchant);
-									CommonUtil.logDebug(this.getClass().getCanonicalName()
-											, "processMerchantProduct::added  new party for venmerchant (Merchant Id :"
-													+ orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId() +" )"
-											);
-									orderItems.get(h).getVenMerchantProduct().setVenMerchant(venMerchant);									
-								}else{
-									venMerchantList.get(0).setVenParty(venPartyList.get(0));
-									VenMerchant venMerchant = venMerchantList.get(0);
-									venMerchant = merchantService.persist(venMerchant);
-									CommonUtil.logDebug(this.getClass().getCanonicalName()
-											, "processMerchantProduct::add  party for venmerchant (Merchant Id :"
-													+ orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId() +" )"
-											);			
-									orderItems.get(h).getVenMerchantProduct().setVenMerchant(venMerchant);
-								}
-							}
-						}
-					}
-
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processMerchantProduct::synchronizing venMerchantProduct referenceData");
-					VenMerchantProduct synchronizedMerchantProduct = null;
-					try {
-						synchronizedMerchantProduct = synchronizeVenMerchantProductReferenceData(
-								orderItems.get(h).getVenMerchantProduct());					
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "processMerchantProduct::venMerchantProduct referenceData is synchronized now");					
-						orderItems.get(h).setVenMerchantProduct(synchronizedMerchantProduct);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "processMerchantProduct::added synchronizedMerchantProduct into orderItem");
-					} catch (Exception e) {
-						CommonUtil.logError(this.getClass().getCanonicalName(), e);
-					}
-				} //end of for orderItems
-			}else {
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "processMerchantProduct::party is null for venmerchant (Merchant Id :"+ temp[0] +" )");
-			}
-
-		} //EOF for		
+	public List<VenMerchantProduct> findByWcsProductSku(String wcsProductSku) {
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "findByWcsProductSku::BEGIN, find merchantProduct with wcsProductSku="+ wcsProductSku);
+		if (wcsProductSku == null || wcsProductSku.length() == 0) {
+			return null;
+		}
+		
+		List<VenMerchantProduct> merchantProducts = venMerchantProductDAO.findByWcsProductSku(wcsProductSku);
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "processMerchantProduct::returning orderItems = "+ (orderItems != null ? orderItems.size() : 0));
-		return orderItems;
+				, "merchantProducts found = " + (merchantProducts != null ? merchantProducts.size() : 0));
+		
+		return merchantProducts;
 	}
 
 }
