@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -106,7 +107,8 @@ public abstract class AbstractFundInService implements FundInService{
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC ||
-		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC){
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC ||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
 			orderPayment = venOrderPaymentDAO.findByReferenceIdAndAmount(referenceId, paymentAmount);
 		}
 		
@@ -150,7 +152,8 @@ public abstract class AbstractFundInService implements FundInService{
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC||
-		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC){
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC ||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
 			
 			List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findWithVenOrderPaymentFinArFundsInReconRecordByCreditCardDetail(referenceId, paymentAmount);
 			orderPaymentAllocation = orderPaymentAllocationList.size() > 0 ? orderPaymentAllocationList.get(0) : null;
@@ -192,7 +195,8 @@ public abstract class AbstractFundInService implements FundInService{
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC||
-		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC){
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC ||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
 			
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 			Date uniquePaymentDate = df.parse(uniquePayment);
@@ -210,6 +214,8 @@ public abstract class AbstractFundInService implements FundInService{
 			fundInReconList = finArFundsInReconRecordDAO.findForInternetBankingDetail(paymentIdentifier);
 			return (fundInReconList.size() > 0);
 		}
+		
+		
 		
 		return true;
 	}
@@ -281,6 +287,9 @@ public abstract class AbstractFundInService implements FundInService{
 			case FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB:
 				sb.append("XL_IB_Record.xml");
 				break;
+			case FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC:
+				sb.append("Mandiri_Installment_Record.xml");
+				break;
 		}
 		
 		return sb.toString();
@@ -329,6 +338,10 @@ public abstract class AbstractFundInService implements FundInService{
 				CommonUtil.logError(CLASS_NAME, "Unable to retrieve unique content from file");
 				e.printStackTrace();
 			}
+		}
+		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
+			uniqueContent = new Timestamp(System.currentTimeMillis()).toString().replace(".", "");
 		}
 			
 		
