@@ -288,7 +288,6 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
             return Boolean.TRUE;
         }   
                      
-        //boolean oldMethod = false;
         boolean oldMethod = true;
 
         for (OrderItem item : order.getOrderItems()) {
