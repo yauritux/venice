@@ -464,7 +464,4 @@ public interface VeniceConstants {
 	public static final String FRD_PARAMETER_RULE_41_ATTEMPT_CC = "attempt CC";
 	
 	public static final String FRD_PARAMETER_RULE_42_MULTIPLE_FUND_IN = "multiple fund in";
-	
-	public static final String FRD_PARAMETER_RULE_43_RISK_POINT = "Risk Point";
-	public static final String FRD_PARAMETER_RULE_43_PAYMENT = "Payment";
 }
