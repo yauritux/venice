@@ -306,7 +306,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
 
         
-		if (oldMethod == true) {
+		if (oldMethod) {
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "Using old service");					
 			oldCreateOrder(order);        
