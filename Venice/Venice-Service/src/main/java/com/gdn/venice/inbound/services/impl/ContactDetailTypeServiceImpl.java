@@ -30,13 +30,13 @@ public class ContactDetailTypeServiceImpl implements ContactDetailTypeService {
 	private VenContactDetailTypeDAO venContactDetailTypeDAO;
 
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenContactDetailType> synchronizeVenContactDetailTypeReferences(
 			List<VenContactDetailType> contactDetailTypes) throws VeniceInternalException {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenContactDetailTypeReferences::BEGIN,contactDetailTypes="
 				  + contactDetailTypes);
-		//if (contactDetailTypes == null || contactDetailTypes.isEmpty()) return null;
 		
 		List<VenContactDetailType> synchronizedContactDetailTypes = new ArrayList<VenContactDetailType>();
 		
@@ -47,6 +47,7 @@ public class ContactDetailTypeServiceImpl implements ContactDetailTypeService {
 							, "synchronizeVenContactDetailTypeReferences::Restricting VenContactDetailType... :" 
 									+ contactDetailType.getContactDetailTypeDesc());
 
+					/*
 					List<VenContactDetailType> contactDetailTypeList 
 					= venContactDetailTypeDAO.findByContactDetailTypeDesc(contactDetailType.getContactDetailTypeDesc());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -56,12 +57,15 @@ public class ContactDetailTypeServiceImpl implements ContactDetailTypeService {
 						throw CommonUtil.logAndReturnException(new InvalidOrderException(
 								"Contact detail type does not exist", VeniceExceptionConstants.VEN_EX_999999)
 						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-					} else {
-						VenContactDetailType venContactDetailType = contactDetailTypeList.get(0);
+					} else {					
+						VenContactDetailType venContactDetailType = contactDetailTypeList.get(0);						
 						synchronizedContactDetailTypes.add(venContactDetailType);
+						*/
+					VenContactDetailType venContactDetailType = venContactDetailTypeDAO.save(contactDetailType);
+					synchronizedContactDetailTypes.add(venContactDetailType);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenContactDetailTypeReferences::successfully added contactDetailType into synchronizedContactDetailTypes");
-					}
+					//}
 				}		
 			} //end of 'for'
 		}

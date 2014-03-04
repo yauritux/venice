@@ -134,4 +134,20 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		return venMerchantProduct;
 	}
 
+	@Override
+	public List<VenMerchantProduct> findByWcsProductSku(String wcsProductSku) {
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "findByWcsProductSku::BEGIN, find merchantProduct with wcsProductSku="+ wcsProductSku);
+		if (wcsProductSku == null || wcsProductSku.length() == 0) {
+			return null;
+		}
+		
+		List<VenMerchantProduct> merchantProducts = venMerchantProductDAO.findByWcsProductSku(wcsProductSku);
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "merchantProducts found = " + (merchantProducts != null ? merchantProducts.size() : 0));
+		
+		return merchantProducts;
+	}
+
 }

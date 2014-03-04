@@ -57,6 +57,7 @@ import com.gdn.venice.dao.VenOrderStatusDAO;
 import com.gdn.venice.dao.VenOrderStatusHistoryDAO;
 import com.gdn.venice.dao.VenTransactionFeeDAO;
 import com.gdn.venice.dao.VenWcsPaymentTypeDAO;
+import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.facade.FinArFundsInReconRecordSessionEJBLocal;
 import com.gdn.venice.facade.FinSalesRecordSessionEJBLocal;
 import com.gdn.venice.facade.KpiPartyPeriodActualSessionEJBLocal;
@@ -116,6 +117,7 @@ import com.gdn.venice.facade.util.AWBReconciliation;
 import com.gdn.venice.facade.util.HolidayUtil;
 import com.gdn.venice.facade.util.KpiPeriodUtil;
 import com.gdn.venice.factory.VenOrderStatusFP;
+import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.OrderService;
 import com.gdn.venice.persistence.FinApprovalStatus;
 import com.gdn.venice.persistence.FinArFundsInActionApplied;
@@ -187,6 +189,7 @@ import com.gdn.venice.persistence.VenSettlementRecord;
 import com.gdn.venice.persistence.VenState;
 import com.gdn.venice.persistence.VenTransactionFee;
 import com.gdn.venice.persistence.VenWcsPaymentType;
+import com.gdn.venice.util.CommonUtil;
 import com.gdn.venice.util.VeniceConstants;
 import com.rits.cloning.Cloner;
 
@@ -235,6 +238,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
     VenOrderItemService venOrderItemService;
     @Autowired
     OrderService orderService;
+    @Autowired
+    MerchantProductService merchantProductService;
     private EntityManager emForJDBC;
     private static Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
     private static Logger _log = loggerFactory.getLog4JLogger("com.gdn.venice.integration.services.VenInboundServiceSessionEJBBean");
@@ -281,17 +286,41 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
             createRetur(order);
 
             return Boolean.TRUE;
+        }   
+                     
+        boolean oldMethod = true;
+
+        for (OrderItem item : order.getOrderItems()) {
+            
+        	CommonUtil.logDebug(this.getClass().getCanonicalName()
+        			, "finding merchantproduct SKU = " + (item.getProduct().getMerchantSKU() != null ? 
+        					item.getProduct().getMerchantSKU().getCode() : ""));
+        	CommonUtil.logDebug(this.getClass().getCanonicalName()
+        			, "finding merchantproduct SKU = " + (item.getProduct().getGdnSKU() != null ? 
+        					item.getProduct().getGdnSKU().getCode() : ""));        	
+        	List<VenMerchantProduct> merchantProducts = merchantProductService.findByWcsProductSku(item.getProduct().getGdnSKU().getCode());
+        	if (merchantProducts == null || (merchantProducts.size() == 0)) {
+        		oldMethod = true;
+        		break;
+        	}
         }
 
-//		try {
-//			orderService.createOrder(order);
-//		} catch (VeniceInternalException e) {
-//			e.printStackTrace();
-//			_log.error(e);
-//			throw new EJBException(e.getMessage());
-//		}
-
-        oldCreateOrder(order);
+        
+		if (oldMethod) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "Using old service");					
+			oldCreateOrder(order);        
+		} else { 
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "Using new service");			
+			try {
+				orderService.createOrder(order);			
+			} catch (VeniceInternalException e) {
+				e.printStackTrace();
+				_log.error(e);
+				throw new EJBException(e.getMessage());
+			}
+		}
 
         Long endTime = System.currentTimeMillis();
         Long duration = endTime - startTime;
@@ -935,7 +964,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
 
         // Remove the customer and the order items because they need to be ignored at this stage
-        order.setCustomer(null);
+       // order.setCustomer(null);
         order.getOrderItems().clear();
 
         // Map the jaxb Order object to a JPA VenOrder object.
@@ -965,9 +994,20 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
 
         venOrder.setVenOrderStatus(venOrderStatus);
-
+        
+        VenCustomer venCustomer = new VenCustomer();
+        
+        try{
+            venCustomer = persistCustomer(venOrder.getVenCustomer());
+        }catch(MappingException e){
+            String errMsg = "createOrderVAPayment: An Exception occured when mapping customer object:" + e.getMessage();
+            _log.error(errMsg);
+            e.printStackTrace();
+            throw new EJBException(errMsg);
+        }
+        venOrder.setVenCustomer(venCustomer);
         // Synchronize the reference data
-        venOrder = this.synchronizeVenOrderReferenceData(venOrder);
+         venOrder = this.synchronizeVenOrderReferenceData(venOrder);
 
         // Persist the order
         try {

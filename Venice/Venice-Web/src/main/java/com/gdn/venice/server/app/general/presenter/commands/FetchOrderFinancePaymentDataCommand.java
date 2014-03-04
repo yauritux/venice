@@ -79,6 +79,7 @@ public class FetchOrderFinancePaymentDataCommand implements RafDsCommand {
 				map.put(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENBANK_BANKSHORTNAME, orderPayment.getVenBank()!=null?orderPayment.getVenBank().getBankShortName():"");
 				map.put(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENPAYMENTTYPE_PAYMENTTYPECODE, orderPayment.getVenPaymentType()!=null?orderPayment.getVenPaymentType().getPaymentTypeCode():"");
 				map.put(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEDESC, orderPayment.getVenWcsPaymentType()!=null?orderPayment.getVenWcsPaymentType().getWcsPaymentTypeDesc():"");
+				map.put(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_TENOR, orderPayment.getTenor()!=null? orderPayment.getTenor().toString():"");
 				map.put(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VIRTUALACCOUNTNUMBER, orderPayment.getVirtualAccountNumber());
 				map.put(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_AMOUNT, orderPayment.getAmount()!=null? orderPayment.getAmount().toString():"");
 				map.put(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENPAYMENTSTATUS_PAYMENTSTATUSID, orderPayment.getVenPaymentStatus()!=null&&orderPayment.getVenPaymentStatus().getPaymentStatusId()!=null?orderPayment.getVenPaymentStatus().getPaymentStatusId().toString():"");

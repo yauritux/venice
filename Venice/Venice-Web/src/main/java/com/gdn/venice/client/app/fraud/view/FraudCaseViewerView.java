@@ -117,6 +117,7 @@ FraudCaseViewerPresenter.MyView {
 		addBlacklistButton.setTitle("Add case(s) to blacklist");
 		
 		uncalculatedCreditCardOrderToolStrip.addButton(addBlacklistButton);
+		addBlacklistButton.setDisabled(true);
 		
 		fraudCaseManagementDetailLayout.setMembers(fraudCaseDetailFlow);
 		fraudCaseManagementLayout.setMembers(uncalculatedCreditCardOrderToolStrip,fraudCaseManagementListLayout, fraudCaseManagementDetailLayout);
@@ -248,7 +249,7 @@ FraudCaseViewerPresenter.MyView {
 				    					}
 				        		});
 							}				
-							SC.say("Case(s) successfully saved and closed.");
+							SC.say("Case(s) successfully saved, check at customer blacklist tab");
 						}
 					}
 				});
@@ -261,7 +262,7 @@ fraudCaseManagementListGrid.addSelectionChangedHandler(new SelectionChangedHandl
 			@Override
 			public void onSelectionChanged(SelectionEvent event) {
 				ListGridRecord[] selectedRecords = fraudCaseManagementListGrid.getSelection();
-				if (selectedRecords.length <= 1)
+				if (selectedRecords.length < 1)
 					addBlacklistButton.setDisabled(true);
 				else
 					addBlacklistButton.setDisabled(false);

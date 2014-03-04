@@ -467,4 +467,9 @@ public interface VeniceConstants {
 	
 	public static final String FRD_PARAMETER_RULE_43_RISK_POINT = "Risk Point";
 	public static final String FRD_PARAMETER_RULE_43_PAYMENT = "Payment";
+	
+	//non slow moving product category
+	public static final String VEN_PRODUCT_CATEGORY_PRODUCT_CATEGORY_ELECTRONIC = "Electronic";
+	public static final String VEN_PRODUCT_CATEGORY_PRODUCT_CATEGORY_HANDPHONE = "Handphones";
+	public static final String VEN_PRODUCT_CATEGORY_LEVEL_ONE= "1";
 }

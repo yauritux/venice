@@ -33,6 +33,9 @@ public class VenMerchantProduct implements Serializable {
 
 	@Column(name="wcs_product_sku", nullable=false, length=200)
 	private String wcsProductSku;
+	
+	@Column(name="merchant_product_sku", nullable=false, length=200)
+	private String merchantProductSku;	
 
 	//bi-directional many-to-one association to VenMerchant
     @ManyToOne
@@ -136,6 +139,14 @@ public class VenMerchantProduct implements Serializable {
 
 	public void setCostOfGoodsSold(BigDecimal costOfGoodsSold) {
 		this.costOfGoodsSold = costOfGoodsSold;
+	}
+	
+	public String getMerchantProductSku() {
+		return merchantProductSku;
+	}
+
+	public void setMerchantProductSku(String merchantProductSku) {
+		this.merchantProductSku = merchantProductSku;
 	}
 	
 }

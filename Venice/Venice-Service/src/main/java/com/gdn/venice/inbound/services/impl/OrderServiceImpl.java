@@ -283,7 +283,7 @@ public class OrderServiceImpl implements OrderService {
 			// Remove party from merchant
 			if (item.getProduct().getMerchant().getParty() != null) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "OrderServiceImpl::createOrder::merchant party is not NULL, going to remove it...");
+						, "createOrder::merchant party is not NULL, going to remove it...");
 				String merchantSKU = item.getProduct().getMerchant().getMerchantId().getCode()
 						+ "&" 
 						+(item.getProduct().getMerchant().getParty().getFullOrLegalName()!=null
@@ -294,7 +294,7 @@ public class OrderServiceImpl implements OrderService {
 		}				
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "OrderServiceImpl::createOrder::checking payment type");
+				, "createOrder::checking payment type");
 		
 		boolean vaPaymentExists = false;
 		boolean csPaymentExists = false;
@@ -313,7 +313,7 @@ public class OrderServiceImpl implements OrderService {
 					if (this.isOrderExist(order.getOrderId().getCode())) {
 						throw CommonUtil.logAndReturnException(
 								new InvalidOrderException(
-										"OrderServiceImpl::createOrder:An order with this WCS orderId already exists: "
+										"createOrder:An order with this WCS orderId already exists: "
 										           + order.getOrderId().getCode(), VeniceExceptionConstants.VEN_EX_000017)
 						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 					}					
@@ -398,13 +398,6 @@ public class OrderServiceImpl implements OrderService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "createOrder::orderItems member = " + orderItems.size());
 		
-		/*
-		for (VenOrderItem item : orderItems) {
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "merchant order items : " + item.getVenMerchantProduct().getVenOrderItems());
-		}
-		*/
-	
 		// Set the defaults for all of the boolean values in venOrder
 		if (venOrder.getBlockedFlag() == null) venOrder.setBlockedFlag(false);
 		if (venOrder.getRmaFlag() == null) venOrder.setRmaFlag(false);
@@ -416,12 +409,6 @@ public class OrderServiceImpl implements OrderService {
 		
 		//This method call will persist the order if there has been no VA payment else it will merge
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::persisting order");
-		
-		/*
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "venOrder merchantProduct orderItems = "
-				+ venOrder.getVenOrderItems().get(0).getVenMerchantProduct().getVenOrderItems());
-		*/
 		
 		venOrder = persistOrder(vaPaymentExists, csPaymentExists, venOrder);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::Persisted VenOrder = " + venOrder);
@@ -858,17 +845,16 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenOrder persistOrder(Boolean vaPaymentExists, Boolean csPaymentExists, VenOrder venOrder) throws VeniceInternalException {
-		CommonUtil.logDebug(this.getClass().getCanonicalName(), "OrderServiceImpl::persistOrder::vaPaymentExists: "+vaPaymentExists);
-		CommonUtil.logDebug(this.getClass().getCanonicalName(), "OrderServiceImpl::persistOrder::csPaymentExists: "+csPaymentExists);
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrder::vaPaymentExists: "+vaPaymentExists);
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrder::csPaymentExists: "+csPaymentExists);
 		if (venOrder != null) {
-			//try {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "OrderServiceImpl::persistOrder::Persisting VenOrder... :" + venOrder.getWcsOrderId());				
+						, "persistOrder::Persisting VenOrder... :" + venOrder.getWcsOrderId());				
 				
 				// Save the order items before persisting as it will be detached
 				List<VenOrderItem> venOrderItemList = venOrder.getVenOrderItems();
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "OrderServiceImpl::persistOrder::venOrderItem merchantProduct orderItems="
+						, "persistOrder::venOrderItem merchantProduct orderItems="
 						+ venOrderItemList.get(0).getVenMerchantProduct().getVenOrderItems());
 
 				// Detach the order items prior to persisting the order.
