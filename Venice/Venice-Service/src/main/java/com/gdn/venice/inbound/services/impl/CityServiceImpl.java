@@ -31,7 +31,6 @@ public class CityServiceImpl implements CityService {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenCityReferences::cityReferences=" + cityReferences);
-		//if (cityReferences == null || cityReferences.size() == 0) return null;
 		
 		List<VenCity> synchronizedVenCities = new ArrayList<VenCity>();
 		
@@ -40,6 +39,7 @@ public class CityServiceImpl implements CityService {
 				if (city.getCityCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCityReferences::Synchronizing VenCity... :" + city.getCityCode());
+					/*
 					List<VenCity> cityList = venCityDAO.findByCityCode(city.getCityCode());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCityReferences::cityList size = "
@@ -53,9 +53,12 @@ public class CityServiceImpl implements CityService {
 					} else {
 						VenCity venCity = cityList.get(0);
 						synchronizedVenCities.add(venCity);
+					*/
+					VenCity venCity = venCityDAO.save(city);
+					synchronizedVenCities.add(venCity);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "successfully added venCity into synchronizedVenCities collection");
-					}
+					//}
 				}			
 			} //End Of 'for'
 		}

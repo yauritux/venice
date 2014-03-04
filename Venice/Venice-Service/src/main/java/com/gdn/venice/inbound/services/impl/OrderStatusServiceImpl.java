@@ -50,6 +50,7 @@ public class OrderStatusServiceImpl implements OrderStatusService {
 							, "synchronizeVenOrderStatusReferences::Restricting VenOrderStatus... :" 
 									+ orderStatus.getOrderStatusCode());
 
+					/*
 					VenOrderStatus venOrderStatus = venOrderStatusDAO.findByOrderStatusCode(orderStatus.getOrderStatusCode());
 					if (venOrderStatus == null) {
 						throw CommonUtil.logAndReturnException(new OrderStatusNotFoundException("Order status does not exist", 
@@ -60,6 +61,9 @@ public class OrderStatusServiceImpl implements OrderStatusService {
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenOrderStatusReferences::successfully added venOrderStatus into synchronizedOrderStatus");
 					}
+					*/
+					VenOrderStatus venOrderStatus = venOrderStatusDAO.save(orderStatus);
+					synchronizedOrderStatus.add(venOrderStatus);
 				}			
 			} // end of 'for'
 		}
