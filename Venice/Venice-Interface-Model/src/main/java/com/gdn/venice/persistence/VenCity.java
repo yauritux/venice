@@ -28,10 +28,8 @@ public class VenCity implements Serializable {
 	private String cityName;
 
 	//bi-directional many-to-one association to VenAddress
-	/*
 	@OneToMany(mappedBy="venCity")
 	private List<VenAddress> venAddresses;
-    */
 
     public VenCity() {
     }
@@ -60,7 +58,6 @@ public class VenCity implements Serializable {
 		this.cityName = cityName;
 	}
 
-	/*
 	public List<VenAddress> getVenAddresses() {
 		return this.venAddresses;
 	}
@@ -68,6 +65,5 @@ public class VenCity implements Serializable {
 	public void setVenAddresses(List<VenAddress> venAddresses) {
 		this.venAddresses = venAddresses;
 	}
-	*/
 	
 }

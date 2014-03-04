@@ -57,20 +57,11 @@ public class RecipientServiceImpl implements RecipientService {
 			venPartyType.setPartyTypeId(new Long(VenPartyTypeConstants.VEN_PARTY_TYPE_RECIPIENT.code()));
 			venRecipient.getVenParty().setVenPartyType(venPartyType);
 
-			//venRecipient.setVenParty(partyService.persistParty(venRecipient.getVenParty(), "Recipient"));
-			VenParty venParty = partyService.persistParty(venRecipient.getVenParty()
-					, VenPartyTypeConstants.VEN_PARTY_TYPE_RECIPIENT.description());
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "persistRecipient::successfully persisted VenParty");
-			venRecipient.setVenParty(venParty);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "persistRecipient::venParty is assigned to venRecipient");
+			venRecipient.setVenParty(partyService.persistParty(venRecipient.getVenParty(), "Recipient"));
 			// Synchronize the reference data
 			venRecipient = this.synchronizeVenRecipientReferenceData(venRecipient);
 			// Persist the object
 			venRecipient = venRecipientDAO.save(venRecipient);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "successfully persisted venRecipient");
 		}
 		return venRecipient;
 	}

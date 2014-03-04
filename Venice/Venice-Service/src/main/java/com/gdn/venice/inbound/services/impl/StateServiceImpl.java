@@ -41,18 +41,18 @@ public class StateServiceImpl implements StateService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenStateReferences::Synchronizing VenState... :" 
 									+ state.getStateCode());
-					//List<VenState> stateList = venStateDAO.findByStateCode(state.getStateCode());
-					//if (stateList == null || stateList.isEmpty()) {
+					List<VenState> stateList = venStateDAO.findByStateCode(state.getStateCode());
+					if (stateList == null || stateList.isEmpty()) {
 						VenState venState = venStateDAO.save(state);
 						synchronizedStateReferences.add(venState);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenStateReferences::successfully added venState into synchronizedStateReferences");
-					//} else {
-						//VenState venState = stateList.get(0);
-						//synchronizedStateReferences.add(venState);
-						//CommonUtil.logDebug(this.getClass().getCanonicalName()
-							//	, "synchronizeReferenceData::successfully added venState into synchronizedStateReferences");
-					//}
+					} else {
+						VenState venState = stateList.get(0);
+						synchronizedStateReferences.add(venState);
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "synchronizeReferenceData::successfully added venState into synchronizedStateReferences");
+					}
 				}		
 			} //end of 'for'
 		}	

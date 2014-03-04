@@ -187,11 +187,9 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 						VenOrderPayment venOrderPaymentPersisted = venOrderPaymentDAO.save(payment);
 						newVenOrderPaymentList.add(venOrderPaymentPersisted);
 						// Persist the allocations
-						/*
 						List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted 
 						   = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
 						payment.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersisted);
-						*/						
 					} else {
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "persistOrderPaymentList::persist the allocations");

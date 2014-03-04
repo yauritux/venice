@@ -45,10 +45,8 @@ public class VenMerchantProduct implements Serializable {
 	private VenProductType venProductType;
 
 	//bi-directional many-to-one association to VenOrderItem
-    /*
 	@OneToMany(mappedBy="venMerchantProduct")
 	private List<VenOrderItem> venOrderItems;
-	*/
 
 	//bi-directional many-to-many association to VenProductCategory
 	@ManyToMany(mappedBy="venMerchantProducts")//, fetch=FetchType.EAGER)
@@ -116,7 +114,6 @@ public class VenMerchantProduct implements Serializable {
 		this.venProductType = venProductType;
 	}
 	
-	/*
 	public List<VenOrderItem> getVenOrderItems() {
 		return this.venOrderItems;
 	}
@@ -124,7 +121,6 @@ public class VenMerchantProduct implements Serializable {
 	public void setVenOrderItems(List<VenOrderItem> venOrderItems) {
 		this.venOrderItems = venOrderItems;
 	}
-	*/
 	
 	public List<VenProductCategory> getVenProductCategories() {
 		return this.venProductCategories;

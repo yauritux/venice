@@ -298,22 +298,28 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         	CommonUtil.logDebug(this.getClass().getCanonicalName()
         			, "finding merchantproduct SKU = " + (item.getProduct().getGdnSKU() != null ? 
         					item.getProduct().getGdnSKU().getCode() : ""));        	
-        	List<VenMerchantProduct> merchantProducts = merchantProductService.findByWcsProductSku(item.getProduct().getMerchantSKU().getCode());
+        	List<VenMerchantProduct> merchantProducts = merchantProductService.findByWcsProductSku(item.getProduct().getGdnSKU().getCode());
         	if (merchantProducts == null || (merchantProducts.size() == 0)) {
         		oldMethod = true;
         		break;
         	}
         }
-        
-		try {
-			if (oldMethod == false) orderService.createOrder(order);			
-		} catch (VeniceInternalException e) {
-			e.printStackTrace();
-			_log.error(e);
-			throw new EJBException(e.getMessage());
-		}
 
-		if (oldMethod == true) oldCreateOrder(order);
+		if (oldMethod == true) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "Using old service");
+			oldCreateOrder(order);        
+		} else {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "Using new service");			
+			try {
+				if (oldMethod == false) orderService.createOrder(order);			
+			} catch (VeniceInternalException e) {
+				e.printStackTrace();
+				_log.error(e);
+				throw new EJBException(e.getMessage());
+			}
+		}
 
         Long endTime = System.currentTimeMillis();
         Long duration = endTime - startTime;
