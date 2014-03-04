@@ -177,30 +177,36 @@ public class MandiriInstallmentCCFundInServiceImpl extends AbstractFundInService
 		BigDecimal paidAmount = fundInRecon.getProviderReportPaidAmount()!=null?fundInRecon.getProviderReportPaidAmount(): new BigDecimal(0);
 		
 		CommonUtil.logDebug(CLASS_NAME, "MID "+rec.getmId().toUpperCase());
-		BigDecimal amountMultiplier = null;
 		
-		if(rec.getmId().toUpperCase().equals(VeniceConstants.BLIBLI_PB3)){
-			amountMultiplier = new BigDecimal("0.03");
-			CommonUtil.logDebug(CLASS_NAME,"Bank Fee 3 % "+fundInRecon.getProviderReportFeeAmount());
-		}else if(rec.getmId().toUpperCase().equals(VeniceConstants.BLIBLI_PB6)){
-			amountMultiplier = new BigDecimal("0.045");
-			
-		}else if(rec.getmId().toUpperCase().equals(VeniceConstants.BLIBLI_PB12)){
-			amountMultiplier = new BigDecimal("0.06");
-		}else{
-			amountMultiplier = new BigDecimal("0.025");
-		}
+		BigDecimal feePercentage = getFeePercentageByMID(rec.getmId());
+		CommonUtil.logDebug(CLASS_NAME, "Bank Fee "+ feePercentage.multiply(new BigDecimal(100))+" % "+fundInRecon.getProviderReportFeeAmount());
 		
-		fundInRecon.setProviderReportFeeAmount(feeAmount.add(discountAmount));
-		fundInRecon.setProviderReportPaidAmount(paidAmount.add(paymentAmount));		
-		fundInRecon.setProviderReportPaymentId(referenceId);
+		fundInRecon.setProviderReportFeeAmount(paymentAmount.multiply(feePercentage));
+		fundInRecon.setProviderReportPaidAmount(paidAmount.add(paymentAmount).abs());		
+		fundInRecon.setProviderReportPaymentId(authCode);
 		fundInRecon.setReconcilliationRecordTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
-		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(tgl.getTime()));
+		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(paymentDate.getTime()));
 		fundInRecon.setRefundAmount(new BigDecimal(0));
 		
 		fundInRecon.setFinArReconResult(getReconResult(fundInRecon));
 		
 		return fundInRecon;
+	}
+
+	private BigDecimal getFeePercentageByMID(String mid) {
+		BigDecimal amountMultiplier;
+		
+		if(mid.toUpperCase().equals(VeniceConstants.BLIBLI_PB3)){
+			amountMultiplier = new BigDecimal("0.03");
+		}else if(mid.toUpperCase().equals(VeniceConstants.BLIBLI_PB6)){
+			amountMultiplier = new BigDecimal("0.045");
+		}else if(mid.toUpperCase().equals(VeniceConstants.BLIBLI_PB12)){
+			amountMultiplier = new BigDecimal("0.06");
+		}else{
+			amountMultiplier = new BigDecimal("0.025");
+		}
+		
+		return amountMultiplier;
 	}
 
 }

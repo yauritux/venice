@@ -88,6 +88,10 @@ public class FinArFundsInReportSessionEJBBean implements FinArFundsInReportSessi
 	@Qualifier("XLIBFundInServiceImpl")
 	FundInService fundInServiceXLIB;
 	
+	@Autowired
+	@Qualifier("MandiriInstallmentCCFundInServiceImpl")
+	FundInService fundInServiceMandiriInstallmentCC;
+	
 	/*
 	 * Implements an IOC model for pre/post callbacks to persist, merge, and
 	 * remove operations. The onPrePersist, onPostPersist, onPreMerge,
@@ -643,6 +647,9 @@ public class FinArFundsInReportSessionEJBBean implements FinArFundsInReportSessi
 					break;
 				case FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB:
 					result = fundInServiceXLIB.process(fileNameAndFullPath, userName);
+					break;
+				case FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC:
+					result = fundInServiceMandiriInstallmentCC.process(fileNameAndFullPath, userName);
 					break;
 				default:
 					break;
