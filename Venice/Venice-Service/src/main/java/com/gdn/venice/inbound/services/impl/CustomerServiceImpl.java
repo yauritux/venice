@@ -94,9 +94,9 @@ public class CustomerServiceImpl implements CustomerService {
 				VenCustomer customer = venCustomer;
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::persisting venCustomer");
-				venCustomer.setVenParty(customer.getVenParty());
-				venCustomer = venCustomerDAO.save(venCustomer);
 				//venCustomer.setVenParty(customer.getVenParty());
+				venCustomer = venCustomerDAO.save(venCustomer);
+				venCustomer.setVenParty(customer.getVenParty());
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw CommonUtil.logAndReturnException(new CannotPersistCustomerException(
