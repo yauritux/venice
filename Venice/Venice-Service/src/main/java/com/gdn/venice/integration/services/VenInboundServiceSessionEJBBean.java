@@ -287,8 +287,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 
             return Boolean.TRUE;
         }   
-        
-        boolean oldMethod = false;
+                     
+        //boolean oldMethod = false;
+        boolean oldMethod = true;
 
         for (OrderItem item : order.getOrderItems()) {
             
@@ -305,15 +306,16 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         	}
         }
 
+        
 		if (oldMethod == true) {
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "Using old service");
+					, "Using old service");					
 			oldCreateOrder(order);        
-		} else {
+		} else { 
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "Using new service");			
 			try {
-				if (oldMethod == false) orderService.createOrder(order);			
+				orderService.createOrder(order);			
 			} catch (VeniceInternalException e) {
 				e.printStackTrace();
 				_log.error(e);
