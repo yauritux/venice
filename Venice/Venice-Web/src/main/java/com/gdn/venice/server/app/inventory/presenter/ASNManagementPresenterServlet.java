@@ -23,11 +23,11 @@ import com.gdn.venice.server.util.Util;
  * 
  * @author Roland
  */
-public class ASNListPresenterServlet extends HttpServlet{
+public class ASNManagementPresenterServlet extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
 	
-	public ASNListPresenterServlet(){
+	public ASNManagementPresenterServlet(){
 		super();
 	}
 	
