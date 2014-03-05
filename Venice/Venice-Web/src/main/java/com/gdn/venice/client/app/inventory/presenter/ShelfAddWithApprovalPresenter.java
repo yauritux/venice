@@ -1,5 +1,7 @@
 package com.gdn.venice.client.app.inventory.presenter;
 
+import java.util.HashMap;
+
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.inventory.data.ShelfData;
 import com.gdn.venice.client.app.inventory.view.handler.ShelfAddWithApprovalUiHandler;
@@ -19,10 +21,7 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
-import com.smartgwt.client.data.Criteria;
-import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DataSource;
-import com.smartgwt.client.data.RestDataSource;
 import com.smartgwt.client.rpc.RPCCallback;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
@@ -30,8 +29,6 @@ import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -91,11 +88,45 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
     public void updateShelfWIPData(String username, HashMap<String, String> data) {
         try {
             RPCRequest request = new RPCRequest();
-
             request.setData(Util.formXMLfromHashMap(data));
-
             request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
                     + "?method=saveUpdateShelfWIP&type=RPC&username=" + username);
+            request.setHttpMethod("POST");
+            request.setUseSimpleHttp(true);
+            request.setWillHandleError(true);
+            RPCManager.setPromptStyle(PromptStyle.DIALOG);
+            RPCManager.setDefaultPrompt("Saving records...");
+            RPCManager.setShowPrompt(true);
+
+            RPCManager.sendRequest(request,
+                    new RPCCallback() {
+                        @Override
+                        public void execute(RPCResponse response,
+                                Object rawData, RPCRequest request) {
+                            String rpcResponse = rawData.toString();
+
+                            if (rpcResponse.startsWith("0")) {
+                                SC.say("Shelf updated");
+                                getView().getShelfDetailWindow().destroy();
+                                getView().refreshAllShelfData();
+                            } else {
+                                SC.warn(rpcResponse);
+                            }
+
+                        }
+                    });
+        } catch (Exception e) {
+            SC.warn("Failed saving shelf, please try again later");
+        }
+    }
+    
+    @Override
+    public void updateStatusShelfWIPData(String username, HashMap<String, String> data) {
+        try {
+            RPCRequest request = new RPCRequest();
+            request.setData(Util.formXMLfromHashMap(data));
+            request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
+                    + "?method=saveUpdateStatusShelf&type=RPC&username=" + username);
             request.setHttpMethod("POST");
             request.setUseSimpleHttp(true);
             request.setWillHandleError(true);

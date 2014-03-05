@@ -94,7 +94,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
     private Window buildShelfDetailWindow(final ListGridRecord record) {
         shelfDetailWindow = new Window();
         shelfDetailWindow.setWidth(600);
-        shelfDetailWindow.setHeight(300);
+		shelfDetailWindow.setHeight(375);
         shelfDetailWindow.setTitle("Shelf Detail");
         shelfDetailWindow.setShowMinimizeButton(false);
         shelfDetailWindow.setIsModal(true);
@@ -133,16 +133,8 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
 
         HLayout buttonSet = new HLayout(5);
 
-        IButton closeButton = new IButton("Close");
         IButton approveButton = new IButton("Approve");
         IButton rejectButton = new IButton("Reject");
-
-        closeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                shelfDetailWindow.destroy();
-            }
-        });
 
         approveButton.addClickHandler(new ClickHandler() {
             @Override
@@ -167,12 +159,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
         });
 
         buttonSet.setAlign(Alignment.CENTER);
-
-//        if (InventoryUtil.isApprover(MainPagePresenter.signedInUser)) {
-        buttonSet.setMembers(closeButton, approveButton, rejectButton);
-//        } else {
-//            buttonSet.setMembers(closeButton, editButton);
-//        }
+        buttonSet.setMembers(approveButton, rejectButton);
 
         shelfDetailLayout.setMembers(shelfDetailForm, buttonSet, storageLabel, storageListGrid);
         shelfDetailWindow.addItem(shelfDetailLayout);

@@ -14,6 +14,7 @@ import com.gdn.venice.server.app.inventory.command.FetchShelfDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchStorageDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchShelfInProcessDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveOrUpdateShelfWIPDataCommand;
+import com.gdn.venice.server.app.inventory.command.SaveOrUpdateStatusShelfWIPDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -118,12 +119,18 @@ public class ShelfManagementPresenterServlet extends HttpServlet{
             }
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");	
-			if(method.equals("saveShelfData")){		
+			if(method.equals("saveShelfData") || method.equals("saveUpdateShelfWIP")){		
 				System.out.println("saveShelfData");
 				String requestBody = Util.extractRequestBody(request);		
 				System.out.println("requestBody: "+requestBody);
 				RafRpcCommand saveOrUpdateShelfWIPDataCommand = new SaveOrUpdateShelfWIPDataCommand(username, requestBody);
 				retVal = saveOrUpdateShelfWIPDataCommand.execute();
+			} else if(method.equals("saveUpdateStatusShelf") || method.equals("saveUpdateStatusShelf")){		
+				System.out.println("updateStatusShelfData");
+				String requestBody = Util.extractRequestBody(request);		
+				System.out.println("requestBody: "+requestBody);
+				RafRpcCommand saveOrUpdateStatusShelfWIPDataCommand = new SaveOrUpdateStatusShelfWIPDataCommand(username, requestBody);
+				retVal = saveOrUpdateStatusShelfWIPDataCommand.execute();
 			} 
 		}
 		

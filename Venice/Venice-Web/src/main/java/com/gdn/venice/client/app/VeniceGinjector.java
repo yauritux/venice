@@ -30,11 +30,12 @@ import com.gdn.venice.client.app.fraud.presenter.UncalculatedCreditCardOrderPres
 import com.gdn.venice.client.app.general.presenter.OrderDataViewerPresenter;
 import com.gdn.venice.client.app.general.presenter.PartyMaintenancePresenter;
 import com.gdn.venice.client.app.general.presenter.ReturDataViewerPresenter;
+import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfNonActiveWithApprovalPresenter;
-import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
 import com.gdn.venice.client.app.inventory.presenter.WarehouseAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.WarehouseEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.WarehouseListFilterPresenter;
@@ -195,4 +196,6 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<ShelfNonActiveWithApprovalPresenter> getShelfNonActiveWithApprovalPresenter();
   
   AsyncProvider<CurrencyManagementPresenter> getCurrencyManagementPresenter();
+  
+  AsyncProvider<ASNListPresenter> getASNListPresenter();
 }

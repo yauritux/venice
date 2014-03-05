@@ -30,7 +30,9 @@ public class InventoryNavigationPaneSectionData {
 		  new NavigationPaneTreeNodeRecord("9", "7", "Add Approval", NameTokens.shelfAddApprovalPage, "IM8", DataWidgetNameTokens.INV_SHELFADDAPPROVALTREENODE),
 		  new NavigationPaneTreeNodeRecord("10", "7", "Edit Approval", NameTokens.shelfEditApprovalPage, "IM9", DataWidgetNameTokens.INV_SHELFEDITAPPROVALTREENODE),
 		  new NavigationPaneTreeNodeRecord("11", "7", "Non-Active Approval", NameTokens.shelfNonActiveApprovalPage, "IM10", DataWidgetNameTokens.INV_SHELFNONACTIVEAPPROVALTREENODE),
-		  new NavigationPaneTreeNodeRecord("12", "1", "Master Currency", NameTokens.currencyManagementPage, "IM11", DataWidgetNameTokens.INV_CURRENCYMANAGEMENTTREENODE)
+		  new NavigationPaneTreeNodeRecord("12", "1", "Master Currency", NameTokens.currencyManagementPage, "IM11", DataWidgetNameTokens.INV_CURRENCYMANAGEMENTTREENODE),
+		  new NavigationPaneTreeNodeRecord("13", "1", "Advance Ship Notice", null, "IM12", DataWidgetNameTokens.INV_ASNTREENODE),
+		  new NavigationPaneTreeNodeRecord("14", "13", "Advance Ship Notice List", NameTokens.asnListPage, "IM13", DataWidgetNameTokens.INV_ASNLISTTREENODE)
 		};
 	  }
 }

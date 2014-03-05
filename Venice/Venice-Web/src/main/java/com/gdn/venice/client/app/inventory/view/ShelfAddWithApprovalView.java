@@ -94,7 +94,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
     private Window buildShelfDetailWindow(final ListGridRecord record) {
         shelfDetailWindow = new Window();
         shelfDetailWindow.setWidth(600);
-        shelfDetailWindow.setHeight(300);
+		shelfDetailWindow.setHeight(375);
         shelfDetailWindow.setTitle("Shelf Detail");
         shelfDetailWindow.setShowMinimizeButton(false);
         shelfDetailWindow.setIsModal(true);
@@ -134,19 +134,12 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
         
         HLayout buttonSet = new HLayout(5);
 
-        IButton closeButton = new IButton("Close");
         final IButton editButton = new IButton("Edit");
         IButton correctionButton = new IButton("Need Correction");
+        correctionButton.setAutoFit(true);
         IButton approveButton = new IButton("Approve");
         IButton rejectButton = new IButton("Reject");
-
-        closeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                shelfDetailWindow.destroy();
-            }
-        });
-
+       
         editButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -172,7 +165,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "APPROVED");
 
-                getUiHandlers().updateShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().updateStatusShelfWIPData(MainPagePresenter.signedInUser, data);
             }
         });
 
@@ -183,7 +176,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "NEED_CORRECTION");
 
-                getUiHandlers().updateShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().updateStatusShelfWIPData(MainPagePresenter.signedInUser, data);
             }
         });
 
@@ -194,16 +187,15 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "REJECTED");
 
-                getUiHandlers().updateShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().updateStatusShelfWIPData(MainPagePresenter.signedInUser, data);
             }
         });
 
         buttonSet.setAlign(Alignment.CENTER);
-        buttonSet.addMember(closeButton);
         if(record.getAttribute(DataNameTokens.INV_SHELF_APPROVALSTATUS).equals("Need Correction")){
         	buttonSet.addMember(editButton);
         }
-//        if (InventoryUtil.isApprover(MainPagePresenter.signedInUser)) {
+        
         buttonSet.addMember(approveButton);
         buttonSet.addMember(correctionButton);
         buttonSet.addMember(rejectButton);

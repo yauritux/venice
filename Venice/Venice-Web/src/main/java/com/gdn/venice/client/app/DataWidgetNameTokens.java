@@ -90,4 +90,7 @@ public class DataWidgetNameTokens {
 	public static String  INV_SHELFNONACTIVEAPPROVALTREENODE = "InvShelfNonActiveApprovalTreeNode";
 	
 	public static String  INV_CURRENCYMANAGEMENTTREENODE = "InvCurrencyManagementTreeNode";
+	
+	public static String  INV_ASNTREENODE = "InvASNTreeNode";
+	public static String  INV_ASNLISTTREENODE = "InvASNListTreeNode";
 }
