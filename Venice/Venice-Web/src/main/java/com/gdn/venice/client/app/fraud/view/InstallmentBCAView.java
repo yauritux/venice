@@ -65,16 +65,15 @@ public class InstallmentBCAView extends
 		ToolStrip convertToolStrip = new ToolStrip();
 		convertToolStrip.setWidth100();
 				
-		convertInstallmentListGrid.setAutoFetchData(false);
+		convertInstallmentListGrid.setAutoFetchData(true);
 		convertInstallmentListGrid.setCanEdit(true);
 		convertInstallmentListGrid.setCanResizeFields(true);
-		convertInstallmentListGrid.setShowFilterEditor(true);
+		convertInstallmentListGrid.setShowFilterEditor(false);
 		convertInstallmentListGrid.setCanSort(true);
 		convertInstallmentListGrid.setSelectionType(SelectionStyle.SIMPLE);
 		convertInstallmentListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
 		convertInstallmentListGrid.setEditEvent(ListGridEditEvent.DOUBLECLICK);
-		convertInstallmentListGrid.setShowRowNumbers(true);			
-
+		convertInstallmentListGrid.setShowRowNumbers(true);				
 		
 		convertInstallmentListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
 			@Override
@@ -139,50 +138,41 @@ public class InstallmentBCAView extends
 	@Override
 	public void loadInstallmentBCAData(DataSource convertInstallmentDS, DataSource cancelInstallmentDS) {			
 		//populate convert installment listgrid
-//		LinkedHashMap<String, String> paymentTypeMap = new LinkedHashMap<String, String>();  
-//		paymentTypeMap.put("3", "MIGS Credit Card");
-//		paymentTypeMap.put("7", "MIGS Installment");
-	//	convertInstallmentDS.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEID).setValueMap(paymentTypeMap);
+		LinkedHashMap<String, String> paymentTypeMap = new LinkedHashMap<String, String>();  
+		paymentTypeMap.put("3", "MIGS Credit Card");
+		paymentTypeMap.put("7", "MIGS Installment");
+		convertInstallmentDS.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEID).setValueMap(paymentTypeMap);
 		
-		
-	//	convertInstallmentDS.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_TENOR).setValueMap(tenorMap);
+		LinkedHashMap<String, String> tenorMap = new LinkedHashMap<String, String>();  
+		tenorMap.put("6", "6 Bulan");
+		tenorMap.put("12", "12 Bulan");
+		convertInstallmentDS.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_TENOR).setValueMap(tenorMap);
 		
 		convertInstallmentListGrid.setDataSource(convertInstallmentDS);	
 		convertInstallmentListGrid.setFields(Util.getListGridFieldsFromDataSource(convertInstallmentDS));
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_ORDERPAYMENTID).setCanEdit(false);
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_ORDERPAYMENTID).setCanFilter(false);		
+		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_ORDERPAYMENTID).setHidden(true);		
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_WCSORDERID).setCanEdit(false);		
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_WCSPAYMENTID).setCanEdit(false);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_REFERENCEID).setCanEdit(false);	
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEDESC).setCanEdit(true);
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEDESC).setCanFilter(false);
+		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEID).setCanEdit(true);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_AMOUNT).setCanEdit(false);	
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_AMOUNT).setCanFilter(false);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_TENOR).setCanEdit(true);
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_TENOR).setCanFilter(false);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_CUSTOMERUSERNAME).setCanEdit(false);	
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_CUSTOMERUSERNAME).setCanFilter(false);	
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME).setCanEdit(false);	
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME).setCanFilter(false);	
+		convertInstallmentListGrid.getField(DataNameTokens.VENCUSTOMER_VENPARTY_FULLORLEGALNAME).setCanEdit(false);	
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_INSTALLMENTSENTFLAG).setCanEdit(false);
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_INSTALLMENTSENTFLAG).setCanFilter(false);
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_ORDERPAYMENTID).setHidden(true);		
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_WCSORDERID).setWidth(100);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_WCSPAYMENTID).setWidth(100);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_REFERENCEID).setWidth(100);
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEDESC).setWidth(100);
+		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEID).setWidth(100);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_AMOUNT).setWidth(120);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_TENOR).setWidth(75);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_CUSTOMERUSERNAME).setWidth(150);
-		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME).setWidth(150);
+		convertInstallmentListGrid.getField(DataNameTokens.VENCUSTOMER_VENPARTY_FULLORLEGALNAME).setWidth(150);
 		convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_INSTALLMENTSENTFLAG).setWidth(75);
 		Util.formatListGridFieldAsCurrency(convertInstallmentListGrid.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_AMOUNT));
 		
 		//populate cancel installment listgrid
-		LinkedHashMap<String, String> tenorMap = new LinkedHashMap<String, String>();  
-		tenorMap.put("6", "6 Bulan");
-		tenorMap.put("12", "12 Bulan");
-		
 		LinkedHashMap<String, String> paymentTypeCancelMap = new LinkedHashMap<String, String>();  
 		paymentTypeCancelMap.put("7", "MIGS Installment");
 		cancelInstallmentDS.getField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_VENWCSPAYMENTTYPE_WCSPAYMENTTYPEID).setValueMap(paymentTypeCancelMap);	
