@@ -29,7 +29,7 @@ public class ASNListPresenter extends Presenter<ASNListPresenter.MyView, ASNList
 	
 	ASNListView view;
 	
-	public static final String asnListPresenterServlet = "ASNListPresenterServlet";
+	public static final String asnManagementPresenterServlet = "ASNManagementPresenterServlet";
 	
 	protected final DispatchAsync dispatcher;
 
