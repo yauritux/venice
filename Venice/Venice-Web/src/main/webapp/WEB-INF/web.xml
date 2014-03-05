@@ -578,6 +578,12 @@
     <servlet-name>CurrencyManagementPresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.inventory.presenter.CurrencyManagementPresenterServlet</servlet-class>
   </servlet>
+   <servlet>
+    <description></description>
+    <display-name>ASNListPresenterServlet</display-name>
+    <servlet-name>ASNListPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.ASNListPresenterServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>FraudBinCreditLimitPresenterServlet</servlet-name>
     <url-pattern>/FraudBinCreditLimitPresenterServlet</url-pattern>
@@ -766,6 +772,10 @@
     <servlet-name>CurrencyManagementPresenterServlet</servlet-name>
     <url-pattern>/CurrencyManagementPresenterServlet</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ASNListPresenterServlet</servlet-name>
+    <url-pattern>/ASNListPresenterServlet</url-pattern>
+  </servlet-mapping>  
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>
