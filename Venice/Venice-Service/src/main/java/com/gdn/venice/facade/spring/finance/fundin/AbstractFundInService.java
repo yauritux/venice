@@ -124,7 +124,8 @@ public abstract class AbstractFundInService implements FundInService{
 		}
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA ||
-		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA){
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA ||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB){
 			orderPayment = venOrderPaymentDAO.findByReferenceId(referenceId);
 		}
 		
@@ -173,6 +174,17 @@ public abstract class AbstractFundInService implements FundInService{
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){			
 					
 			List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findWithVenOrderPaymentFinArFundsInReconRecordByInternetBankingDetail(referenceId);
+			orderPaymentAllocation = orderPaymentAllocationList.size() > 0 ? orderPaymentAllocationList.get(0) : null;
+			
+			if(orderPaymentAllocation == null){
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+						"A record in the report being processed contains an order id that has no corresponding order record in the Venice database:" + referenceId);
+			}
+		}
+		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB){			
+							
+			List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findWithVenOrderPaymentFinArFundsInReconRecordByPaymentReferenceId(referenceId);
 			orderPaymentAllocation = orderPaymentAllocationList.size() > 0 ? orderPaymentAllocationList.get(0) : null;
 			
 			if(orderPaymentAllocation == null){
@@ -230,6 +242,11 @@ public abstract class AbstractFundInService implements FundInService{
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){			
 			
+			fundInReconList = finArFundsInReconRecordDAO.findForInternetBankingDetail(paymentIdentifier);
+			return (fundInReconList.size() > 0);
+		}
+		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB){			
 			fundInReconList = finArFundsInReconRecordDAO.findForInternetBankingDetail(paymentIdentifier);
 			return (fundInReconList.size() > 0);
 		}

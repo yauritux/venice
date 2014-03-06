@@ -55,6 +55,12 @@ public interface FinArFundsInReconRecordDAO extends JpaRepository<FinArFundsInRe
 		"o.uniquePayment = ?2 AND " +
 		"o.reconcilliationRecordTimestamp IS NOT NULL";
 	
+	public static final String FIND_BY_NOMORREFF =
+		"SELECT o " +
+		"FROM FinArFundsInReconRecord o " +
+		"WHERE o.nomorReff = ?1 AND " +
+		"o.reconcilliationRecordTimestamp IS NOT NULL ";
+	
 	public List<FinArFundsInReconRecord> findByWcsOrderId(String wcsOrderId);
 	
 	@Query(FIND_BY_NOMORREFF_PAIDAMOUNT_PAYMENTDATE)
@@ -71,4 +77,7 @@ public interface FinArFundsInReconRecordDAO extends JpaRepository<FinArFundsInRe
 	
 	@Query(FIND_BY_NOMORREFF_UNIQUEPAYMENT)
 	public List<FinArFundsInReconRecord> findByNomorReffUniquePayment(String paymentConfirmationNumber,String uniquePayment);
+	
+	@Query(FIND_BY_NOMORREFF)
+	public List<FinArFundsInReconRecord> findByNomorReff(String paymentConfirmationNumber);
 }

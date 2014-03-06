@@ -48,6 +48,14 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 			   "WHERE " +
 			   " op.referenceId = ?1 ";
 	
+	public static final String FIND_BY_PAYMENTREFERENCEID =
+		   "SELECT o " +
+		   "FROM VenOrderPaymentAllocation AS o " +
+		   " JOIN FETCH o.venOrderPayment AS op " +
+		   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
+		   "WHERE " +
+		   " op.referenceId = ?1 ";
+	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
@@ -59,4 +67,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(FIND_BY_VA_DETAIL)
 	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByVADetail(String referenceId);
+	
+	@Query(FIND_BY_PAYMENTREFERENCEID)
+	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByPaymentReferenceId(String referenceId);
 }
