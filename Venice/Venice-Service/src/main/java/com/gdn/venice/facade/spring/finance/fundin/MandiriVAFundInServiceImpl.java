@@ -11,16 +11,17 @@ import org.springframework.stereotype.Service;
 
 import com.gdn.venice.constants.FinApprovalStatusConstants;
 import com.gdn.venice.constants.FinArFundsInActionAppliedConstants;
+import com.gdn.venice.constants.FinArFundsInReportTimeConstants;
 import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
 import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.exception.FundInFileAlreadyUploadedException;
 import com.gdn.venice.exception.FundInFileParserException;
 import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
-import com.gdn.venice.exportimport.finance.dataimport.BRI_IB_FileReader;
-import com.gdn.venice.finance.dataexportimport.BCA_VA_IB_Record;
-import com.gdn.venice.finance.dataexportimport.BRI_IB_Record;
+import com.gdn.venice.exportimport.finance.dataimport.MT942_FileReader;
+import com.gdn.venice.finance.dataexportimport.MT942_Record;
 import com.gdn.venice.hssf.PojoInterface;
 import com.gdn.venice.persistence.FinApprovalStatus;
+import com.gdn.venice.persistence.FinArFundsIdReportTime;
 import com.gdn.venice.persistence.FinArFundsInActionApplied;
 import com.gdn.venice.persistence.FinArFundsInReconRecord;
 import com.gdn.venice.persistence.FinArFundsInReport;
@@ -28,16 +29,20 @@ import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
 import com.gdn.venice.util.CommonUtil;
 
-@Service("BRIIBFundInServiceImpl")
-public class BRIIBFundInServiceImpl extends AbstractFundInService{
-	private static final FinArFundsInReportTypeConstants REPORT_TYPE = FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB;
-	private static final String CLASS_NAME = BRIIBFundInServiceImpl.class.getCanonicalName();
+@Service("MandiriVAFundInServiceImpl")
+public class MandiriVAFundInServiceImpl extends AbstractFundInService {
+	private static final FinArFundsInReportTypeConstants REPORT_TYPE = FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA;
+	private static final String CLASS_NAME = MandiriVAFundInServiceImpl.class.getCanonicalName();
 	
 	@Override
 	public String process(String fileNameAndFullPath, String uploadUserName)
 			throws NoSuchAlgorithmException, IOException,
 			FundInFileAlreadyUploadedException,
 			FundInNoFinancePeriodFoundException {
+		
+		if(isFileAlreadyUploaded(fileNameAndFullPath, REPORT_TYPE)){
+			throw new FundInFileAlreadyUploadedException("The file is already uploaded");
+		}
 		
 		FinArFundsInReport finArFundsInReport = createFundInReportRecord(REPORT_TYPE, fileNameAndFullPath, uploadUserName);
 		
@@ -49,14 +54,32 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 			FinArFundsInReconRecord fundInRecon = null;
 			List<FinArFundsInReconRecord> fundInReconReadyToPersistList = new ArrayList<FinArFundsInReconRecord>(fundInData.getFundInList().size());
 			
+			boolean isNextDayPaymentFile = isNextDayPaymentFile(fileNameAndFullPath);
+			
 			for(PojoInterface pojo : fundInData.getFundInList()){
-				BCA_VA_IB_Record rec = (BCA_VA_IB_Record) pojo;
+				MT942_Record rec = (MT942_Record) pojo;
 				
 				if(isPaymentAmountNotLessThanZero(new BigDecimal(rec.getPaymentAmount()))){
-					fundInRecon = processEachFundIn(pojo, finArFundsInReport);
-					if(fundInRecon != null){
-						fundInReconReadyToPersistList.add(fundInRecon);
-						fundInData.getProcessedFundInList().add(fundInRecon.getNomorReff());
+					List<FinArFundsInReconRecord> nextDayFundInReconList = null;
+					if(isNextDayPaymentFile){
+						nextDayFundInReconList = getNextDayFundInRecon(rec);
+					}
+					
+					if(nextDayFundInReconList == null || nextDayFundInReconList.size() == 0){
+						fundInRecon = processEachFundIn(pojo, finArFundsInReport, isNextDayPaymentFile);
+						if(fundInRecon != null){
+							fundInReconReadyToPersistList.add(fundInRecon);
+							fundInData.getProcessedFundInList().add(fundInRecon.getNomorReff());
+						}
+					}else{
+						FinArFundsIdReportTime nextDayFundInReportTime = new FinArFundsIdReportTime();
+						nextDayFundInReportTime.setReportTimeId(FinArFundsInReportTimeConstants.FIN_AR_FUNDS_IN_REPORT_TIME_H1.id());
+						
+						for(FinArFundsInReconRecord eachFundInRecon : nextDayFundInReconList){
+							eachFundInRecon.setFinArFundsIdReportTime(nextDayFundInReportTime);
+							fundInReconReadyToPersistList.add(eachFundInRecon);
+							fundInData.getProcessedFundInList().add(eachFundInRecon.getNomorReff());
+						}
 					}
 				}
 			}
@@ -81,6 +104,17 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 			e.printStackTrace();
 			return e.getMessage();
 		}
+		
+	}
+
+	public List<FinArFundsInReconRecord> getNextDayFundInRecon(MT942_Record rec) {
+		List<FinArFundsInReconRecord> fundInReconList;
+		String accountNumber = rec.getAccountNumber();
+		BigDecimal paymentAmount = new BigDecimal(rec.getPaymentAmount());
+		String paymentDate = SDF_yyyyMMdd_HHmmss2.format(rec.getPaymentDate());
+		
+		fundInReconList = getFundInReconForVAPayment(accountNumber, paymentDate + " - " + paymentAmount);
+		return fundInReconList;
 	}
 
 	@Override
@@ -88,14 +122,14 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 			throws FundInFileParserException {
 		ArrayList<PojoInterface> records = null;
 		
-		BRI_IB_FileReader reader = new BRI_IB_FileReader();
+		MT942_FileReader reader = new MT942_FileReader();
 		
 		try {
-			ArrayList<BRI_IB_Record> results = reader.readFile(fileNameAndFullPath);
+			ArrayList<MT942_Record> results = reader.readFile(fileNameAndFullPath);
 			records = new ArrayList<PojoInterface>(results.size());
 			
-			for (BRI_IB_Record briIBRecord : results) {
-				records.add(briIBRecord);
+			for (MT942_Record mandiriRecord : results) {
+				records.add(mandiriRecord);
 			}
 			
 		} catch (Exception e) {
@@ -109,71 +143,47 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 
 	@Override
 	public FundInData mergeAndSumDuplicate(ArrayList<PojoInterface> fundInList) {
-		CommonUtil.logDebug(CLASS_NAME, "Check for duplicate fund in");
+		CommonUtil.logDebug(CLASS_NAME, "No fund in duplication check for this fund in");
 		FundInData fundInData = new FundInData();
 		
-		BRI_IB_Record currentRecord = null;
-		BRI_IB_Record otherRecord = null;
-		String currentReferenceNo = null;
-		String otherReferenceNo = null;
+		MT942_Record rec = null;
 		
 		for(int i = 0 ; i < fundInList.size(); i++){
-			currentRecord = (BRI_IB_Record) fundInList.get(i);
-			
-			fundInList.remove(i);
-			i = -1;
-			
-			currentReferenceNo = currentRecord.getBillReferenceNo();
-			
-			for(int j = 0 ; j < fundInList.size(); j++){
-				otherRecord = (BRI_IB_Record) fundInList.get(j);
+			rec = (MT942_Record) fundInList.get(i);
 				
-				otherReferenceNo = otherRecord.getBillReferenceNo();
-				
-				if(currentReferenceNo.equals(otherReferenceNo)){
-					CommonUtil.logDebug(CLASS_NAME, "Duplicate Fund In with Bill Reference No " + currentReferenceNo);
-					fundInList.remove(j);
-					j = 0;
-					
-					currentRecord.setAmount(currentRecord.getAmount() + otherRecord.getAmount());
-					currentRecord.setBankFee(currentRecord.getBankFee() + otherRecord.getBankFee());
-				}
-			}
-			
-			fundInData.getFundInList().add(currentRecord);
+			fundInData.getFundInList().add(rec);
 		}
 		
 		return fundInData;
 	}
 	
-	public FinArFundsInReconRecord processEachFundIn(PojoInterface pojo, FinArFundsInReport finArFundsInReport) throws ParseException{
+	public FinArFundsInReconRecord processEachFundIn(PojoInterface pojo, FinArFundsInReport finArFundsInReport, boolean isNextDayPayment) throws ParseException{
 		FinArFundsInReconRecord fundInRecon = null;
 		
-		BRI_IB_Record rec = (BRI_IB_Record) pojo;
+		MT942_Record rec = (MT942_Record) pojo;
 		
-		String billReferenceNo = rec.getBillReferenceNo();
+		String accountNumber = rec.getAccountNumber();
 		
-		BigDecimal paymentAmount = new BigDecimal(rec.getAmount());
-		BigDecimal bankFee = new BigDecimal(rec.getBankFee());
+		BigDecimal paymentAmount = new BigDecimal(rec.getPaymentAmount());
 		
-		if(!isFundInOkToContinue(billReferenceNo, "", paymentAmount, REPORT_TYPE)) {
+		String paymentDate = SDF_yyyyMMdd_HHmmss2.format(rec.getPaymentDate());
+		
+		String uniquePayment = paymentDate + " - " + paymentAmount;
+		
+		if(!isFundInOkToContinue(accountNumber, uniquePayment, paymentAmount, REPORT_TYPE)) {
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(billReferenceNo, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(accountNumber, paymentAmount, REPORT_TYPE);
 		
-		if(isInternetBankingFundInAlreadyExist(billReferenceNo, REPORT_TYPE.id())){
-			order = null;
-		}
-		
-		if(order != null && !isOrderPaymentExist(billReferenceNo, paymentAmount, REPORT_TYPE)){
-			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + billReferenceNo);
+		if(order != null && !isOrderPaymentExist(accountNumber, paymentAmount, REPORT_TYPE)){
+			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + accountNumber);
 			return null;
 		}
 		
 		if(order != null){
 			VenOrderPaymentAllocation orderPaymentAllocation 
-				= getPaymentAllocationByRelatedPayment(billReferenceNo, 
+				= getPaymentAllocationByRelatedPayment(accountNumber, 
 						                               paymentAmount, 
 						                               REPORT_TYPE);
 			
@@ -199,22 +209,35 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 		}else{
 			BigDecimal remainingAmount = fundInRecon.getRemainingBalanceAmount()!=null?fundInRecon.getRemainingBalanceAmount(): new BigDecimal(0);
 			fundInRecon.setRemainingBalanceAmount(remainingAmount.subtract(paymentAmount));
-			fundInRecon.setNomorReff(billReferenceNo);
+			fundInRecon.setNomorReff(accountNumber);
 		}
 		
 		fundInRecon.setFinArFundsInReport(finArFundsInReport);
-		BigDecimal feeAmount = fundInRecon.getProviderReportFeeAmount()!=null?fundInRecon.getProviderReportFeeAmount(): new BigDecimal(0);
-		BigDecimal paidAmount = fundInRecon.getProviderReportPaidAmount()!=null?fundInRecon.getProviderReportPaidAmount(): new BigDecimal(0);
-		fundInRecon.setProviderReportFeeAmount(feeAmount.add(bankFee));
-		fundInRecon.setProviderReportPaidAmount(paidAmount.add(paymentAmount));		
-		fundInRecon.setProviderReportPaymentId(billReferenceNo);
-		fundInRecon.setReconcilliationRecordTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
-		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(rec.getTransactionDateTime().getTime()));
-		fundInRecon.setRefundAmount(new BigDecimal(0));
 		
+		BigDecimal paidAmount = fundInRecon.getProviderReportPaidAmount()!=null?fundInRecon.getProviderReportPaidAmount(): new BigDecimal(0);
+		fundInRecon.setProviderReportPaidAmount(paidAmount.add(paymentAmount));	
+		
+		fundInRecon.setProviderReportFeeAmount(new BigDecimal(0));
+		fundInRecon.setUniquePayment(uniquePayment);
+		fundInRecon.setProviderReportPaymentId(accountNumber);
+		fundInRecon.setReconcilliationRecordTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
+		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(rec.getPaymentDate().getTime()));
+		fundInRecon.setRefundAmount(new BigDecimal(0));
 		fundInRecon.setFinArReconResult(getReconResult(fundInRecon));
 		
+		FinArFundsIdReportTime finArFundsIdReportTime = getFundsIdReportTime(isNextDayPayment);
+		fundInRecon.setFinArFundsIdReportTime(finArFundsIdReportTime);
+		
 		return fundInRecon;
+	}
+	
+	public boolean isNextDayPaymentFile(String fileNameAndFullPath) throws Exception{
+		MT942_FileReader reader = new MT942_FileReader();
+		String uniqueIds = reader.getUniqueReportIdentifier(fileNameAndFullPath);
+		String[] uniqueIdSplit=uniqueIds.split("&");
+		String typeReport=uniqueIdSplit[1];
+		
+		return typeReport.equalsIgnoreCase("old");
 	}
 
 }

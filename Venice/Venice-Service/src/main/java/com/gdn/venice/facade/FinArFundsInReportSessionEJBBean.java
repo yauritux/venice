@@ -24,17 +24,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 
+import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
+import com.djarum.raf.utilities.JPQLQueryStringBuilder;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
 import com.gdn.venice.exception.FundInFileAlreadyUploadedException;
-import com.gdn.venice.exception.FundInFileParserException;
 import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
 import com.gdn.venice.facade.callback.SessionCallback;
 import com.gdn.venice.facade.finder.FinderReturn;
 import com.gdn.venice.facade.spring.finance.fundin.FundInService;
 import com.gdn.venice.persistence.FinArFundsInReport;
-import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
-import com.djarum.raf.utilities.JPQLQueryStringBuilder;
-import com.djarum.raf.utilities.Log4jLoggerFactory;
 
 /**
  * Session Bean implementation class FinArFundsInReportSessionEJBBean
@@ -91,6 +90,14 @@ public class FinArFundsInReportSessionEJBBean implements FinArFundsInReportSessi
 	@Autowired
 	@Qualifier("MandiriInstallmentCCFundInServiceImpl")
 	FundInService fundInServiceMandiriInstallmentCC;
+	
+	@Autowired
+	@Qualifier("MandiriVAFundInServiceImpl")
+	FundInService fundInServiceMandiriVA;
+	
+	@Autowired
+	@Qualifier("BCAVAFundInServiceImpl")
+	FundInService fundInServiceBCAVA;
 	
 	/*
 	 * Implements an IOC model for pre/post callbacks to persist, merge, and
@@ -650,6 +657,12 @@ public class FinArFundsInReportSessionEJBBean implements FinArFundsInReportSessi
 					break;
 				case FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC:
 					result = fundInServiceMandiriInstallmentCC.process(fileNameAndFullPath, userName);
+					break;
+				case FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA:
+					result = fundInServiceMandiriVA.process(fileNameAndFullPath, userName);
+					break;
+				case FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA:
+					result = fundInServiceBCAVA.process(fileNameAndFullPath, userName);
 					break;
 				default:
 					break;
