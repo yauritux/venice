@@ -50,9 +50,9 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 			List<FinArFundsInReconRecord> fundInReconReadyToPersistList = new ArrayList<FinArFundsInReconRecord>(fundInData.getFundInList().size());
 			
 			for(PojoInterface pojo : fundInData.getFundInList()){
-				BCA_VA_IB_Record rec = (BCA_VA_IB_Record) pojo;
+				BRI_IB_Record rec = (BRI_IB_Record) pojo;
 				
-				if(isPaymentAmountNotLessThanZero(new BigDecimal(rec.getPaymentAmount()))){
+				if(isPaymentAmountNotLessThanZero(new BigDecimal(rec.getAmount()))){
 					fundInRecon = processEachFundIn(pojo, finArFundsInReport);
 					if(fundInRecon != null){
 						fundInReconReadyToPersistList.add(fundInRecon);
