@@ -3,7 +3,7 @@ package com.gdn.venice.constants;
 public enum VenWCSPaymentTypeConstants {	
 
 	 VEN_WCS_PAYMENT_TYPE_KlikBCA(0, "KlikBCA"),
-	 VEN_WCS_PAYMENT_TYPE_MandiriKlikpay(1, "MandiriKlikpay"),
+	 VEN_WCS_PAYMENT_TYPE_MandiriKlikpay(1, "DebitMandiri"),
 	 VEN_WCS_PAYMENT_TYPE_VirtualAccount(2, "VirtualAccount"),
 	 VEN_WCS_PAYMENT_TYPE_MIGSCreditCard(3, "MIGSCreditCard"),
 	 VEN_WCS_PAYMENT_TYPE_KlikPAYFullPayment(4, "KlikPAYFullPayment"),
@@ -23,10 +23,11 @@ public enum VenWCSPaymentTypeConstants {
 	 VEN_WCS_PAYMENT_TYPE_KlikPAYKartuKredit(16, "KlikPAYKartuKredit"),
 	 VEN_WCS_PAYMENT_TYPE_KlikPAYKlikBCA(17, "KlikPAYKlikBCA"),
 	 
-	 VEN_WCS_PAYMENT_TYPE_DebitMandiri(18, "DebitMandiri"),
-	 		
+	 VEN_WCS_PAYMENT_TYPE_TelkomselPoin(18, "TelkomselPoin"),
+	 VEN_WCS_PAYMENT_TYPE_BCACreditCard(19, "BCACreditCard"),	
+	 VEN_WCS_PAYMENT_TYPE_ANZ(20, "ANZ");
 	//this is only for wcs
-	 VEN_WCS_PAYMENT_TYPE_PartialFulfillment(19, "PartialFulfillment");
+//	 VEN_WCS_PAYMENT_TYPE_PartialFulfillment(19, "PartialFulfillment");
 	 
 	 private long id;
 	 private String desc;

@@ -56,6 +56,8 @@ public interface VeniceConstants {
 	public static final String VEN_WCS_PAYMENT_TYPE_MandiriDebit = "MandiriDebit";
 	public static final String VEN_WCS_PAYMENT_TYPE_CSPayment = "CSPayment";
 	public static final String VEN_WCS_PAYMENT_TYPE_TelkomselPoin = "TelkomselPoin";
+	public static final String VEN_WCS_PAYMENT_TYPE_BCACreditCard = "BCACreditCard";
+	public static final String VEN_WCS_PAYMENT_TYPE_ANZ = "ANZ";
 	
 	//this is only for wcs
 	public static final String VEN_WCS_PAYMENT_TYPE_PartialFulfillment = "PartialFulfillment";
@@ -79,6 +81,8 @@ public interface VeniceConstants {
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_KlikPAYKartuKredit = 16;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_KlikPAYKlikBCA = 17;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_TelkomselPoin = 18;
+	public static final long VEN_WCS_PAYMENT_TYPE_ID_BCACreditCard = 19;
+	public static final long VEN_WCS_PAYMENT_TYPE_ID_ANZ = 20;
 	
 	public static final Integer VEN_FULFILLMENT_STATUS_ZERO = 0;
 	public static final Integer VEN_FULFILLMENT_STATUS_ONE = 1;
@@ -309,6 +313,7 @@ public interface VeniceConstants {
 	public static final long FIN_JOURNAL_PAYMENT = 4;
 	public static final long FIN_JOURNAL_MANUAL = 5;
 	public static final long FIN_JOURNAL_ALLOCATION = 6;
+	public static final long VEN_BANK_ID_ANZ= 7;
 	
 	
 	public static final long FIN_TRANSACTION_STATUS_NEW = 0;
