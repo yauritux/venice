@@ -31,6 +31,7 @@ import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
 import com.gdn.venice.exportimport.finance.dataimport.BCA_IB_FileReader;
 import com.gdn.venice.exportimport.finance.dataimport.BRI_IB_FileReader;
 import com.gdn.venice.exportimport.finance.dataimport.MT942_FileReader;
+import com.gdn.venice.exportimport.finance.dataimport.Niaga_IB_FileReader;
 import com.gdn.venice.finance.dataexportimport.BCA_CC_Record;
 import com.gdn.venice.hssf.ExcelToPojo;
 import com.gdn.venice.hssf.PojoInterface;
@@ -384,6 +385,16 @@ public abstract class AbstractFundInService implements FundInService{
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB){
 			BRI_IB_FileReader reader = new BRI_IB_FileReader();
+			try {
+				uniqueContent = reader.getUniqueReportIdentifier(fileNameAndFullPath);
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), "Unable to retrieve unique content from file");
+				e.printStackTrace();
+			}
+		}
+		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB){
+			Niaga_IB_FileReader reader = new Niaga_IB_FileReader();
 			try {
 				uniqueContent = reader.getUniqueReportIdentifier(fileNameAndFullPath);
 			} catch (Exception e) {
