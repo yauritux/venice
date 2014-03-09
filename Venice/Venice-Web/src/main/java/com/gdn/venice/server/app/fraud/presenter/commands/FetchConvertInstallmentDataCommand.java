@@ -53,94 +53,42 @@ public class FetchConvertInstallmentDataCommand implements RafDsCommand {
 		this.request=request;
 	}
 	
-	/*private void setupDBConnection() throws ClassNotFoundException, SQLException{
-		Class.forName("org.postgresql.Driver");		
-		conn = DriverManager.getConnection("jdbc:postgresql://" + dbHost +":" + dbPort + "/" + dbName, dbUsername, dbPassword);
-	}*/
-	
-	/*private static final String CONVERT_INSTALLMENT_LIST_SQL = "select op.order_payment_id, op.wcs_payment_id, o.wcs_order_id, o.order_date, op.reference_id, op.amount, op.tenor, op.installment, op.interest, op.interest_installment, op.installment_sent_flag, c.customer_user_name, p.full_or_legal_name, op.wcs_payment_type_id " +
-																												"from ven_order o " +
-																												"left join ven_order_payment_allocation opa on o.order_id=opa.order_id " +
-																												"left join ven_order_payment op on opa.order_payment_id=op.order_payment_id " +
-																												"left join ven_customer c on c.customer_id=o.customer_id " +
-																												"left join ven_party p on p.party_id=c.party_id " +
-																												"left join ven_bin_credit_limit_estimate b on b.bin_number=substr(op.masked_credit_card_number,0,7) " +
-																												"where op.amount>500000 and o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
-																												" and op.wcs_payment_type_id in (" +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSBCAInstallment + ", " + VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSCreditCard + ")" +
-																												" and b.bank_name='BCA' and op.installment_sent_flag=false and o.order_date>=?";
-	*/
 	@Override
 	public RafDsResponse execute() {
-		/*RafDsResponse rafDsResponse = new RafDsResponse();
-		List<HashMap<String, String>> dataList= new ArrayList<HashMap<String, String>>();
-		PreparedStatement psInstallmentList = null;      
-      	ResultSet rsInstallmentList = null;
-      	ArrayList<Installment> InstallmentList = null;	*/
-
 		RafDsResponse rafDsResponse = new RafDsResponse();
 		List<HashMap<String, String>> dataList= new ArrayList<HashMap<String, String>>();
-		Locator<Object> locator=null;
-		
-		
+		Locator<Object> locator=null;		
       	
 		try{
-	/*		InstallmentList = new ArrayList<Installment>();
-            psInstallmentList = conn.prepareStatement(CONVERT_INSTALLMENT_LIST_SQL, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            
-            Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Date paramDate = DateUtils.addDays((Date) sdf.parse(sdf.format(calendar.getTime())), -30);
-            
-            psInstallmentList.setDate(1, new java.sql.Date(paramDate.getTime()));
-    		rsInstallmentList = psInstallmentList.executeQuery();
-    		
-    		rsInstallmentList.last();
-			int totalInstallmentList = rsInstallmentList.getRow();
-			rsInstallmentList.beforeFirst();
-			rsInstallmentList.next();
-    					*/
-
+			Calendar oneMonthAgo = Calendar.getInstance();
+			oneMonthAgo.add(Calendar.DAY_OF_MONTH, -30);
+			
+			String dayOfOneMonthAgo = oneMonthAgo.get(Calendar.YEAR)+"-"+(oneMonthAgo.get(Calendar.MONTH)+1)+"-"+oneMonthAgo.get(Calendar.DAY_OF_MONTH);
 			locator = new Locator<Object>();					
 			VenOrderPaymentAllocationSessionEJBRemote orderAllocationSessionHome = (VenOrderPaymentAllocationSessionEJBRemote) locator.lookup(VenOrderPaymentAllocationSessionEJBRemote.class, "VenOrderPaymentAllocationSessionEJBBean");		
 			List<VenOrderPaymentAllocation> venOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>();		
 
 			JPQLAdvancedQueryCriteria criteria = request.getCriteria();			
-
 			
 			String query="select o from VenBinCreditLimitEstimate ob, VenOrderPaymentAllocation o join fetch o.venOrder oi join fetch o.venOrderPayment oe join fetch oi.venCustomer oa left join oa.venParty ou" +
 					" where substring(oe.maskedCreditCardNumber,0,7) = ob.binNumber and oe.amount>500000 and oi.venOrderStatus.orderStatusId= " + VeniceConstants.VEN_ORDER_STATUS_FP +
 					" and oe.venWcsPaymentType.wcsPaymentTypeId in (" +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSBCAInstallment + ", " + VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSCreditCard + ") "+
 					" and ob.bankName='BCA' ";
-		/*	if(criteria==null){		
-				
-			}else{
-				List<JPQLSimpleQueryCriteria> simpleCriteriaList = criteria.getSimpleCriteria();
-				for (int i=0;i<simpleCriteriaList.size();i++) {
-					query = query + " and";
-					if (simpleCriteriaList.get(i).getFieldName().equals(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_WCSPAYMENTID)) {
-						query = query + " oe.wcsPaymentId like '%"+simpleCriteriaList.get(i).getValue()+"%'";
-					}else if (simpleCriteriaList.get(i).getFieldName().equals(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_WCSORDERID)) {
-						query = query + " oi.wcsOrderId like '%"+simpleCriteriaList.get(i).getValue()+"%'";
-					}else if (simpleCriteriaList.get(i).getFieldName().equals(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_REFERENCEID)) {
-						query = query + " oe.referenceId like '%"+simpleCriteriaList.get(i).getValue()+"%'";
-					}
-				}
-			}*/
 
 			if (criteria!=null){
 				List<JPQLSimpleQueryCriteria> simpleCriteriaList = criteria.getSimpleCriteria();
 				for (int i=0;i<simpleCriteriaList.size();i++) {
 					if (simpleCriteriaList.get(i).getFieldName().equals(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_INSTALLMENTSENTFLAG)) {
-						if(simpleCriteriaList.get(i).getValue().equals("Yes")){
-							query = query + " and oe.installmentSentFlag is true ";
-						}else if(simpleCriteriaList.get(i).getValue().equals("No")){
-							query = query + " and oe.installmentSentFlag is false ";
+						if(simpleCriteriaList.get(i).getValue().toLowerCase().equals("yes")){
+							query = query + " and oe.installmentSentFlag is true";
+						}else if(simpleCriteriaList.get(i).getValue().toLowerCase().equals("no")){
+							query = query + " and oe.installmentSentFlag is false";
 						}
 					}
 				}
 			}			
-			
-			venOrderPaymentAllocationList = orderAllocationSessionHome.queryByRange(query,0, 20);
+			query = query+" and oi.orderDate >= '"+dayOfOneMonthAgo+"'";
+			venOrderPaymentAllocationList = orderAllocationSessionHome.queryByRange(query,0, 0);
 			
 				for(VenOrderPaymentAllocation venOrderPaymentAllocation:venOrderPaymentAllocationList ){
                     HashMap<String, String> map = new HashMap<String, String>();
