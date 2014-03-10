@@ -242,38 +242,36 @@ public class OrderItemServiceImpl implements OrderItemService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::BEGIN, venOrderItem=" + venOrderItem);
 		
-		/*
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::merchantProduct orderItems="
 				+ venOrderItem.getVenMerchantProduct().getVenOrderItems());
-		*/
 
-		//if (venOrderItem.getLogLogisticService() != null) {
+		if (venOrderItem.getLogLogisticService() != null) {
 			List<LogLogisticService> logLogisticServiceRefs = new ArrayList<LogLogisticService>();
 			logLogisticServiceRefs.add(venOrderItem.getLogLogisticService());
 			logLogisticServiceRefs = logLogisticService.synchronizeLogLogisticServiceReferences(logLogisticServiceRefs);
 			for (LogLogisticService logisticService : logLogisticServiceRefs) {
 				venOrderItem.setLogLogisticService(logisticService);
 			}
-		//}
+		}
 		
-		//if (venOrderItem.getVenMerchantProduct() != null) {
+		if (venOrderItem.getVenMerchantProduct() != null) {
 			List<VenMerchantProduct> merchantProductRefs = new ArrayList<VenMerchantProduct>();
 			merchantProductRefs.add(venOrderItem.getVenMerchantProduct());
 			merchantProductRefs = merchantProductService.synchronizeVenMerchantProductRefs(merchantProductRefs);
 			for (VenMerchantProduct merchantProduct : merchantProductRefs) {
 				venOrderItem.setVenMerchantProduct(merchantProduct);
 			}
-		//}
+		}
 		
-		//if (venOrderItem.getVenOrderStatus() != null) {
+		if (venOrderItem.getVenOrderStatus() != null) {
 			List<VenOrderStatus> orderStatusRefs = new ArrayList<VenOrderStatus>();
 			orderStatusRefs.add(venOrderItem.getVenOrderStatus());
 			orderStatusRefs = orderStatusService.synchronizeVenOrderStatusReferences(orderStatusRefs);
 			for (VenOrderStatus orderStatus : orderStatusRefs) {
 				venOrderItem.setVenOrderStatus(orderStatus);
 			}
-		//}
+		}
 		/*
 		List<Object> references = new ArrayList<Object>();
 		references.add(venOrderItem.getLogLogisticService());

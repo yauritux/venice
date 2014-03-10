@@ -32,6 +32,7 @@ public class CountryServiceImpl implements CountryService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenCountryReferences::BEGIN,countryReferences="
 				  + countryReferences);
+		//if (countryReferences == null || countryReferences.size() == 0) return null;
 		
 		List<VenCountry> synchronizedVenCountries = new ArrayList<VenCountry>();
 		
@@ -40,7 +41,6 @@ public class CountryServiceImpl implements CountryService {
 				if (country.getCountryCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
 							"synchronizeVenCountryReferences::Synchronizing VenCountry... :" + country.getCountryCode());
-					/*
 					List<VenCountry> countryList = venCountryDAO.findByCountryCode(country.getCountryCode());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCountryReferences::countryList size = "
@@ -53,12 +53,9 @@ public class CountryServiceImpl implements CountryService {
 					} else {
 						VenCountry venCountry = countryList.get(0);
 						synchronizedVenCountries.add(venCountry);
-				    */
-					VenCountry venCountry = venCountryDAO.save(country);
-					synchronizedVenCountries.add(venCountry);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenCountryReferences::successfully added venCountry into synchronizedVenCountries");
-					//}
+					}
 				}		
 			} //end of 'for'
 		}
