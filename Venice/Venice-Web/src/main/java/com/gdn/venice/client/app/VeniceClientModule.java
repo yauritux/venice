@@ -62,6 +62,8 @@ import com.gdn.venice.client.app.general.view.PartyMaintenanceView;
 import com.gdn.venice.client.app.general.view.ReturDataViewerView;
 import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
+import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
+import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -72,6 +74,8 @@ import com.gdn.venice.client.app.inventory.presenter.WarehouseListFilterPresente
 import com.gdn.venice.client.app.inventory.presenter.WarehouseNonActiveWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.view.ASNListView;
 import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
+import com.gdn.venice.client.app.inventory.view.GRNCreateView;
+import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfEditWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfListFilterView;
@@ -423,5 +427,15 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				ASNListPresenter.MyView.class,
 				ASNListView.class,
 				ASNListPresenter.MyProxy.class);
+		
+		bindPresenter(GRNListPresenter.class,
+				GRNListPresenter.MyView.class,
+				GRNListView.class,
+				GRNListPresenter.MyProxy.class);
+		
+		bindPresenter(GRNCreatePresenter.class,
+				GRNCreatePresenter.MyView.class,
+				GRNCreateView.class,
+				GRNCreatePresenter.MyProxy.class);		
 	}
 }

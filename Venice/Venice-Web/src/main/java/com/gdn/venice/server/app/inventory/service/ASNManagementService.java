@@ -12,20 +12,21 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.AdvanceShipNotice;
 import com.gdn.inventory.exchange.entity.AdvanceShipNoticeItem;
-import com.gdn.inventory.exchange.entity.ConsignmentFinalForm;
-import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentApprovalItem;
+import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalForm;
+import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalItem;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrder;
-import com.gdn.inventory.exchange.entity.module.inbound.PurchaseRequisitionItem;
+import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrderItem;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
-import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -38,39 +39,43 @@ import com.gdn.venice.util.InventoryUtil;
 public class ASNManagementService{
 	HttpClient httpClient;
 	ObjectMapper mapper;
+	protected static Logger _log = null;
 	
 	public ASNManagementService() {
 		httpClient = new HttpClient();
 		mapper = new ObjectMapper();
+		
+        Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+        _log = loggerFactory.getLog4JLogger("ccom.gdn.venice.server.app.inventory.service.ASNManagementService");
 	}
 	
 	public InventoryPagingWrapper<AdvanceShipNotice> getASNDataList(RafDsRequest request) throws HttpException, IOException{
-		System.out.println("getASNDataList");
+		_log.info("getASNDataList");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "advanceShipNotice/getActiveList?"
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
-    	System.out.println("url: "+url);
+        _log.info("url: "+url);
     	
         if (request.getCriteria() != null) {
-        	System.out.println("criteria not null");
+        	_log.debug("criteria not null");
             Map<String, Object> searchMap = new HashMap<String, Object>();
             for (JPQLSimpleQueryCriteria criteria:request.getCriteria().getSimpleCriteria()) {
-            	System.out.println("adding criteria:"+criteria.getFieldName()+", "+criteria.getValue());
+            	_log.debug("adding criteria:"+criteria.getFieldName()+", "+criteria.getValue());
                 searchMap.put(criteria.getFieldName(), criteria.getValue());
             }
             String json = mapper.writeValueAsString(searchMap);
-            System.out.println("json: "+json);
+            _log.debug("json: "+json);
             httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
             httpPost.setRequestHeader("Content-Type", "application/json");
         } else{
-        	System.out.println("No criteria");
+        	_log.debug("No criteria");
         }
         
         int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
+        _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -78,7 +83,7 @@ public class ASNManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            System.out.println(sb.toString());
+            _log.debug(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<AdvanceShipNotice>>() {});
         } else {
@@ -86,39 +91,14 @@ public class ASNManagementService{
         }
 	}
 	
-	public ResultWrapper<AdvanceShipNotice> getASNData(RafDsRequest request, String asnId) throws HttpException, IOException{
-		System.out.println("getASNData");
-		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "advanceShipNotice/getDetail?username=" + request.getParams().get("username")
-                + "&asnId=" + asnId;
-        PostMethod httpPost = new PostMethod(url);
-    	System.out.println(url);
-                 
-        int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            System.out.println("return value: "+sb.toString());
-            is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<AdvanceShipNotice>>() {});
-        } else {
-        	return null;
-        }
-	}
-	
 	public InventoryPagingWrapper<PurchaseOrder> getPOData(RafDsRequest request, String reffNumber) throws HttpException, IOException{
-		System.out.println("getPOData");
+		_log.info("getPOData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "purchaseOrder/getAllCreated?username=" + request.getParams().get("username")
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
-    	System.out.println(url);
+        _log.info("url: "+url);
     	
         Map<String, Object> searchMap = new HashMap<String, Object>();
         
@@ -128,16 +108,16 @@ public class ASNManagementService{
         numberCriteria.setValue(reffNumber);
         numberCriteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.INV_PO_NUMBER));
 				
-        System.out.println("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
+        _log.debug("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
         searchMap.put(numberCriteria.getFieldName(), numberCriteria.getValue());
         
         String json = mapper.writeValueAsString(searchMap);
-        System.out.println(json);
+        _log.debug(json);
         httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
             httpPost.setRequestHeader("Content-Type", "application/json");
                
         int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
+        _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -145,7 +125,7 @@ public class ASNManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            System.out.println("return value: "+sb.toString());
+            _log.debug("return value: "+sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PurchaseOrder>>() {});
         } else {
@@ -154,13 +134,13 @@ public class ASNManagementService{
 	}
 	
 	public InventoryPagingWrapper<ConsignmentFinalForm> getCFFData(RafDsRequest request, String reffNumber) throws HttpException, IOException{
-		System.out.println("getCFFData");
+		_log.info("getCFFData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "consignmentFinal/findByFilter?username=" + request.getParams().get("username")
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
-    	System.out.println(url);
+        _log.info("url: "+url);
     	
         Map<String, Object> searchMap = new HashMap<String, Object>();
         
@@ -170,16 +150,16 @@ public class ASNManagementService{
         criteria.setValue(reffNumber);
         criteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.INV_CFF_NUMBER));
         
-        System.out.println("adding criteria:"+criteria.getFieldName()+", "+criteria.getValue());
+        _log.debug("adding criteria:"+criteria.getFieldName()+", "+criteria.getValue());
         searchMap.put(criteria.getFieldName(), criteria.getValue());
         
         String json = mapper.writeValueAsString(searchMap);
-        System.out.println(json);
+        _log.debug(json);
         httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
         httpPost.setRequestHeader("Content-Type", "application/json");
                 
         int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
+        _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -187,25 +167,75 @@ public class ASNManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            System.out.println("return value: "+sb.toString());
+            _log.debug("return value: "+sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<ConsignmentFinalForm>>() {});
         } else {
         	return null;
         }
 	}
+	
+	public ResultWrapper<PurchaseOrderItem> getPOItemData(RafDsRequest request, String id) throws HttpException, IOException{
+		_log.info("getPOItemData");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "purchaseOrder/getDetailItem?username=" + request.getParams().get("username")
+                + "&id=" + id;
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+               
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug("return value: "+sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PurchaseOrderItem>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public ResultWrapper<ConsignmentFinalItem> getCFFItemData(RafDsRequest request, String id) throws HttpException, IOException{
+		_log.info("getCFFItemData");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "consignmentFinal/getDetailItem?username=" + request.getParams().get("username")
+                + "&cffItemId=" + id;
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+               
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug("return value: "+sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ConsignmentFinalItem>>() {});
+        } else {
+        	return null;
+        }
+	}
 		
 	public InventoryPagingWrapper<AdvanceShipNoticeItem> getASNItemData(RafDsRequest request, String id) throws JsonGenerationException, JsonMappingException, IOException {
-		System.out.println("getASNItemData");
+		_log.info("getASNItemData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "advanceShipNotice/findItemByASNId?&asnId=" + id
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
-		System.out.println("url: "+url);
+		_log.info("url: "+url);
         PostMethod httpPost = new PostMethod(url);
                 
         int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
+        _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -214,62 +244,8 @@ public class ASNManagementService{
                 sb.append(line);
             }
             is.close();
-            System.out.println("return value: "+sb.toString());
+            _log.debug("return value: "+sb.toString());
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<AdvanceShipNoticeItem>>() {});
-        } else {
-        	return null;
-        }
-	}
-
-	public ResultListWrapper<PurchaseRequisitionItem> getPRItemData(RafDsRequest request, long id) throws JsonGenerationException, JsonMappingException, IOException {
-		System.out.println("getPRItemData");
-		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "purchaseRequisition/findPrItemByPrId?username=" + request.getParams().get("username")
-                + "&id=" + id
-                + "&page=" + request.getParams().get("page")
-                + "&limit=" + request.getParams().get("limit");
-		System.out.println("url: "+url);
-        PostMethod httpPost = new PostMethod(url);
-                
-        int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            is.close();
-            System.out.println("return value: "+sb.toString());
-            return mapper.readValue(sb.toString(), new TypeReference<ResultListWrapper<PurchaseRequisitionItem>>() {});
-        } else {
-        	return null;
-        }
-	}
-
-	public ResultListWrapper<ConsignmentApprovalItem> getCAFItemData(RafDsRequest request, long id) throws JsonGenerationException, JsonMappingException, IOException {
-		System.out.println("getCAFItemData");
-		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "consignmentApprovalForm/findItemCafByCafId?username=" + request.getParams().get("username")
-                + "&id=" + id
-                + "&page=" + request.getParams().get("page")
-                + "&limit=" + request.getParams().get("limit");
-		System.out.println("url: "+url);
-        PostMethod httpPost = new PostMethod(url);
-                
-        int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            is.close();
-            System.out.println("return value: "+sb.toString());
-            return mapper.readValue(sb.toString(), new TypeReference<ResultListWrapper<ConsignmentApprovalItem>>() {});
         } else {
         	return null;
         }

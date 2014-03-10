@@ -325,7 +325,7 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
 					for (int i=0;i<storageRecords.length;i++) {
 						storageRowMap.put(DataNameTokens.INV_STORAGE_DESCRIPTION, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_DESCRIPTION));
 						storageRowMap.put(DataNameTokens.INV_STORAGE_TYPE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_TYPE));
-						storageDataMap.put("STORAGE"+i, storageRowMap.toString());;
+						storageDataMap.put("STORAGE"+i, storageRowMap.toString());
 					}
 					getUiHandlers().onSaveShelfClicked(shelfRowMap, storageDataMap, addShelfWindow);
           		}

@@ -16,11 +16,8 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.types.SummaryFunctionType;
-import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
@@ -143,8 +140,6 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
         
         asnDetailForm.setDisabled(true);
         
-        final IButton closeButton = new IButton("Close");
-        
         itemListGrid = buildItemListGrid(id);
         itemListGrid.setCanEdit(false);
         
@@ -154,16 +149,8 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
 	      }
         });
         
-        closeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-            	asnDetailWindow.destroy();
-            }
-        });
-        
         HLayout buttonSet = new HLayout(5);
-        buttonSet.setAlign(Alignment.LEFT);        
-        buttonSet.setMembers(closeButton);
+        buttonSet.setAlign(Alignment.LEFT);
         
 		VLayout headerLayout = new VLayout();
 		headerLayout.setWidth100();
@@ -186,10 +173,9 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
     	itemListGrid.setShowAllRecords(true);
     	itemListGrid.setSortField(0);
 
-    	itemListGrid.setShowFilterEditor(true);
     	itemListGrid.setCanResizeFields(true);
     	itemListGrid.setShowRowNumbers(true);
-    	itemListGrid.setShowFilterEditor(true);
+    	itemListGrid.setShowFilterEditor(false);
 
     	DataSource asnItemData = ASNData.getASNItemData(asnId, 1, 20);
 		itemListGrid.setDataSource(asnItemData);

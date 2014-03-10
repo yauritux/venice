@@ -83,7 +83,7 @@ public class DataWidgetNameTokens {
 	public static String  INV_EDITWITHAPPROVALTREENODE = "InvEditWithApprovalTreeNode";
 	public static String  INV_NONACTIVEWITHAPPROVALTREENODE = "InvNonActiveWithApprovalTreeNode";
 	
-	public static String  INV_SHELFMANAGEMENTTREENODE = "InvShelfManagementTreeNode";
+	public static String  INV_MASTERSHELFTREENODE = "InvMasterShelfTreeNode";
 	public static String  INV_SHELFLISTFILTERTREENODE = "InvShelfListFilterTreeNode";
 	public static String  INV_SHELFADDAPPROVALTREENODE = "InvShelfAddApprovalTreeNode";
 	public static String  INV_SHELFEDITAPPROVALTREENODE = "InvShelfEditApprovalTreeNode";
@@ -91,6 +91,9 @@ public class DataWidgetNameTokens {
 	
 	public static String  INV_CURRENCYMANAGEMENTTREENODE = "InvCurrencyManagementTreeNode";
 	
-	public static String  INV_ASNTREENODE = "InvASNTreeNode";
 	public static String  INV_ASNLISTTREENODE = "InvASNListTreeNode";
+	
+	public static String  INV_GRNTREENODE = "InvGRNTreeNode";
+	public static String  INV_GRNLISTTREENODE = "InvGRNListTreeNode";
+	public static String  INV_GRNCREATETREENODE = "InvGRNCreateTreeNode";
 }

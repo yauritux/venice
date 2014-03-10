@@ -35,7 +35,7 @@ public class ASNData {
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
-				GWT.getHostPageBaseURL() + ASNListPresenter.asnListPresenterServlet + "?method=fetchASNData&type=DataSource&limit="+limit+"&page="+page,
+				GWT.getHostPageBaseURL() + ASNListPresenter.asnManagementPresenterServlet + "?method=fetchASNData&type=DataSource&limit="+limit+"&page="+page,
 				null,
 				null,
 				null, 
@@ -45,10 +45,9 @@ public class ASNData {
 	}
 	
 	public static DataSource getASNItemData(String asnId, int page, int limit) {
-		System.out.println("asnId: "+asnId);
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_ASN_ITEM_ID, "ASN Item ID"),
-				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMCODE, "Item SKU"),
+				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMCODE, "Item SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMDESC, "Item Desc"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_QTY, "Qty"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMUNIT, "UoM"),
@@ -62,7 +61,7 @@ public class ASNData {
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
-				GWT.getHostPageBaseURL() + ASNListPresenter.asnListPresenterServlet + "?method=fetchASNItemData&type=DataSource&limit="+limit+"&page="+page,
+				GWT.getHostPageBaseURL() + ASNListPresenter.asnManagementPresenterServlet + "?method=fetchASNItemData&type=DataSource&limit="+limit+"&page="+page,
 				null,
 				null,
 				null, 

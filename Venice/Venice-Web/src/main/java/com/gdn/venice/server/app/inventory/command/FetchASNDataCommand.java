@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.AdvanceShipNotice;
-import com.gdn.inventory.exchange.entity.ConsignmentFinalForm;
+import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalForm;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrder;
 import com.gdn.inventory.exchange.type.ASNReferenceType;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
@@ -24,41 +27,41 @@ public class FetchASNDataCommand implements RafDsCommand {
 
     private RafDsRequest request;
     ASNManagementService asnService;
+    protected static Logger _log = null;
     
     public FetchASNDataCommand(RafDsRequest request) {
         this.request = request;
+        Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.command.FetchASNDataCommand");
     }
 
     @Override
     public RafDsResponse execute() {
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
-        System.out.println("fetch asn command");
+        _log.info("FetchASNDataCommand");
         try {
         		asnService = new ASNManagementService();
                 InventoryPagingWrapper<AdvanceShipNotice> asnWrapper = asnService.getASNDataList(request);
                 if(asnWrapper != null){
-	                System.out.println(asnWrapper.getContent().size());
 	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	 		        
 	                for(AdvanceShipNotice asn : asnWrapper.getContent()){
 	                    HashMap<String, String> map = new HashMap<String, String>();
 	                    map.put(DataNameTokens.INV_ASN_ID, asn.getId().toString());
 	                    map.put(DataNameTokens.INV_ASN_NUMBER, asn.getAsnNumber());
-	                    map.put(DataNameTokens.INV_ASN_REFF_TYPE, asn.getReferenceType().name());
 	                    map.put(DataNameTokens.INV_ASN_REFF_NUMBER, asn.getReferenceNumber());
 	                    
-	                  //get supplier based on reff type
-	                    System.out.println("reff type: "+asn.getReferenceType().name());
+	                    _log.debug("reff type: "+asn.getReferenceType().name());
 	                    String supplierCode="", supplierName="";
 	                    if(asn.getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
-	                    	InventoryPagingWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber());
+	                    	InventoryPagingWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber().toString());
 	                    	if(poWrapper!=null){
 	                    		PurchaseOrder po = poWrapper.getContent().get(0);
 	                    		supplierCode = po.getSupplier().getCode();
 	                    		supplierName = po.getSupplier().getName();
 	                    	}else{
-	                    		System.out.println("PO not found");
+	                    		_log.error("PO not found");
 	                    	}                    	
 	                    }else if(asn.getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
 	                    	InventoryPagingWrapper<ConsignmentFinalForm> cffWrapper = asnService.getCFFData(request, asn.getReferenceNumber());
@@ -67,7 +70,7 @@ public class FetchASNDataCommand implements RafDsCommand {
 	                    		supplierCode = cff.getConsignmentApprovalForm().getSupplier().getCode();
 	                    		supplierName = cff.getConsignmentApprovalForm().getSupplier().getName();
 	                    	}else{
-	                    		System.out.println("CFF not found");
+	                    		_log.error("CFF not found");
 	                    	}
 	                   }
 	                    

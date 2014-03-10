@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.gdn.inventory.exchange.entity.AdvanceShipNotice;
+import org.apache.log4j.Logger;
+
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.AdvanceShipNoticeItem;
-import com.gdn.inventory.exchange.entity.ConsignmentFinalForm;
-import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentApprovalForm;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentApprovalItem;
-import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrder;
-import com.gdn.inventory.exchange.entity.module.inbound.PurchaseRequisition;
+import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalItem;
+import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrderItem;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseRequisitionItem;
 import com.gdn.inventory.exchange.type.ASNReferenceType;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
-import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.ASNManagementService;
@@ -30,101 +29,76 @@ public class FetchASNItemDataCommand implements RafDsCommand {
 
     private RafDsRequest request;
     ASNManagementService asnService;
+    protected static Logger _log = null;
     
     public FetchASNItemDataCommand(RafDsRequest request) {
         this.request = request;
+        Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.command.FetchASNItemDataCommand");
     }
 
     @Override
     public RafDsResponse execute() {
-    	System.out.println("fetch asn item command");
+    	_log.info("FetchASNItemDataCommand");
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
-        System.out.println("asn id: "+request.getParams().get(DataNameTokens.INV_ASN_ID));
         try {
-        	System.out.println("get asn data command");
-        		asnService = new ASNManagementService();        		
-        		ResultWrapper<AdvanceShipNotice> asnWrapper = asnService.getASNData(request, request.getParams().get(DataNameTokens.INV_ASN_ID));
-                if(asnWrapper != null){     
-                	System.out.println("asn data found");
-                	
-                	String asnItemQuantity = "";
-                	String asnItemQtyGrn = "";
-//                	InventoryPagingWrapper<AdvanceShipNoticeItem> asnItemWrapper = asnService.getASNItemData(request, request.getParams().get(DataNameTokens.INV_ASN_ID));           	
-//					if(asnItemWrapper != null){
-//					  for(AdvanceShipNoticeItem item : asnItemWrapper.getContent()){
-//					      HashMap<String, String> map = new HashMap<String, String>();
-//					      asnItemQuantity = Integer.toString(item.getQuantity());
-//					  }
-//					}
-                	
-                	AdvanceShipNotice asn = asnWrapper.getContent();
-                	if(asn.getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
-                		System.out.println("purchase order");
-                		InventoryPagingWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber());
-                    	if(poWrapper!=null){
-                    		System.out.println("po found");
-                    		PurchaseRequisition pr = poWrapper.getContent().get(0).getPurchaseRequisition();
-                    		ResultListWrapper<PurchaseRequisitionItem> prItemWrapper = asnService.getPRItemData(request, pr.getId());
-                    		if(prItemWrapper!=null){
-                    			System.out.println("pr item found");
-                    			for(PurchaseRequisitionItem item : prItemWrapper.getContents()){   
-                    				System.out.println("item code: "+item.getItem().getCode());
-                    				HashMap<String, String> map = new HashMap<String, String>();                    				             
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
-            	                    map.put(DataNameTokens.INV_POCFF_QTY, asnItemQuantity);
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMLENGTH, String.valueOf(item.getItem().getLength()));
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMWIDTH, String.valueOf(item.getItem().getWidth()));
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMHEIGHT, String.valueOf(item.getItem().getHeight()));
-            	                    map.put(DataNameTokens.INV_POCFF_VOLUME, String.valueOf(item.getItem().getLength()*item.getItem().getWidth()
-            	                    		*item.getItem().getHeight()));
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMWEIGHT, String.valueOf(item.getItem().getWeight()));
-            	                    map.put(DataNameTokens.INV_POCFF_QTYGRN, String.valueOf(asnItemQtyGrn));
-            	                    
-            	                    dataList.add(map);
-            	                    System.out.println("dataList size: "+dataList.size());
-                    			}                    			
-                    		}else{
-                    			System.out.println("PR item not found");
-                    		}
+    		asnService = new ASNManagementService();        		
+    		InventoryPagingWrapper<AdvanceShipNoticeItem> asnWrapper = asnService.getASNItemData(request, request.getParams().get(DataNameTokens.INV_ASN_ID));
+            if(asnWrapper != null){     
+            	
+            	for(AdvanceShipNoticeItem asnItem: asnWrapper.getContent()){
+            		if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
+            			_log.info("reff type: purchase order");                		                		
+                		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
+                    	if(poItemWrapper!=null){
+                    		PurchaseRequisitionItem item = poItemWrapper.getContent().getPurchaseRequisitionItem();
+                    		_log.debug("PO item found, code:"+item.getItem().getCode());    
+                    		
+            				HashMap<String, String> map = new HashMap<String, String>();
+            				map.put(DataNameTokens.INV_ASN_ITEM_ID, asnItem.getId().toString());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
+    	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(poItemWrapper.getContent().getQuantity()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMLENGTH, String.valueOf(item.getItem().getLength()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMWIDTH, String.valueOf(item.getItem().getWidth()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMHEIGHT, String.valueOf(item.getItem().getHeight()));
+    	                    map.put(DataNameTokens.INV_POCFF_VOLUME, String.valueOf(item.getItem().getLength()*item.getItem().getWidth()*item.getItem().getHeight()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMWEIGHT, String.valueOf(item.getItem().getWeight()));
+    	                    map.put(DataNameTokens.INV_POCFF_QTYGRN, Integer.toString(asnItem.getGrnQuantity()));
+    	                    
+    	                    dataList.add(map);
                     	}else{
-                    		System.out.println("PO not found");
+                    		_log.error("PO item not found");
                     	}   
-                	}else if(asn.getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
-                		System.out.println("consignment");
-                		InventoryPagingWrapper<ConsignmentFinalForm> cffWrapper = asnService.getCFFData(request, asn.getReferenceNumber());
-                    	if(cffWrapper!=null){
-                    		System.out.println("cff found");
-                    		ConsignmentApprovalForm caf = cffWrapper.getContent().get(0).getConsignmentApprovalForm();
-                    		ResultListWrapper<ConsignmentApprovalItem> cafItemWrapper = asnService.getCAFItemData(request, caf.getId());
-                    		if(cafItemWrapper!=null){
-                    			System.out.println("caf item found");
-                    			for(ConsignmentApprovalItem item : cafItemWrapper.getContents()){                    				                    				
-                    				HashMap<String, String> map = new HashMap<String, String>();                    				             
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
-            	                    map.put(DataNameTokens.INV_POCFF_QTY, asnItemQuantity);
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMLENGTH, String.valueOf(item.getItem().getLength()));
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMWIDTH, String.valueOf(item.getItem().getWidth()));
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMHEIGHT, String.valueOf(item.getItem().getHeight()));
-            	                    map.put(DataNameTokens.INV_POCFF_VOLUME, String.valueOf(item.getItem().getLength()*item.getItem().getWidth()
-            	                    		*item.getItem().getHeight()));
-            	                    map.put(DataNameTokens.INV_POCFF_ITEMWEIGHT, String.valueOf(item.getItem().getWeight()));
-            	                    map.put(DataNameTokens.INV_POCFF_QTYGRN, String.valueOf(asnItemQtyGrn));
-            	                    
-            	                    dataList.add(map);
-                    			}                    			
-                    		}else{
-                    			System.out.println("CAF item not found");
-                    		}
+                	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
+                		_log.info("reff type: consignment");
+                		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber().toString());
+                    	if(cffItemWrapper!=null){
+                    		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
+                    		_log.debug("CFF item found, code:"+item.getItem().getCode());    
+                    		
+            				HashMap<String, String> map = new HashMap<String, String>();
+            				map.put(DataNameTokens.INV_ASN_ITEM_ID, asnItem.getId().toString());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
+    	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(cffItemWrapper.getContent().getQuantity()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMLENGTH, String.valueOf(item.getItem().getLength()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMWIDTH, String.valueOf(item.getItem().getWidth()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMHEIGHT, String.valueOf(item.getItem().getHeight()));
+    	                    map.put(DataNameTokens.INV_POCFF_VOLUME, String.valueOf(item.getItem().getLength()*item.getItem().getWidth()*item.getItem().getHeight()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMWEIGHT, String.valueOf(item.getItem().getWeight()));
+    	                    map.put(DataNameTokens.INV_POCFF_QTYGRN, Integer.toString(asnItem.getGrnQuantity()));
+    	                    
+    	                    dataList.add(map);
                     	}else{
-                    		System.out.println("CFF not found");
-                    	}
+                    		_log.error("CFF item not found");
+                    	} 
                 	}
-                }        		        		
+            	}
+            }        		        		
 
 	        rafDsResponse.setStatus(0);
 	        rafDsResponse.setTotalRows(dataList.size());

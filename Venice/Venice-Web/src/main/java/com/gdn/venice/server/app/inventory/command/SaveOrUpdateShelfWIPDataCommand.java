@@ -11,9 +11,9 @@ import com.gdn.inventory.exchange.entity.Storage;
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.util.Util;
 import com.gdn.venice.server.app.inventory.service.ShelfManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
-import com.gdn.venice.server.util.Util;
 
 public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 

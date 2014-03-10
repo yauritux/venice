@@ -1235,6 +1235,10 @@ public class DataNameTokens {
     	public static String INV_POCFF_ITEMWEIGHT = "weight";
     	public static String INV_POCFF_VOLUME = "volume";
     	public static String INV_POCFF_QTYGRN = "grnQuantity";
+    	
+    	public static String INV_GRN_ID = "id";
+    	public static String INV_GRN_NUMBER = "grnNumber";
+    	public static String INV_GRN_ITEM_ID = "id";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type
