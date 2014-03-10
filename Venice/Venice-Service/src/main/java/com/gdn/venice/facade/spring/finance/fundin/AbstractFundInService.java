@@ -403,7 +403,8 @@ public abstract class AbstractFundInService implements FundInService{
 			}
 		}
 		
-		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC ||
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB){
 			uniqueContent = new Timestamp(System.currentTimeMillis()).toString().replace(".", "");
 		}
 		
