@@ -3,6 +3,7 @@ package com.gdn.venice.client.app.fraud.view;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.gdn.venice.client.app.DataMessageTokens;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.fraud.presenter.FraudCaseViewerPresenter;
 import com.gdn.venice.client.app.fraud.ui.widgets.FraudCaseViewerLayout;
@@ -19,10 +20,17 @@ import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
+import com.smartgwt.client.rpc.RPCCallback;
+import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.DateDisplayFormat;
 import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.Overflow;
+import com.smartgwt.client.types.SelectionAppearance;
+import com.smartgwt.client.util.BooleanCallback;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.HTMLFlow;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
@@ -36,10 +44,13 @@ import com.smartgwt.client.widgets.form.fields.DateTimeItem;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.CellClickEvent;
 import com.smartgwt.client.widgets.grid.events.CellClickHandler;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitEvent;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitHandler;
+import com.smartgwt.client.widgets.grid.events.SelectionChangedHandler;
+import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
@@ -64,6 +75,7 @@ FraudCaseViewerPresenter.MyView {
 	ListGrid fraudCaseManagementListGrid;
 	VLayout fraudCaseManagementListLayout = new VLayout();
 	
+	ToolStripButton addBlacklistButton;
 	Window reportParameterWindow;
 	
 	@Inject
@@ -96,6 +108,17 @@ FraudCaseViewerPresenter.MyView {
 		
 		uncalculatedCreditCardOrderToolStrip.addButton(printCaseButton);
 		
+		ToolStrip addBlacklistToolStrip = new ToolStrip();
+		addBlacklistToolStrip.setWidth(100);
+		
+		addBlacklistButton=new ToolStripButton();
+		addBlacklistButton.setIcon("[SKIN]/icons/add.png");  
+		addBlacklistButton.setTooltip("Add to Blacklist"); 
+		addBlacklistButton.setTitle("Add case(s) to blacklist");
+		
+		uncalculatedCreditCardOrderToolStrip.addButton(addBlacklistButton);
+		addBlacklistButton.setDisabled(true);
+		
 		fraudCaseManagementDetailLayout.setMembers(fraudCaseDetailFlow);
 		fraudCaseManagementLayout.setMembers(uncalculatedCreditCardOrderToolStrip,fraudCaseManagementListLayout, fraudCaseManagementDetailLayout);
 		buildFraudCaseManagementGrid();
@@ -112,6 +135,7 @@ FraudCaseViewerPresenter.MyView {
 		fraudCaseManagementListGrid.setSortField(0);
 		fraudCaseManagementListGrid.setCanHover(true);
 //		fraudCaseManagementListGrid.setAutoFetchData(true);	
+		fraudCaseManagementListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
 		fraudCaseManagementListGrid.setCanResizeFields(true);		
 		fraudCaseManagementListGrid.setShowFilterEditor(true);
 		
@@ -190,13 +214,6 @@ FraudCaseViewerPresenter.MyView {
 	}
 
 	protected void bindCustomUiHandlers() {	
-		fraudCaseManagementListGrid.addCellClickHandler(new CellClickHandler() {
-			@Override
-			public void onCellClick(CellClickEvent event) {
-				Record record = event.getRecord();
-				showFraudCaseDetails(record);
-			}
-		});
 		
 		fraudCaseManagementListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {			
 			@Override
@@ -204,7 +221,72 @@ FraudCaseViewerPresenter.MyView {
 				refreshFraudCaseData();
 			}
 		});
+		
+
+		addBlacklistButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				SC.ask("Are you sure you want to add this case(s) to blacklist ?", new BooleanCallback() {
+					@Override
+					public void execute(Boolean value) {
+						if(value != null && value){
+							ListGridRecord[] selectedRecords = fraudCaseManagementListGrid.getSelection();
+							for (int i=0;i<selectedRecords.length;i++) {
+								String wcsOrderId=selectedRecords[i].getAttributeAsString(DataNameTokens.FRDFRAUDSUSPICIONCASE_VENORDER_WCSORDERID);
+				        		
+								RPCRequest rpcRequest = new RPCRequest();
+				        		rpcRequest.setData(wcsOrderId);
+				        		rpcRequest.setActionURL(GWT.getHostPageBaseURL() +  "FraudCaseMaintenancePresenterServlet?method=fraudCaseViewerAddToBlackList&wcsOrderId="+wcsOrderId+"&type=RPC");
+				        		rpcRequest.setHttpMethod("POST");
+				        		rpcRequest.setUseSimpleHttp(true);
+				        		rpcRequest.setShowPrompt(false);
+				        		
+				        		RPCManager.sendRequest(rpcRequest, new RPCCallback () {
+				    					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+				    						String rpcResponse = rawData.toString();
+				    						if (!rpcResponse.startsWith("0")) {							    					
+				    							SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
+				    						} 
+				    					}
+				        		});
+							}				
+							SC.say("Case(s) successfully saved, check at customer blacklist tab");
+						}
+					}
+				});
+			}						
+		});
+		
+		
+fraudCaseManagementListGrid.addSelectionChangedHandler(new SelectionChangedHandler() {
+			
+			@Override
+			public void onSelectionChanged(SelectionEvent event) {
+				ListGridRecord[] selectedRecords = fraudCaseManagementListGrid.getSelection();
+				if (selectedRecords.length < 1)
+					addBlacklistButton.setDisabled(true);
+				else
+					addBlacklistButton.setDisabled(false);
+				
+				if (selectedRecords.length==1) {
+					Record record = selectedRecords[0];
+					showFraudCaseDetails(record);
+				} else {
+					HTMLFlow fraudCaseDetailFlow = new HTMLFlow();
+					fraudCaseDetailFlow.setAlign(Alignment.CENTER);
+					fraudCaseDetailFlow.setWidth100();
+					if (selectedRecords.length==0) {
+						fraudCaseDetailFlow.setContents("<h2 align=\"center\">Please select fraud case to show the task detail</h2>");
+					} else if (selectedRecords.length>1) {
+						fraudCaseDetailFlow.setContents("<h2 align=\"center\">More than one fraud case selected, please select only one fraud case to show the fraud case detail</h2>");
+					}
+					fraudCaseManagementDetailLayout.setMembers(fraudCaseDetailFlow);
+				}
+			}
+		});
+		
 	}
+	
+	
 	
 	@Override
 	public void loadFraudCaseData(DataSource dataSource) {

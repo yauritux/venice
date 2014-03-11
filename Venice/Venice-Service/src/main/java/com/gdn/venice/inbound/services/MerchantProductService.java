@@ -16,4 +16,5 @@ public interface MerchantProductService {
 			List<VenMerchantProduct> merchantProductRefs) throws VeniceInternalException;
 	public VenMerchantProduct synchronizeVenMerchantProductReferenceData(
 			VenMerchantProduct venMerchantProduct) throws VeniceInternalException;	
+	public List<VenMerchantProduct> findByWcsProductSku(String wcsProductSku);
 }

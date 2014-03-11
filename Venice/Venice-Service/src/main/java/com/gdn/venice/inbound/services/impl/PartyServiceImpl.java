@@ -71,11 +71,10 @@ public class PartyServiceImpl implements PartyService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(),
 				"persistParty::BEGIN, venParty=" + venParty + ", type=" + type);
 		if (venParty != null) {
-			// try {
 			VenParty existingParty;
 			if (type.equals("Customer")) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName(),
-						"persistParty::Persisting VenParty... :"
+						"persistParty::Persisting VenParty (PartyType = Customer)... :"
 								+ venParty.getVenCustomers().get(0)
 										.getCustomerUserName());
 
@@ -85,7 +84,7 @@ public class PartyServiceImpl implements PartyService {
 			} else {
 				CommonUtil.logDebug(
 						this.getClass().getCanonicalName(),
-						"persistParty::Persisting VenParty... :"
+						"persistParty::Persisting VenParty (PartyType = " + type + ") :"
 								+ venParty.getFullOrLegalName());
 
 				// Get any existing party based on full or legal name
@@ -463,13 +462,13 @@ public class PartyServiceImpl implements PartyService {
 	@Override
 	public VenParty retrieveExistingParty(String custUserName)
 			throws VeniceInternalException {
-		String escapeChar = "";
+		//String escapeChar = "";
 
 		CommonUtil.logDebug(this.getClass().getCanonicalName(),
 				"retrieveExistingParty::BEGIN, custUserName = " + custUserName);
 		List<VenCustomer> customerList = customerService
 				.findByCustomerName(JPQLStringEscapeUtility
-						.escapeJPQLStringData(custUserName, escapeChar));
+						.escapeJPQLStringData(custUserName, ""));
 		CommonUtil.logDebug(
 				this.getClass().getCanonicalName(),
 				"retrieveExistingParty::customerList size = "
