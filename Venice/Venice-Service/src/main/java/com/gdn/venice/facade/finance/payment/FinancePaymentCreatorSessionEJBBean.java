@@ -301,6 +301,7 @@ public class FinancePaymentCreatorSessionEJBBean implements FinancePaymentCreato
 					FinAccount bankAccount = new FinAccount();
 					bankAccount.setAccountId(bankAccountId);
 					payment.setFinAccount(bankAccount);
+					payment.setApPaymentDate(new Timestamp(System.currentTimeMillis()));
 
 					/*
 					 * persist the payment 

@@ -87,7 +87,7 @@ public class FraudRules {
 		int pointRule1=0, pointRule2=0, pointRule3=0, pointRule4=0, pointRule5=0, pointRule6=0, pointRule7=0, pointRule8=0, pointRule9=0, pointRule10=0, pointRule11=0, pointRule12=0, 
 		pointRule13=0, pointRule14=0, pointRule15=0, pointRule16=0, pointRule17=0, pointRule18=0, pointRule19=0, pointRule20=0, pointRule21=0, pointRule22=0, pointRule23=0, 
 		pointRule24=0, pointRule25=0, pointRule26=0, pointRule27=0, pointRule28=0, pointRule29=0, pointRule30=0, pointRule31=0, pointRule32=0, pointRule33=0, pointRule34=0,
-		pointRule35=0, pointRule36=0,pointRule37=0, pointRule38=0, pointRule39=0, pointRule40=0, pointRule41=0,pointRule42=0;
+		pointRule35=0, pointRule36=0,pointRule37=0, pointRule38=0, pointRule39=0, pointRule40=0, pointRule41=0, pointRule42=0, pointRule43=0;
 		
 		Locator<Object> locator = null;
 		try{
@@ -250,11 +250,15 @@ public class FraudRules {
 			 //status approve >1
 			 Rule42 rule42 = new Rule42();
 			 pointRule42=rule42.execute(venOrder.getWcsOrderId());
+			 
+			 //total payment >1
+			 Rule43 rule43 = new Rule43();
+			 pointRule43=rule43.execute(venOrder.getOrderId());
 			
 			totalFraudPoints = pointRule1+pointRule2+pointRule3+pointRule4+pointRule5+pointRule6+pointRule7+pointRule8+pointRule9+pointRule10+pointRule11+pointRule12+pointRule13+
 			pointRule14+pointRule15+pointRule16+pointRule17+pointRule18+pointRule19+pointRule20+pointRule21+pointRule22+pointRule23+pointRule24+pointRule25+pointRule26+pointRule27+
 			pointRule28+pointRule29+pointRule30+pointRule31+pointRule32+pointRule33+pointRule34+pointRule35+pointRule36+pointRule37+pointRule38+pointRule39+pointRule40+pointRule41+
-			pointRule42;
+			pointRule42+pointRule43;
 			_log.info("Done calculate fraud rules, total fraud points is: "+totalFraudPoints);
 		}catch(Exception e){
 			_log.error("Fraud calculate failed for wcs order id: "+venOrder.getWcsOrderId());
@@ -547,6 +551,11 @@ public class FraudRules {
 						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
 						fraudPoint.setFraudRuleName(DataConstantNameTokens.FRAUD_RULE_42);
 						fraudPoint.setRiskPoints(pointRule42);
+						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
+						
+						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
+						fraudPoint.setFraudRuleName(DataConstantNameTokens.FRAUD_RULE_43);
+						fraudPoint.setRiskPoints(pointRule43);
 						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
 						
 						//add fraud case history
