@@ -19,6 +19,7 @@ import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.GRNManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.util.Util;
+import com.gdn.venice.util.InventoryUtil;
 
 public class SaveGrnDataCommand implements RafRpcCommand {
 
@@ -70,7 +71,7 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 				String value = entry.getValue();
 				
 				GoodReceivedNoteItem grnItem = new GoodReceivedNoteItem();
-				HashMap<String, String> map = convertToHashMap(value);
+				HashMap<String, String> map = InventoryUtil.convertToHashMap(value);
 				for(Map.Entry<String, String> e : map.entrySet()){
 					String k = e.getKey();
 					String v = e.getValue();
@@ -105,19 +106,5 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 		}
 		
 		return "0";
-	}
-	
-	private HashMap<String, String> convertToHashMap(String s) {
-	    String[] arr = s.split(", ");
-	    String str = null;
-	    HashMap<String, String> map = new HashMap<String, String>();
-	    for (int i=0;i<arr.length;i++) {
-	    	str = arr[i].replace("{", "").replace("}", "");
-	        String[] splited = str.split("=");
-
-	        map.put(splited[0], splited[1]);
-	    }
-	    
-	    return map;
 	}
 }
