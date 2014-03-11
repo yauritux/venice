@@ -12,21 +12,21 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.gdn.venice.constants.VeniceEnvironment;
 import com.gdn.venice.dto.FundInData;
-import com.gdn.venice.finance.dataexportimport.MT942_Record;
+import com.gdn.venice.finance.dataexportimport.BRI_IB_Record;
 import com.gdn.venice.hssf.PojoInterface;
 import com.gdn.venice.util.CommonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MandiriIBFundInServiceImplTest {
-	private MandiriIBFundInServiceImpl sut;
+public class BRIIBFundInServiceImplTest {
+	private BRIIBFundInServiceImpl sut;
 	
 	VeniceEnvironment veniceEnv;
 	
-	@Before
+	@Before 
 	public void setup(){
 		veniceEnv = VeniceEnvironment.TESTING;
 		CommonUtil.veniceEnv = veniceEnv;
-		sut = new MandiriIBFundInServiceImpl();
+		sut = new BRIIBFundInServiceImpl();
 	}
 	
 	@Test
@@ -40,9 +40,9 @@ public class MandiriIBFundInServiceImplTest {
 	
 	@Test
 	public void mergeDuplicate_1FundIn_returns1FundIn(){
-		MT942_Record fundIn1 = new MT942_Record();
-		fundIn1.setAccountNumber("uniquefundin1");
-		fundIn1.setPaymentAmount(new Double(1000));
+		BRI_IB_Record fundIn1 = new BRI_IB_Record();
+		fundIn1.setBillReferenceNo("uniquefundin1");
+		fundIn1.setAmount(new Double(1000));
 		fundIn1.setBankFee(new Double(10));
 		
 		ArrayList<PojoInterface> fundInList = new ArrayList<PojoInterface>(1);
@@ -53,31 +53,30 @@ public class MandiriIBFundInServiceImplTest {
 		assertEquals(1, fundInData.getFundInList().size());
 	}
 	
-	
 	private ArrayList<PojoInterface> get5FundInWith3DuplicateFundIn(){
-		MT942_Record duplicateFundIn1 = new MT942_Record();
-		duplicateFundIn1.setAccountNumber("duplicate");
-		duplicateFundIn1.setPaymentAmount(new Double(1000));
+		BRI_IB_Record duplicateFundIn1 = new BRI_IB_Record();
+		duplicateFundIn1.setBillReferenceNo("duplicate");
+		duplicateFundIn1.setAmount(new Double(1000));
 		duplicateFundIn1.setBankFee(new Double(10));
 		
-		MT942_Record fundIn1 = new MT942_Record();
-		fundIn1.setAccountNumber("unique1");
-		fundIn1.setPaymentAmount(new Double(1500));
+		BRI_IB_Record fundIn1 = new BRI_IB_Record();
+		fundIn1.setBillReferenceNo("unique1");
+		fundIn1.setAmount(new Double(1500));
 		fundIn1.setBankFee(new Double(10));
 		
-		MT942_Record fundIn2 = new MT942_Record();
-		fundIn2.setAccountNumber("unique2");
-		fundIn2.setPaymentAmount(new Double(4000));
+		BRI_IB_Record fundIn2 = new BRI_IB_Record();
+		fundIn2.setBillReferenceNo("unique2");
+		fundIn2.setAmount(new Double(4000));
 		fundIn2.setBankFee(new Double(10));
 		
-		MT942_Record duplicateFundIn2 = new MT942_Record();
-		duplicateFundIn2.setAccountNumber("duplicate");
-		duplicateFundIn2.setPaymentAmount(new Double(2000));
+		BRI_IB_Record duplicateFundIn2 = new BRI_IB_Record();
+		duplicateFundIn2.setBillReferenceNo("duplicate");
+		duplicateFundIn2.setAmount(new Double(2000));
 		duplicateFundIn2.setBankFee(new Double(10));
 		
-		MT942_Record duplicateFundIn3 = new MT942_Record();
-		duplicateFundIn3.setAccountNumber("duplicate");
-		duplicateFundIn3.setPaymentAmount(new Double(3000));
+		BRI_IB_Record duplicateFundIn3 = new BRI_IB_Record();
+		duplicateFundIn3.setBillReferenceNo("duplicate");
+		duplicateFundIn3.setAmount(new Double(3000));
 		duplicateFundIn3.setBankFee(new Double(10));
 		
 		ArrayList<PojoInterface> fundInList = new ArrayList<PojoInterface>(5);
@@ -96,4 +95,5 @@ public class MandiriIBFundInServiceImplTest {
 		CommonUtil.veniceEnv = veniceEnv;
 		sut = null;
 	}
+
 }
