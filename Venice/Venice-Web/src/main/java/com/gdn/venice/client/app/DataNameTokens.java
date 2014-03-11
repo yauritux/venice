@@ -1239,6 +1239,13 @@ public class DataNameTokens {
     	public static String INV_GRN_ID = "id";
     	public static String INV_GRN_NUMBER = "grnNumber";
     	public static String INV_GRN_ITEM_ID = "id";
+    	
+    	public static String INV_ITEM_ATTRIBUTE_ID = "attributeId";
+    	public static String INV_ITEM_ATTRIBUTE_NAME = "name";
+    	public static String INV_ITEM_ATTRIBUTE_VALUE = "value";
+    	public static String INV_ITEM_ATTRIBUTE_IMEI = "imei";
+    	public static String INV_ITEM_ATTRIBUTE_SERIALNUMBER = "serialNumber";
+    	public static String INV_ITEM_ATTRIBUTE_EXPIREDDATE = "expiredDate";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type
