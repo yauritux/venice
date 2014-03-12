@@ -24,6 +24,7 @@ public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 		String retVal = "";
 		
 		int totalInboxItem=0;
+		int totalInvoiceNumberNullValue=0;
 		
 		Map<String, TaskSummaryProcessData> taskSummaryData = new HashMap<String, TaskSummaryProcessData>();
 		
@@ -43,14 +44,15 @@ public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 					//is excluded within the task inbox.
 					//Example for this would be peer-approving process for Logistics Activity Report Approval 
 					boolean excludedFromCurrentUser = false;
-					
 					if (processName.equals(ProcessNameTokens.LOGISTICSACTIVITYREPORTAPPROVAL) &&
 							activityName.equals(ProcessNameTokens.LOGISTICSACTIVITYREPORTAPPROVAL_APPROVALACTIVITYNAME)) {
 						String submittedBy = bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.SUBMITTEDBY);
 						excludedFromCurrentUser = userName.equals(submittedBy);
 					}
-					
+
+					String invoiceNumberAll = bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.INVOICERENUMBER);
 					if (!excludedFromCurrentUser) {
+							
 						if (!taskSummaryData.containsKey(processName)) {
 							TaskSummaryProcessData processData = new TaskSummaryProcessData();
 							processData.setProcessName(processName);
@@ -79,6 +81,12 @@ public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 								totalInboxItem += 1;
 							}
 						}
+						if(processName.equals(ProcessNameTokens.LOGISTICSINVOICEAPPROVAL)){
+							if(invoiceNumberAll.length()<1){
+								totalInvoiceNumberNullValue++;
+							}
+							
+						}
 					}
 				}
 			}
@@ -88,9 +96,9 @@ public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 
 		if (taskSummaryData.size()>0) {
 			if (totalInboxItem > 1) {
-				retVal += "<span style=\"font-size:12px\">You have <b>" + totalInboxItem + "</b> items in Inbox<br/>";
+				retVal += "<span style=\"font-size:12px\">You have <b>" + (totalInboxItem-totalInvoiceNumberNullValue) + "</b> items in Inbox<br/>";
 			} else {
-				retVal += "<span style=\"font-size:12px\">You have <b>" + totalInboxItem + "</b> item in Inbox<br/>";
+				retVal += "<span style=\"font-size:12px\">You have <b>" + (totalInboxItem-totalInvoiceNumberNullValue) + "</b> item in Inbox<br/>";
 			}
 			retVal = retVal + "This is the summary from your task:" +
 				"<ol>";
@@ -109,8 +117,11 @@ public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 					while (iterTask.hasNext()) {
 						String taskName = iterTask.next();
 						TaskSummaryTaskData taskSummaryTaskData = taskDataMap.get(taskName);
-						
-						retVal = retVal + "<li>" +  taskName + " (<b>"+ taskSummaryTaskData.getNumActivity() +"</b>)</li>";
+						if(taskName.equals(ProcessNameTokens.LOGISTICSINVOICEREPORTAPPROVAL_APPROVALACTIVITYNAME)){
+							retVal = retVal + "<li>" +  taskName + " (<b>"+ (taskSummaryTaskData.getNumActivity()-totalInvoiceNumberNullValue) +"</b>)</li>";
+						}
+						else
+							retVal = retVal + "<li>" +  taskName + " (<b>"+ taskSummaryTaskData.getNumActivity() +"</b>)</li>";
 					}
 					
 					retVal += "</ul>";
