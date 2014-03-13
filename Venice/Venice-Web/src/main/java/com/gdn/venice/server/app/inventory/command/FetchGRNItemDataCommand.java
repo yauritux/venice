@@ -51,7 +51,11 @@ public class FetchGRNItemDataCommand implements RafDsCommand {
         	if(grnItemWrapper != null){     
             	
 	    		asnService = new ASNManagementService(); 
-            	for(GoodReceivedNoteItem grnItem : grnItemWrapper.getContent()){   
+            	for(GoodReceivedNoteItem grnItem : grnItemWrapper.getContent()){  
+            		
+    				HashMap<String, String> map = new HashMap<String, String>(); 
+    				map.put(DataNameTokens.INV_GRN_ITEM_ID, String.valueOf(grnItem.getId()));
+    				
 	            	AdvanceShipNoticeItem asnItem = grnItem.getAdvanceShipNoticeItem();
 	            	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
                 		_log.info("reff type: purchase order");                		                		
@@ -59,8 +63,7 @@ public class FetchGRNItemDataCommand implements RafDsCommand {
                     	if(poItemWrapper!=null){
                     		PurchaseRequisitionItem item = poItemWrapper.getContent().getPurchaseRequisitionItem();
                     		_log.debug("PO item found, code:"+item.getItem().getCode());    
-                    		
-            				HashMap<String, String> map = new HashMap<String, String>();                    				             
+                    		                   				             
     	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
     	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
     	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(poItemWrapper.getContent().getQuantity()));
@@ -76,8 +79,7 @@ public class FetchGRNItemDataCommand implements RafDsCommand {
                     	if(cffItemWrapper!=null){
                     		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
                     		_log.debug("CFF item found, code:"+item.getItem().getCode());    
-                    		
-            				HashMap<String, String> map = new HashMap<String, String>();                    				             
+                    		                   				             
     	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
     	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
     	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(cffItemWrapper.getContent().getQuantity()));

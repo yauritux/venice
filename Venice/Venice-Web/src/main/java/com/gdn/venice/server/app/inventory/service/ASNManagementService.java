@@ -24,7 +24,6 @@ import com.gdn.inventory.exchange.entity.AdvanceShipNotice;
 import com.gdn.inventory.exchange.entity.AdvanceShipNoticeItem;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalForm;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalItem;
-import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNote;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrder;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrderItem;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
@@ -255,12 +254,11 @@ public class ASNManagementService{
 	public ResultWrapper<AdvanceShipNoticeItem> getSingleASNItemData(String asnItemId) throws HttpException, IOException{
 		_log.info("getSingleASNItemData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "advanceShipNotice/getDetail?asnItemId=" + asnItemId;
+                + "advanceShipNotice/findItemByASNItemId?asnItemId=" + asnItemId;
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
                  
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));

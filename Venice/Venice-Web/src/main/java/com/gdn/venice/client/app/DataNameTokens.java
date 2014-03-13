@@ -1244,9 +1244,9 @@ public class DataNameTokens {
     	public static String INV_ITEM_ATTRIBUTE_ID = "attributeId";
     	public static String INV_ITEM_ATTRIBUTE_NAME = "name";
     	public static String INV_ITEM_ATTRIBUTE_VALUE = "value";
-    	public static String INV_ITEM_ATTRIBUTE_IMEI = "imei";
-    	public static String INV_ITEM_ATTRIBUTE_SERIALNUMBER = "serialNumber";
-    	public static String INV_ITEM_ATTRIBUTE_EXPIREDDATE = "expiredDate";
+//    	public static String INV_ITEM_ATTRIBUTE_IMEI = "imei";
+//    	public static String INV_ITEM_ATTRIBUTE_SERIALNUMBER = "serialNumber";
+//    	public static String INV_ITEM_ATTRIBUTE_EXPIREDDATE = "expiredDate";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type
@@ -2291,7 +2291,10 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_FINARFUNDSINRECONRECORD_NOMORREFF,"java.lang.String");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_DATE,"java.sql.Timestamp");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT,"java.math.BigDecimal");
-							
+		
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_ID,"java.lang.Long");
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_NAME,"java.lang.String");
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_VALUE,"java.lang.String");			
 	}
 	
 	/**

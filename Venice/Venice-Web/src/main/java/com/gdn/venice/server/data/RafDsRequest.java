@@ -633,30 +633,21 @@ public class RafDsRequest {
 
 						for (int j = 0; j < dataFieldNodes.getLength(); j++) {
 							if (dataFieldNodes.item(j) instanceof Element) {
-
-								String dataKey = dataFieldNodes.item(j)
-										.getNodeName();
+								String dataKey = dataFieldNodes.item(j).getNodeName();
 								String dataValue = "";
 								// if Field Class is null, that means it is
 								// excluded from filter or data query
 								// e.g. commenthistory "extra" column in
 								// LogActivityReconRecord
-								if (DataNameTokens.getDataNameToken()
-										.getFieldClass(dataKey) != null) {
-									if (DataNameTokens.getDataNameToken()
-											.getFieldClass(dataKey)
-											.equals("java.sql.Timestamp")) {
+								if (DataNameTokens.getDataNameToken().getFieldClass(dataKey) != null) {
+									if (DataNameTokens.getDataNameToken().getFieldClass(dataKey).equals("java.sql.Timestamp")) {
 										DateToXsdDatetimeFormatter formatter = new DateToXsdDatetimeFormatter();
 
 										dataValue = new Long(formatter.parse(
-												dataFieldNodes.item(j)
-														.getTextContent())
-												.getTime()).toString();
+												dataFieldNodes.item(j).getTextContent()).getTime()).toString();
 									} else {
-										dataValue = dataFieldNodes.item(j)
-												.getTextContent();
+										dataValue = dataFieldNodes.item(j).getTextContent();
 									}
-
 									data.put(dataKey, dataValue);
 								}
 

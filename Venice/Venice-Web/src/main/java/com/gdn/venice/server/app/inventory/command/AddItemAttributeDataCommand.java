@@ -2,7 +2,9 @@ package com.gdn.venice.server.app.inventory.command;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -12,7 +14,6 @@ import com.gdn.inventory.exchange.entity.Attribute;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentApprovalItem;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalItem;
-import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNoteItem;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrderItem;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseRequisitionItem;
 import com.gdn.inventory.exchange.type.ASNReferenceType;
@@ -28,22 +29,22 @@ import com.gdn.venice.server.data.RafDsResponse;
  *
  * @author Roland
  */
-public class FetchItemAttributeDataCommand implements RafDsCommand {
+public class AddItemAttributeDataCommand implements RafDsCommand {
 
     private RafDsRequest request;
     GRNManagementService grnService;
     ASNManagementService asnService;
     protected static Logger _log = null;
     
-    public FetchItemAttributeDataCommand(RafDsRequest request) {
+    public AddItemAttributeDataCommand(RafDsRequest request) {
         this.request = request;
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.command.FetchItemAttributeDataCommand");
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.command.AddItemAttributeDataCommand");
     }
 
     @Override
     public RafDsResponse execute() {
-    	_log.info("FetchItemAttributeDataCommand");
+    	_log.info("AddItemAttributeDataCommand");
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         try {
@@ -52,15 +53,8 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         	
         	String itemIdParam = null;
         	if(request.getParams().get(DataNameTokens.INV_ASN_ITEM_ID)!=null){
-        		_log.info("item id from asn item");
         		itemIdParam = request.getParams().get(DataNameTokens.INV_ASN_ITEM_ID);
-        	}else if(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID)!=null){    
-        		_log.info("item id from grn item");
-        		ResultWrapper<GoodReceivedNoteItem> grnItemWrapper = grnService.findItemByGRNItemId(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID));
-        		
-        		if(grnItemWrapper!=null){
-        			itemIdParam = grnItemWrapper.getContent().getAdvanceShipNoticeItem().getId().toString();
-        		}
+        		_log.info("item id from asn item: "+itemIdParam);
         	}
         	
         	ResultWrapper<AdvanceShipNoticeItem> asnItemWrapper = asnService.getSingleASNItemData(itemIdParam);
@@ -84,7 +78,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
             		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber().toString());
                 	if(cffItemWrapper!=null){
                 		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
-                		_log.debug("CFF item found, id:"+item.getItem().getId());    
+                		_log.debug("CFF item found, id:"+item.getItem().getId());  
                 		itemId=item.getItem().getId();
                 	}else{
                 		_log.error("CFF item not found");
@@ -92,19 +86,31 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
             	}
             	
             	if(itemId!=null){
-            		_log.debug("item found, id:"+itemId); 
+            		_log.debug("item found, id:"+itemId);
             		List<WarehouseItem> whItemList = grnService.getWarehouseItemDataList(itemId.toString());
-            		for(WarehouseItem whItem : whItemList){
-            			List<Attribute> attList = grnService.getAttributeDataList(whItem.getId().toString());
-            			
-            			for(Attribute att : attList){            				
-            				_log.debug("attribute found, id:"+att.getId()); 
-            				HashMap<String, String> map = new HashMap<String, String>();
-            				map.put(DataNameTokens.INV_ITEM_ATTRIBUTE_ID, att.getId().toString());            				
-            				map.put(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME, att.getName());
-            				map.put(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE, att.getValue());         			 
-                			dataList.add(map);
-            			}
+            		if(whItemList!=null){ 
+            			dataList=request.getData();
+            			for(int i=0;i< dataList.size();i++){
+            				Map<String, String> data = dataList.get(i);
+            				
+            				Iterator<String> iter=data.keySet().iterator();
+            				
+        					Attribute attribute = new Attribute();
+        					WarehouseItem whItem = new WarehouseItem();
+        					whItem.setId(whItemList.get(0).getId());
+        					attribute.setWarehouseItem(whItem);
+        					
+            				while(iter.hasNext()){
+            					String key=iter.next();
+            					if(key.equals(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME)){
+            						attribute.setName(data.get(key));
+            					}else if(key.equals(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE)){
+            						attribute.setValue(data.get(key));
+            					}
+            				}
+            				
+            				grnService.addEditItemAttribute(request.getParams().get("username"), attribute);
+            			}            			            		
             		}
             	}
         	}     		        		

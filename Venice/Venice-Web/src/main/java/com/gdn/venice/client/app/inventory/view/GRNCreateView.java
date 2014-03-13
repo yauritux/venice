@@ -1,6 +1,7 @@
 package com.gdn.venice.client.app.inventory.view;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
@@ -36,7 +37,6 @@ import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.form.validator.LengthRangeValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -61,7 +61,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     RafViewLayout layout;
     ListGrid asnListGrid, itemListGrid, attributeListGrid;
     Window createGRNWindow, attributeWindow;
-    Boolean canSave=true;
+    Boolean canSave=false;
 
     ToolStrip toolStrip;
     ToolStripButton addItemButton, removeItemButton;
@@ -229,21 +229,6 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		
 		ToolStrip itemToolStrip = new ToolStrip();
 		itemToolStrip.setWidth100();
-		
-//		itemToolStrip.addButton(addItemButton);
-//		itemToolStrip.addButton(removeItemButton);
-//
-//		addItemButton.addClickHandler(new ClickHandler() {
-//			public void onClick(ClickEvent event) {
-//				itemListGrid.startEditingNew();
-//			}
-//		});
-//		
-//		removeItemButton.addClickHandler(new ClickHandler() {
-//			public void onClick(ClickEvent event) {
-//				itemListGrid.removeSelectedData();
-//			}
-//		});
            	
         detailLayout.setMembers(headerLayout, itemLabel, itemToolStrip, itemListGrid);
         createGRNWindow.addItem(detailLayout);
@@ -311,16 +296,6 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		itemListGrid.getField(DataNameTokens.INV_POCFF_ITEMDESC).setCanEdit(false);
 		itemListGrid.getField(DataNameTokens.INV_POCFF_ITEMUNIT).setCanEdit(false);
 		itemListGrid.getField(DataNameTokens.INV_ASN_ITEM_ID).setHidden(true);	
-		        
-//        addItemButton = new ToolStripButton();
-//        addItemButton.setIcon("[SKIN]/icons/business_users_add.png");  
-//        addItemButton.setTooltip("Add GRN Item");
-//        addItemButton.setTitle("Add");
-//	    
-//	    removeItemButton = new ToolStripButton();
-//	    removeItemButton.setIcon("[SKIN]/icons/business_users_delete.png");  
-//	    removeItemButton.setTooltip("Remove GRN Item");
-//	    removeItemButton.setTitle("Remove");
               				        
         return itemListGrid;
     }
@@ -342,7 +317,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     private Window buildAttributeWindow(String itemId) {
 		final Window addEditAttributeWindow = new Window();
 		addEditAttributeWindow.setWidth(400);
-		addEditAttributeWindow.setHeight(200);
+		addEditAttributeWindow.setHeight(400);
 		addEditAttributeWindow.setShowMinimizeButton(false);
 		addEditAttributeWindow.setIsModal(true);
 		addEditAttributeWindow.setShowModalMask(true);
@@ -356,7 +331,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		ToolStripButton removeButton = new ToolStripButton();
 		removeButton.setIcon("[SKIN]/icons/business_users_delete.png");
 		removeButton.setTitle("Remove");
-
+		
 		ToolStrip attributeToolStrip = new ToolStrip();
 		attributeToolStrip.setWidth100();
 		attributeToolStrip.addButton(addButton);
@@ -364,24 +339,31 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 
 		final DataSource attributeData = GRNData.getItemAttributeData(itemId);			
 		
+		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();  
+		map.put("imei", "IMEI");
+		map.put("serial", "Serial Number");
+		map.put("expired", "Expired Date");
+		attributeData.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setValueMap(map);
+		
 		attributeListGrid = new ListGrid();
 		attributeListGrid.setDataSource(attributeData);
-		attributeListGrid.setUseAllDataSourceFields(true);
 		attributeListGrid.setAutoFetchData(true);
 		attributeListGrid.setCanEdit(true);
-		attributeListGrid.setShowFilterEditor(false);
+		attributeListGrid.setShowFilterEditor(true);
 		attributeListGrid.setSelectionType(SelectionStyle.SIMPLE);
-		attributeListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
+		attributeListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
 		attributeListGrid.setShowRowNumbers(true);
-
-//		attributeListGrid.getField(DataNameTokens.INV_ASN_ITEM_ID).setHidden(true);
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID).setHidden(true);
-						
-//		LengthRangeValidator lengthRangeValidator = new LengthRangeValidator();  
-//		lengthRangeValidator.setMax(255);  
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_IMEI).setValidators(lengthRangeValidator);
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_SERIALNUMBER).setValidators(lengthRangeValidator);
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_EXPIREDDATE).setValidators(lengthRangeValidator);
+		
+		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(attributeData);
+		ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2]};        
+		attributeListGrid.setFields(finalListGridField);
+		
+		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID).setHidden(true);
+		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setWidth("30%");
+		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE).setWidth("70%");
+		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setCanFilter(false);
+		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE).setCanFilter(false);
+//		attributeListGrid.groupBy(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME);
 		 
 		VLayout attributeLayout = new VLayout();
 		attributeLayout.setHeight100();
@@ -389,16 +371,6 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		attributeLayout.setMembers(attributeToolStrip, attributeListGrid);
 		addEditAttributeWindow.addItem(attributeLayout);
 		
-		attributeListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
-			@Override
-			public void onEditComplete(EditCompleteEvent event) {
-				attributeListGrid.saveAllEdits();
-				if(event.getDsResponse().getStatus()==0){
-					SC.say("Attribute Added/Edited");
-				}				
-			}
-		});
-
 		addButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				attributeListGrid.startEditingNew();
@@ -408,13 +380,28 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		removeButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				attributeListGrid.removeSelectedData();
-				SC.say("Attribute Removed");
+				refreshAttributeData();
 			}
 		});
 		
 		addEditAttributeWindow.addCloseClickHandler(new CloseClickHandler() {
 			public void onCloseClick(CloseClientEvent event) {
 				addEditAttributeWindow.destroy();
+			}
+		});
+				
+		attributeListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
+			@Override
+			public void onEditComplete(EditCompleteEvent event) {		
+				attributeListGrid.saveAllEdits();
+				refreshAttributeData();
+			}
+		});
+		
+		attributeListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {			
+			@Override
+			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
+				refreshAttributeData();
 			}
 		});
 
@@ -431,6 +418,18 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         };
 
         asnListGrid.getDataSource().fetchData(asnListGrid.getFilterEditorCriteria(), callBack);
+    }
+    
+    @Override
+    public void refreshAttributeData() {
+        DSCallback callBack = new DSCallback() {
+            @Override
+            public void execute(DSResponse response, Object rawData, DSRequest request) {
+            	attributeListGrid.setData(response.getData());
+            }
+        };
+
+        attributeListGrid.getDataSource().fetchData(attributeListGrid.getFilterEditorCriteria(), callBack);
     }
 
     @Override
