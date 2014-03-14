@@ -3,11 +3,8 @@ package com.gdn.venice.server.app.finance.presenter.commands;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.digester.SetRootRule;
 
 import com.djarum.raf.utilities.Locator;
 import com.gdn.venice.client.app.DataNameTokens;
@@ -26,7 +23,7 @@ public class UpdateRefundPaymentProcessingDataCommand implements RafDsCommand {
 	 * the XML parameters that are passed to the servlet
 	 */
 	RafDsRequest request;
-	
+
 	public UpdateRefundPaymentProcessingDataCommand(RafDsRequest request) {
 		this.request = request;
 	}
@@ -39,45 +36,33 @@ public class UpdateRefundPaymentProcessingDataCommand implements RafDsCommand {
 		List<FinArFundsInRefund> finArFundsInRefundList = new ArrayList<FinArFundsInRefund>();		
 		List<HashMap<String,String >> dataList = request.getData();		
 		FinArFundsInRefund finArFundsInRefund = new FinArFundsInRefund();
-				
+
 		Locator<FinArFundsInRefundSessionEJBRemote> FinArFundsInRefundLocator = null;
-		
+
 		try {
 			FinArFundsInRefundLocator = new Locator<FinArFundsInRefundSessionEJBRemote>();
-			
+
 			FinArFundsInRefundSessionEJBRemote sessionHome = (FinArFundsInRefundSessionEJBRemote) FinArFundsInRefundLocator
 			.lookup(FinArFundsInRefundSessionEJBRemote.class, "FinArFundsInRefundSessionEJBBean");
-			
+
 			for (int i=0;i<dataList.size();i++) {
 				Map<String, String> data = dataList.get(i);		
-				
-				Iterator<String> iter = data.keySet().iterator();
-				while (iter.hasNext()) {
-					String key = iter.next();
-					if(key.equals(DataNameTokens.FINARFUNDSINREFUND_REFUNDRECORDID)){
-						try{
-							finArFundsInRefund = sessionHome.queryByRange("select o from FinArFundsInRefund o where o.refundRecordId="+new Long(data.get(key)), 0, 1).get(0); 
-						}catch(IndexOutOfBoundsException e){
-							finArFundsInRefund.setRefundRecordId(new Long(data.get(key)));
-						}
-						break;
-					}
-				}	
-				
-				iter = data.keySet().iterator();			
-				while (iter.hasNext()) {
-					String key = iter.next();
-					if (key.equals(DataNameTokens.FINARFUNDSINREFUND_BANKFEE)) {
-						finArFundsInRefund.setFeeAmount(data.get(key)!=null?new BigDecimal(data.get(key)):new BigDecimal(data.get(0)));
-						break;
-					} 
-				}						
-				
+
+				String id = data.get(DataNameTokens.FINARFUNDSINREFUND_REFUNDRECORDID);
+				try{
+					finArFundsInRefund = sessionHome.queryByRange("select o from FinArFundsInRefund o where o.refundRecordId="+new Long(id), 0, 1).get(0); 
+				}catch(IndexOutOfBoundsException e){
+					finArFundsInRefund.setRefundRecordId(new Long(id));
+				}
+
+				String bankFee = data.get(DataNameTokens.FINARFUNDSINREFUND_BANKFEE);
+				finArFundsInRefund.setFeeAmount(bankFee!=null && !bankFee.trim().isEmpty()?new BigDecimal(bankFee):new BigDecimal(0));
+
 				finArFundsInRefundList.add(finArFundsInRefund);			
 			}
-					
+
 			sessionHome.mergeFinArFundsInRefundList((ArrayList<FinArFundsInRefund>)finArFundsInRefundList);			
-			
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			rafDsResponse.setStatus(-1);
