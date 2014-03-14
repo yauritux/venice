@@ -290,7 +290,6 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
         grnListGrid.setDataSource(dataSource);    	
         grnListGrid.setAutoFetchData(true);
         grnListGrid.setFields(listGridField);
-        grnListGrid.setDataSource(dataSource);
         grnListGrid.getField(DataNameTokens.INV_GRN_ID).setHidden(true);
         grnListGrid.setAutoFitData(Autofit.BOTH);
 

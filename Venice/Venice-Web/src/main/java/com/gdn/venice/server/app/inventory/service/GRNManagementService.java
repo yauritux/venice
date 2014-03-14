@@ -47,7 +47,7 @@ public class GRNManagementService{
 		mapper = new ObjectMapper();
 		
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-        _log = loggerFactory.getLog4JLogger("ccom.gdn.venice.server.app.inventory.service.GRNManagementService");
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.service.GRNManagementService");
 	}
 	
 	public InventoryPagingWrapper<GoodReceivedNote> getGRNDataList(RafDsRequest request) throws HttpException, IOException{

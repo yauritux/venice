@@ -307,7 +307,6 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         asnListGrid.setDataSource(dataSource);    	
         asnListGrid.setAutoFetchData(true);
         asnListGrid.setFields(listGridField);
-        asnListGrid.setDataSource(dataSource);
         asnListGrid.getField(DataNameTokens.INV_ASN_ID).setHidden(true);
         asnListGrid.setAutoFitData(Autofit.BOTH);
 

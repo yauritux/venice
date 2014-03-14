@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.app.inventory.command.FetchWarehouseComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchWarehouseDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchWarehouseInProcessDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveOrUpdateWarehouseWIPDataCommand;
@@ -108,11 +109,16 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
                 }
             }
         } else {
-            String requestBody = Util.extractRequestBody(request);
             System.out.println("Masuk RPC");
-            System.out.println(requestBody);
-            RafRpcCommand saveWarehouseCommand = new SaveOrUpdateWarehouseWIPDataCommand(username, requestBody);
-            retVal = saveWarehouseCommand.execute();
+            if (method.equals("fetchWarehouseComboBoxData")){            	
+				RafRpcCommand fetchWarehouseComboBoxDataCommand = new FetchWarehouseComboBoxDataCommand(request.getParameter("username"));
+				retVal = fetchWarehouseComboBoxDataCommand.execute();		
+			}else{
+	            String requestBody = Util.extractRequestBody(request);
+	            System.out.println(requestBody);
+	            RafRpcCommand saveWarehouseCommand = new SaveOrUpdateWarehouseWIPDataCommand(username, requestBody);
+	            retVal = saveWarehouseCommand.execute();
+			}
         }
 
         response.getOutputStream().println(retVal);

@@ -46,7 +46,7 @@ public class ASNManagementService{
 		mapper = new ObjectMapper();
 		
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-        _log = loggerFactory.getLog4JLogger("ccom.gdn.venice.server.app.inventory.service.ASNManagementService");
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.service.ASNManagementService");
 	}
 	
 	public InventoryPagingWrapper<AdvanceShipNotice> getASNDataList(RafDsRequest request) throws HttpException, IOException{

@@ -1244,9 +1244,14 @@ public class DataNameTokens {
     	public static String INV_ITEM_ATTRIBUTE_ID = "attributeId";
     	public static String INV_ITEM_ATTRIBUTE_NAME = "name";
     	public static String INV_ITEM_ATTRIBUTE_VALUE = "value";
-//    	public static String INV_ITEM_ATTRIBUTE_IMEI = "imei";
-//    	public static String INV_ITEM_ATTRIBUTE_SERIALNUMBER = "serialNumber";
-//    	public static String INV_ITEM_ATTRIBUTE_EXPIREDDATE = "expiredDate";
+    	
+    	public static String INV_PICKINGLIST_WAREHOUSEITEMID = "id";
+    	public static String INV_PICKINGLIST_WAREHOUSEITEMSKU = "warehouseItemSKU";
+    	public static String INV_PICKINGLIST_ITEMSKUNAME = "warehouseItemSKUName";
+    	public static String INV_PICKINGLIST_STOCKTYPE = "stockType";
+    	public static String INV_PICKINGLIST_MERCHANT = "merchant";
+    	public static String INV_PICKINGLIST_QTY = "qty";
+    	public static String INV_PICKINGLIST_QTYPICKED = "qtyPicked";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type

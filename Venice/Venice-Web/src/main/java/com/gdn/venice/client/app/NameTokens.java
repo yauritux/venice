@@ -82,6 +82,8 @@ public class NameTokens {
 
 	public static final String grnCreatePage = "!grnCreatePage";
 	public static final String grnListPage = "!grnListPage";
+	
+	public static final String pickingListPage = "!pickingListPage";
         
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;

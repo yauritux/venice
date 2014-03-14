@@ -46,7 +46,7 @@ public class GRNData {
 	public static DataSource getGRNItemData(String grnId, int page, int limit) {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_GRN_ITEM_ID, "GRN Item ID"),
-				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMCODE, "Item SKU ID"),
+				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMCODE, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMDESC, "Item Desc"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_QTY, "Qty"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMUNIT, "UoM")};
@@ -98,7 +98,7 @@ public class GRNData {
 	public static DataSource getASNItemData(String asnId, int page, int limit) {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_ASN_ITEM_ID, "ASN Item ID"),
-				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMCODE, "Item SKU ID"),
+				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMCODE, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMDESC, "Item Desc"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_QTY, "Qty"),
 				new DataSourceTextField(DataNameTokens.INV_POCFF_ITEMUNIT, "UoM"),
