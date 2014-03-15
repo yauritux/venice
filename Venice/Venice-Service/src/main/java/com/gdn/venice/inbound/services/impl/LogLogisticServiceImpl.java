@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,6 +31,9 @@ public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.L
 	@Autowired
 	private LogLogisticServiceDAO logLogisticServiceDAO;
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@Override
 	public List<LogLogisticService> synchronizeLogLogisticServiceReferences(
 			List<LogLogisticService> logLogisticServiceRefs)
@@ -40,6 +46,7 @@ public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.L
 		   = new ArrayList<LogLogisticService>();
 		
 		for (LogLogisticService logLogisticService : logLogisticServiceRefs) {
+			em.detach(logLogisticService);
 			if (logLogisticService.getServiceCode() != null) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeLogLogisticServiceReferences::Restricting LogLogisticService... :" 

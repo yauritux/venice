@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +27,9 @@ public class CityServiceImpl implements CityService {
 	
 	@Autowired
 	private VenCityDAO venCityDAO;
+	
+	@PersistenceContext
+	private EntityManager em;	
 
 	@Override
 	public List<VenCity> synchronizeVenCityReferences(
@@ -31,19 +37,19 @@ public class CityServiceImpl implements CityService {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenCityReferences::cityReferences=" + cityReferences);
-		//if (cityReferences == null || cityReferences.size() == 0) return null;
 		
 		List<VenCity> synchronizedVenCities = new ArrayList<VenCity>();
 		
 		if (cityReferences != null) {
 			for (VenCity city : cityReferences) {
+				em.detach(city);
 				if (city.getCityCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCityReferences::Synchronizing VenCity... :" + city.getCityCode());
 					List<VenCity> cityList = venCityDAO.findByCityCode(city.getCityCode());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCityReferences::cityList size = "
-									+ cityList.size());
+									+ (cityList != null ? cityList.size() : 0));
 					if (cityList == null || (cityList.size() == 0)) {
 						VenCity venCity = venCityDAO.save(city);
 						synchronizedVenCities.add(venCity);

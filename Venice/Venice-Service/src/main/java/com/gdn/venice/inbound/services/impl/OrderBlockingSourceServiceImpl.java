@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,6 +32,9 @@ public class OrderBlockingSourceServiceImpl implements OrderBlockingSourceServic
 	@Autowired
 	private VenOrderBlockingSourceDAO venOrderBlockingSourceDAO;
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@Override
 	public List<VenOrderBlockingSource> synchronizeVenOrderBlockingSourceReferences(
 			List<VenOrderBlockingSource> orderBlockingSourceReferences) throws VeniceInternalException {
@@ -36,7 +42,6 @@ public class OrderBlockingSourceServiceImpl implements OrderBlockingSourceServic
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderBlockingSourceReferences::BEGIN, orderBlockingSourceReferences="
 				  + orderBlockingSourceReferences);
-		//if (orderBlockingSourceReferences == null || orderBlockingSourceReferences.isEmpty()) return null;
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderBlockingSourceReferences::preparing synchronizedOrderBlockingSource");
@@ -45,6 +50,7 @@ public class OrderBlockingSourceServiceImpl implements OrderBlockingSourceServic
 		
 		if (orderBlockingSourceReferences != null) {
 			for (VenOrderBlockingSource orderBlockingSource : orderBlockingSourceReferences) {
+				em.detach(orderBlockingSource);
 				if (orderBlockingSource.getBlockingSourceDesc() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenOrderBlockingSourceReferences::Restricting VenOrderBlockingSource... :" 

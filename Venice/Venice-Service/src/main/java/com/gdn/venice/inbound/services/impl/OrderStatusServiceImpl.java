@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,6 +37,9 @@ public class OrderStatusServiceImpl implements OrderStatusService {
 	@Autowired
 	private VenOrderStatusDAO venOrderStatusDAO;	
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@Override
 	public List<VenOrderStatus> synchronizeVenOrderStatusReferences(
 			List<VenOrderStatus> orderStatusReferences) throws VeniceInternalException {
@@ -45,6 +51,7 @@ public class OrderStatusServiceImpl implements OrderStatusService {
 		
 		if (orderStatusReferences != null) {
 			for (VenOrderStatus orderStatus : orderStatusReferences) {
+				em.detach(orderStatus);
 				if (orderStatus.getOrderStatusCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenOrderStatusReferences::Restricting VenOrderStatus... :" 

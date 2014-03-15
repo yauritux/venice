@@ -287,8 +287,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 
             return Boolean.TRUE;
         }   
-                     
-        boolean oldMethod = true;
+         
+        /*
+        boolean oldMethod = false;
 
         for (OrderItem item : order.getOrderItems()) {
             
@@ -313,6 +314,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 		} else { 
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "Using new service");			
+		*/
 			try {
 				orderService.createOrder(order);			
 			} catch (VeniceInternalException e) {
@@ -320,7 +322,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 				_log.error(e);
 				throw new EJBException(e.getMessage());
 			}
-		}
+		//}
 
         Long endTime = System.currentTimeMillis();
         Long duration = endTime - startTime;

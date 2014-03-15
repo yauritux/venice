@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,6 +35,9 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 	@Autowired
 	private ProductTypeService productTypeService;
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@Override
 	public List<VenMerchantProduct> synchronizeVenMerchantProductRefs(
 			List<VenMerchantProduct> merchantProductRefs)
@@ -43,6 +49,7 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		List<VenMerchantProduct> synchronizedMerchantProductRefs = new ArrayList<VenMerchantProduct>();
 		
 		for (VenMerchantProduct merchantProduct : merchantProductRefs) {
+			em.detach(merchantProduct);
 			if (merchantProduct.getWcsProductSku() != null) {
 				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -90,23 +97,23 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenMerchantProductReferenceData::BEGIN, venMerchantProduct = " + venMerchantProduct);
 		
-		if (venMerchantProduct.getVenProductType() != null) {
+		//if (venMerchantProduct.getVenProductType() != null) {
 			List<VenProductType> productTypeRefs = new ArrayList<VenProductType>();
 			productTypeRefs.add(venMerchantProduct.getVenProductType());
 			productTypeRefs = productTypeService.synchronizeVenProductTypeReferences(productTypeRefs);
 			for (VenProductType productType : productTypeRefs) {
 				venMerchantProduct.setVenProductType(productType);
 			}
-		}
+		//}
 		
-		if (venMerchantProduct.getVenMerchant() != null) {
+		//if (venMerchantProduct.getVenMerchant() != null) {
 			List<VenMerchant> merchantRefs = new ArrayList<VenMerchant>();
 			merchantRefs.add(venMerchantProduct.getVenMerchant());
 			//merchantRefs = discuss with team whether method synchronized for this particular class should be implemented or not
 			for (VenMerchant merchant : merchantRefs) {
 				venMerchantProduct.setVenMerchant(merchant);
 			}
-		}
+		//}
 		
 		/*
 		List<Object> references = new ArrayList<Object>();

@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,6 +32,9 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 	@Autowired
 	private VenProductTypeDAO venProductTypeDAO;
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@Override
 	public List<VenProductType> synchronizeVenProductTypeReferences(
 			List<VenProductType> productTypeRefs)
@@ -40,6 +46,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 		List<VenProductType> synchronizedProductTypeRefs = new ArrayList<VenProductType>();
 		
 		for (VenProductType productType : productTypeRefs) {
+			em.detach(productType);
 			if (productType.getProductTypeCode() != null) {
 				try {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()

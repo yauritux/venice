@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +27,9 @@ public class StateServiceImpl implements StateService {
 	
 	@Autowired
 	private VenStateDAO venStateDAO;
+	
+	@PersistenceContext
+	private EntityManager em;	
 
 	@Override
 	public List<VenState> synchronizeVenStateReferences(
@@ -31,12 +37,12 @@ public class StateServiceImpl implements StateService {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenStateReferences::BEGIN,stateReferences=" + stateReferences);
-		//if (stateReferences == null || stateReferences.size() == 0) return null;
 		
 		List<VenState> synchronizedStateReferences = new ArrayList<VenState>();
 		
 		if (stateReferences != null) {
 			for (VenState state : stateReferences) {
+				em.detach(state);
 				if (state.getStateCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenStateReferences::Synchronizing VenState... :" 

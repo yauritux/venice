@@ -60,9 +60,9 @@ public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService 
 			venOrderStatusHistory = venOrderStatusHistoryDAO.save(venOrderStatusHistory);
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrderStatusHistory::done add order status history");
 			if(venOrderStatusHistory != null){
-				return true;
+				return Boolean.TRUE;
 			}
-			return false;
+			return Boolean.FALSE;
 		} catch (Exception e) {
 			throw CommonUtil.logAndReturnException(new CannotPersistOrderStatusHistoryException(
 					"An exception occured when creating order status history"

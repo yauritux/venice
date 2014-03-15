@@ -14,7 +14,6 @@ import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenOrderItemDAO;
 import com.gdn.venice.exception.CannotPersistOrderItemException;
-import com.gdn.venice.exception.InvalidOrderException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.AddressService;
 import com.gdn.venice.inbound.services.MerchantProductService;
@@ -246,32 +245,32 @@ public class OrderItemServiceImpl implements OrderItemService {
 				, "synchronizeVenOrderItemReferenceData::merchantProduct orderItems="
 				+ venOrderItem.getVenMerchantProduct().getVenOrderItems());
 
-		if (venOrderItem.getLogLogisticService() != null) {
+		//if (venOrderItem.getLogLogisticService() != null) {
 			List<LogLogisticService> logLogisticServiceRefs = new ArrayList<LogLogisticService>();
 			logLogisticServiceRefs.add(venOrderItem.getLogLogisticService());
 			logLogisticServiceRefs = logLogisticService.synchronizeLogLogisticServiceReferences(logLogisticServiceRefs);
 			for (LogLogisticService logisticService : logLogisticServiceRefs) {
 				venOrderItem.setLogLogisticService(logisticService);
 			}
-		}
+		//}
 		
-		if (venOrderItem.getVenMerchantProduct() != null) {
+		//if (venOrderItem.getVenMerchantProduct() != null) {
 			List<VenMerchantProduct> merchantProductRefs = new ArrayList<VenMerchantProduct>();
 			merchantProductRefs.add(venOrderItem.getVenMerchantProduct());
 			merchantProductRefs = merchantProductService.synchronizeVenMerchantProductRefs(merchantProductRefs);
 			for (VenMerchantProduct merchantProduct : merchantProductRefs) {
 				venOrderItem.setVenMerchantProduct(merchantProduct);
 			}
-		}
+		//}
 		
-		if (venOrderItem.getVenOrderStatus() != null) {
+		//if (venOrderItem.getVenOrderStatus() != null) {
 			List<VenOrderStatus> orderStatusRefs = new ArrayList<VenOrderStatus>();
 			orderStatusRefs.add(venOrderItem.getVenOrderStatus());
 			orderStatusRefs = orderStatusService.synchronizeVenOrderStatusReferences(orderStatusRefs);
 			for (VenOrderStatus orderStatus : orderStatusRefs) {
 				venOrderItem.setVenOrderStatus(orderStatus);
 			}
-		}
+		//}
 		/*
 		List<Object> references = new ArrayList<Object>();
 		references.add(venOrderItem.getLogLogisticService());

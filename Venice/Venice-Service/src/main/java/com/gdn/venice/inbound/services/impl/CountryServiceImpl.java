@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +27,9 @@ public class CountryServiceImpl implements CountryService {
 	
 	@Autowired
 	private VenCountryDAO venCountryDAO;
+	
+	@PersistenceContext
+	private EntityManager em;	
 
 	@Override
 	public List<VenCountry> synchronizeVenCountryReferences(
@@ -32,19 +38,19 @@ public class CountryServiceImpl implements CountryService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenCountryReferences::BEGIN,countryReferences="
 				  + countryReferences);
-		//if (countryReferences == null || countryReferences.size() == 0) return null;
 		
 		List<VenCountry> synchronizedVenCountries = new ArrayList<VenCountry>();
 		
 		if (countryReferences != null) {
 			for (VenCountry country : countryReferences) {
+				em.detach(country);
 				if (country.getCountryCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
 							"synchronizeVenCountryReferences::Synchronizing VenCountry... :" + country.getCountryCode());
 					List<VenCountry> countryList = venCountryDAO.findByCountryCode(country.getCountryCode());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCountryReferences::countryList size = "
-									+ countryList.size());
+									+ (countryList != null ? countryList.size() : 0));
 					if (countryList == null || countryList.size() == 0) {
 						VenCountry venCountry = venCountryDAO.save(country);
 						synchronizedVenCountries.add(venCountry);

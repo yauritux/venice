@@ -655,6 +655,36 @@ public class OrderServiceImpl implements OrderService {
 			}			
 		}
 
+		// Persisting Order Item
+		List<VenOrderItem> venOrderItemList = new ArrayList<VenOrderItem>(venOrder.getVenOrderItems());		
+		try {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "createOrder::trying to persistOrderItemList");
+			List<VenOrderItem> venOrderItemListPersisted = orderItemService.persistOrderItemList(venOrder, venOrderItemList);
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "createOrder::trying to assign venOrderItemListPersisted into venOrder");
+			venOrder.setVenOrderItems(venOrderItemListPersisted);
+		    CommonUtil.logDebug(this.getClass().getCanonicalName()
+		    		, "createOrder::successfully assigned venOrderItemListPersisted into venOrder");
+		} catch (Exception e) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "createOrder::an exception occured when trying assign venOrderItems into venOrder: "
+					+ e);
+		}		
+		// End of Persisting Order Item
+		
+		// update/merge VenOrder
+		try {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "createOrder::updating venOrder");
+			venOrder = venOrderDAO.save(venOrder);
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "createOrder::successfully updated");			
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName()
+					, e);			
+		}
+		// end of update/merge VenOrder
 		
 		//LOG.debug("\n done create order!");
 		//Long endTime = System.currentTimeMillis();
@@ -666,6 +696,12 @@ public class OrderServiceImpl implements OrderService {
 		
 		return Boolean.TRUE;
 	}
+	
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Boolean createOrderVAPayment(Order order) throws VeniceInternalException {
+    	return Boolean.TRUE;
+    }
 	
 	/**
 	 * Synchronizes the data for the direct VenOrderPayment references
@@ -851,8 +887,12 @@ public class OrderServiceImpl implements OrderService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::Persisting VenOrder... :" + venOrder.getWcsOrderId());				
 				
-				// Save the order items before persisting as it will be detached
-				List<VenOrderItem> venOrderItemList = venOrder.getVenOrderItems();
+				// backup the order items before persisting as it will be detached				
+				//List<VenOrderItem> venOrderItemList = venOrder.getVenOrderItems();
+				List<VenOrderItem> venOrderItemList = new ArrayList<VenOrderItem>(venOrder.getVenOrderItems());
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "persistOrder::venOrderItem merchantProduct WCS Product SKU = " 
+				        + venOrderItemList.get(0).getVenMerchantProduct().getWcsProductSku());
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::venOrderItem merchantProduct orderItems="
 						+ venOrderItemList.get(0).getVenMerchantProduct().getVenOrderItems());
@@ -868,6 +908,7 @@ public class OrderServiceImpl implements OrderService {
 				venOrder.setVenTransactionFees(null);
 				// Detach the customer first then persist and re-attach
 				VenCustomer customer = venOrder.getVenCustomer();
+				em.detach(customer);
 				venOrder.setVenCustomer(null);
 
 				if(venOrder.getVenOrderBlockingSource().getBlockingSourceId()== null 
@@ -878,13 +919,24 @@ public class OrderServiceImpl implements OrderService {
 				
 				try {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrder::trying to persist venCustomer");
-					VenCustomer persistedCustomer = customerService.persistCustomer(customer);
+							, "persistOrder::trying to persist venCustomer; WCS Customer ID = " + customer.getWcsCustomerId()
+							+ ", Customer User Name = " + customer.getCustomerUserName());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrder::venCustomer persisted");					
-					venOrder.setVenCustomer(persistedCustomer);
+							, "persistOrder::venCustomer's Party = " + customer.getVenParty());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrder::customer has been set to venOrder");
+							, "persistOrder::venCustomer's Party Type = " 
+					        + (customer.getVenParty() != null ? customer.getVenParty().getVenPartyType() : null));
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrder::venCustomer's Party Legal Name = " 
+							+ (customer.getVenParty() != null ? customer.getVenParty().getFullOrLegalName() : null));
+					//VenCustomer persistedCustomer = customerService.persistCustomer(customer);
+					customer = customerService.persistCustomer(customer);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrder::venCustomer has been successfully persisted");					
+					//venOrder.setVenCustomer(persistedCustomer);
+					venOrder.setVenCustomer(customer);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrder::customer has just been reattached to venOrder");
 				} catch (Exception e) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "cannot persist customer!! Error = " + e);
@@ -909,6 +961,9 @@ public class OrderServiceImpl implements OrderService {
 						.getVenAddress());
 				orderAddress = addressService.persistAddress(venOrder.getVenCustomer()
 						.getVenParty().getVenPartyAddresses().get(0).getVenAddress());
+				
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "persistOrder::successfully persisted orderAddress");				
 				
 				// Synchronize the reference data
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -953,6 +1008,7 @@ public class OrderServiceImpl implements OrderService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::venOrder.wcsOrderId: "+venOrder.getWcsOrderId());
 				
+				/*
 				try {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::trying to persistOrderItemList");
@@ -967,6 +1023,7 @@ public class OrderServiceImpl implements OrderService {
 							, "persistOrder::an exception occured when trying assign venOrderItems into venOrder: "
 							+ e);
 				}
+				*/
 				
 				//Tally Order with customer address and contact details
 				//defined in the ref tables VenOrderAddress and VenOrderContactDetail
