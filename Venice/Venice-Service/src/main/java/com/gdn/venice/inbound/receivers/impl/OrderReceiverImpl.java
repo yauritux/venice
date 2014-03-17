@@ -1124,11 +1124,11 @@ public class OrderReceiverImpl implements OrderReceiver {
 				if (vaPaymentExists || csPaymentExists) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "masuk merge di persist");
 					//venOrder = (VenOrder) orderHome.mergeVenOrder(venOrder);
-					venOrder = venOrderDAO.saveAndFlush(venOrder);
+					venOrder = venOrderDAO.save(venOrder);
 				} else {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "masuk persist di persist");
 					//venOrder = (VenOrder) orderHome.persistVenOrder(venOrder);
-					venOrder = venOrderDAO.saveAndFlush(venOrder);
+					venOrder = venOrderDAO.save(venOrder);
 				}
 				//add order status history
 				this.createOrderStatusHistory(venOrder, venOrder.getVenOrderStatus());

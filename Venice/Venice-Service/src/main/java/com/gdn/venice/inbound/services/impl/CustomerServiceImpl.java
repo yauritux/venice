@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,6 +33,9 @@ import com.gdn.venice.util.CommonUtil;
 @Service
 @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 public class CustomerServiceImpl implements CustomerService {
+	
+	@PersistenceContext
+	EntityManager em;
 	
 	@Autowired
 	private VenCustomerDAO venCustomerDAO;
@@ -71,7 +77,6 @@ public class CustomerServiceImpl implements CustomerService {
 						, "persistCustomer::setting Customer's partyType");
 				VenPartyType venPartyType = new VenPartyType();
 				// Set the party type to Customer
-				//venPartyType.setPartyTypeId(new Long(4));
 				venPartyType.setPartyTypeId(VenPartyTypeConstants.VEN_PARTY_TYPE_CUSTOMER.code());
 				venPartyType.setPartyTypeDesc("Customer");
 				venCustomer.getVenParty().setVenPartyType(venPartyType);
@@ -80,7 +85,7 @@ public class CustomerServiceImpl implements CustomerService {
 				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::setting Customer's party");
-				VenParty party = venCustomer.getVenParty();
+				VenParty party = venCustomer.getVenParty(); //if venCustomer is in detach mode, then party here is also in detach mode, and vice versa 
 				List<VenCustomer> venCustomers = new ArrayList<VenCustomer>();
 				venCustomers.add(0, venCustomer);
 				party.setVenCustomers(venCustomers);
@@ -95,8 +100,13 @@ public class CustomerServiceImpl implements CustomerService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::persisting venCustomer");
 				//venCustomer.setVenParty(customer.getVenParty());
-				venCustomer = venCustomerDAO.save(venCustomer);
-				venCustomer.setVenParty(customer.getVenParty());
+				/*
+				if (!em.contains(venCustomer)) {
+					//venCustomer is in detach mode, hence we need to call save explicitly 
+					venCustomer = venCustomerDAO.save(venCustomer);
+				}
+				*/
+				venCustomer.setVenParty(customer.getVenParty()); // attached object will be automatically persisted by the JPA transaction, thus no need to explicitly call save again
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw CommonUtil.logAndReturnException(new CannotPersistCustomerException(

@@ -1,7 +1,6 @@
 package com.gdn.venice.inbound.services.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
 import com.gdn.venice.exception.CannotPersistOrderPaymentAllocationException;
-import com.gdn.venice.exception.CannotPersistOrderPaymentException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.OrderPaymentAllocationService;
 import com.gdn.venice.persistence.VenOrder;

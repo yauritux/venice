@@ -3,3 +3,4 @@
 *.class
 target/*
 Venice/pom.xml
+**/*.class

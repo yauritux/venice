@@ -32,7 +32,7 @@ public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.L
 	private LogLogisticServiceDAO logLogisticServiceDAO;
 	
 	@PersistenceContext
-	EntityManager em;
+	private EntityManager em;
 	
 	@Override
 	public List<LogLogisticService> synchronizeLogLogisticServiceReferences(
@@ -46,7 +46,7 @@ public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.L
 		   = new ArrayList<LogLogisticService>();
 		
 		for (LogLogisticService logLogisticService : logLogisticServiceRefs) {
-			em.detach(logLogisticService);
+			//em.detach(logLogisticService);
 			if (logLogisticService.getServiceCode() != null) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeLogLogisticServiceReferences::Restricting LogLogisticService... :" 
@@ -57,6 +57,7 @@ public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.L
 							"Logistics service does not exist", VeniceExceptionConstants.VEN_EX_500001)
 					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 				} else {
+					em.detach(logisticService);
 					synchronizedLogLogisticServiceRefs.add(logisticService);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeLogLogisticServiceReferences::successfully added logisticService into synchronizedLogLogisticServiceRefs");

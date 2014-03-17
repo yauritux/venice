@@ -184,19 +184,22 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "persistOrderPaymentList::payment not found, persisting it");
 						// Persist the object
-						VenOrderPayment venOrderPaymentPersisted = venOrderPaymentDAO.save(payment);
-						newVenOrderPaymentList.add(venOrderPaymentPersisted);
+						//VenOrderPayment venOrderPaymentPersisted = venOrderPaymentDAO.save(payment);
+						//newVenOrderPaymentList.add(venOrderPaymentPersisted);
+						newVenOrderPaymentList.add(payment);
 						// Persist the allocations
-						List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted 
-						   = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
-						payment.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersisted);
+						//List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted 
+						  // = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
+						//payment.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersisted);
+						payment.setVenOrderPaymentAllocations(venOrderPaymentAllocationList);
 					} else {
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "persistOrderPaymentList::persist the allocations");
 						// Persist the allocations
-						List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted 
-						   = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
-						payment.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersisted);
+						//List<VenOrderPaymentAllocation> venOrderPaymentAllocationPersisted 
+						   //= orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
+						//payment.setVenOrderPaymentAllocations(venOrderPaymentAllocationPersisted);
+						payment.setVenOrderPaymentAllocations(venOrderPaymentAllocationList);
 						// Just put it back into the new list
 						newVenOrderPaymentList.add(payment);						
 					}

@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.gdn.venice.facade.logistics.activity.processor.MSGActivityReportProcessorTest
--------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.143 sec

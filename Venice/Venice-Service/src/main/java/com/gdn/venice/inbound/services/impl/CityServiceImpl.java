@@ -29,9 +29,10 @@ public class CityServiceImpl implements CityService {
 	private VenCityDAO venCityDAO;
 	
 	@PersistenceContext
-	private EntityManager em;	
+	private EntityManager em;
 
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenCity> synchronizeVenCityReferences(
 			List<VenCity> cityReferences) {
 		
@@ -42,7 +43,7 @@ public class CityServiceImpl implements CityService {
 		
 		if (cityReferences != null) {
 			for (VenCity city : cityReferences) {
-				em.detach(city);
+				//em.detach(city);
 				if (city.getCityCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCityReferences::Synchronizing VenCity... :" + city.getCityCode());
@@ -50,14 +51,19 @@ public class CityServiceImpl implements CityService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCityReferences::cityList size = "
 									+ (cityList != null ? cityList.size() : 0));
-					if (cityList == null || (cityList.size() == 0)) {
-						VenCity venCity = venCityDAO.save(city);
-						synchronizedVenCities.add(venCity);
+					if (cityList == null || (cityList.size() == 0)) {						
+						if (!em.contains(city)) {
+							// city is in detach mode, hence need to call save explicitly
+							city = venCityDAO.save(city);
+						}						
+						//em.detach(city);						
+						synchronizedVenCities.add(city);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenCityReferences::successfully added venCity " + venCity 
+								, "synchronizeVenCityReferences::successfully added city " + city 
 								+ " into synchronizedVenCities collection");
 					} else {
 						VenCity venCity = cityList.get(0);
+						//em.detach(venCity);
 						synchronizedVenCities.add(venCity);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "successfully added venCity into synchronizedVenCities collection");

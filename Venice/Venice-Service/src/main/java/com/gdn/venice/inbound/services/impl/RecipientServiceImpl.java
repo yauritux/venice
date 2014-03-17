@@ -61,7 +61,9 @@ public class RecipientServiceImpl implements RecipientService {
 			// Synchronize the reference data
 			venRecipient = this.synchronizeVenRecipientReferenceData(venRecipient);
 			// Persist the object
+			/*
 			venRecipient = venRecipientDAO.save(venRecipient);
+			*/
 		}
 		return venRecipient;
 	}

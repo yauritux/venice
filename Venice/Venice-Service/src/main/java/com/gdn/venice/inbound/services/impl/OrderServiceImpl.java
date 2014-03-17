@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,8 +20,6 @@ import com.gdn.integration.jaxb.OrderItem;
 import com.gdn.integration.jaxb.Payment;
 import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VenOrderStatusConstants;
-import com.gdn.venice.constants.VenPartyTypeConstants;
-import com.gdn.venice.constants.VenWCSPaymentTypeConstants;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.FinArFundsInReconRecordDAO;
 import com.gdn.venice.dao.LogLogisticServiceDAO;
@@ -85,25 +82,17 @@ import com.gdn.venice.inbound.services.OrderService;
 import com.gdn.venice.inbound.services.OrderStatusHistoryService;
 import com.gdn.venice.inbound.services.OrderStatusService;
 import com.gdn.venice.inbound.services.PartyService;
-import com.gdn.venice.persistence.FinApprovalStatus;
-import com.gdn.venice.persistence.FinArFundsInActionApplied;
-import com.gdn.venice.persistence.FinArFundsInReconRecord;
-import com.gdn.venice.persistence.FinArReconResult;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenAddressType;
 import com.gdn.venice.persistence.VenContactDetail;
 import com.gdn.venice.persistence.VenCustomer;
 import com.gdn.venice.persistence.VenFraudCheckStatus;
-import com.gdn.venice.persistence.VenMerchant;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderAddress;
 import com.gdn.venice.persistence.VenOrderBlockingSource;
 import com.gdn.venice.persistence.VenOrderContactDetail;
 import com.gdn.venice.persistence.VenOrderItem;
-import com.gdn.venice.persistence.VenOrderPayment;
-import com.gdn.venice.persistence.VenOrderPaymentAllocation;
-import com.gdn.venice.persistence.VenOrderPaymentAllocationPK;
 import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenParty;
 import com.gdn.venice.persistence.VenPartyAddress;
@@ -248,7 +237,6 @@ public class OrderServiceImpl implements OrderService {
     private CustomerService customerService;
 	
 	private Mapper mapper = DozerBeanMapperSingletonWrapper.getInstance();	
-	private Cloner cloner = new Cloner();
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRES_NEW)
@@ -414,6 +402,7 @@ public class OrderServiceImpl implements OrderService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::Persisted VenOrder = " + venOrder);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::done persist order");
 		
+		/*
 		Pattern pattern = Pattern.compile("&");
 		for(String party : merchantProduct){				
 			String[] temp = pattern.split(party, 0);
@@ -466,12 +455,10 @@ public class OrderServiceImpl implements OrderService {
 										venPartyitem.setFullOrLegalName(temp[1]);	
 										CommonUtil.logDebug(this.getClass().getCanonicalName()
 												, "createOrder::persist venParty :  "+venPartyitem.getFullOrLegalName());
-										venPartyitem = venPartyDAO.save(venPartyitem);
+										//venPartyitem = venPartyDAO.save(venPartyitem);
 										venMerchantList.get(0).setVenParty(venPartyitem);
-										//venMerchantHome.mergeVenMerchant(venMechantList.get(0));
-										//venMerchantDAO.save(venMerchantListCloned.get(0));
 										VenMerchant venMerchant = venMerchantList.get(0);
-										merchantService.persist(venMerchant);
+										//merchantService.persist(venMerchant);
 										CommonUtil.logDebug(this.getClass().getCanonicalName()
 												, "createOrder::added  new party for venmerchant (Merchant Id :"
 										          + orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId() +" )"
@@ -479,7 +466,7 @@ public class OrderServiceImpl implements OrderService {
 									}else{
 										venMerchantList.get(0).setVenParty(venPartyList.get(0));
 										VenMerchant venMerchant = venMerchantList.get(0);
-										merchantService.persist(venMerchant);
+										//merchantService.persist(venMerchant);
 										CommonUtil.logDebug(this.getClass().getCanonicalName()
 												, "createOrder::add  party for venmerchant (Merchant Id :"
 										          + orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId() +" )"
@@ -604,7 +591,7 @@ public class OrderServiceImpl implements OrderService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "createOrder::persist payment allocation");
 				
-				venOrderPaymentAllocationList = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
+				//venOrderPaymentAllocationList = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
 				venOrder.setVenOrderPaymentAllocations(venOrderPaymentAllocationList);
 				
 				//Here we need to create a dummy reconciliation records
@@ -640,52 +627,33 @@ public class OrderServiceImpl implements OrderService {
 
 						// balance per payment amount - handling fee = payment amount, jadi bukan amount order total keseluruhan
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::payment Amount  = "+payment.getAmount());
+								//, "createOrder::payment Amount  = "+payment.getAmount());
+								, "createOrder::payment Amount  = " + orderPayment.getAmount());
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::HandlingFee = "+payment.getHandlingFee());
+								//, "createOrder::HandlingFee = "+payment.getHandlingFee());
+								, "createOrder::HandlingFee = " + orderPayment.getHandlingFee());
+						BigDecimal remaining = orderPayment.getAmount().subtract(orderPayment.getHandlingFee()); 
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::setRemainingBalanceAmount = " + orderPayment.getAmount().subtract(orderPayment.getHandlingFee()));
+								, "createOrder::setRemainingBalanceAmount = " + remaining);
 						
-						reconRecord.setRemainingBalanceAmount(orderPayment.getAmount());
-						reconRecord.setUserLogonName("System");
-						finArFundsInReconRecordDAO.save(reconRecord);
+						//reconRecord.setRemainingBalanceAmount(orderPayment.getAmount());
+						reconRecord.setRemainingBalanceAmount(remaining);
+						reconRecord.setUserLogonName("System");						
+						try {
+							finArFundsInReconRecordDAO.save(reconRecord);
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "createOrder::successfully persisted FinArFundInReconRecord");
+						} catch (Exception e) {
+							CommonUtil.logError(this.getClass().getCanonicalName()
+									, e);
+						}						
 						//reconRecordHome.persistFinArFundsInReconRecord(reconRecord);
 					}
 				}
 			}			
 		}
+		*/
 
-		// Persisting Order Item
-		List<VenOrderItem> venOrderItemList = new ArrayList<VenOrderItem>(venOrder.getVenOrderItems());		
-		try {
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "createOrder::trying to persistOrderItemList");
-			List<VenOrderItem> venOrderItemListPersisted = orderItemService.persistOrderItemList(venOrder, venOrderItemList);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "createOrder::trying to assign venOrderItemListPersisted into venOrder");
-			venOrder.setVenOrderItems(venOrderItemListPersisted);
-		    CommonUtil.logDebug(this.getClass().getCanonicalName()
-		    		, "createOrder::successfully assigned venOrderItemListPersisted into venOrder");
-		} catch (Exception e) {
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "createOrder::an exception occured when trying assign venOrderItems into venOrder: "
-					+ e);
-		}		
-		// End of Persisting Order Item
-		
-		// update/merge VenOrder
-		try {
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "createOrder::updating venOrder");
-			venOrder = venOrderDAO.save(venOrder);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "createOrder::successfully updated");			
-		} catch (Exception e) {
-			CommonUtil.logError(this.getClass().getCanonicalName()
-					, e);			
-		}
-		// end of update/merge VenOrder
-		
 		//LOG.debug("\n done create order!");
 		//Long endTime = System.currentTimeMillis();
 		//Long duration = endTime - startTime;
@@ -893,9 +861,11 @@ public class OrderServiceImpl implements OrderService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::venOrderItem merchantProduct WCS Product SKU = " 
 				        + venOrderItemList.get(0).getVenMerchantProduct().getWcsProductSku());
+				/*
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::venOrderItem merchantProduct orderItems="
 						+ venOrderItemList.get(0).getVenMerchantProduct().getVenOrderItems());
+				*/
 
 				// Detach the order items prior to persisting the order.
 				venOrder.setVenOrderItems(null);
@@ -908,12 +878,13 @@ public class OrderServiceImpl implements OrderService {
 				venOrder.setVenTransactionFees(null);
 				// Detach the customer first then persist and re-attach
 				VenCustomer customer = venOrder.getVenCustomer();
-				em.detach(customer);
+				//em.detach(customer);
 				venOrder.setVenCustomer(null);
 
 				if(venOrder.getVenOrderBlockingSource().getBlockingSourceId()== null 
-						&& venOrder.getVenOrderBlockingSource().getBlockingSourceDesc()==null)
+						&& venOrder.getVenOrderBlockingSource().getBlockingSourceDesc()==null) {
 					venOrder.setVenOrderBlockingSource(null);
+				}
 									
 				// Persist the customer
 				
@@ -985,7 +956,7 @@ public class OrderServiceImpl implements OrderService {
 				if (vaPaymentExists || csPaymentExists) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::either vaPayment or csPayment is exist, do merging operation");
-					venOrder = venOrderDAO.save(venOrder);
+					//venOrder = venOrderDAO.save(venOrder); no need to explicitly call save, since it would be handling automatically by the JPA transaction
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::venOrder merged");
 				} else {
@@ -996,7 +967,7 @@ public class OrderServiceImpl implements OrderService {
 							, "persistOrder::venOrder persisted");
 				}
 				//add order status history
-				orderStatusHistoryService.createOrderStatusHistory(venOrder, venOrder.getVenOrderStatus());
+				orderStatusHistoryService.createOrderStatusHistory(venOrder, venOrder.getVenOrderStatus()); //here, venOrder has already in attached mode
 				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::creating orderStatusHistory");
@@ -1007,12 +978,14 @@ public class OrderServiceImpl implements OrderService {
 				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::venOrder.wcsOrderId: "+venOrder.getWcsOrderId());
-				
-				/*
+												
 				try {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::trying to persistOrderItemList");
-					List<VenOrderItem> venOrderItemListPersisted = orderItemService.persistOrderItemList(venOrder, venOrderItemList);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "venOrder is attached ? " + (em.contains(venOrder)));					
+					List<VenOrderItem> venOrderItemListPersisted 
+					   = orderItemService.persistOrderItemList(venOrder, venOrderItemList); //venorder = attached, venOrderItemList = detached
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::trying to assign venOrderItemListPersisted into venOrder");
 					venOrder.setVenOrderItems(venOrderItemListPersisted);
@@ -1022,8 +995,7 @@ public class OrderServiceImpl implements OrderService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::an exception occured when trying assign venOrderItems into venOrder: "
 							+ e);
-				}
-				*/
+				}							
 				
 				//Tally Order with customer address and contact details
 				//defined in the ref tables VenOrderAddress and VenOrderContactDetail
@@ -1060,12 +1032,12 @@ public class OrderServiceImpl implements OrderService {
 							, "persistOrder::Total VenOrderContactDetail to be persisted => " 
 					+ venOrderContactDetailList.size());
 					// persist VenOrderContactDetail
-					//venOrderContactDetailDAO.save(venOrderContactDetailList);
 					orderContactDetailService.persistVenOrderContactDetails(venOrderContactDetailList);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::venOrderContactDetails successfully persisted");
 				}			
-		}
+		} // end if venOrder != null
+		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "persistOrder::EOF, returning venOrder = " + venOrder);
 		return venOrder;
@@ -1113,6 +1085,9 @@ public class OrderServiceImpl implements OrderService {
 					, "synchronizeVenOrderReferenceData::orderStatusReferences has been synchronized : " 
 			          + orderStatusReferences);
 			for (VenOrderStatus orderStatus : orderStatusReferences) { // weird isn't it ?
+				List<VenOrder> orderStatusVenOrders = orderStatus.getVenOrders();
+				orderStatusVenOrders.add(venOrder);
+				orderStatus.setVenOrders(orderStatusVenOrders);
 				venOrder.setVenOrderStatus(orderStatus);
 			}			
 		}
@@ -1141,404 +1116,7 @@ public class OrderServiceImpl implements OrderService {
 				, "synchronizeVenOrderReferenceData::EOF, returning venOrder = " + venOrder);
 		return venOrder;
 	}	
-	
-	/*
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	private VenCustomer persistCustomer(VenCustomer venCustomer) throws VeniceInternalException {
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistCustomer::BEGIN, venCustomer = " + venCustomer);
-		if (venCustomer != null) {
-			try {
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistCustomer::Persisting VenCustomer... :" + venCustomer.getCustomerUserName());
-				// If the customer already exists then return it, else persist everything
-				//List<VenCustomer> venCustomerList = venCustomerDAO.findByWcsCustomerId(venCustomer.getWcsCustomerId());
-				//if (venCustomerList != null && (venCustomerList.size() > 0)) {
-				//	venCustomer.setCustomerId(venCustomerList.get(0).getCustomerId());
-				//}
-				VenCustomer existingVenCustomer = customerService.findByWcsCustomerId(venCustomer.getWcsCustomerId());
-				if (existingVenCustomer != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistCustomer::existingVenCustomer NOT NULL --> " + existingVenCustomer);
-					venCustomer.setCustomerId(existingVenCustomer.getCustomerId());
-				}
-
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistCustomer::setting Customer's partyType");
-				VenPartyType venPartyType = new VenPartyType();
-				// Set the party type to Customer
-				venPartyType.setPartyTypeId(new Long(4));
-				venPartyType.setPartyTypeDesc("Customer");
-				venCustomer.getVenParty().setVenPartyType(venPartyType);
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistCustomer::Customer's partyType successfully set");
-				
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistCustomer::setting Customer's party");
-				VenParty party = venCustomer.getVenParty();
-				List<VenCustomer> venCustomers = new ArrayList<VenCustomer>();
-				venCustomers.add(0, venCustomer);
-				party.setVenCustomers(venCustomers);
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistCustomer::Customer's party successfully set");
-				venCustomer.setVenParty(this.persistParty(party, "Customer"));
-				// Synchronize the reference data
-				venCustomer = this.synchronizeVenCustomerReferenceData(venCustomer);
-
-				// Persist the object
-				VenCustomer customer = venCustomer;
-				//venCustomer = customerHome.mergeVenCustomer(venCustomer);
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistCustomer::persisting venCustomer");
-				venCustomer.setVenParty(customer.getVenParty());
-				venCustomer = venCustomerDAO.save(venCustomer);
-				//venCustomer.setVenParty(customer.getVenParty());
-			} catch (Exception e) {
-				//e.printStackTrace();
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, e.getMessage());
-				throw CommonUtil.logAndReturnException(new InvalidOrderException(
-						"An exception occured when persisting VenCustomer", VeniceExceptionConstants.VEN_EX_100001)
-				  , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-			}
-		}
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistCustomer::EOM, venCustomer has been persisted successfully, " + venCustomer);
-		return venCustomer;
-	}
-	*/	
-	
-	/**
-	 * Synchronizes the data for the direct VenCustomer references
-	 * 
-	 * @param venCustomer
-	 * @return the synchronized data object
-	 */
-	/*
-	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	private VenCustomer synchronizeVenCustomerReferenceData(
-			VenCustomer venCustomer) throws VeniceInternalException {
-
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenCustomerReferenceData, BEGIN, venCustomer = " + venCustomer);
-		List<Object> references = new ArrayList<Object>();
-		references.add(venCustomer.getVenParty());
-
-		// Synchronize the data references
-		references = this.synchronizeReferenceData(references);
-
-		// Push the keys back into the record
-		Iterator<Object> referencesIterator = references.iterator();
-		while (referencesIterator.hasNext()) {
-			Object next = referencesIterator.next();
-			if (next instanceof VenParty) {
-				venCustomer.setVenParty((VenParty) next);
-			}
-		}
-		return venCustomer;
-	}	
-	*/
-	
-	/**
-	 * Persists a list of party addresses using the session tier.
-	 * 
-	 * @param venPartyAddressList
-	 * @return the persisted object
-	 */
-	/*
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	List<VenPartyAddress> persistPartyAddresses(List<VenPartyAddress> venPartyAddressList) throws VeniceInternalException {
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistPartyAddresses::BEGIN, venPartyAddressList = " + venPartyAddressList);
-		List<VenPartyAddress> newVenPartyAddressList = new ArrayList<VenPartyAddress>();
-		//if (venPartyAddressList != null && !venPartyAddressList.isEmpty()) {
-		if (venPartyAddressList != null && venPartyAddressList.size() > 0) {
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistPartyAddresses::Persisting VenPartyAddress list...:" + venPartyAddressList.size());
-				Iterator<VenPartyAddress> i = venPartyAddressList.iterator();
-				while (i.hasNext()) {
-					VenPartyAddress next = i.next();
-
-					// Set up the primary key object
-					VenPartyAddressPK id = new VenPartyAddressPK();
-					id.setAddressId(next.getVenAddress().getAddressId());
-					id.setPartyId(next.getVenParty().getPartyId());
-					id.setAddressTypeId(next.getVenAddressType().getAddressTypeId());
-					next.setId(id);
-					// Persist the object
-					newVenPartyAddressList.add(venPartyAddressDAO.save(next));
-				}
-		}
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistPartyAddresses::EOM, returning newVenPartyAddressList = " + newVenPartyAddressList);
-		return newVenPartyAddressList;
-	}	
-	*/
-	
-	/*
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	VenParty persistParty(VenParty venParty, String type) throws VeniceInternalException {
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistParty::BEGIN, venParty " + venParty + ", type " + type);
-		if (venParty != null) {
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "persistParty::venParty is not null (i.e " + venParty + ")");
-			//try {
-				VenParty existingParty;
-				if(type.equals("Customer")){
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistParty::Persisting VenParty... :" 
-					+ venParty.getVenCustomers().get(0).getCustomerUserName());
-	
-					// Get any existing party based on customer username
-					existingParty = this.retrieveExistingParty(venParty.getVenCustomers().get(0).getCustomerUserName());
-				} else {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistParty::Persisting VenParty... :" + venParty.getFullOrLegalName());
-
-					// Get any existing party based on full or legal name 
-					existingParty = this.retrieveExistingParty(venParty.getFullOrLegalName());
-				}
-			
-				//If the party already exists then the existing party 
-				//addresses and contacts may have changed so we
-				//need to synchronize them
-				 							
-				if (existingParty != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistParty::existing Party not null" );
-					
-					//Get the existing addresses
-					List<VenAddress> existingAddressList = new ArrayList<VenAddress>();
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistParty::existingParty.getVenPartyAddresses() = " 
-							+ existingParty.getVenPartyAddresses());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistParty::existingParty.getVenPartyAddresses().size() = "
-							+ existingParty.getVenPartyAddresses().size());
-					for(VenPartyAddress venPartyAddress:existingParty.getVenPartyAddresses()){
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::ven Party Address... :"+venPartyAddress.getVenAddress().getAddressId());
-						existingAddressList.add(venPartyAddress.getVenAddress());
-					}
-					
-					//Get the new addresses
-					List<VenAddress> newAddressList = new ArrayList<VenAddress>();
-					if(venParty.getVenPartyAddresses()!=null){
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::venParty.getVenPartyAddresses() not null");
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::venParty.getVenPartyAddresses().size() = " 
-								+ venParty.getVenPartyAddresses().size());
-						for(VenPartyAddress venPartyAddress:venParty.getVenPartyAddresses()){
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "persistParty::New ven Party Address... :"
-							+ venPartyAddress.getVenAddress().getStreetAddress1());
-							newAddressList.add(venPartyAddress.getVenAddress());
-						}
-					}
-
-					//If any new addresses are provided then check that 
-					//the existing addresses match the new addresses
-					//else add the new addresses for the party 
-					
-					if(!newAddressList.isEmpty()){
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::New ven Party Address is not empty and Update Address List");
-						List<VenAddress> updatedAddressList = this.updateAddressList(existingAddressList, newAddressList);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::updatedAddressList size => " + updatedAddressList.size());
-						List<VenAddress> tempAddressList = new ArrayList<VenAddress>();
-						
-						tempAddressList.addAll(updatedAddressList);
-						
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::Remove old VenAddress");
-						//Remove all the existing addresses
-						updatedAddressList.removeAll(existingAddressList);
-						
-						//Setup the new VenPartyAddress records
-						List<VenPartyAddress> venPartyAddressList = new ArrayList<VenPartyAddress>();
-						for(VenAddress updatedAddress:updatedAddressList){
-							VenPartyAddress venPartyAddress = new VenPartyAddress();							
-							VenAddressType venAddressType = new VenAddressType();
-							venAddressType.setAddressTypeId(VeniceConstants.VEN_ADDRESS_TYPE_DEFAULT);
-														
-							venPartyAddress.setVenAddress(updatedAddress);
-							venPartyAddress.setVenAddressType(venAddressType);
-							venPartyAddress.setVenParty(existingParty);
-							existingParty.getVenPartyAddresses().add(venPartyAddress);
-							
-							venPartyAddressList.add(venPartyAddress);							
-						}
-						
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::persist Party Addresses ");
-						//Persist the new VenPartyAddress records
-						venPartyAddressList = this.persistPartyAddresses(venPartyAddressList);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::venPartyAddressList=" + venPartyAddressList);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::size=" + venPartyAddressList.size());
-						
-						if(updatedAddressList.size() == 0){
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "persistParty::updatedAddressList.size == 0");
-							for(VenAddress updatedAddress:tempAddressList){					
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "persistParty::updatedAddress = " + updatedAddress);
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "persistParty::total venparty addresses : " + updatedAddress.getVenPartyAddresses().size() );
-								venPartyAddressList.addAll(updatedAddress.getVenPartyAddresses());	
-								for(VenPartyAddress venPartyAddress:venPartyAddressList){
-									CommonUtil.logDebug(this.getClass().getCanonicalName()
-											, "persistParty::VenPartyAddress => " + venPartyAddress.getVenAddress().getAddressId());
-								}
-							}
-						}
-						
-						//copy existing address list to new list so it can be added new address list
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::copy address list to new list");
-//						List<VenPartyAddress> venPartyAddressList2=new ArrayList<VenPartyAddress>(existingParty.getVenPartyAddresses()).subList(0,venPartyAddressList.size());
-						
-						//Add all the new party address records	
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::add All VenParty Addresses");
-						existingParty.setVenPartyAddresses(venPartyAddressList);
-						for(VenPartyAddress venPartyAddress:venPartyAddressList){
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "persistParty::VenPartyAddress => " + venPartyAddress.getVenAddress().getAddressId());
-						}
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistParty::done add All VenParty Addresses");
-					}
-					
-					//If any new contact details are provided then check
-					//that the new contact details match the existing 
-					//contact details else add the new contact details
-					//to the party and then merge.
-					
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistParty::Get old and new party ven contact Detail  ");
-					//Get the existing contact details
-					List<VenContactDetail> existingContactDetailList = existingParty.getVenContactDetails();
-					
-					if(venParty.getVenContactDetails()!=null){
-							//Get the new addresses
-							List<VenContactDetail> newContactDetailList = venParty.getVenContactDetails();
-							
-							if(!newContactDetailList.isEmpty()){
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "persistParty::updatedContact Detail List from existingContactDetailList to newContactDetailList");
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "persistParty::start updating contact detail");
-								//if the contact detail of existing party is null we can not get the party id using existingContactDetailList, so send the existing party
-								List<VenContactDetail> updatedContactDetailList = this.updateContactDetailList(existingParty, existingContactDetailList, newContactDetailList);
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "persistParty::done updating contact detail!!!");
 		
-								existingParty.setVenContactDetails(updatedContactDetailList);
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "persistParty::assigned updatedContactDetailList into existingParty");
-							}
-					}
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistParty::existingParty not null block condition, returning existingParty " + existingParty);
-					return existingParty;
-				}
-
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistParty::persisting addresses");
-				// Persist addresses
-				List<VenAddress> addressList = new ArrayList<VenAddress>();
-				Iterator<VenPartyAddress> i = venParty.getVenPartyAddresses().iterator();
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistParty::i = " + i);
-				while (i.hasNext()) {
-					addressList.add(i.next().getVenAddress());
-				}
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistParty::persisting Address List");
-				addressList = this.persistAddressList(addressList);
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistParty::addressList persisted with total member : " + addressList.size());
-
-				// Assign the address keys back to the n-n object
-				i = venParty.getVenPartyAddresses().iterator();
-				int index = 0;
-				while (i.hasNext()) {
-					VenPartyAddress next = i.next();
-					next.setVenAddress(addressList.get(index));
-					VenAddressType addressType = new VenAddressType();
-					addressType.setAddressTypeId(VeniceConstants.VEN_ADDRESS_TYPE_DEFAULT);
-					List<Object> references = new ArrayList<Object>();
-					references.add(addressType);
-					references = this.synchronizeReferenceData(references);
-					index++;
-				}
-
-				// Detach the party addresses object before persisting party
-				List<VenPartyAddress> venPartyAddressList = venParty.getVenPartyAddresses();
-				venParty.setVenPartyAddresses(null);
-
-				// Detach the list of contact details before persisting party
-				List<VenContactDetail> venContactDetailList = venParty.getVenContactDetails();
-				venParty.setVenContactDetails(null);
-				
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistParty::synchronize VenParty Reference Data");
-				// Synchronize the reference data
-				venParty = this.synchronizeVenPartyReferenceData(venParty);
-				
-				// Persist the object
-				//VenPartySessionEJBLocal partyHome = (VenPartySessionEJBLocal) this._genericLocator.lookupLocal(VenPartySessionEJBLocal.class, "VenPartySessionEJBBeanLocal");
-
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistParty::persisting VenParty ");
-				// Merge the party object
-				//venParty = (VenParty) partyHome.persistVenParty(venParty);
-				venParty = venPartyDAO.save(venParty);
-
-				VenAddressType venAddressType = new VenAddressType();
-				venAddressType.setAddressTypeId(VeniceConstants.VEN_ADDRESS_TYPE_DEFAULT);
-
-				// Set the party relationship for each VenPartyAddress
-				i = venPartyAddressList.iterator();
-				while (i.hasNext()) {
-					VenPartyAddress next = i.next();
-					next.setVenParty(venParty);
-					next.setVenAddressType(venAddressType);
-				}
-
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistParty::persisting Party Addresses ");
-				// Persist the party addresses
-				venParty.setVenPartyAddresses(this.persistPartyAddresses(venPartyAddressList));
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistParty::Venpartyaddress size = >" + venParty.getVenPartyAddresses().size());
-				// Set the party relationship for each contact detail
-				Iterator<VenContactDetail> contactsIterator = venContactDetailList.iterator();
-				while (contactsIterator.hasNext()) {
-					contactsIterator.next().setVenParty(venParty);
-				}
-
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistParty::persisting Contact Details");
-				// Persist the contact details
-				venParty.setVenContactDetails(this.persistContactDetails(venContactDetailList));
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistParty::VenContactDetails size = >" + venParty.getVenContactDetails());
-			
-			//} catch (Exception e) {
-				//String errMsg = "An exception occured when persisting VenParty:";
-				//LOG.error(errMsg + e.getMessage());
-				//throw new EJBException(errMsg);
-			//}
-			
-		} //end of block if venParty != null
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistParty::EOM, returning venParty " + venParty);
-		return venParty;
-	}
-	*/
-	
 	/**
 	 * Synchronizes the data for the direct VenParty references
 	 * 

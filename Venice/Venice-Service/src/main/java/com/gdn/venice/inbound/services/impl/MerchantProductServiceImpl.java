@@ -36,9 +36,10 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 	private ProductTypeService productTypeService;
 	
 	@PersistenceContext
-	EntityManager em;
+	private EntityManager em;
 	
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenMerchantProduct> synchronizeVenMerchantProductRefs(
 			List<VenMerchantProduct> merchantProductRefs)
 			throws VeniceInternalException {
@@ -49,28 +50,36 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		List<VenMerchantProduct> synchronizedMerchantProductRefs = new ArrayList<VenMerchantProduct>();
 		
 		for (VenMerchantProduct merchantProduct : merchantProductRefs) {
-			em.detach(merchantProduct);
+			//em.detach(merchantProduct);
 			if (merchantProduct.getWcsProductSku() != null) {
 				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeVenMerchantProductRefs::Synchronizing VenMerchantProduct... :" 
 				          + merchantProduct.getWcsProductSku());
 				
-				merchantProduct = synchronizeVenMerchantProductReferenceData(merchantProduct);
+				merchantProduct = synchronizeVenMerchantProductReferenceData(merchantProduct); // merchantProduct is in attach mode here
+				em.detach(merchantProduct);
 				
 				List<VenMerchantProduct> merchantProductList = venMerchantProductDAO.findByWcsProductSku(merchantProduct.getWcsProductSku());
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeVenMerchantProductReferences::merchantProductList = " 
 								+ merchantProductList);
-				if (merchantProductList == null || (merchantProductList.size() == 0)) {
-					VenMerchantProduct venMerchantProduct = venMerchantProductDAO.save(merchantProduct);
+				if (merchantProductList == null || (merchantProductList.isEmpty())) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeVenMerchantProductReferences::VenMerchantProduct is not listed in the database, saving it");
+					//VenMerchantProduct venMerchantProduct = venMerchantProductDAO.save(merchantProduct); //attach merchantProduct
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::adding venMerchantProduct into synchronizedMerchantProductRefs");
-					synchronizedMerchantProductRefs.add(venMerchantProduct);
+					//em.detach(venMerchantProduct);					
+					//synchronizedMerchantProductRefs.add(venMerchantProduct);
+					synchronizedMerchantProductRefs.add(merchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
 				} else {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeVenMerchantProductReferences::venMerchantProduct is in attached mode, going to detach it");
 					VenMerchantProduct venMerchantProduct = merchantProductList.get(0);
+					em.detach(venMerchantProduct);
 					synchronizedMerchantProductRefs.add(venMerchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
@@ -98,6 +107,8 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				, "synchronizeVenMerchantProductReferenceData::BEGIN, venMerchantProduct = " + venMerchantProduct);
 		
 		//if (venMerchantProduct.getVenProductType() != null) {
+		    CommonUtil.logDebug(this.getClass().getCanonicalName()
+		    		, "synchronizeVenMerchantProductReferenceData::merchantProduct product type = " + venMerchantProduct.getVenProductType());
 			List<VenProductType> productTypeRefs = new ArrayList<VenProductType>();
 			productTypeRefs.add(venMerchantProduct.getVenProductType());
 			productTypeRefs = productTypeService.synchronizeVenProductTypeReferences(productTypeRefs);

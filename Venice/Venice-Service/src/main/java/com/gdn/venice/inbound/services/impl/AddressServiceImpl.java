@@ -29,11 +29,6 @@ import com.gdn.venice.util.CommonUtil;
  * 
  * @author yauritux
  * 
- * Notes:
- * There is a bad design (see line 232 which i remarked). It has strong tightly coupled in the code
- * since this class Service call another method (synchronizeReferenceData) in other class, and at the same time that particular class
- * also call the method on this class Service.
- * Later, think about the proper design to handle this CRC (Cyclick Redundancy Call)
  *
  */
 @Service
@@ -202,30 +197,27 @@ public class AddressServiceImpl implements AddressService {
 						}							
 						venAddress.setVenCountry(null);
 					}			
-
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistAddress::trying to persist venAddress at the first time");
 					
-					venAddress = venAddressDAO.save(venAddress);
+					if (!em.contains(venAddress)) {
+						// venAddress is in detach mode, hence we need to call save explicitly
+						venAddress = venAddressDAO.save(venAddress);
+					}					
 					
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistAddress::successfully persisted venAddress once");
-
 					//reattach after persisted
 					venAddress.setVenCity(city);
 					venAddress.setVenState(state);
 					venAddress.setVenCountry(country);
-
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistAddress::persisting address");
-					venAddress = venAddressDAO.save(venAddress); // update/merge
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistAddress::venAddress has just been merged/updated");					
 				}
 			} else {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistAddress::updating/renew the data in venAddress");				
 				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistAddress::merge address");
-				venAddress = venAddressDAO.save(venAddress);
+				/*
+				if (!em.contains(venAddress)) {
+					// venAddress is in detach mode, hence we need to call save explicitly
+					venAddress = venAddressDAO.save(venAddress);
+				}
+				*/				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistAddress::successfully merged venAddress");				
 			}

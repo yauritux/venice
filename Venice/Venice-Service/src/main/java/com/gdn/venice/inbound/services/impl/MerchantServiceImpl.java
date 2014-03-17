@@ -2,6 +2,9 @@ package com.gdn.venice.inbound.services.impl;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,7 +29,10 @@ import com.gdn.venice.util.CommonUtil;
 public class MerchantServiceImpl implements MerchantService {
 	
 	@Autowired
-	VenMerchantDAO venMerchantDAO;
+	private VenMerchantDAO venMerchantDAO;
+	
+	@PersistenceContext
+	private EntityManager em;
 
 	@Override
 	public List<VenMerchant> findByWcsMerchantId(String wcsMerchantId) {
@@ -51,13 +57,24 @@ public class MerchantServiceImpl implements MerchantService {
 		VenMerchant persistedVenMerchant = null;
 		
 		if (venMerchant != null) {
-			try {
-				persistedVenMerchant = venMerchantDAO.save(venMerchant);
-			} catch (Exception e) {
-				CommonUtil.logAndReturnException(new CannotPersistMerchantException(
-						"Cannot persist VenMerchant," + e, VeniceExceptionConstants.VEN_EX_120001)
-				    , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			/*
+			if (!em.contains(venMerchant)) {
+				// venMerchant is in detach mode, hence should call save explicitly as shown below
+				try {
+					persistedVenMerchant = venMerchantDAO.save(venMerchant);
+				} catch (Exception e) {
+					CommonUtil.logAndReturnException(new CannotPersistMerchantException(
+							"Cannot persist VenMerchant," + e, VeniceExceptionConstants.VEN_EX_120001)
+					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+				}
+			} else {
+				persistedVenMerchant = venMerchant;
 			}
+			*/
+			if (em.contains(venMerchant)) {
+				em.detach(venMerchant);
+			}
+			persistedVenMerchant = venMerchant;
 		}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()

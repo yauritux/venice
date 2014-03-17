@@ -29,8 +29,8 @@ public class StateServiceImpl implements StateService {
 	private VenStateDAO venStateDAO;
 	
 	@PersistenceContext
-	private EntityManager em;	
-
+	private EntityManager em;
+	
 	@Override
 	public List<VenState> synchronizeVenStateReferences(
 			List<VenState> stateReferences) {
@@ -42,19 +42,25 @@ public class StateServiceImpl implements StateService {
 		
 		if (stateReferences != null) {
 			for (VenState state : stateReferences) {
-				em.detach(state);
 				if (state.getStateCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenStateReferences::Synchronizing VenState... :" 
 									+ state.getStateCode());
 					List<VenState> stateList = venStateDAO.findByStateCode(state.getStateCode());
-					if (stateList == null || stateList.isEmpty()) {
+					if (stateList == null || stateList.isEmpty()) {						
 						VenState venState = venStateDAO.save(state);
-						synchronizedStateReferences.add(venState);
+						synchronizedStateReferences.add(venState);						
+						/*
+						if (em.contains(state)) {
+							em.detach(state);
+						}
+						synchronizedStateReferences.add(state);
+						*/
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenStateReferences::successfully added venState into synchronizedStateReferences");
 					} else {
 						VenState venState = stateList.get(0);
+						//em.detach(venState);
 						synchronizedStateReferences.add(venState);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeReferenceData::successfully added venState into synchronizedStateReferences");

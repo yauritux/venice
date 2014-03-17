@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,6 +29,7 @@ import com.gdn.venice.inbound.services.OrderStatusHistoryService;
 import com.gdn.venice.inbound.services.OrderStatusService;
 import com.gdn.venice.inbound.services.RecipientService;
 import com.gdn.venice.persistence.LogLogisticService;
+import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenContactDetail;
 import com.gdn.venice.persistence.VenMerchantProduct;
 import com.gdn.venice.persistence.VenOrder;
@@ -33,7 +37,6 @@ import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.persistence.VenOrderItemAddress;
 import com.gdn.venice.persistence.VenOrderItemAdjustment;
 import com.gdn.venice.persistence.VenOrderItemContactDetail;
-import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.util.CommonUtil;
 
 /**
@@ -77,6 +80,9 @@ public class OrderItemServiceImpl implements OrderItemService {
 	
 	@Autowired
 	private RecipientService recipientService;
+	
+	@PersistenceContext
+	private EntityManager em;
 
 	/**
 	 * This method is used to check whether the OrderItem has already existed or not 
@@ -117,10 +123,12 @@ public class OrderItemServiceImpl implements OrderItemService {
 				// Synchronize the references before persisting anything
 				while(i.hasNext()){
 					VenOrderItem venOrderItem = i.next();
+					/*
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::inside while i.hashNext() loop,merchant OrderItems="
 							+ venOrderItem.getVenMerchantProduct().getVenOrderItems());
-					venOrderItem = synchronizeVenOrderItemReferenceData(venOrderItem);
+					*/
+					venOrderItem = synchronizeVenOrderItemReferenceData(venOrderItem); //venOrderItem is in detach mode
 				}
 				
 				//Main processing loop
@@ -141,14 +149,17 @@ public class OrderItemServiceImpl implements OrderItemService {
 					orderItem.setLogMerchantPickupInstructions(null);
 
 					// Persist the shipping address
-					orderItem.setVenAddress(addressService.persistAddress(orderItem.getVenAddress()));
+					VenAddress persistedAddress = addressService.persistAddress(orderItem.getVenAddress());
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::persistedAddress ID = " + persistedAddress.getAddressId());
+					orderItem.setVenAddress(persistedAddress);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::orderItem venAddress has been successfully persisted");
 
-					// Persist the recipient
+					// Persist the recipient					
 					orderItem.setVenRecipient(recipientService.persistRecipient(orderItem.getVenRecipient()));
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrderItemList::successfully persist the recipient in main processing loop");
+							, "persistOrderItemList::successfully persist the recipient in main processing loop");					
 					
 					// Adjust the shipping weight because it comes across as the
 					// product shipping weight
@@ -157,25 +168,35 @@ public class OrderItemServiceImpl implements OrderItemService {
 							, "persistOrderItemList::successfully set shipping weight in main processing loop");
 					
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrderItemList::check venMerchantProduct (value = "
-							+ orderItem.getVenMerchantProduct() + ") before persisting into DB");
+							, "persistOrderItemList::check venMerchantProduct (SKU = "
+							+ orderItem.getVenMerchantProduct().getWcsProductSku() + ") before persisting into DB");
+					/*
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::venMerchantProduct venOrderItems "
 							+ orderItem.getVenMerchantProduct().getVenOrderItems());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::venMerchantProduct venOrderItems size "
-							+ orderItem.getVenMerchantProduct().getVenOrderItems().size());
+							+ (orderItem.getVenMerchantProduct().getVenOrderItems() != null 
+							? orderItem.getVenMerchantProduct().getVenOrderItems().size() : 0));
+					*/
 
-					// Persist the object
-				    orderItem = venOrderItemDAO.save(orderItem);
+					// Persist the object						
+					if (!em.contains(orderItem)) {
+						//orderItem is in detach mode, hence should call save explicitly as shown below
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::calling save on VenOrderItem explicitly");
+						orderItem = venOrderItemDAO.save(orderItem);
+					}					
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrderItemList::successfully persisted orderItem into DB");
-
+							, "persistOrderItemList::successfully persisted orderItem into DB");						
+					
+					em.detach(orderItem);
+					
 					/*
 					 * Tally Order Item with recipient address and contact details
 					 * defined in the ref tables VenOrderItemAddress and VenOrderItemContactDetail
 					 */
-					
+										
 					List<VenOrderItemContactDetail> venOrderItemContactDetailList = new ArrayList<VenOrderItemContactDetail>();
 					
 					VenOrderItemAddress venOrderItemAddress = new VenOrderItemAddress();
@@ -205,6 +226,10 @@ public class OrderItemServiceImpl implements OrderItemService {
 					        + venOrderItemContactDetailList.size());
 					orderItemContactDetailService.persist(venOrderItemContactDetailList);
 					
+					if (!em.contains(orderItem)) {
+						venOrderItemDAO.save(orderItem); // reattach orderItem
+					}
+					
 					//add order item history
 					orderItemStatusHistoryService.createOrderItemStatusHistory(orderItem, venOrder.getVenOrderStatus());
 
@@ -215,9 +240,10 @@ public class OrderItemServiceImpl implements OrderItemService {
 							, "persistOrderItemList::adding orderItem into newVenOrderItemList");
 					newVenOrderItemList.add(orderItem);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrderItemList::orderItem added into newVenOrderItemList");
+							, "persistOrderItemList::orderItem added into newVenOrderItemList");					
 				}
 			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), e);
 				throw CommonUtil.logAndReturnException(new CannotPersistOrderItemException(
 						"An exception occured when persisting VenOrderItem"
 						, VeniceExceptionConstants.VEN_EX_000021)
@@ -241,9 +267,11 @@ public class OrderItemServiceImpl implements OrderItemService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::BEGIN, venOrderItem=" + venOrderItem);
 		
+		/*
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::merchantProduct orderItems="
 				+ venOrderItem.getVenMerchantProduct().getVenOrderItems());
+		*/
 
 		//if (venOrderItem.getLogLogisticService() != null) {
 			List<LogLogisticService> logLogisticServiceRefs = new ArrayList<LogLogisticService>();
@@ -254,22 +282,38 @@ public class OrderItemServiceImpl implements OrderItemService {
 			}
 		//}
 		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenOrderItemReferenceData::VenOrderItem merchantProduct = "
+				+ venOrderItem.getVenMerchantProduct());
 		//if (venOrderItem.getVenMerchantProduct() != null) {
 			List<VenMerchantProduct> merchantProductRefs = new ArrayList<VenMerchantProduct>();
 			merchantProductRefs.add(venOrderItem.getVenMerchantProduct());
 			merchantProductRefs = merchantProductService.synchronizeVenMerchantProductRefs(merchantProductRefs);
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "synchronizeVenOrderItemReferenceData::merchantProductRefs = "
+					+ (merchantProductRefs != null ? merchantProductRefs.size() : 0));
 			for (VenMerchantProduct merchantProduct : merchantProductRefs) {
 				venOrderItem.setVenMerchantProduct(merchantProduct);
 			}
 		//}
 		
 		//if (venOrderItem.getVenOrderStatus() != null) {
+			
+			/*
 			List<VenOrderStatus> orderStatusRefs = new ArrayList<VenOrderStatus>();
 			orderStatusRefs.add(venOrderItem.getVenOrderStatus());
 			orderStatusRefs = orderStatusService.synchronizeVenOrderStatusReferences(orderStatusRefs);
-			for (VenOrderStatus orderStatus : orderStatusRefs) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "synchronizeVenOrderItemReferenceData::orderStatusRefs is synchronized");
+			for (VenOrderStatus orderStatus : orderStatusRefs) {				
+				List<VenOrderItem> orderStatusVenOrderItems = orderStatus.getVenOrderItems();
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenOrderItemReferenceData::orderStatusVenOrderItems = " + orderStatusVenOrderItems);
+				orderStatusVenOrderItems.add(venOrderItem);
+				orderStatus.setVenOrderItems(orderStatusVenOrderItems);
 				venOrderItem.setVenOrderStatus(orderStatus);
 			}
+			*/
 		//}
 		/*
 		List<Object> references = new ArrayList<Object>();
@@ -305,9 +349,14 @@ public class OrderItemServiceImpl implements OrderItemService {
 		}
 		*/
 		
+		/*
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::EOM, returning venOrderItem = " + venOrderItem
 				+ ", merchantProduct orderItems = " + venOrderItem.getVenMerchantProduct().getVenOrderItems());
+		*/
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenOrderItemReferenceData::EOM, returning venOrderItem = " + venOrderItem
+				+ ", merchantProduct = " + venOrderItem.getVenMerchantProduct());
 		return venOrderItem;
 	}
 }

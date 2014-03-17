@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,6 +31,9 @@ public class PromotionServiceImpl implements PromotionService {
 
 	@Autowired
 	private VenPromotionDAO venPromotionDAO;
+	
+	@PersistenceContext
+	private EntityManager em;
 
 	@Override
 	public List<VenPromotion> synchronizeVenPromotionReferences(
@@ -71,10 +77,16 @@ public class PromotionServiceImpl implements PromotionService {
 										.getPromotionType() == null) {
 							if (venPromotion.getPromotionName().toLowerCase()
 									.contains("free shipping")) {
+								venPromotion = promotion;								
 								VenPromotionType type = new VenPromotionType();
 								type.setPromotionType(VeniceConstants.VEN_PROMOTION_TYPE_FREESHIPPING);
 								venPromotion.setVenPromotionType(type);
-								venPromotion = venPromotionDAO.save(promotion);
+								/*
+								if (!em.contains(promotion)) {
+									// promotion is not in attach mode, hence should call save explicitly
+									venPromotion = venPromotionDAO.save(promotion);
+								}
+								*/								
 							}
 						}
 					} else {
@@ -103,7 +115,12 @@ public class PromotionServiceImpl implements PromotionService {
 									.getMerchantMargin());
 							venPromotion.setOthersMargin(promotion
 									.getOthersMargin());
-							venPromotion = venPromotionDAO.save(venPromotion);
+							/*
+							if (!em.contains(venPromotion)) {
+								// venPromotion is in detach mode, hence should call save explicitly 
+								venPromotion = venPromotionDAO.save(venPromotion);
+							}
+							*/
 							CommonUtil
 									.logDebug(this.getClass()
 											.getCanonicalName(),
@@ -113,7 +130,13 @@ public class PromotionServiceImpl implements PromotionService {
 									.logDebug(
 											this.getClass().getCanonicalName(),
 											"synchronizeVenPromotionReferences::no exact matching promo code, no uploaded promo, persist promo from inbound");
-							venPromotion = venPromotionDAO.save(promotion);
+							/*
+							if (!em.contains(promotion)) {
+								// promotion is in detach mode, hence should call save explicitly
+								venPromotion = venPromotionDAO.save(promotion);
+							}
+							*/
+							venPromotion = promotion;
 
 							// check the promo code for free shipping
 							if (venPromotion.getVenPromotionType() == null
@@ -125,8 +148,12 @@ public class PromotionServiceImpl implements PromotionService {
 									VenPromotionType type = new VenPromotionType();
 									type.setPromotionType(VeniceConstants.VEN_PROMOTION_TYPE_FREESHIPPING);
 									venPromotion.setVenPromotionType(type);
-									venPromotion = venPromotionDAO
-											.save(venPromotion);
+									/*
+									if (!em.contains(venPromotion)) {
+										// venPromotion is in detach mode, hence should call save explicitly
+										venPromotion = venPromotionDAO.save(venPromotion);
+									}
+									*/
 									CommonUtil
 											.logDebug(this.getClass()
 													.getCanonicalName(),
@@ -138,6 +165,9 @@ public class PromotionServiceImpl implements PromotionService {
 					CommonUtil
 							.logDebug(this.getClass().getCanonicalName(),
 									"synchronizeVenPromotionReferences::adding venPromotion into retVal");
+					if (em.contains(venPromotion)) {
+						em.detach(venPromotion);
+					}
 					synchronizedPromotionRefs.add(venPromotion);
 					CommonUtil
 							.logDebug(this.getClass().getCanonicalName(),

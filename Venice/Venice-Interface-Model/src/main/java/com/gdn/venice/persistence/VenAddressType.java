@@ -1,9 +1,14 @@
 package com.gdn.venice.persistence;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 
 /**
@@ -25,8 +30,10 @@ public class VenAddressType implements Serializable {
 	private String addressTypeDesc;
 
 	//bi-directional many-to-one association to VenPartyAddress
+	/*
 	@OneToMany(mappedBy="venAddressType")
 	private List<VenPartyAddress> venPartyAddresses;
+	*/
 
     public VenAddressType() {
     }
@@ -47,6 +54,7 @@ public class VenAddressType implements Serializable {
 		this.addressTypeDesc = addressTypeDesc;
 	}
 
+	/*
 	public List<VenPartyAddress> getVenPartyAddresses() {
 		return this.venPartyAddresses;
 	}
@@ -54,5 +62,6 @@ public class VenAddressType implements Serializable {
 	public void setVenPartyAddresses(List<VenPartyAddress> venPartyAddresses) {
 		this.venPartyAddresses = venPartyAddresses;
 	}
+	*/
 	
 }

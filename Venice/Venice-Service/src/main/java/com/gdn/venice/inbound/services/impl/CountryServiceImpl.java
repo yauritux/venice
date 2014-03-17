@@ -29,8 +29,8 @@ public class CountryServiceImpl implements CountryService {
 	private VenCountryDAO venCountryDAO;
 	
 	@PersistenceContext
-	private EntityManager em;	
-
+	private EntityManager em;
+	
 	@Override
 	public List<VenCountry> synchronizeVenCountryReferences(
 			List<VenCountry> countryReferences) {
@@ -43,21 +43,32 @@ public class CountryServiceImpl implements CountryService {
 		
 		if (countryReferences != null) {
 			for (VenCountry country : countryReferences) {
-				em.detach(country);
 				if (country.getCountryCode() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
 							"synchronizeVenCountryReferences::Synchronizing VenCountry... :" + country.getCountryCode());
+					em.detach(country);
 					List<VenCountry> countryList = venCountryDAO.findByCountryCode(country.getCountryCode());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenCountryReferences::countryList size = "
 									+ (countryList != null ? countryList.size() : 0));
 					if (countryList == null || countryList.size() == 0) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "synchronizeVenCountryReferences::country is not listed in the database, saving it");
+						
 						VenCountry venCountry = venCountryDAO.save(country);
+						//em.detach(venCountry);
 						synchronizedVenCountries.add(venCountry);
+						/*
+						if (em.contains(country)) {
+							em.detach(country);
+						}
+						synchronizedVenCountries.add(country);
+						*/												
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenCountryReferences::successfully added venCountry into synchronizedVenCountries");
 					} else {
 						VenCountry venCountry = countryList.get(0);
+						//em.detach(venCountry);
 						synchronizedVenCountries.add(venCountry);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenCountryReferences::successfully added venCountry into synchronizedVenCountries");
