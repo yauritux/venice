@@ -313,13 +313,11 @@ public class PartyServiceImpl implements PartyService {
 			// Persist the object
 
 			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"persistParty::persist VenParty ");
-			/*
+					"persistParty::persist VenParty ");			
 			if (!em.contains(venParty)) {
 				//venParty is in detach mode, hence we need to call save explicitly here
 				venParty = venPartyDAO.save(venParty);
-			}
-			*/
+			}			
 
 			VenAddressType venAddressType = new VenAddressType();
 			venAddressType
