@@ -37,6 +37,8 @@ import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.persistence.VenOrderItemAddress;
 import com.gdn.venice.persistence.VenOrderItemAdjustment;
 import com.gdn.venice.persistence.VenOrderItemContactDetail;
+import com.gdn.venice.persistence.VenOrderStatus;
+import com.gdn.venice.persistence.VenRecipient;
 import com.gdn.venice.util.CommonUtil;
 
 /**
@@ -156,8 +158,11 @@ public class OrderItemServiceImpl implements OrderItemService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::orderItem venAddress has been successfully persisted");
 
-					// Persist the recipient					
-					orderItem.setVenRecipient(recipientService.persistRecipient(orderItem.getVenRecipient()));
+					// Persist the recipient		
+					VenRecipient persistedRecipient = recipientService.persistRecipient(orderItem.getVenRecipient());
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::persistedRecipient ID = " + persistedRecipient.getRecipientId());					
+					orderItem.setVenRecipient(persistedRecipient);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::successfully persist the recipient in main processing loop");					
 					
@@ -298,8 +303,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 		//}
 		
 		//if (venOrderItem.getVenOrderStatus() != null) {
-			
-			/*
+						
 			List<VenOrderStatus> orderStatusRefs = new ArrayList<VenOrderStatus>();
 			orderStatusRefs.add(venOrderItem.getVenOrderStatus());
 			orderStatusRefs = orderStatusService.synchronizeVenOrderStatusReferences(orderStatusRefs);
@@ -312,8 +316,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 				orderStatusVenOrderItems.add(venOrderItem);
 				orderStatus.setVenOrderItems(orderStatusVenOrderItems);
 				venOrderItem.setVenOrderStatus(orderStatus);
-			}
-			*/
+			}			
 		//}
 		/*
 		List<Object> references = new ArrayList<Object>();

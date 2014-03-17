@@ -390,18 +390,6 @@ public class PartyServiceImpl implements PartyService {
 					.synchronizeVenPartyTypeReferenceData(partyTypeReferences);
 		}
 
-		/*
-		 * // Synchronize the data references references =
-		 * this.synchronizeReferenceData(references);
-		 * 
-		 * // Push the keys back into the record Iterator<Object>
-		 * referencesIterator = references.iterator(); while
-		 * (referencesIterator.hasNext()) { Object next =
-		 * referencesIterator.next(); if (next instanceof VenParty) {
-		 * venParty.setVenParty((VenParty) next); } else if (next instanceof
-		 * VenPartyType) { venParty.setVenPartyType((VenPartyType) next); } }
-		 */
-
 		for (VenParty party : partyReferences) {
 			venParty.setVenParty(party);
 		}
@@ -422,12 +410,7 @@ public class PartyServiceImpl implements PartyService {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenPartyReferenceData::BEGIN,venParties=" + venParties);
-		/*
-		if (venParties == null || venParties.size() == 0) {
-			return null;
-		}
-		*/
-
+		
 		List<VenParty> venPartyList = new ArrayList<VenParty>();
 
 		if (venParties != null) {
