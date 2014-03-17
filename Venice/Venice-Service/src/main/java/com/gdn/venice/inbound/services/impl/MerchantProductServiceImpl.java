@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gdn.venice.dao.VenMerchantProductDAO;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.MerchantProductService;
+import com.gdn.venice.inbound.services.MerchantService;
 import com.gdn.venice.inbound.services.ProductTypeService;
 import com.gdn.venice.persistence.VenMerchant;
 import com.gdn.venice.persistence.VenMerchantProduct;
@@ -31,6 +32,9 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 
 	@Autowired
 	private VenMerchantProductDAO venMerchantProductDAO;
+	
+	@Autowired
+	private MerchantService merchantService;
 	
 	@Autowired
 	private ProductTypeService productTypeService;
@@ -57,9 +61,19 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 						, "synchronizeVenMerchantProductRefs::Synchronizing VenMerchantProduct... :" 
 				          + merchantProduct.getWcsProductSku());
 				
-				merchantProduct = synchronizeVenMerchantProductReferenceData(merchantProduct); // merchantProduct is in attach mode here
-				em.detach(merchantProduct);
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductReferences::merchantProduct merchant = "  + merchantProduct.getVenMerchant());				
 				
+				merchantProduct = synchronizeVenMerchantProductReferenceData(merchantProduct); // merchantProduct is in attach mode here
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductReferences::merchantProduct merchant after synchronized = "  + merchantProduct.getVenMerchant());
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductReferences::merchantProduct merchant WCS Merchant ID = "  + merchantProduct.getVenMerchant().getWcsMerchantId());				
+				
+				//em.detach(merchantProduct);
+				
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductReferences::merchantProduct merchant ID = "  + merchantProduct.getVenMerchant().getMerchantId());
 				List<VenMerchantProduct> merchantProductList = venMerchantProductDAO.findByWcsProductSku(merchantProduct.getWcsProductSku());
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeVenMerchantProductReferences::merchantProductList = " 
@@ -67,7 +81,14 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				if (merchantProductList == null || (merchantProductList.isEmpty())) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::VenMerchantProduct is not listed in the database, saving it");
-					VenMerchantProduct venMerchantProduct = venMerchantProductDAO.save(merchantProduct); //attach merchantProduct
+					VenMerchantProduct venMerchantProduct = null;
+					if (!em.contains(merchantProduct)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "synchronizeVenMerchantProductReferences::explicitly call save for venMerchantProduct");
+						venMerchantProduct = venMerchantProductDAO.save(merchantProduct); //attach merchantProduct
+					} else {
+						venMerchantProduct = merchantProduct;
+					}
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::adding venMerchantProduct into synchronizedMerchantProductRefs");
 					//em.detach(venMerchantProduct);					
@@ -119,8 +140,15 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		//if (venMerchantProduct.getVenMerchant() != null) {
 			List<VenMerchant> merchantRefs = new ArrayList<VenMerchant>();
 			merchantRefs.add(venMerchantProduct.getVenMerchant());
+			List<VenMerchant> synchronizedMerchants = null;
+			synchronizedMerchants = merchantService.synchronizeVenMerchantReferences(merchantRefs);
 			//merchantRefs = discuss with team whether method synchronized for this particular class should be implemented or not
+			/*
 			for (VenMerchant merchant : merchantRefs) {
+				venMerchantProduct.setVenMerchant(merchant);
+			}
+			*/
+			for (VenMerchant merchant : synchronizedMerchants) {
 				venMerchantProduct.setVenMerchant(merchant);
 			}
 		//}

@@ -1,5 +1,6 @@
 package com.gdn.venice.inbound.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -38,12 +39,51 @@ public class MerchantServiceImpl implements MerchantService {
 	public List<VenMerchant> findByWcsMerchantId(String wcsMerchantId) {
 		return venMerchantDAO.findByWcsMerchantId(wcsMerchantId);
 	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public VenMerchant synchronizeVenMerchantData(VenMerchant venMerchant)
+	   throws VeniceInternalException {
+		VenMerchant merchant = venMerchant;
+		if (venMerchant != null) {
+			List<VenMerchant> merchantList = findByWcsMerchantId(venMerchant.getWcsMerchantId());
+			if (merchantList != null && (!merchantList.isEmpty())) {
+				merchant = merchantList.get(0);
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantData::found venMerchant WCS Merchant ID = "  + merchant.getWcsMerchantId());	
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantData::found venMerchant Merchant ID = "  + merchant.getMerchantId());					
+			} else {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantData::venMerchant is not listed in the DB, saving it");
+				merchant = persist(venMerchant);
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantData::successfully persisted venMerchant");
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantData::new venMerchant ID = " + merchant.getMerchantId());				
+			}
+		} 
+		return merchant;
+	}
 
 	@Override
 	public List<VenMerchant> synchronizeVenMerchantReferences(
 			List<VenMerchant> merchantRefs) throws VeniceInternalException {
-		// TODO Auto-generated method stub
-		return null; // homework, discuss with the team whether this should be implemented or not
+
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantReferences::BEGIN");
+		
+		List<VenMerchant> synchronizedMerchantReferences = new ArrayList<VenMerchant>();
+		
+		for (VenMerchant merchant : merchantRefs) {	
+			VenMerchant synchMerchant = synchronizeVenMerchantData(merchant);
+			synchronizedMerchantReferences.add(synchMerchant);
+		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantReferences::EOF, returning synchronizedMerchantReferences = "
+				+ synchronizedMerchantReferences.size());
+		return synchronizedMerchantReferences;
 	}
 
 	@Override
@@ -57,7 +97,6 @@ public class MerchantServiceImpl implements MerchantService {
 		VenMerchant persistedVenMerchant = null;
 		
 		if (venMerchant != null) {
-			/*
 			if (!em.contains(venMerchant)) {
 				// venMerchant is in detach mode, hence should call save explicitly as shown below
 				try {
@@ -67,15 +106,10 @@ public class MerchantServiceImpl implements MerchantService {
 							"Cannot persist VenMerchant," + e, VeniceExceptionConstants.VEN_EX_120001)
 					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 				}
-			} else {
-				persistedVenMerchant = venMerchant;
 			}
-			*/
-			if (em.contains(venMerchant)) {
-				em.detach(venMerchant);
-			}
-			persistedVenMerchant = venMerchant;
 		}
+		
+		persistedVenMerchant  = venMerchant;
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "persist::EOM, returning persistedVenMerchant = " + persistedVenMerchant);

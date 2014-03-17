@@ -13,6 +13,8 @@ import com.gdn.venice.persistence.VenMerchant;
 public interface MerchantService {
 
 	public List<VenMerchant> findByWcsMerchantId(String wcsMerchantId);
+	public VenMerchant synchronizeVenMerchantData(VenMerchant venMerchant)
+	       throws VeniceInternalException;
 	public List<VenMerchant> synchronizeVenMerchantReferences(
 			List<VenMerchant> merchantRefs) throws VeniceInternalException;
 	public VenMerchant persist(VenMerchant venMerchant)
