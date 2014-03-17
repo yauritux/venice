@@ -1,6 +1,6 @@
 /.project
 /.metadata
 *.class
-target/*
+target/**.*
 Venice/pom.xml
 **/*.class
