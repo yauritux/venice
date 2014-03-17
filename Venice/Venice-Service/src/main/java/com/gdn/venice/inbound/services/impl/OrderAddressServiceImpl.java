@@ -42,8 +42,7 @@ public class OrderAddressServiceImpl implements OrderAddressService {
 		
 		VenOrderAddress persistedOrderAddress = null;
 		
-		if (venOrderAddress != null) {		
-			/*
+		if (venOrderAddress != null) {					
 			if (!em.contains(venOrderAddress)) {
 				//venOrderAddress is in detach mode, hence need to call save explicitly
 				try {
@@ -53,12 +52,7 @@ public class OrderAddressServiceImpl implements OrderAddressService {
 							"Cannot persist VenOrderAddress," + e, VeniceExceptionConstants.VEN_EX_000030)
 					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 				}			
-			}
-			*/
-			if (em.contains(venOrderAddress)) {
-				em.detach(venOrderAddress);
-			}
-			persistedOrderAddress = venOrderAddress;
+			}			
 		} 
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
