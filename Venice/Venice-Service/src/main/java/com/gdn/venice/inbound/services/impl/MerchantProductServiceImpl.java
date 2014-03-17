@@ -67,19 +67,18 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				if (merchantProductList == null || (merchantProductList.isEmpty())) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::VenMerchantProduct is not listed in the database, saving it");
-					//VenMerchantProduct venMerchantProduct = venMerchantProductDAO.save(merchantProduct); //attach merchantProduct
+					VenMerchantProduct venMerchantProduct = venMerchantProductDAO.save(merchantProduct); //attach merchantProduct
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::adding venMerchantProduct into synchronizedMerchantProductRefs");
 					//em.detach(venMerchantProduct);					
-					//synchronizedMerchantProductRefs.add(venMerchantProduct);
-					synchronizedMerchantProductRefs.add(merchantProduct);
+					synchronizedMerchantProductRefs.add(venMerchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
 				} else {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::venMerchantProduct is in attached mode, going to detach it");
 					VenMerchantProduct venMerchantProduct = merchantProductList.get(0);
-					em.detach(venMerchantProduct);
+					//em.detach(venMerchantProduct);
 					synchronizedMerchantProductRefs.add(venMerchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
