@@ -49,6 +49,21 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 																		  "(ls.serviceCode = 'BOPIS' OR ls.serviceCode = 'Big Product') " +
 																		  "AND oi.wcsOrderItemId = ?1 ";
 	
+	public static final String FIND_WITH_VENMERCHANTPRODUCT_VENPRODUCTCATEGORY_BY_VENORDER_SQL = 
+		"SELECT oi " + 
+	    "FROM VenOrderItem oi " + 
+	    "INNER JOIN FETCH oi.venMerchantProduct mp " +
+	    "INNER JOIN FETCH mp.venProductCategories " +
+	    "WHERE oi.venOrder = ?1";
+	
+	public static final String FIND_WITH_LOGISTICPROVIDER_BY_VENORDER_SQL = 
+        "SELECT oi " + 
+		  "FROM VenOrderItem AS oi " + 
+		  "INNER JOIN FETCH oi.venOrder o " +
+		  "INNER JOIN FETCH oi.logLogisticService AS ls " +
+		  "INNER JOIN FETCH ls.logLogisticsProvider AS lp " +
+		  "WHERE oi.venOrder = ?1";
+	
 	@Query(COUNT_BY_WCSORDERITEMID_SQL)
     public int countByWcsOrderItemId(String wcsOrderItemId);
 	
@@ -70,4 +85,10 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 	
 	@Query(COUNT_WHERE_LOGISTICSERVICE_IS_BOPIS_OR_BIGPRODUCT_BY_WCSORDERITEMID_SQL)
     public int countWhereLogisticServiceIsBopisOrBigProductByWcsOrderItemId(String wcsOrderItemId);
+	
+	@Query(FIND_WITH_VENMERCHANTPRODUCT_VENPRODUCTCATEGORY_BY_VENORDER_SQL)
+	public List<VenOrderItem> findWithVenMerchantProductVenProductCategoryByVenOrder(VenOrder venOrder);
+	
+	@Query(FIND_WITH_LOGISTICPROVIDER_BY_VENORDER_SQL)
+	public List<VenOrderItem> findWithLogisticProviderByVenOrder(VenOrder venOrder);
 }
