@@ -29,6 +29,7 @@ import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.exception.FundInFileParserException;
 import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
 import com.gdn.venice.exportimport.finance.dataimport.BCA_IB_FileReader;
+import com.gdn.venice.exportimport.finance.dataimport.BCA_VA_FileReader;
 import com.gdn.venice.exportimport.finance.dataimport.BRI_IB_FileReader;
 import com.gdn.venice.exportimport.finance.dataimport.MT942_FileReader;
 import com.gdn.venice.exportimport.finance.dataimport.Niaga_IB_FileReader;
@@ -408,9 +409,20 @@ public abstract class AbstractFundInService implements FundInService{
 			uniqueContent = new Timestamp(System.currentTimeMillis()).toString().replace(".", "");
 		}
 		
-		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA ||
-		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA){
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA){
 			MT942_FileReader reader = new MT942_FileReader();
+			try {
+				String uniqueIds = reader.getUniqueReportIdentifier(fileNameAndFullPath);
+				String[] uniqueIdSplit=uniqueIds.split("&");
+				uniqueContent = uniqueIdSplit[0];
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), "Unable to retrieve unique content from file");
+				e.printStackTrace();
+			}
+		}
+		
+		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA){
+			BCA_VA_FileReader reader = new BCA_VA_FileReader();
 			try {
 				String uniqueIds = reader.getUniqueReportIdentifier(fileNameAndFullPath);
 				String[] uniqueIdSplit=uniqueIds.split("&");
@@ -444,6 +456,7 @@ public abstract class AbstractFundInService implements FundInService{
         } catch (Exception e) {
         	String errMsg = "Error parsing Excel File Processing row number:" + (excelToPojo != null && excelToPojo.getErrorRowNumber() != null?excelToPojo.getErrorRowNumber():"1");
 			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg);
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
 			return null;
 		}
 	}
