@@ -195,8 +195,6 @@ public class OrderItemServiceImpl implements OrderItemService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::successfully persisted orderItem into DB");						
 					
-					em.detach(orderItem);
-					
 					/*
 					 * Tally Order Item with recipient address and contact details
 					 * defined in the ref tables VenOrderItemAddress and VenOrderItemContactDetail
@@ -230,10 +228,6 @@ public class OrderItemServiceImpl implements OrderItemService {
 							, "persistOrderItemList::Total VenOrderItemContactDetail to be persisted => " 
 					        + venOrderItemContactDetailList.size());
 					orderItemContactDetailService.persist(venOrderItemContactDetailList);
-					
-					if (!em.contains(orderItem)) {
-						venOrderItemDAO.save(orderItem); // reattach orderItem
-					}
 					
 					//add order item history
 					orderItemStatusHistoryService.createOrderItemStatusHistory(orderItem, venOrder.getVenOrderStatus());
