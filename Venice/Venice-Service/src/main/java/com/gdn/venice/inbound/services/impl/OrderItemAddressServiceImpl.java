@@ -8,10 +8,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gdn.venice.constants.LoggerLevel;
+import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenOrderItemAddressDAO;
+import com.gdn.venice.exception.CannotPersistOrderItemAddressException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.OrderItemAddressService;
 import com.gdn.venice.persistence.VenOrderItemAddress;
+import com.gdn.venice.util.CommonUtil;
 
 /**
  * 
@@ -32,8 +36,7 @@ public class OrderItemAddressServiceImpl implements OrderItemAddressService {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenOrderItemAddress persist(VenOrderItemAddress venOrderItemAddress) 
 	  throws VeniceInternalException {
-		VenOrderItemAddress persistedOrderItemAddress = null;
-		/*
+		VenOrderItemAddress persistedOrderItemAddress = venOrderItemAddress;
 		if (!em.contains(venOrderItemAddress)) {
 			// venOrderItemAddress is not in attach mode, hence should be attached by calling save explicitly
 			try {
@@ -43,15 +46,8 @@ public class OrderItemAddressServiceImpl implements OrderItemAddressService {
 						"Cannot persist VenOrderItemAddress " + e, VeniceExceptionConstants.VEN_EX_000027)
 				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 			}
-		} else {
-			persistedOrderItemAddress = venOrderItemAddress;
 		}
-		*/
-		if (em.contains(venOrderItemAddress)) {
-			em.detach(venOrderItemAddress);
-		}
-		persistedOrderItemAddress = venOrderItemAddress;
-		
+	
 		return persistedOrderItemAddress;
 	}
 

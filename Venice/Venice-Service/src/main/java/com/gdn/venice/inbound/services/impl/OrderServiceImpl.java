@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -20,6 +21,8 @@ import com.gdn.integration.jaxb.OrderItem;
 import com.gdn.integration.jaxb.Payment;
 import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VenOrderStatusConstants;
+import com.gdn.venice.constants.VenPartyTypeConstants;
+import com.gdn.venice.constants.VenWCSPaymentTypeConstants;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.FinArFundsInReconRecordDAO;
 import com.gdn.venice.dao.LogLogisticServiceDAO;
@@ -82,17 +85,25 @@ import com.gdn.venice.inbound.services.OrderService;
 import com.gdn.venice.inbound.services.OrderStatusHistoryService;
 import com.gdn.venice.inbound.services.OrderStatusService;
 import com.gdn.venice.inbound.services.PartyService;
+import com.gdn.venice.persistence.FinApprovalStatus;
+import com.gdn.venice.persistence.FinArFundsInActionApplied;
+import com.gdn.venice.persistence.FinArFundsInReconRecord;
+import com.gdn.venice.persistence.FinArReconResult;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenAddressType;
 import com.gdn.venice.persistence.VenContactDetail;
 import com.gdn.venice.persistence.VenCustomer;
 import com.gdn.venice.persistence.VenFraudCheckStatus;
+import com.gdn.venice.persistence.VenMerchant;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderAddress;
 import com.gdn.venice.persistence.VenOrderBlockingSource;
 import com.gdn.venice.persistence.VenOrderContactDetail;
 import com.gdn.venice.persistence.VenOrderItem;
+import com.gdn.venice.persistence.VenOrderPayment;
+import com.gdn.venice.persistence.VenOrderPaymentAllocation;
+import com.gdn.venice.persistence.VenOrderPaymentAllocationPK;
 import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenParty;
 import com.gdn.venice.persistence.VenPartyAddress;
@@ -103,7 +114,6 @@ import com.gdn.venice.util.CommonUtil;
 import com.gdn.venice.util.OrderUtil;
 import com.gdn.venice.util.VeniceConstants;
 import com.gdn.venice.validator.factory.OrderCreationValidatorFactory;
-import com.rits.cloning.Cloner;
 
 /**
  * 
@@ -402,7 +412,6 @@ public class OrderServiceImpl implements OrderService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::Persisted VenOrder = " + venOrder);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::done persist order");
 		
-		/*
 		Pattern pattern = Pattern.compile("&");
 		for(String party : merchantProduct){				
 			String[] temp = pattern.split(party, 0);
@@ -652,7 +661,6 @@ public class OrderServiceImpl implements OrderService {
 				}
 			}			
 		}
-		*/
 
 		//LOG.debug("\n done create order!");
 		//Long endTime = System.currentTimeMillis();
