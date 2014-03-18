@@ -23,6 +23,7 @@ public interface OrderService {
 			, VenOrder venOrder) throws VeniceInternalException;	
 	public VenOrder synchronizeVenOrderReferenceData(VenOrder venOrder)
 			throws VeniceInternalException;
+	public VenOrder synchronizeVenOrder(VenOrder venOrder) throws VeniceInternalException;
 	public List<VenOrder> synchronizeVenOrderReferences(List<VenOrder> orderReferences) 
 	        throws VeniceInternalException;
 }

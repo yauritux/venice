@@ -32,6 +32,26 @@ public class CountryServiceImpl implements CountryService {
 	private EntityManager em;
 	
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public VenCountry synchronizeVenCountry(VenCountry venCountry) {
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::BEGIN,venCountry = " + venCountry);
+		VenCountry synchCountry = venCountry;
+		if (venCountry != null && venCountry.getCountryCode() != null) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::countryCode=  " + venCountry.getCountryCode());
+			List<VenCountry> countryList = venCountryDAO.findByCountryCode(venCountry.getCountryCode());
+			if (countryList == null || countryList.isEmpty()) {
+				if (!em.contains(venCountry)) {
+					//venCountry in detach mode, hence need to explicitly call save 
+					synchCountry = venCountryDAO.saveAndFlush(venCountry);
+				} 
+			} else {
+				synchCountry = countryList.get(0);
+			}
+		}
+		return synchCountry;
+	}
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenCountry> synchronizeVenCountryReferences(
 			List<VenCountry> countryReferences) {
 		
@@ -43,37 +63,7 @@ public class CountryServiceImpl implements CountryService {
 		
 		if (countryReferences != null) {
 			for (VenCountry country : countryReferences) {
-				if (country.getCountryCode() != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
-							"synchronizeVenCountryReferences::Synchronizing VenCountry... :" + country.getCountryCode());
-					em.detach(country);
-					List<VenCountry> countryList = venCountryDAO.findByCountryCode(country.getCountryCode());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenCountryReferences::countryList size = "
-									+ (countryList != null ? countryList.size() : 0));
-					if (countryList == null || countryList.size() == 0) {
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenCountryReferences::country is not listed in the database, saving it");
-						
-						VenCountry venCountry = venCountryDAO.save(country);
-						//em.detach(venCountry);
-						synchronizedVenCountries.add(venCountry);
-						/*
-						if (em.contains(country)) {
-							em.detach(country);
-						}
-						synchronizedVenCountries.add(country);
-						*/												
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenCountryReferences::successfully added venCountry into synchronizedVenCountries");
-					} else {
-						VenCountry venCountry = countryList.get(0);
-						//em.detach(venCountry);
-						synchronizedVenCountries.add(venCountry);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenCountryReferences::successfully added venCountry into synchronizedVenCountries");
-					}
-				}		
+				synchronizedVenCountries.add(synchronizeVenCountry(country));
 			} //end of 'for'
 		}
 		

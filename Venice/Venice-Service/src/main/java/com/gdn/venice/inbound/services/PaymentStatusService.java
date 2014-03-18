@@ -12,6 +12,8 @@ import com.gdn.venice.persistence.VenPaymentStatus;
  */
 public interface PaymentStatusService {
 
+	public VenPaymentStatus synchronizeVenPaymentStatus(VenPaymentStatus venPaymentStatus)
+	   throws VeniceInternalException;
 	public List<VenPaymentStatus> synchronizeVenPaymentStatusReferences
 	   (List<VenPaymentStatus> paymentStatusReferences) throws VeniceInternalException;
 }

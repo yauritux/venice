@@ -1060,14 +1060,7 @@ public class OrderServiceImpl implements OrderService {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public VenOrder synchronizeVenOrderReferenceData(VenOrder venOrder) throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(),
-				"synchronizeVenOrderReferenceData::START, venOrder=" + venOrder);
-		/*
-		List<Object> references = new ArrayList<Object>();
-		references.add(venOrder.getVenOrderBlockingSource());
-		references.add(venOrder.getVenOrderStatus());
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "OrderServiceImpl::synchronizeVenOrderReferenceData::references size = " + references.size());
-		*/
+				"synchronizeVenOrderReferenceData::BEGIN, venOrder=" + venOrder);
 		if (venOrder.getVenOrderBlockingSource() != null) {
 			List<VenOrderBlockingSource> orderBlockingSourceReferences = new ArrayList<VenOrderBlockingSource>();
 			orderBlockingSourceReferences.add(venOrder.getVenOrderBlockingSource());
@@ -2347,6 +2340,24 @@ public class OrderServiceImpl implements OrderService {
 	*/
 	
 	@Override
+	public VenOrder synchronizeVenOrder(VenOrder venOrder) throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenOrder::BEGIN,venOrder = " + venOrder);
+		VenOrder synchOrder = venOrder;
+		if (venOrder != null && venOrder.getWcsOrderId() != null) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenOrder::wcsOrderId = " + venOrder.getWcsOrderId());
+			synchOrder = venOrderDAO.findByWcsOrderId(venOrder.getWcsOrderId());
+			if (synchOrder == null) {
+				throw CommonUtil.logAndReturnException(new OrderNotFoundException(
+						"VenOrder does not exist!"
+						, VeniceExceptionConstants.VEN_EX_000020)
+				  , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			}
+			return synchOrder;
+		}
+		return synchOrder;
+	}
+	
+	@Override
 	public List<VenOrder> synchronizeVenOrderReferences(List<VenOrder> orderReferences) 
 	   throws VeniceInternalException {
 
@@ -2355,25 +2366,18 @@ public class OrderServiceImpl implements OrderService {
 		
 		List<VenOrder> synchronizedOrderReferences = new ArrayList<VenOrder>();
 		
-		for (VenOrder order : orderReferences) {
-			if (order.getWcsOrderId() != null) {
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "synchronizeVenOrderReferences::Restricting VenOrder... :" + order.getWcsOrderId());
-				VenOrder venOrder = venOrderDAO.findByWcsOrderId(order.getWcsOrderId());
-				if (venOrder == null) {
-					throw CommonUtil.logAndReturnException(new OrderNotFoundException(
-							"synchronizeVenOrderReferences::Order does not exist"
-							, VeniceExceptionConstants.VEN_EX_000020)
-					  , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-				} else {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenOrderReferences::adding venOrder into synchronizedOrderReferences");
-					synchronizedOrderReferences.add(venOrder);
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenOrderReferences::successfully added venOrder into synchronizedOrderReferences");
-				}
-			}			
-		} //end of 'for'
+		try {
+			for (VenOrder order : orderReferences) {
+				synchronizedOrderReferences.add(synchronizeVenOrder(order));
+			} //end of 'for'
+		} catch (VeniceInternalException e) {
+			CommonUtil.logAndReturnException(e, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+		} catch (Exception e) {
+			throw CommonUtil.logAndReturnException(new OrderNotFoundException(
+					"VenOrder does not exist!"
+					, VeniceExceptionConstants.VEN_EX_000020)
+			  , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);			
+		}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderReferences::returning synchronizedOrderReferences = " 

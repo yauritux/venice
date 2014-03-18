@@ -212,12 +212,10 @@ public class AddressServiceImpl implements AddressService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistAddress::updating/renew the data in venAddress");				
 				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistAddress::merge address");
-				/*
 				if (!em.contains(venAddress)) {
 					// venAddress is in detach mode, hence we need to call save explicitly
 					venAddress = venAddressDAO.save(venAddress);
-				}
-				*/				
+				}				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistAddress::successfully merged venAddress");				
 			}
@@ -238,41 +236,33 @@ public class AddressServiceImpl implements AddressService {
 	public VenAddress synchronizeVenAddressReferenceData(VenAddress venAddress)
 			throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenAddressReferenceData::BEGIN, venAddress = " + venAddress);
+				, "synchronizeVenAddressReferenceData::BEGIN, venAddress = " + venAddress);		
 		
 		/*
-		List<Object> references = new ArrayList<Object>();
-		references.add(venAddress.getVenCity());
-		references.add(venAddress.getVenCountry());
-		references.add(venAddress.getVenState());
-
-		// Synchronize the data references (homework to be done later)
-		//references = this.synchronizeReferenceData(references);
-
-		// Push the keys back into the record
-		Iterator<Object> referencesIterator = references.iterator();
-		while (referencesIterator.hasNext()) {
-			Object next = referencesIterator.next();
-			if (next instanceof VenCity) {
-				venAddress.setVenCity((VenCity) next);
-			} else if (next instanceof VenCountry) {
-				venAddress.setVenCountry((VenCountry) next);
-			} else if (next instanceof VenState) {
-				venAddress.setVenState((VenState) next);
-			}
-		}
-		*/
-		
 		List<VenCity> cityReferences = new ArrayList<VenCity>();
 		cityReferences.add(venAddress.getVenCity());
 		List<VenCountry> countryReferences = new ArrayList<VenCountry>();
 		countryReferences.add(venAddress.getVenCountry());
 		List<VenState> stateReferences = new ArrayList<VenState>();
 		stateReferences.add(venAddress.getVenState());
+		*/
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenAddressReferenceData::calling synchronize methods for city, country, and state");
 		
+		VenCity synchCity = cityService.synchronizeVenCity(venAddress.getVenCity());
+		venAddress.setVenCity(synchCity);
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenAddressReferenceData::city has been synchronized, result = " + synchCity);
+		
+		VenCountry synchCountry = countryService.synchronizeVenCountry(venAddress.getVenCountry());
+		venAddress.setVenCountry(synchCountry);
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenAddressReferenceData::country has been synchronized, result = " + synchCountry);		
+		
+		VenState synchState = stateService.synchronizeVenState(venAddress.getVenState());
+		venAddress.setVenState(synchState);
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenAddressReferenceData::state has been synchronized, result = " + synchState);		
+		
+		/*
 		cityReferences = cityService.synchronizeVenCityReferences(cityReferences);
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenAddressReferenceData::city has been synchronized, result = " + cityReferences);
@@ -284,7 +274,7 @@ public class AddressServiceImpl implements AddressService {
 		stateReferences = stateService.synchronizeVenStateReferences(stateReferences);
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenAddressReferenceData::state has been synchronized, result = " + stateReferences);
-				
+			
 		for (VenCity city : cityReferences) { // weird, isn't it ? do we need loop on this 'kind' of logic ?
 			venAddress.setVenCity(city);
 		}
@@ -296,6 +286,7 @@ public class AddressServiceImpl implements AddressService {
 		for (VenState state : stateReferences) {
 			venAddress.setVenState(state);
 		}		
+		*/
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeReferenceData::EOM, returning venAddress = " + venAddress);

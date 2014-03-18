@@ -11,5 +11,6 @@ import com.gdn.venice.persistence.VenCountry;
  */
 public interface CountryService {
 	
+	public VenCountry synchronizeVenCountry(VenCountry venCountry);
 	public List<VenCountry> synchronizeVenCountryReferences(List<VenCountry> countryReferences);
 }
