@@ -158,7 +158,12 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 				for (VenOrderPayment payment : venOrderPaymentList) {
 					
 					//backup initial payment allocations before it's detached
-					List<VenOrderPaymentAllocation> venOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>(payment.getVenOrderPaymentAllocations());
+					List<VenOrderPaymentAllocation> venOrderPaymentAllocationList = null;
+					if (payment.getVenOrderPaymentAllocations() != null) {
+					   venOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>(payment.getVenOrderPaymentAllocations());
+					} else {
+						venOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>();
+					}
 					
 					//detach initial payment allocations
 					payment.setVenOrderPaymentAllocations(null);
