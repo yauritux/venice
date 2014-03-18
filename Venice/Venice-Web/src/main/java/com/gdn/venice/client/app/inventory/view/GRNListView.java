@@ -140,8 +140,6 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
         
         asnDetailForm.setFields(grnNumberItem, reffDateItem, asnNumberItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
         		DestinationItem, supplierNameItem);
-        
-        asnDetailForm.setDisabled(true);
                 
         itemListGrid = buildItemListGrid(id);
         itemListGrid.setCanEdit(false);

@@ -9,6 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.venice.server.app.inventory.command.FetchPickingListDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchPickingListItemDetailDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchPickingListSalesOrderDetailDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchPickingListStorageDetailDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -28,17 +31,15 @@ public class PickingListManagementPresenterServlet extends HttpServlet{
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String type = request.getParameter("type");
 		String retVal =  "";
-		
 		String username = Util.getUserName(request);
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("username", username.trim());
-		
 		if (type.equals(RafDsCommand.DataSource)){
 			String requestBody = Util.extractRequestBody(request);
 	        params.put("limit", request.getParameter("limit"));
@@ -54,12 +55,14 @@ public class PickingListManagementPresenterServlet extends HttpServlet{
 			if(request.getParameter("warehouseId")!=null){
 				params.put("warehouseId", request.getParameter("warehouseId"));
 			}
+			if(request.getParameter("warehouseItemId")!=null){
+				params.put("warehouseItemId", request.getParameter("warehouseItemId"));
+			}
 
 			rafDsRequest.setParams(params);
 			
 			String method = request.getParameter("method");
-			
-			if(method.equals("fetchPickingListData")){			
+			if(method.equals("fetchPickingListData")){	
 				RafDsCommand fetchPickingListDataCommand = new FetchPickingListDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchPickingListDataCommand.execute();
 				try{
@@ -67,8 +70,32 @@ public class PickingListManagementPresenterServlet extends HttpServlet{
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-			}		
-						
+			}else if(method.equals("fetchPickingListItemDetailData")){
+				RafDsCommand fetchPickingListItemDetailDataCommand = new FetchPickingListItemDetailDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchPickingListItemDetailDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else if(method.equals("fetchPickingListSalesOrderDetailData")){	
+				RafDsCommand fetchPickingListSalesOrderDetailDataCommand = new FetchPickingListSalesOrderDetailDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchPickingListSalesOrderDetailDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else if(method.equals("fetchPickingListStorageDetailData")){	
+				RafDsCommand fetchPickingListStorageDetailDataCommand = new FetchPickingListStorageDetailDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchPickingListStorageDetailDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+			
 		}else if (type.equals(RafRpcCommand.RPC)) {
 
 		}

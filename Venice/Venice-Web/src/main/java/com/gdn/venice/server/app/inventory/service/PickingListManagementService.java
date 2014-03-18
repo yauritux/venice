@@ -17,6 +17,7 @@ import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.module.outbound.PickingListDetail;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
+import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
 
@@ -45,7 +46,6 @@ public class PickingListManagementService{
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
-        System.out.println("url: "+url);
         
         int httpCode = httpClient.executeMethod(httpPost);
         _log.info("response code: "+httpCode);
@@ -64,18 +64,15 @@ public class PickingListManagementService{
         }
 	}	
 	
-	public PickingListDetail getPickingListDetail(RafDsRequest request, String warehouseItemId) throws HttpException, IOException{
+	public ResultWrapper<PickingListDetail> getPickingListDetail(RafDsRequest request) throws HttpException, IOException{
 		_log.info("getPickingListDetail");
-		System.out.println("getPickingListDetail");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "pickingList/getDetail?username="+request.getParams().get("username")
-                + "&warehouseId="+warehouseItemId;
+                + "&warehouseItemId="+ request.getParams().get("warehouseItemId");
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
-        
         int httpCode = httpClient.executeMethod(httpPost);
         _log.info("response code: "+httpCode);
-        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -84,12 +81,34 @@ public class PickingListManagementService{
                 sb.append(line);
             }
             _log.debug(sb.toString());
-            System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<PickingListDetail>() {});
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PickingListDetail>>() {});
         } else {
         	return null;
         }
-	}	
+	}
+	
+	public ResultWrapper<WarehouseItem> getWarehouseItem(RafDsRequest request) throws HttpException, IOException{
+		_log.info("getWarehouseItem");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "warehouseItem/getWarehouseItemById?&warehouseItemId="+ request.getParams().get("warehouseItemId");
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<WarehouseItem>>() {});
+        } else {
+        	return null;
+        }
+	}
 }
 

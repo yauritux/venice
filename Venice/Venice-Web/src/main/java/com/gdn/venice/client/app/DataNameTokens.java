@@ -1252,6 +1252,15 @@ public class DataNameTokens {
     	public static String INV_PICKINGLIST_MERCHANT = "merchant";
     	public static String INV_PICKINGLIST_QTY = "qty";
     	public static String INV_PICKINGLIST_QTYPICKED = "qtyPicked";
+    	public static String INV_PICKINGLIST_DIMENSION = "dimension";
+    	public static String INV_PICKINGLIST_WEIGHT = "weight";
+    	public static String INV_PICKINGLIST_UOM = "uom";
+    	public static String INV_PICKINGLIST_ATTRIBUTE = "attribute";
+    	public static String INV_PICKINGLIST_SALESORDERID = "salesOrderId";
+    	public static String INV_PICKINGLIST_SALESORDERNUMBER = "salesOrderNumber";
+    	public static String INV_PICKINGLIST_SALESORDERQTY = "salesOrderQty";
+    	public static String INV_PICKINGLIST_SHELFCODE = "shelfCode";
+    	public static String INV_PICKINGLIST_WAREHOUSESTORAGEID = "shelfStorageId";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type
@@ -2299,7 +2308,7 @@ public class DataNameTokens {
 		
 		fieldClassMap.put(INV_ITEM_ATTRIBUTE_ID,"java.lang.Long");
 		fieldClassMap.put(INV_ITEM_ATTRIBUTE_NAME,"java.lang.String");
-		fieldClassMap.put(INV_ITEM_ATTRIBUTE_VALUE,"java.lang.String");			
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_VALUE,"java.lang.String");		
 	}
 	
 	/**
