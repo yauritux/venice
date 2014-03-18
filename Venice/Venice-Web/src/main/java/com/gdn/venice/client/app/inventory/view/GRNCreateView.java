@@ -152,6 +152,9 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         final TextItem DestinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
         DestinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
         
+        final TextItem DestinationItemCode = new TextItem(DataNameTokens.INV_ASN_DESTINATIONCODE, "Destination Code");
+        DestinationItemCode.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATIONCODE));
+        
         asnDetailForm.setDisabled(true);
                 
         asnDetailForm.setFields(asnNumberItem, reffDateItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
@@ -188,11 +191,11 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         saveButton.addClickHandler(new ClickHandler() {
 	          @Override
 	          public void onClick(ClickEvent event) {   
-	        	  if(canSave==true){
+//	        	  if(canSave==true){
 					HashMap<String, String> grnDataMap = new HashMap<String, String>();
 						
 					grnDataMap.put(DataNameTokens.INV_ASN_ID, id);
-					grnDataMap.put(DataNameTokens.INV_ASN_DESTINATION, DestinationItem.getValueAsString());
+					grnDataMap.put(DataNameTokens.INV_ASN_DESTINATIONCODE, DestinationItemCode.getValueAsString());
 					grnDataMap.put(DataNameTokens.INV_ASN_REFF_NUMBER, reffNumberItem.getValueAsString());
 					grnDataMap.put(DataNameTokens.INV_ASN_INVENTORY_TYPE, inventoryTypeItem.getValueAsString());
 		                
@@ -207,9 +210,9 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 						grnItemDataMap.put("ITEM"+i, itemRowMap.toString());					
 					}
 					getUiHandlers().onSaveClicked(grnDataMap, grnItemDataMap, createGRNWindow);
-	        	  }else{
-	        		  SC.say("Please check the GRN item quantity");
-	        	  }
+//	        	  }else{
+//	        		  SC.say("Please check the GRN item quantity");
+//	        	  }
 	  		}
 	    });
                         
@@ -308,6 +311,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         asnListGrid.setAutoFetchData(true);
         asnListGrid.setFields(listGridField);
         asnListGrid.getField(DataNameTokens.INV_ASN_ID).setHidden(true);
+        asnListGrid.getField(DataNameTokens.INV_ASN_DESTINATIONCODE).setHidden(true);
         asnListGrid.setAutoFitData(Autofit.BOTH);
 
         layout.setMembers(toolStrip, asnListGrid);

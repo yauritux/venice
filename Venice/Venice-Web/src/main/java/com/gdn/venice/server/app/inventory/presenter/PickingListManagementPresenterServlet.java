@@ -12,6 +12,7 @@ import com.gdn.venice.server.app.inventory.command.FetchPickingListDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchPickingListItemDetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchPickingListSalesOrderDetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchPickingListStorageDetailDataCommand;
+import com.gdn.venice.server.app.inventory.command.ReleaseLockDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -40,18 +41,21 @@ public class PickingListManagementPresenterServlet extends HttpServlet{
 		String username = Util.getUserName(request);
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("username", username.trim());
+        
+		String method = request.getParameter("method");
+		String requestBody = Util.extractRequestBody(request);
+
 		if (type.equals(RafDsCommand.DataSource)){
-			String requestBody = Util.extractRequestBody(request);
 	        params.put("limit", request.getParameter("limit"));
 	        params.put("page", request.getParameter("page"));
-			
+	        
 			RafDsRequest rafDsRequest = null;
 			try{
 				rafDsRequest = RafDsRequest.convertXmltoRafDsRequest(requestBody);
 			}catch(Exception e){
 				e.printStackTrace();
 			}
-			
+
 			if(request.getParameter("warehouseId")!=null){
 				params.put("warehouseId", request.getParameter("warehouseId"));
 			}
@@ -61,7 +65,6 @@ public class PickingListManagementPresenterServlet extends HttpServlet{
 
 			rafDsRequest.setParams(params);
 			
-			String method = request.getParameter("method");
 			if(method.equals("fetchPickingListData")){	
 				RafDsCommand fetchPickingListDataCommand = new FetchPickingListDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchPickingListDataCommand.execute();
@@ -97,7 +100,10 @@ public class PickingListManagementPresenterServlet extends HttpServlet{
 			}
 			
 		}else if (type.equals(RafRpcCommand.RPC)) {
-
+			if(method.equals("releaseLock")){					
+				RafRpcCommand releaseLockDataCommand = new ReleaseLockDataCommand(username, request.getParameter("warehouseId"));
+				retVal = releaseLockDataCommand.execute();
+			}
 		}
 		
 		response.getOutputStream().println(retVal);

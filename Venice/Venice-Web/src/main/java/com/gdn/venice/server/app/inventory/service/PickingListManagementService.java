@@ -110,5 +110,31 @@ public class PickingListManagementService{
         	return null;
         }
 	}
+	
+	public ResultWrapper<PickingListDetail> releasePickingLock(String username, String warehouseId) throws HttpException, IOException{
+		System.out.println("releasePickingLock");
+		System.out.println("username: "+username);
+		System.out.println("warehouse id: "+warehouseId);
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "pickingList/releasePickingLock?username="+ username
+                + "&warehouseId="+ warehouseId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PickingListDetail>>() {});
+        } else {
+        	return null;
+        }
+	}
 }
 

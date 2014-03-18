@@ -24,6 +24,7 @@ import com.smartgwt.client.rpc.RPCCallback;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.rpc.RPCResponse;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
 
 /**
@@ -82,6 +83,26 @@ public class PickingListPresenter extends Presenter<PickingListPresenter.MyView,
 						String xmlData = rpcResponse;
 						final LinkedHashMap<String, String> warehouseMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlData));
 						getView().loadPickingListData(warehouseMap);
+				}
+		});
+	}
+	
+	@Override
+	public void releaseLock(String warehouseId) {	
+		RPCRequest request=new RPCRequest();
+		request = new RPCRequest();
+		request.setActionURL(GWT.getHostPageBaseURL() + "PickingListManagementPresenterServlet?method=releaseLock&type=RPC&username="+MainPagePresenter.signedInUser+"&warehouseId="+warehouseId);
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setShowPrompt(false);
+		RPCManager.sendRequest(request, 
+				new RPCCallback () {
+					public void execute(RPCResponse response,
+							Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						if (!rpcResponse.startsWith("0")) {
+                            SC.warn(rpcResponse);
+                        }
 				}
 		});
 	}

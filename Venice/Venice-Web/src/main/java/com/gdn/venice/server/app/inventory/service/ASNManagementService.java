@@ -108,7 +108,7 @@ public class ASNManagementService{
         numberCriteria.setValue(reffNumber);
         numberCriteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.INV_PO_NUMBER));
 				
-        _log.debug("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
+        _log.info("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
         searchMap.put(numberCriteria.getFieldName(), numberCriteria.getValue());
         
         String json = mapper.writeValueAsString(searchMap);

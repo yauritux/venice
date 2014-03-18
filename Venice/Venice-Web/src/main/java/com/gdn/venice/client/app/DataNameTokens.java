@@ -1215,6 +1215,7 @@ public class DataNameTokens {
     	public static String INV_ASN_SUPPLIER_CODE = "supplier.code";
     	public static String INV_ASN_SUPPLIER_NAME = "supplier.name";
     	public static String INV_ASN_DESTINATION = "destinationWarehouse.name";
+    	public static String INV_ASN_DESTINATIONCODE = "destinationWarehouse.code";
     	public static String INV_ASN_STATUS = "currentStatus";
     	public static String INV_ASN_SPECIAL_NOTES = "specialNotes";
     	public static String INV_ASN_REFF_TYPE = "referenceType";

@@ -13,5 +13,7 @@ import com.smartgwt.client.widgets.Window;
 public interface PickingListUiHandler extends UiHandlers {
 
 	void onFetchWarehouseComboBoxData();
+	void releaseLock(String warehouseId);
 //	void onSaveClicked(HashMap<String, String> grnDataMap, HashMap<String, String> itemDataMap, Window window);
+
 }

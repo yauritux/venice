@@ -80,7 +80,8 @@ public class GRNData {
 				new DataSourceTextField(DataNameTokens.INV_ASN_INVENTORY_TYPE, "Inventory Type"),
 				new DataSourceTextField(DataNameTokens.INV_ASN_SUPPLIER_CODE, "Supplier Code"),
 				new DataSourceTextField(DataNameTokens.INV_ASN_SUPPLIER_NAME, "Supplier Name"),
-				new DataSourceTextField(DataNameTokens.INV_ASN_DESTINATION, "Destination"),
+				new DataSourceTextField(DataNameTokens.INV_ASN_DESTINATIONCODE, "Destination Code"),
+				new DataSourceTextField(DataNameTokens.INV_ASN_DESTINATION, "Destination"),				
 				new DataSourceTextField(DataNameTokens.INV_ASN_STATUS, "Status"),
 				new DataSourceTextField(DataNameTokens.INV_ASN_SPECIAL_NOTES, "Special Notes")};
 		dataSourceFields[0].setPrimaryKey(true);

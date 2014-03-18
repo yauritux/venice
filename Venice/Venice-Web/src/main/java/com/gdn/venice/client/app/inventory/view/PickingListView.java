@@ -20,6 +20,8 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.types.SelectionAppearance;
 import com.smartgwt.client.types.SelectionStyle;
+import com.smartgwt.client.util.BooleanCallback;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
@@ -60,6 +62,10 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
     VLayout headerLayout;
     ComboBoxItem warehouseItemComboBox;
     DynamicForm itemDetailForm;
+    
+    String totalQtyPicked = "0";
+    
+//    Boolean confirmChangeRow = false;
 
     @Inject
     public PickingListView() {
@@ -92,6 +98,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
             @Override
             public void onCellClick(CellClickEvent event) {
                 ListGridRecord record = warehouseItemListGrid.getSelectedRecord();
+
                 buildPickingListDetailWindow(record).show();
             }
         });
@@ -101,7 +108,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
 				refreshPickingListData();
 			}
-		});     
+		});    
     }
     
 	private void buildWarehouseItemListGrid(String warehouseId) {
@@ -132,9 +139,18 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
         buttonSet.setMembers(submitButton);
                 
         pickingListDetailWindow.addCloseClickHandler(new CloseClickHandler() {
-            public void onCloseClick(CloseClientEvent event) {
-                pickingListDetailWindow.destroy();
-                warehouseItemListGrid.deselectRecord(record);
+            public void onCloseClick(CloseClientEvent event) {                
+					SC.ask("Data not submitted yet, are you sure you want to close?", new BooleanCallback() {
+	                    @Override
+	                    public void execute(Boolean value) {
+	                        if (value != null && value == true) {
+	                            getUiHandlers().releaseLock(warehouseItemComboBox.getValue().toString());	
+	                            pickingListDetailWindow.destroy();
+	                        }else{
+	                        	return;
+	                        }
+	                    }
+	                });
             }
         });
   
@@ -149,13 +165,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 		headerLayout.setWidth100();
 		headerLayout.setHeight(50);
 		headerLayout.setMargin(10);
-		headerLayout.setMembers(buttonSet);
-                        
-        pickingListDetailWindow.addCloseClickHandler(new CloseClickHandler() {
-	      public void onCloseClick(CloseClientEvent event) {
-	    	  pickingListDetailWindow.destroy();
-	      }
-        });
+		headerLayout.setMembers(buttonSet);                       
                 						
 		//set item data
         DataSource itemDetailData = PickingListData.getPickingListItemDetailData(record.getAttribute(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
@@ -205,6 +215,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 		ListGridField finalListGridStorageField[] = {listGridStorageField[1], listGridStorageField[2], listGridStorageField[3]};
               
         storageDetailListGrid = new ListGrid();
+		storageDetailListGrid.setSaveLocally(true);
         storageDetailListGrid.setDataSource(storageDetailData);		
         storageDetailListGrid.setFields(finalListGridStorageField);
         storageDetailListGrid.setWidth(325);
