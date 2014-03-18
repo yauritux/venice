@@ -8,6 +8,7 @@ package com.gdn.venice.constants;
 public enum VeniceExceptionConstants {
 
 	VEN_EX_000001("Invalid Order"),
+	VEN_EX_000111("Cannot create Order"),
 	VEN_EX_000002("No Order Received"),
 	VEN_EX_000003("No Order Amount"),
 	VEN_EX_000004("No Customer Record"),
