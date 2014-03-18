@@ -54,7 +54,6 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		List<VenMerchantProduct> synchronizedMerchantProductRefs = new ArrayList<VenMerchantProduct>();
 		
 		for (VenMerchantProduct merchantProduct : merchantProductRefs) {
-			//em.detach(merchantProduct);
 			if (merchantProduct.getWcsProductSku() != null) {
 				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -68,9 +67,9 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeVenMerchantProductReferences::merchantProduct merchant after synchronized = "  + merchantProduct.getVenMerchant());
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "synchronizeVenMerchantProductReferences::merchantProduct merchant WCS Merchant ID = "  + merchantProduct.getVenMerchant().getWcsMerchantId());				
-				
-				//em.detach(merchantProduct);
+						, "synchronizeVenMerchantProductReferences::merchantProduct merchant WCS Merchant ID = "  + merchantProduct.getVenMerchant().getWcsMerchantId());	
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductReferences::merchantProduct SKU = " + merchantProduct.getMerchantProductSku());
 				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeVenMerchantProductReferences::merchantProduct merchant ID = "  + merchantProduct.getVenMerchant().getMerchantId());
@@ -91,7 +90,6 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 					}
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::adding venMerchantProduct into synchronizedMerchantProductRefs");
-					//em.detach(venMerchantProduct);					
 					synchronizedMerchantProductRefs.add(venMerchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
@@ -99,7 +97,6 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::venMerchantProduct is in attached mode, going to detach it");
 					VenMerchantProduct venMerchantProduct = merchantProductList.get(0);
-					//em.detach(venMerchantProduct);
 					synchronizedMerchantProductRefs.add(venMerchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
