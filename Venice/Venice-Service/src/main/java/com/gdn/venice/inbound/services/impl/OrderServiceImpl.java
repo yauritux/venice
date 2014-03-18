@@ -600,7 +600,7 @@ public class OrderServiceImpl implements OrderService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "createOrder::persist payment allocation");
 				
-				//venOrderPaymentAllocationList = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
+				venOrderPaymentAllocationList = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
 				venOrder.setVenOrderPaymentAllocations(venOrderPaymentAllocationList);
 				
 				//Here we need to create a dummy reconciliation records
