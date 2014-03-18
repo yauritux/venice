@@ -117,6 +117,9 @@ import com.gdn.venice.facade.util.AWBReconciliation;
 import com.gdn.venice.facade.util.HolidayUtil;
 import com.gdn.venice.facade.util.KpiPeriodUtil;
 import com.gdn.venice.factory.VenOrderStatusFP;
+import com.gdn.venice.inbound.commands.Command;
+import com.gdn.venice.inbound.commands.impl.CreateOrderCommand;
+import com.gdn.venice.inbound.receivers.OrderReceiver;
 import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.OrderService;
 import com.gdn.venice.persistence.FinApprovalStatus;
@@ -236,8 +239,13 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
     VenOrderItemStatusHistoryService venOrderItemStatusHistoryService;
     @Autowired
     VenOrderItemService venOrderItemService;
+    
+    @Autowired
+    OrderReceiver orderReceiver;
+    
     @Autowired
     OrderService orderService;
+    
     @Autowired
     MerchantProductService merchantProductService;
     private EntityManager emForJDBC;
@@ -287,7 +295,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 
             return Boolean.TRUE;
         }   
-         
+        
+        /*
         try {
         	orderService.createOrder(order);			
         } catch (VeniceInternalException e) {
@@ -295,10 +304,24 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         	_log.error(e);
         	throw new EJBException(e.getMessage());
         }
+        */
+        
+		//OrderReceiver orderReceiver = new OrderReceiverImpl(order);
+        orderReceiver.setOrder(order);
+		Command createOrderCmd = new CreateOrderCommand(orderReceiver);
+		
+        try {
+    		createOrderCmd.execute();         	
+        } catch (VeniceInternalException e) {
+        	e.printStackTrace();
+        	CommonUtil.logError(this.getClass().getCanonicalName(), e);
+        	throw new EJBException(e.getMessage());
+        }
 
         Long endTime = System.currentTimeMillis();
         Long duration = endTime - startTime;
         CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder() completed in:" + duration + "ms");
+        
         return Boolean.TRUE;
     }
 
