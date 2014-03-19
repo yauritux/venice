@@ -20,6 +20,9 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.fields.DataSourceFloatField;
+import com.smartgwt.client.data.fields.DataSourceIntegerField;
+import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.widgets.IButton;
@@ -29,8 +32,6 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.TextAreaItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -86,20 +87,20 @@ public class WarehouseNonActiveWithApprovalView extends ViewWithUiHandlers<Wareh
                 buildWarehouseDetailWindow(record).show();
             }
         });
-        
+
         warehouseListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
-			
-			@Override
-			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
-				refreshAllWarehouseData();
-			}
-		});
+            @Override
+            public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
+                refreshAllWarehouseData();
+            }
+        });
     }
 
     private Window buildWarehouseDetailWindow(final ListGridRecord record) {
         warehouseDetailWindow = new Window();
         warehouseDetailWindow.setWidth(600);
-        warehouseDetailWindow.setHeight(300);
+        warehouseDetailWindow.setHeight(450);
+        warehouseDetailWindow.setCanDragResize(true);
         warehouseDetailWindow.setTitle("Warehouse Detail");
         warehouseDetailWindow.setShowMinimizeButton(false);
         warehouseDetailWindow.setIsModal(true);
@@ -121,30 +122,33 @@ public class WarehouseNonActiveWithApprovalView extends ViewWithUiHandlers<Wareh
 
         final Long id = Long.parseLong(record.getAttribute(DataNameTokens.INV_WAREHOUSE_ID));
 
-        String errMsg = "Required field";
-        final TextItem whCode = new TextItem(DataNameTokens.INV_WAREHOUSE_CODE, "Warehouse Code");
-        whCode.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_CODE));
-        whCode.setDisabled(Boolean.TRUE);
-        final TextItem whName = new TextItem(DataNameTokens.INV_WAREHOUSE_NAME, "Warehouse Name");
-        whName.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_NAME));
-        whName.setRequired(Boolean.TRUE);
-        whName.setRequiredMessage(errMsg);
-        final TextAreaItem whDescription = new TextAreaItem(DataNameTokens.INV_WAREHOUSE_DESCRIPTION, "Warehouse Description");
-        whDescription.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_DESCRIPTION));
-        final TextItem whAddress = new TextItem(DataNameTokens.INV_WAREHOUSE_ADDRESS, "Address");
-        whAddress.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_ADDRESS));
-        whAddress.setRequired(Boolean.TRUE);
-        whAddress.setRequiredMessage(errMsg);
-        final TextItem whCity = new TextItem(DataNameTokens.INV_WAREHOUSE_CITY, "City");
-        whCity.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_CITY));
-        whCity.setRequired(Boolean.TRUE);
-        whCity.setRequiredMessage(errMsg);
-        final TextItem whZipcode = new TextItem(DataNameTokens.INV_WAREHOUSE_ZIPCODE, "Zipcode");
-        whZipcode.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_ZIPCODE));
-        whZipcode.setRequired(Boolean.TRUE);
-        whZipcode.setRequiredMessage(errMsg);
+        DataSource ds = new DataSource();
+        DataSourceTextField whCode = new DataSourceTextField("whCode", "Warehouse Code");
+        whCode.setCanEdit(false);
+        DataSourceTextField whName = new DataSourceTextField("whName", "Warehouse Name", 255, true);
+        DataSourceTextField whDescription = new DataSourceTextField("whDescription", "Warehouse Description", 1000);
+        DataSourceTextField whAddress = new DataSourceTextField("whAddress", "Address", 255, true);
+        DataSourceTextField whCity = new DataSourceTextField("whCity", "City", 255, true);
+        DataSourceIntegerField whZipcode = new DataSourceIntegerField("whZipcode", "Zipcode", 5);
+        DataSourceTextField whContactPerson = new DataSourceTextField("whContactPerson", "Contact Person", 255);
+        DataSourceIntegerField whContactPhone = new DataSourceIntegerField("whContactPhone", "Contact Phone", 16);
+        DataSourceFloatField whSpace = new DataSourceFloatField("whSpace", "Space", 10);
+        DataSourceFloatField whAvailSpace = new DataSourceFloatField("whAvailSpace", "Available Space", 10);
 
-        warehouseDetailForm.setFields(whName, whDescription, whAddress, whCity, whZipcode);
+        ds.setFields(whCode, whName, whDescription, whAddress, whCity, whZipcode, whContactPerson, whContactPhone, whSpace, whAvailSpace);
+        warehouseDetailForm.setDataSource(ds);
+        warehouseDetailForm.setDisabled(true);
+
+        warehouseDetailForm.setValue("whCode", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CODE));
+        warehouseDetailForm.setValue("whName", record.getAttribute(DataNameTokens.INV_WAREHOUSE_NAME));
+        warehouseDetailForm.setValue("whDescription", record.getAttribute(DataNameTokens.INV_WAREHOUSE_DESCRIPTION));
+        warehouseDetailForm.setValue("whAddress", record.getAttribute(DataNameTokens.INV_WAREHOUSE_ADDRESS));
+        warehouseDetailForm.setValue("whCity", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CITY));
+        warehouseDetailForm.setValue("whZipcode", record.getAttribute(DataNameTokens.INV_WAREHOUSE_ZIPCODE));
+        warehouseDetailForm.setValue("whContactPerson", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CONTACT_PERSON));
+        warehouseDetailForm.setValue("whContactPhone", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CONTACT_PHONE));
+        warehouseDetailForm.setValue("whSpace", record.getAttribute(DataNameTokens.INV_WAREHOUSE_SPACE));
+        warehouseDetailForm.setValue("whAvailSpace", record.getAttribute(DataNameTokens.INV_WAREHOUSE_AVAILABLE_SPACE));
 
         HLayout buttonSet = new HLayout(5);
 
@@ -183,11 +187,11 @@ public class WarehouseNonActiveWithApprovalView extends ViewWithUiHandlers<Wareh
 
         buttonSet.setAlign(Alignment.CENTER);
 
-//        if (InventoryUtil.isApprover(MainPagePresenter.signedInUser)) {
-        buttonSet.setMembers(closeButton, approveButton, rejectButton);
-//        } else {
-//            buttonSet.setMembers(closeButton, editButton);
-//        }
+        if (MainPagePresenter.getSignedInUserRole().toLowerCase().contains("inv_wh_approver")) {
+            buttonSet.setMembers(closeButton, approveButton, rejectButton);
+        } else {
+            buttonSet.setMembers(closeButton);
+        }
 
         warehouseDetailLayout.setMembers(warehouseDetailForm, buttonSet);
         warehouseDetailWindow.addItem(warehouseDetailLayout);
@@ -210,7 +214,6 @@ public class WarehouseNonActiveWithApprovalView extends ViewWithUiHandlers<Wareh
         warehouseListGrid.setAutoFetchData(Boolean.TRUE);
         warehouseListGrid.setFields(listGridField);
         warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ID).setHidden(Boolean.TRUE);
-        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CODE).setHidden(Boolean.TRUE);
         warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ADDRESS).setCanFilter(Boolean.FALSE);
         warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CITY).setCanFilter(Boolean.FALSE);
         warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_DESCRIPTION).setCanFilter(Boolean.FALSE);
@@ -222,7 +225,7 @@ public class WarehouseNonActiveWithApprovalView extends ViewWithUiHandlers<Wareh
 
     @Override
     public void refreshAllWarehouseData() {
-    	DSCallback callBack = new DSCallback() {
+        DSCallback callBack = new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {
                 warehouseListGrid.setData(response.getData());

@@ -34,6 +34,7 @@ import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -204,4 +205,6 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<GRNListPresenter> getGRNListPresenter();
   
   AsyncProvider<GRNCreatePresenter> getGRNCreatePresenter();
+  
+  AsyncProvider<PackingListPresenter> getPackingListPresenter();
 }

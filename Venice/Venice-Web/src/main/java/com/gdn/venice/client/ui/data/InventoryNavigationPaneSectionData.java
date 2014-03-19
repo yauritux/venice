@@ -35,6 +35,7 @@ public class InventoryNavigationPaneSectionData {
 		  new NavigationPaneTreeNodeRecord("14", "1", "Good Received Note", null, "IM13", DataWidgetNameTokens.INV_GRNTREENODE),
 		  new NavigationPaneTreeNodeRecord("15", "14", "Create Good Received Note", NameTokens.grnCreatePage, "IM14", DataWidgetNameTokens.INV_GRNCREATETREENODE),
 		  new NavigationPaneTreeNodeRecord("16", "14", "Good Received Note List", NameTokens.grnListPage, "IM15", DataWidgetNameTokens.INV_GRNLISTTREENODE),
+                  new NavigationPaneTreeNodeRecord("17", "1", "Packing List", NameTokens.packingListPage, "IM16", DataWidgetNameTokens.INV_PACKINGLISTTREENODE)
 		};
 	  }
 }

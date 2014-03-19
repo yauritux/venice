@@ -1187,6 +1187,10 @@ public class DataNameTokens {
         public static String INV_WAREHOUSE_APPROVALSTATUS="approvalStatus";
         public static String INV_WAREHOUSE_APPROVAL_IN_PROCESS="approvalInProcess";
         public static String INV_WAREHOUSE_ORIGINALID="originId";
+        public static String INV_WAREHOUSE_CONTACT_PERSON="contactPerson";
+        public static String INV_WAREHOUSE_CONTACT_PHONE="contactPhone";
+        public static String INV_WAREHOUSE_SPACE="space";
+        public static String INV_WAREHOUSE_AVAILABLE_SPACE="availableSpace";
         
         public static String INV_SHELF_ID="id";
         public static String INV_SHELF_CODE="code";
@@ -1202,9 +1206,12 @@ public class DataNameTokens {
         public static String INV_STORAGE_DESCRIPTION="description";
         public static String INV_STORAGE_TYPE="type";
                 
+        //Inventory Currency
         public static String INV_CURRENCY_ID="id";
         public static String INV_CURRENCY_CURRENCY="currency";
         public static String INV_CURRENCY_RATE="rate";
+        public static String INV_CURRENCY_UPDATE_DATE="updateDate";
+        public static String INV_CURRENCY_UPDATED_BY="updatedBy";
         
     	public static String INV_ASN_ID = "id";
     	public static String INV_ASN_NUMBER = "asnNumber";
@@ -1248,6 +1255,26 @@ public class DataNameTokens {
     	public static String INV_ITEM_ATTRIBUTE_SERIALNUMBER = "serialNumber";
     	public static String INV_ITEM_ATTRIBUTE_EXPIREDDATE = "expiredDate";
                 
+        //Inventory Packing List
+        public static String INV_AWB_ID = "awbId";
+        public static String INV_AWB_NO = "awbNo";
+        public static String INV_AWB_PUDATE = "puDate";
+        public static String INV_AWB_LOGNAME = "logisticName";
+        public static String INV_AWB_STATUS = "status";
+        public static String INV_AWB_CLAIMEDBY = "claimedBy";
+        
+        //Inventory Sales Order
+        public static String INV_SO_ID = "soId";
+        public static String INV_SO_ORDERID = "orderId";
+        public static String INV_SO_ORDERITEMID = "orderItemId";
+        public static String INV_SO_MERCHANTSKU = "merchantSKU";
+        public static String INV_SO_QUANTITY = "quantity";
+        public static String INV_SO_ITEMDESC = "itemDesc";
+        public static String INV_SO_ITEMUOM = "itemUom";
+        public static String INV_SO_ITEMPHOTO = "itemPhoto";
+        public static String INV_SO_ITEMHASATTRIBUTE = "itemHasAttribute";
+        public static String INV_SO_ATTRIBUTE = "attribute";
+        
 	/**
 	 * This constructor adds all of the name token and the wrapper type
 	 * definitions into the Map. This should really be removed so that the 

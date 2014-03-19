@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.venice.server.app.presenter.command.FetchUserPermissionListCommand;
+import com.gdn.venice.server.app.presenter.command.FetchUserRoleCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.util.Util;
 
@@ -45,6 +46,9 @@ public class AuthorizationUtilServlet extends HttpServlet {
 			if (method.equals("fetchUserPermissionList")) {
 				RafRpcCommand fetchUserPermissionListCommand = new FetchUserPermissionListCommand(userName);
 				retVal = fetchUserPermissionListCommand.execute();
+			} else if (method.equals("fetchUserRoleList")) {
+				RafRpcCommand fetchUserRoleListCommand = new FetchUserRoleCommand(userName);
+				retVal = fetchUserRoleListCommand.execute();
 			}
 		}
 		response.getOutputStream().println(retVal);

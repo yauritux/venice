@@ -66,7 +66,7 @@ public class NameTokens {
 
 	public static final String reservationOrderManagement= "!reservationOrderManagement";
 
-    public static final String warehouseListFilterPage = "!warehouseListFilterPage";
+        public static final String warehouseListFilterPage = "!warehouseListFilterPage";
 	public static final String warehouseAddWithApprovalPage = "!addWithApprovalPage";
 	public static final String warehouseEditWithApprovalPage = "!editWithApprovalPage";
 	public static final String warehouseNonActiveWithApprovalPage = "!nonActiveWithApprovalPage";
@@ -82,6 +82,8 @@ public class NameTokens {
 
 	public static final String grnCreatePage = "!grnCreatePage";
 	public static final String grnListPage = "!grnListPage";
+        
+        public static final String packingListPage = "!packingListPage";
         
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;
