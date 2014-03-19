@@ -98,7 +98,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
             public void onCellClick(CellClickEvent event) {
                 ListGridRecord record = warehouseItemListGrid.getSelectedRecord();
 
-                buildPickingListDetailWindow(record).show();
+                buildPickingListDetailWindow(record).show();                
             }
         });
         
@@ -187,7 +187,6 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 	    salesDetailListGrid = new ListGrid();
 	    salesDetailListGrid.setDataSource(salesDetailData);		
 		salesDetailListGrid.setFields(finalListGridSalesField);
-		salesDetailListGrid.setSelectionProperty("isSelected");
 	    salesDetailListGrid.setWidth(325);
 	    salesDetailListGrid.setHeight(300);
 	    salesDetailListGrid.setPadding(5);
@@ -202,8 +201,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
         salesDetailListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
         salesDetailListGrid.setSelectionType(SelectionStyle.SIMPLE);
         salesDetailListGrid.getField(DataNameTokens.INV_PICKINGLIST_SALESORDERQTY).setWidth("40%");
-
-                
+                        
         //set storage data
 		DataSource storageDetailData = PickingListData.getStorageListData(record.getAttribute(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
 		ListGridField listGridStorageField[] = Util.getListGridFieldsFromDataSource(storageDetailData);
@@ -250,6 +248,10 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 					itemDataMap.put("ITEM", itemRowMap.toString());					
             
 					ListGridRecord[] salesRecords = salesDetailListGrid.getSelection();
+					if(salesRecords.length<1){
+						SC.say("Please select sales order");
+						return;
+					}
 		            HashMap<String, String> salesDataMap = new HashMap<String, String>();
 					HashMap<String, String> salesRowMap = new HashMap<String, String>();
 										
@@ -278,6 +280,11 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 							qtyPick=0;
 						}
 						totalQtyPicked+=qtyPick;
+						
+						if(totalQtyPicked==0){
+							SC.say("Please input quantity from shelf");
+							return;
+						}
 						storageDataMap.put("STORAGE"+i, storageRowMap.toString());					
 					}
 				getUiHandlers().onSaveClicked(itemDataMap, salesDataMap, storageDataMap, totalQtyPicked);
