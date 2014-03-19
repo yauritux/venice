@@ -80,7 +80,15 @@ public class Rule44 {
     		
     	}catch(Exception e){
     		e.printStackTrace();
-    	}
+    	}finally {
+            try {
+                if (locator != null) {
+                    locator.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     	
     	return venOrderItemList;
     }
@@ -102,7 +110,15 @@ public class Rule44 {
     		
     	}catch(Exception e){
     		e.printStackTrace();
-    	}
+    	}finally {
+            try {
+                if (locator != null) {
+                    locator.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     	
     	return venMerchantProductList;
     } 
