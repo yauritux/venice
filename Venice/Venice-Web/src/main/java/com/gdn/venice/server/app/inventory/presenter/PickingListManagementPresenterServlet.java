@@ -13,6 +13,8 @@ import com.gdn.venice.server.app.inventory.command.FetchPickingListItemDetailDat
 import com.gdn.venice.server.app.inventory.command.FetchPickingListSalesOrderDetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchPickingListStorageDetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.ReleaseLockDataCommand;
+import com.gdn.venice.server.app.inventory.command.SaveGrnDataCommand;
+import com.gdn.venice.server.app.inventory.command.SavePickingListDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -103,6 +105,9 @@ public class PickingListManagementPresenterServlet extends HttpServlet{
 			if(method.equals("releaseLock")){					
 				RafRpcCommand releaseLockDataCommand = new ReleaseLockDataCommand(username, request.getParameter("warehouseId"));
 				retVal = releaseLockDataCommand.execute();
+			}else if(method.equals("savePickingListData")){					
+				RafRpcCommand SavePickingListDataCommand = new SavePickingListDataCommand(username, requestBody);
+				retVal = SavePickingListDataCommand.execute();
 			}
 		}
 		

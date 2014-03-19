@@ -38,12 +38,12 @@ public class PickingListData {
 	
 	public static DataSource getPickingListItemDetailData(String warehouseItemId) {
 		DataSourceField[] dataSourceFields = {
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID, "Warehouse Item ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_ITEMID, "Item ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, "Warehouse Item SKU"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME, "Item SKU Name"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_STOCKTYPE, "Type"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_MERCHANT, "Merchant"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_DIMENSION, "W x H x L"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_DIMENSION, "W x H x L (cm)"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WEIGHT, "Weight"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_UOM, "UoM"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_ATTRIBUTE, "Reff Attribute")};
@@ -62,7 +62,8 @@ public class PickingListData {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_SALESORDERID, "Sales Order ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_SALESORDERNUMBER, "Sales Order Number"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_SALESORDERQTY, "Sales Order Qty")};
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_SALESORDERQTY, "Sales Order Qty"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_SALESORDERTIPEPENANGANAN, "Tipe Penanganan")};
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
 				GWT.getHostPageBaseURL() + PickingListPresenter.pickingListManagementPresenterServlet + "?method=fetchPickingListSalesOrderDetailData&type=DataSource&warehouseItemId="+warehouseItemId,
@@ -75,7 +76,6 @@ public class PickingListData {
 	}
 	
 	public static DataSource getStorageListData(String warehouseItemId) {
-		System.out.println("warehouseItemId: "+warehouseItemId);
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WAREHOUSESTORAGEID, "Warehouse Storage ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_SHELFCODE, "Shelf Code"),

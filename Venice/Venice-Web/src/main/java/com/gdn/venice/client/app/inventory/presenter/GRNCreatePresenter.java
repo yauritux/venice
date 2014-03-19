@@ -99,12 +99,7 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
                             getView().getGrnCreateWindow().destroy();
 							getView().refreshASNData();
 						} else {
-							String[] split = rpcResponse.split(":");
-							if(split.length>1){
-								SC.warn(split[1]);
-							}else{
-								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
-							}
+							SC.warn(rpcResponse);
 						}
 					}
 		});		
@@ -136,12 +131,7 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
                             getView().getGrnCreateWindow().destroy();
 							getView().refreshAttributeData();
 						} else {
-							String[] split = rpcResponse.split(":");
-							if(split.length>1){
-								SC.warn(split[1]);
-							}else{
-								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
-							}
+							SC.warn(rpcResponse);
 						}
 					}
 		});		

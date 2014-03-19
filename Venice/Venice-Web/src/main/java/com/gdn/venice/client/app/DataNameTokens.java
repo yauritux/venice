@@ -1247,6 +1247,7 @@ public class DataNameTokens {
     	public static String INV_ITEM_ATTRIBUTE_VALUE = "value";
     	
     	public static String INV_PICKINGLIST_WAREHOUSEITEMID = "id";
+    	public static String INV_PICKINGLIST_ITEMID = "itemId";
     	public static String INV_PICKINGLIST_WAREHOUSEITEMSKU = "warehouseItemSKU";
     	public static String INV_PICKINGLIST_ITEMSKUNAME = "warehouseItemSKUName";
     	public static String INV_PICKINGLIST_STOCKTYPE = "stockType";
@@ -1260,6 +1261,7 @@ public class DataNameTokens {
     	public static String INV_PICKINGLIST_SALESORDERID = "salesOrderId";
     	public static String INV_PICKINGLIST_SALESORDERNUMBER = "salesOrderNumber";
     	public static String INV_PICKINGLIST_SALESORDERQTY = "salesOrderQty";
+    	public static String INV_PICKINGLIST_SALESORDERTIPEPENANGANAN = "tipePenanganan";
     	public static String INV_PICKINGLIST_SHELFCODE = "shelfCode";
     	public static String INV_PICKINGLIST_WAREHOUSESTORAGEID = "shelfStorageId";
                 

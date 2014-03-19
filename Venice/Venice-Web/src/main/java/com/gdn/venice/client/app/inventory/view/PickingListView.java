@@ -1,5 +1,6 @@
 package com.gdn.venice.client.app.inventory.view;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.DataNameTokens;
@@ -63,9 +64,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
     ComboBoxItem warehouseItemComboBox;
     DynamicForm itemDetailForm;
     
-    String totalQtyPicked = "0";
-    
-//    Boolean confirmChangeRow = false;
+    int totalQtyPicked = 0;
 
     @Inject
     public PickingListView() {
@@ -144,7 +143,8 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 	                    @Override
 	                    public void execute(Boolean value) {
 	                        if (value != null && value == true) {
-	                            getUiHandlers().releaseLock(warehouseItemComboBox.getValue().toString());	
+	                            getUiHandlers().releaseLock(warehouseItemComboBox.getValue().toString());
+	                            resetTotalQtyPicked();
 	                            pickingListDetailWindow.destroy();
 	                        }else{
 	                        	return;
@@ -152,14 +152,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 	                    }
 	                });
             }
-        });
-  
-        submitButton.addClickHandler(new ClickHandler() {
-	          @Override
-	          public void onClick(ClickEvent event) {   
-//				getUiHandlers().onSaveClicked(grnDataMap, grnItemDataMap, pickingListDetailWindow);	        	  
-	  		}
-	    });
+        });          
         
 		VLayout headerLayout = new VLayout();
 		headerLayout.setWidth100();
@@ -168,7 +161,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 		headerLayout.setMembers(buttonSet);                       
                 						
 		//set item data
-        DataSource itemDetailData = PickingListData.getPickingListItemDetailData(record.getAttribute(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
+        final DataSource itemDetailData = PickingListData.getPickingListItemDetailData(record.getAttribute(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
 		
 		DataSourceField[] dataSourceFields = itemDetailData.getFields();
 		FormItem[] formItems = new FormItem[dataSourceFields.length];
@@ -183,7 +176,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 		itemDetailForm.setDataSource(itemDetailData);
 		itemDetailForm.setUseAllDataSourceFields(false);
 		itemDetailForm.setNumCols(2);
-		itemDetailForm.setFields(formItems[1], formItems[2], formItems[3], formItems[4], formItems[5], formItems[6], formItems[7], formItems[8]);
+		itemDetailForm.setFields(formItems[0], formItems[1], formItems[2], formItems[3], formItems[4], formItems[5], formItems[6], formItems[7], formItems[8]);
 		itemDetailForm.fetchData();
 					
 		//set sales order data
@@ -194,6 +187,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 	    salesDetailListGrid = new ListGrid();
 	    salesDetailListGrid.setDataSource(salesDetailData);		
 		salesDetailListGrid.setFields(finalListGridSalesField);
+		salesDetailListGrid.setSelectionProperty("isSelected");
 	    salesDetailListGrid.setWidth(325);
 	    salesDetailListGrid.setHeight(300);
 	    salesDetailListGrid.setPadding(5);
@@ -208,6 +202,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
         salesDetailListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
         salesDetailListGrid.setSelectionType(SelectionStyle.SIMPLE);
         salesDetailListGrid.getField(DataNameTokens.INV_PICKINGLIST_SALESORDERQTY).setWidth("40%");
+
                 
         //set storage data
 		DataSource storageDetailData = PickingListData.getStorageListData(record.getAttribute(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
@@ -234,6 +229,60 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 		storageDetailListGrid.getField(DataNameTokens.INV_PICKINGLIST_QTY).setWidth("30%");
 		storageDetailListGrid.getField(DataNameTokens.INV_PICKINGLIST_QTYPICKED).setWidth("30%");
 		storageDetailListGrid.getField(DataNameTokens.INV_PICKINGLIST_QTYPICKED).setCanEdit(true);
+
+		submitButton.addClickHandler(new ClickHandler() {
+	          @Override
+	          public void onClick(ClickEvent event) {   
+					ListGridRecord itemRecords = warehouseItemListGrid.getSelectedRecord();
+		            HashMap<String, String> itemDataMap = new HashMap<String, String>();
+					HashMap<String, String> itemRowMap = new HashMap<String, String>();
+										
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID, itemRecords.getAttributeAsString(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_ITEMID, itemDetailForm.getField(DataNameTokens.INV_PICKINGLIST_ITEMID).getValue().toString());
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_STOCKTYPE, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_STOCKTYPE));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_MERCHANT, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_MERCHANT));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_DIMENSION, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_DIMENSION));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_WEIGHT, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_WEIGHT));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_UOM, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_UOM));
+					itemRowMap.put(DataNameTokens.INV_PICKINGLIST_ATTRIBUTE, itemDetailForm.getValueAsString(DataNameTokens.INV_PICKINGLIST_ATTRIBUTE));
+					itemDataMap.put("ITEM", itemRowMap.toString());					
+            
+					ListGridRecord[] salesRecords = salesDetailListGrid.getSelection();
+		            HashMap<String, String> salesDataMap = new HashMap<String, String>();
+					HashMap<String, String> salesRowMap = new HashMap<String, String>();
+										
+					for (int i=0;i<salesRecords.length;i++) {
+						salesRowMap.put(DataNameTokens.INV_PICKINGLIST_SALESORDERID, salesRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_SALESORDERID));
+						salesRowMap.put(DataNameTokens.INV_PICKINGLIST_SALESORDERNUMBER, salesRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_SALESORDERNUMBER));
+						salesRowMap.put(DataNameTokens.INV_PICKINGLIST_SALESORDERQTY, salesRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_SALESORDERQTY));
+						salesRowMap.put(DataNameTokens.INV_PICKINGLIST_SALESORDERTIPEPENANGANAN, salesRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_SALESORDERTIPEPENANGANAN));
+						salesDataMap.put("SALES"+i, salesRowMap.toString());					
+					}
+					
+					ListGridRecord[] storageRecords = storageDetailListGrid.getRecords();
+		            HashMap<String, String> storageDataMap = new HashMap<String, String>();
+					HashMap<String, String> storageRowMap = new HashMap<String, String>();
+										
+					for (int i=0;i<storageRecords.length;i++) {
+						storageRowMap.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSESTORAGEID, storageRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_WAREHOUSESTORAGEID));
+						storageRowMap.put(DataNameTokens.INV_PICKINGLIST_SHELFCODE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_SHELFCODE));
+						storageRowMap.put(DataNameTokens.INV_PICKINGLIST_QTY, storageRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_QTY));
+						storageRowMap.put(DataNameTokens.INV_PICKINGLIST_QTYPICKED, storageRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_QTYPICKED));
+						
+						int qtyPick=0;
+						try{
+							qtyPick = Integer.parseInt(storageRecords[i].getAttributeAsString(DataNameTokens.INV_PICKINGLIST_QTYPICKED));
+						}catch(Exception e){
+							qtyPick=0;
+						}
+						totalQtyPicked+=qtyPick;
+						storageDataMap.put("STORAGE"+i, storageRowMap.toString());					
+					}
+				getUiHandlers().onSaveClicked(itemDataMap, salesDataMap, storageDataMap, totalQtyPicked);
+	  		}
+	    });
 		
 		Label itemLabel = new Label("<b>Item Detail:</b>");
 		itemLabel.setHeight(10);
@@ -320,5 +369,10 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 	@Override
 	public Window getPickingListDetailWindow() {
 		return pickingListDetailWindow;
-	}        
+	} 
+	
+	@Override
+	public int resetTotalQtyPicked() {
+		return totalQtyPicked=0;
+	}
 }

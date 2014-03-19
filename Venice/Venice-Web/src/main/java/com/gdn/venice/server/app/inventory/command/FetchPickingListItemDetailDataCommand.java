@@ -43,7 +43,7 @@ public class FetchPickingListItemDetailDataCommand implements RafDsCommand {
                 if(detailWrapper != null){
                 	PickingListDetail detail = detailWrapper.getContent();
 	                HashMap<String, String> map = new HashMap<String, String>();
-	                map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID, detail.getItem().getId().toString());
+	                map.put(DataNameTokens.INV_PICKINGLIST_ITEMID, detail.getItem().getId().toString());
 	                map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, detail.getItem().getCode());
 	                map.put(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME, detail.getItem().getName());
 	                
@@ -59,7 +59,7 @@ public class FetchPickingListItemDetailDataCommand implements RafDsCommand {
 	                String width = Float.toString(detail.getItem().getWidth());
 	                String height = Float.toString(detail.getItem().getHeight());
 	                String length = Float.toString(detail.getItem().getLength());
-	                map.put(DataNameTokens.INV_PICKINGLIST_DIMENSION, width+"cm x"+height+"cm x"+length+"cm");
+	                map.put(DataNameTokens.INV_PICKINGLIST_DIMENSION, width+"x"+height+"x"+length);
 	                map.put(DataNameTokens.INV_PICKINGLIST_WEIGHT, Float.toString(detail.getItem().getWeight()));
 	                map.put(DataNameTokens.INV_PICKINGLIST_UOM, detail.getItem().getItemUnit());
 	                map.put(DataNameTokens.INV_PICKINGLIST_ATTRIBUTE, Boolean.valueOf(detail.getItem().isHasAttribute()).toString());

@@ -50,7 +50,8 @@ public class FetchPickingListSalesOrderDetailDataCommand implements RafDsCommand
         	                map.put(DataNameTokens.INV_PICKINGLIST_SALESORDERID, so.getId().toString());
         	                map.put(DataNameTokens.INV_PICKINGLIST_SALESORDERNUMBER, so.getSalesOrderNumber());
         	                map.put(DataNameTokens.INV_PICKINGLIST_SALESORDERQTY, Integer.toString(so.getQuantity()));
-        	                	                    
+        	                map.put(DataNameTokens.INV_PICKINGLIST_SALESORDERTIPEPENANGANAN, so.getTipePenanganan());
+        	                
         	                dataList.add(map);
                 		}
                 	}

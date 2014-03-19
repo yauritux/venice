@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -120,6 +121,37 @@ public class PickingListManagementService{
                 + "&warehouseId="+ warehouseId;
         PostMethod httpPost = new PostMethod(url);
         System.out.println("url: "+url);
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PickingListDetail>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public ResultWrapper<PickingListDetail> submitPickingList(String username, PickingListDetail pickingListDetail) throws HttpException, IOException{
+		System.out.println("submitPickingList");
+		System.out.println("username: "+username);
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "pickingList/submitPickingList?username="+ username;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        
+		String json = mapper.writeValueAsString(pickingListDetail);
+		System.out.println("json: "+json);
+		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+
+		httpPost.setRequestHeader("Content-Type", "application/json");
+        
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {

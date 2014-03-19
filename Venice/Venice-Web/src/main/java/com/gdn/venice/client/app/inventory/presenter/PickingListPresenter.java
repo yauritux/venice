@@ -1,5 +1,6 @@
 package com.gdn.venice.client.app.inventory.presenter;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.NameTokens;
@@ -24,6 +25,7 @@ import com.smartgwt.client.rpc.RPCCallback;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.rpc.RPCResponse;
+import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
 
@@ -50,6 +52,7 @@ public class PickingListPresenter extends Presenter<PickingListPresenter.MyView,
 		public void loadPickingListData(LinkedHashMap<String, String> warehouseMap);
 		public void refreshPickingListData();
 		public Window getPickingListDetailWindow();
+		public int resetTotalQtyPicked();
 	}
 
 	@Inject
@@ -107,41 +110,38 @@ public class PickingListPresenter extends Presenter<PickingListPresenter.MyView,
 		});
 	}
 	
-//	@Override
-//	public void onSaveClicked(HashMap<String, String> grnDataMap, HashMap<String, String> itemDataMap, final Window window) {
-//		RPCRequest request=new RPCRequest();
-//		
-//		String grnMap = Util.formXMLfromHashMap(grnDataMap);
-//		String itemMap = Util.formXMLfromHashMap(itemDataMap);
-//		
-//		request.setData(grnMap+"#"+itemMap);
-//		
-//		request.setActionURL(GWT.getHostPageBaseURL() + grnManagementPresenterServlet + "?method=saveGrnData&type=RPC");
-//		request.setHttpMethod("POST");
-//		request.setUseSimpleHttp(true);
-//		request.setWillHandleError(true);
-//		RPCManager.setPromptStyle(PromptStyle.DIALOG);
-//		RPCManager.setDefaultPrompt("Saving records...");
-//		RPCManager.setShowPrompt(true);
-//		
-//		RPCManager.sendRequest(request, new RPCCallback () {
-//					public void execute(RPCResponse response,
-//							Object rawData, RPCRequest request) {
-//						String rpcResponse = rawData.toString();
-//						
-//						if (rpcResponse.startsWith("0")) {
-//                            SC.say("GRN created");
-//                            getView().getGrnCreateWindow().destroy();
-//							getView().refreshASNData();
-//						} else {
-//							String[] split = rpcResponse.split(":");
-//							if(split.length>1){
-//								SC.warn(split[1]);
-//							}else{
-//								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
-//							}
-//						}
-//					}
-//		});		
-//	}
+	@Override
+	public void onSaveClicked(HashMap<String, String> itemDataMap, HashMap<String, String> salesDataMap, HashMap<String, String> storageDataMap
+			, int totalQtyPicked) {
+		RPCRequest request=new RPCRequest();
+		
+		String itemMap = Util.formXMLfromHashMap(itemDataMap);
+		String salesMap = Util.formXMLfromHashMap(salesDataMap);
+		String storageMap = Util.formXMLfromHashMap(storageDataMap);
+		
+		request.setData(itemMap+"#"+salesMap+"#"+storageMap+"#"+totalQtyPicked);
+		
+		request.setActionURL(GWT.getHostPageBaseURL() + pickingListManagementPresenterServlet + "?method=savePickingListData&type=RPC");
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setWillHandleError(true);
+		RPCManager.setPromptStyle(PromptStyle.DIALOG);
+		RPCManager.setDefaultPrompt("Saving records...");
+		RPCManager.setShowPrompt(true);
+		
+		RPCManager.sendRequest(request, new RPCCallback () {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						
+						if (rpcResponse.startsWith("0")) {
+                            SC.say("Data submitted");
+							getView().refreshPickingListData();
+							getView().getPickingListDetailWindow().destroy();
+							getView().resetTotalQtyPicked();
+						} else {
+							SC.warn(rpcResponse);
+						}
+					}
+		});		
+	}
 }
