@@ -13,4 +13,5 @@ import com.smartgwt.client.widgets.Window;
 public interface GRNCreateUiHandler extends UiHandlers {
 
 	void onSaveClicked(HashMap<String, String> grnDataMap, HashMap<String, String> itemDataMap, Window window);
+	void onSaveAttributeClicked(HashMap<String, String> attributeDataMap,Window window);
 }

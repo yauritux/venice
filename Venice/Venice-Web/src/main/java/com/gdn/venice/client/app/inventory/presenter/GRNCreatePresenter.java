@@ -53,6 +53,7 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
 	public interface MyView extends View, HasUiHandlers<GRNCreateUiHandler> {
 		public void loadASNData(DataSource dataSource);
 		public void refreshASNData();
+		public void refreshAttributeData();
 		public Window getGrnCreateWindow();
 	}
 
@@ -98,12 +99,39 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
                             getView().getGrnCreateWindow().destroy();
 							getView().refreshASNData();
 						} else {
-							String[] split = rpcResponse.split(":");
-							if(split.length>1){
-								SC.warn(split[1]);
-							}else{
-								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
-							}
+							SC.warn(rpcResponse);
+						}
+					}
+		});		
+	}
+	
+	@Override
+	public void onSaveAttributeClicked(HashMap<String, String> attributeDataMap, final Window window) {
+		RPCRequest request=new RPCRequest();
+		
+		String map = Util.formXMLfromHashMap(attributeDataMap);
+		
+		request.setData(map);
+		
+		request.setActionURL(GWT.getHostPageBaseURL() + grnManagementPresenterServlet + "?method=saveAttributeData&type=RPC");
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setWillHandleError(true);
+		RPCManager.setPromptStyle(PromptStyle.DIALOG);
+		RPCManager.setDefaultPrompt("Saving records...");
+		RPCManager.setShowPrompt(true);
+		
+		RPCManager.sendRequest(request, new RPCCallback () {
+					public void execute(RPCResponse response,
+							Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						
+						if (rpcResponse.startsWith("0")) {
+                            SC.say("Attribute created");
+                            getView().getGrnCreateWindow().destroy();
+							getView().refreshAttributeData();
+						} else {
+							SC.warn(rpcResponse);
 						}
 					}
 		});		

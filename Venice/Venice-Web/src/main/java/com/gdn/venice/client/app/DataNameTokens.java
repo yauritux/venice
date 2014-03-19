@@ -1222,6 +1222,7 @@ public class DataNameTokens {
     	public static String INV_ASN_SUPPLIER_CODE = "supplier.code";
     	public static String INV_ASN_SUPPLIER_NAME = "supplier.name";
     	public static String INV_ASN_DESTINATION = "destinationWarehouse.name";
+    	public static String INV_ASN_DESTINATIONCODE = "destinationWarehouse.code";
     	public static String INV_ASN_STATUS = "currentStatus";
     	public static String INV_ASN_SPECIAL_NOTES = "specialNotes";
     	public static String INV_ASN_REFF_TYPE = "referenceType";
@@ -1251,9 +1252,25 @@ public class DataNameTokens {
     	public static String INV_ITEM_ATTRIBUTE_ID = "attributeId";
     	public static String INV_ITEM_ATTRIBUTE_NAME = "name";
     	public static String INV_ITEM_ATTRIBUTE_VALUE = "value";
-    	public static String INV_ITEM_ATTRIBUTE_IMEI = "imei";
-    	public static String INV_ITEM_ATTRIBUTE_SERIALNUMBER = "serialNumber";
-    	public static String INV_ITEM_ATTRIBUTE_EXPIREDDATE = "expiredDate";
+    	
+    	public static String INV_PICKINGLIST_WAREHOUSEITEMID = "id";
+    	public static String INV_PICKINGLIST_ITEMID = "itemId";
+    	public static String INV_PICKINGLIST_WAREHOUSEITEMSKU = "warehouseItemSKU";
+    	public static String INV_PICKINGLIST_ITEMSKUNAME = "warehouseItemSKUName";
+    	public static String INV_PICKINGLIST_STOCKTYPE = "stockType";
+    	public static String INV_PICKINGLIST_MERCHANT = "merchant";
+    	public static String INV_PICKINGLIST_QTY = "qty";
+    	public static String INV_PICKINGLIST_QTYPICKED = "qtyPicked";
+    	public static String INV_PICKINGLIST_DIMENSION = "dimension";
+    	public static String INV_PICKINGLIST_WEIGHT = "weight";
+    	public static String INV_PICKINGLIST_UOM = "uom";
+    	public static String INV_PICKINGLIST_ATTRIBUTE = "attribute";
+    	public static String INV_PICKINGLIST_SALESORDERID = "salesOrderId";
+    	public static String INV_PICKINGLIST_SALESORDERNUMBER = "salesOrderNumber";
+    	public static String INV_PICKINGLIST_SALESORDERQTY = "salesOrderQty";
+    	public static String INV_PICKINGLIST_SALESORDERTIPEPENANGANAN = "tipePenanganan";
+    	public static String INV_PICKINGLIST_SHELFCODE = "shelfCode";
+    	public static String INV_PICKINGLIST_WAREHOUSESTORAGEID = "shelfStorageId";
                 
         //Inventory Packing List
         public static String INV_AWB_ID = "awbId";
@@ -2318,7 +2335,10 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_FINARFUNDSINRECONRECORD_NOMORREFF,"java.lang.String");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_DATE,"java.sql.Timestamp");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT,"java.math.BigDecimal");
-							
+		
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_ID,"java.lang.Long");
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_NAME,"java.lang.String");
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_VALUE,"java.lang.String");		
 	}
 	
 	/**

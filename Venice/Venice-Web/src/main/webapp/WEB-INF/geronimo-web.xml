@@ -8,12 +8,12 @@
             <dep:type>car</dep:type>
         </dep:moduleId>
         <dep:dependencies>
-             <dep:dependency>
+<!--             <dep:dependency>
                 <dep:groupId>console.realm</dep:groupId>
                 <dep:artifactId>OpenLdap</dep:artifactId>
                 <dep:version>1.0</dep:version>
                 <dep:type>car</dep:type>
-            </dep:dependency> 
+            </dep:dependency> -->
             <dep:dependency>
                 <dep:groupId>venice</dep:groupId>
                 <dep:artifactId>server</dep:artifactId>
@@ -24,7 +24,7 @@
         <dep:inverse-classloading/>
     </dep:environment>
     <web:context-root>/Venice</web:context-root>
-     <web:security-realm-name>OpenLdap</web:security-realm-name>
+<!--     <web:security-realm-name>OpenLdap</web:security-realm-name>
         <security>
         <default-principal realm-name="OpenLdap">
             <principal class="org.apache.geronimo.security.realm.providers.GeronimoUserPrincipal" name="system"/>
@@ -36,6 +36,6 @@
                 </realm>
             </role>
         </role-mappings>
-    </security> 
+    </security> -->
     
 </web:web-app>

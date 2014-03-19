@@ -64,7 +64,11 @@ import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
+<<<<<<< HEAD
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
+=======
+import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+>>>>>>> refs/remotes/origin/stockholm/development_r1s8
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -77,7 +81,11 @@ import com.gdn.venice.client.app.inventory.view.ASNListView;
 import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
 import com.gdn.venice.client.app.inventory.view.GRNCreateView;
 import com.gdn.venice.client.app.inventory.view.GRNListView;
+<<<<<<< HEAD
 import com.gdn.venice.client.app.inventory.view.PackingListView;
+=======
+import com.gdn.venice.client.app.inventory.view.PickingListView;
+>>>>>>> refs/remotes/origin/stockholm/development_r1s8
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfEditWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfListFilterView;
@@ -440,9 +448,14 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				GRNCreateView.class,
 				GRNCreatePresenter.MyProxy.class);
                 
-                bindPresenter(PackingListPresenter.class,
+        bindPresenter(PackingListPresenter.class,
 				PackingListPresenter.MyView.class,
 				PackingListView.class,
 				PackingListPresenter.MyProxy.class);
+		
+		bindPresenter(PickingListPresenter.class,
+				PickingListPresenter.MyView.class,
+				PickingListView.class,
+				PickingListPresenter.MyProxy.class);	
 	}
 }

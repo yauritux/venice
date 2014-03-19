@@ -9,11 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.app.inventory.command.AddItemAttributeDataCommand;
+import com.gdn.venice.server.app.inventory.command.DeleteItemAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNItemDataCommand;
 import com.gdn.venice.server.app.inventory.command.GetMaxGRNItemQuantityAllowedDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveGrnDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemAttributeDataCommand;
+import com.gdn.venice.server.app.inventory.command.UpdateItemAttributeDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -85,7 +88,6 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 					e.printStackTrace();
 				}
 			}else if(method.equals("fetchItemAttributeData")){
-				System.out.println("fetchItemAttributeData di servlet");
 				RafDsCommand fetchItemAttributeDataCommand = new FetchItemAttributeDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchItemAttributeDataCommand.execute();
 				try{
@@ -93,7 +95,32 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-			}
+			}else if(method.equals("addItemAttributeData")){
+				RafDsCommand addItemAttributeDataCommand = new AddItemAttributeDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = addItemAttributeDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else if(method.equals("updateItemAttributeData")){
+				RafDsCommand updateItemAttributeDataCommand = new UpdateItemAttributeDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = updateItemAttributeDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else if(method.equals("deleteItemAttributeData")){
+				RafDsCommand deleteItemAttributeDataCommand = new DeleteItemAttributeDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = deleteItemAttributeDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}			
+						
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");	
 			String requestBody = Util.extractRequestBody(request);	

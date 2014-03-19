@@ -58,11 +58,11 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 			asn.setReferenceNumber(grnMap.get(DataNameTokens.INV_ASN_REFF_NUMBER));			
 			asn.setReferenceType(ASNReferenceType.valueOf(grnMap.get(DataNameTokens.INV_ASN_REFF_TYPE)));
 			
-			_log.debug("asn reff number: "+asn.getReferenceNumber());
-			_log.debug("asn reff type: "+asn.getReferenceType());
+			_log.info("asn reff number: "+asn.getReferenceNumber());
+			_log.info("asn reff type: "+asn.getReferenceType());
 			
 			Warehouse destination = new Warehouse();
-			destination.setName(grnMap.get(DataNameTokens.INV_ASN_DESTINATION));
+			destination.setCode(grnMap.get(DataNameTokens.INV_ASN_DESTINATIONCODE));
 			
 			grn.setAdvanceShipNotice(asn);					
 			grn.setReceivedWarehouse(destination);			

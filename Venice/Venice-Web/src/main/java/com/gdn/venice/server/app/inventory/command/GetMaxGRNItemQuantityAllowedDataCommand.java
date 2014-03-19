@@ -35,9 +35,9 @@ public class GetMaxGRNItemQuantityAllowedDataCommand implements RafRpcCommand {
 		try {
 			grnService = new GRNManagementService();
 			asnService = new ASNManagementService();
-			_log.info("GetMaxGRNItemQuantityAllowedDataCommand");													
-			Integer created = grnService.getASNItemQuantityAlreadyCreated(asnItemId);									
-			_log.debug("qty already created: "+created);
+			_log.info("GetMaxGRNItemQuantityAllowedDataCommand");	
+			Integer created = grnService.getASNItemQuantityAlreadyCreated(asnItemId)!=null?grnService.getASNItemQuantityAlreadyCreated(asnItemId):0;									
+			_log.info("qty already created: "+created);
 									
 			HashMap<String, String> params = new HashMap<String, String>();
 	        params.put("username", username);			
@@ -55,7 +55,7 @@ public class GetMaxGRNItemQuantityAllowedDataCommand implements RafRpcCommand {
 				ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getContent().getReferenceNumber().toString());
 				oriQty = cffItemWrapper.getContent().getQuantity();
 			}
-			_log.debug("qty original: "+oriQty);
+			_log.info("qty original: "+oriQty);
 			
 			allowed = oriQty-created;
 			_log.info("quantity allowed: "+allowed);

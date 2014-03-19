@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -46,7 +47,7 @@ public class GRNManagementService{
 		mapper = new ObjectMapper();
 		
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-        _log = loggerFactory.getLog4JLogger("ccom.gdn.venice.server.app.inventory.service.GRNManagementService");
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.service.GRNManagementService");
 	}
 	
 	public InventoryPagingWrapper<GoodReceivedNote> getGRNDataList(RafDsRequest request) throws HttpException, IOException{
@@ -258,7 +259,7 @@ public class GRNManagementService{
 		_log.info("getAttributeDataList");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "goodReceivedNote/getAttributeByItem?itemId=" +itemId;
+                + "attribute/getAttributeByItem?itemId=" +itemId;
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
     	        
@@ -276,6 +277,102 @@ public class GRNManagementService{
             return mapper.readValue(sb.toString(), new TypeReference<List<Attribute>>() {});
         } else {
         	return null;
+        }
+	}
+	
+	public ResultWrapper<GoodReceivedNoteItem> findItemByGRNItemId(String grnItemId) throws HttpException, IOException{
+		_log.info("findItemByGRNItemId");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "goodReceivedNote/findItemByGRNItemId?asnItemId=" +grnItemId;
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<GoodReceivedNoteItem>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public Boolean addEditItemAttribute(String username, Attribute attribute) throws JsonGenerationException, JsonMappingException, IOException{
+		_log.info("addEditItemAttribute");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "attribute/saveOrUpdate?username=" +username;
+		_log.info("url: "+url);
+		HttpClient client = new HttpClient();
+		PostMethod request = new PostMethod(url);
+		int httpCode = 0;
+		
+		ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(attribute);
+        request.setRequestHeader("Content-type", "application/json");
+        request.setRequestEntity(new StringRequestEntity(json, "application/json", "UTF-8"));
+
+        BufferedReader br = null;
+        
+		try {			
+			httpCode = client.executeMethod(request);
+			_log.info("response code: "+httpCode);
+			 if (httpCode != 0) {
+				if (httpCode == HttpStatus.SC_OK) {
+			
+	                br = new BufferedReader(new InputStreamReader(request.getResponseBodyAsStream()));
+	                
+	                String inputLine;
+	                StringBuffer sb = new StringBuffer();
+	                
+	                while ((inputLine = br.readLine()) != null) {
+	                    sb.append(inputLine);
+	                }	                
+	                _log.debug(sb.toString());	
+				}else {
+					return null;
+				}
+			 }
+		}catch (Exception e) {
+			_log.error("exception when call Stockholm service", e);
+			return false;
+		}finally{
+			request.releaseConnection();
+			try {
+				if (br != null) br.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		return true;
+	}
+	
+	public Boolean deleteItemAttribute(String username, Attribute attribute) throws JsonGenerationException, JsonMappingException, IOException{
+		_log.info("deleteItemAttribute");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "attribute/delete?username=" +username;
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+        
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writeValueAsString(attribute);
+        httpPost.setRequestHeader("Content-type", "application/json");
+        httpPost.setRequestEntity(new StringRequestEntity(json, "application/json", "UTF-8"));
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            return true;
+        } else {
+        	return false;
         }
 	}
 }
