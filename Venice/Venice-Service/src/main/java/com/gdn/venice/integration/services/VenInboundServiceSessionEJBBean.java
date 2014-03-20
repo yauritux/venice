@@ -6773,7 +6773,11 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                     returItem.setWcsReturItemId(orderItem.getWcsOrderItemId());
 
                     VenOrderStatus venReturStatus = new VenOrderStatus();
-                    venReturStatus.setOrderStatusId(VeniceConstants.VEN_ORDER_STATUS_B);
+                    if(orderItem.getVenOrderStatus().getOrderStatusId().equals(VeniceConstants.VEN_ORDER_STATUS_S)){
+                    	venReturStatus.setOrderStatusId(VeniceConstants.VEN_ORDER_STATUS_D);
+                    }else{
+                    	venReturStatus.setOrderStatusId(VeniceConstants.VEN_ORDER_STATUS_B);
+                    }
                     returItem.setVenReturStatus(venReturStatus);
                     returItem.setVenMerchantProduct(orderItem.getVenMerchantProduct());
                     returItem.setQuantity(orderItem.getQuantity());

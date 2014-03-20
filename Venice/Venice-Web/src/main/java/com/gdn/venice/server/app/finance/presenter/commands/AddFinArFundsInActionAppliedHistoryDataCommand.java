@@ -106,13 +106,15 @@ public class AddFinArFundsInActionAppliedHistoryDataCommand {
 							amount=new BigDecimal(refundAmount);
 					}
 				}
-				finArFundsInActionAppliedHistoryItem.setActionTakenTimestamp(newDate);
-				finArFundsInActionAppliedHistoryItem.setAmount(amount);
-				finArFundsInActionAppliedHistoryItem.setReferenceId(referenceId);
-				finArFundsInActionAppliedHistoryItem.setFinArFundsInActionApplied(action);
-				finArFundsInActionAppliedHistoryItem.setFinArFundsInReconRecords(finArFundsInReconRecordList.get(0));
-				
-				FinArFundsInActionAppliedHistoryList.add(finArFundsInActionAppliedHistoryItem);
+				if(action!=null){
+					finArFundsInActionAppliedHistoryItem.setActionTakenTimestamp(newDate);
+					finArFundsInActionAppliedHistoryItem.setAmount(amount);
+					finArFundsInActionAppliedHistoryItem.setReferenceId(referenceId);
+					finArFundsInActionAppliedHistoryItem.setFinArFundsInActionApplied(action);
+					finArFundsInActionAppliedHistoryItem.setFinArFundsInReconRecords(finArFundsInReconRecordList.get(0));
+					
+					FinArFundsInActionAppliedHistoryList.add(finArFundsInActionAppliedHistoryItem);
+				}
 				
 			}			
 			actionHome.persistFinArFundsInActionAppliedHistoryList(FinArFundsInActionAppliedHistoryList);
