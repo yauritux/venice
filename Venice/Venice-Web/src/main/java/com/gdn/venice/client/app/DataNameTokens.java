@@ -73,6 +73,8 @@ public class DataNameTokens {
 	public static String FRDCUSTOMERWHITELIST_REMARK="FrdCustomerWhitelist.remark";
 	public static String FRDCUSTOMERWHITELIST_CREATEDBY="FrdCustomerWhitelist.createdby";
 	public static String FRDCUSTOMERWHITELIST_CREATED="FrdCustomerWhitelist.created";
+
+
 	
 	public static String FRDFRAUDPOINT_FRAUDPOINTSREFERENCEID="FrdFraudPointsReference.fraudPointsReferenceId";
 	public static String FRDFRAUDPOINT_FRAUDREFERENCEDESCRIPTION="FrdFraudPointsReference.fraudReferenceDescription";
@@ -965,6 +967,8 @@ public class DataNameTokens {
 	public static String FINJOURNALTRANSACTION_PAYMENT_TYPE = "FinJournalTransaction.paymenttype";
 	public static String FINJOURNALTRANSACTION_GROUP_JOURNAL = "FinJournalTransaction.groupJournal";
 	
+	public static String FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS= "FinJournalTransaction.finArFundsInReconRecords.comment";
+	
 	//Manual Journal Screen - Manual Journal Detail
 	public static String FINAPMANUALJOURNALTRANSACTION_VENORDER_ORDERID = "FinApManualJournalTransaction.venOrder.orderId";
 	public static String FINAPMANUALJOURNALTRANSACTION_VENPARTY_PARTYID = "FinApManualJournalTransaction.venParty.partyId";
@@ -1214,6 +1218,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_GENUINEDATE, "java.sql.Timestamp");
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_REMARK, "java.lang.String");
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_CREATED, "java.sql.Timestamp");
+		
 		
 		fieldClassMap.put(FRDFRAUDPOINT_FRAUDPOINTSREFERENCEID, "java.lang.Long");
 		fieldClassMap.put(FRDFRAUDPOINT_FRAUDREFERENCEDESCRIPTION, "java.lang.String");
@@ -1961,7 +1966,9 @@ public class DataNameTokens {
 		fieldClassMap.put(FINJOURNALTRANSACTION_COMMENTS, "java.lang.String");
 		fieldClassMap.put(FINJOURNALTRANSACTION_REFF, "java.lang.String");
 		fieldClassMap.put(FINJOURNALTRANSACTION_GROUP_JOURNAL, "java.lang.String");		
-		fieldClassMap.put(FINJOURNALTRANSACTION_PAYMENT_TYPE, "java.lang.String");			
+		fieldClassMap.put(FINJOURNALTRANSACTION_PAYMENT_TYPE, "java.lang.String");
+
+		fieldClassMap.put(FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, "java.lang.String");	
 		
 		fieldClassMap.put(FINJOURNALTRANSACTION_FINJOURNALAPPROVALGROUP_JOURNALGROUPID, "java.lang.Long");				
 		

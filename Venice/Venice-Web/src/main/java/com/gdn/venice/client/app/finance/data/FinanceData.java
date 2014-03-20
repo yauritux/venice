@@ -327,7 +327,7 @@ public class FinanceData {
             new DataSourceFloatField(DataNameTokens.FINJOURNALTRANSACTION_DEBITTRANSACTIONMOUNT, "Debit"),
             new DataSourceFloatField(DataNameTokens.FINJOURNALTRANSACTION_CREDITTRANSACTIONMOUNT, "Credit"),
             new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_FINTRANSACTIONSTATUS_TRANSACTIONSTATUSDESC, "Status"),
-            new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_COMMENTS, "Comments"),
+            new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, "Comments"),
             new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_GROUP_JOURNAL, "Group Desc")
         };
         dataSourceFields[0].setPrimaryKey(true);
