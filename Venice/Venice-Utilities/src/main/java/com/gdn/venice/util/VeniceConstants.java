@@ -260,6 +260,8 @@ public interface VeniceConstants {
 	public static final long FIN_APPROVAL_STATUS_APPROVED = 2;
 	public static final long FIN_APPROVAL_STATUS_REJECTED = 3;
 	public static final long FIN_APPROVAL_STATUS_DONE= 4;
+	
+	public static final String FIN_APPROVAL_STATUS_DESC_APPROVED="Approved";
 
 	public static final long FIN_ACCOUNT_1120101 = 1120101;
 	public static final long FIN_ACCOUNT_1120102 = 1120102;
