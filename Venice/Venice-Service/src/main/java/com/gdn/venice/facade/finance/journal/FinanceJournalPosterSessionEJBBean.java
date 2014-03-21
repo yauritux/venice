@@ -2628,7 +2628,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
 
 				if (itemAllocate.isEmpty()) {
 					newRecord
@@ -2950,7 +2950,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 					finApprovalStatus
-							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
 					newRecord.setFinApprovalStatus(finApprovalStatus);
 
 					FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();
@@ -2997,7 +2997,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 					finApprovalStatus
-							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
 					tempRecord.setFinApprovalStatus(finApprovalStatus);
 
 					tempRecord.setFinArFundsInReport(payment
@@ -3104,7 +3104,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 			finApprovalStatus
-					.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+					.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
 			payment.setFinApprovalStatus(finApprovalStatus);
 
 			fundsInReconRecordHome.mergeFinArFundsInReconRecord(payment);
@@ -3241,7 +3241,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ sdf.format(new Date())
 									+ "'"
 									+ " and o.finApprovalStatus.approvalStatusId = "
-									+ VeniceConstants.FIN_APPROVAL_STATUS_NEW,
+									+ VeniceConstants.FIN_APPROVAL_STATUS_APPROVED,
 							0, 0);
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
@@ -4976,7 +4976,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
 				reconciliationRecord.setFinApprovalStatus(finApprovalStatus);
 
 				// reconciliationRecord.setRemainingBalanceAmount(remainingUnallocatedAmount.subtract(new
@@ -5083,7 +5083,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ sdf.format(new Date())
 									+ "'"
 									+ " and o.finApprovalStatus.approvalStatusId = "
-									+ VeniceConstants.FIN_APPROVAL_STATUS_NEW,
+									+ VeniceConstants.FIN_APPROVAL_STATUS_APPROVED,
 							0, 0);
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
@@ -5294,7 +5294,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					"select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Logistics Debt Acknowledgement Journal for:")
 					.append(sdf.format(new Date()))
 					.append("' and o.finApprovalStatus.approvalStatusId = ")
-					.append(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+					.append(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = journalApprovalGroupHome
 					.queryByRange(sb.toString(), 0, 0);
 
@@ -6550,7 +6550,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ sdf.format(new Date())
 									+ "'"
 									+ " and o.finApprovalStatus.approvalStatusId = "
-									+ VeniceConstants.FIN_APPROVAL_STATUS_NEW,
+									+ VeniceConstants.FIN_APPROVAL_STATUS_APPROVED,
 							0, 0);
 
 			if (finJournalApprovalGroupList.isEmpty()) {
