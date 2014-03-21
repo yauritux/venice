@@ -1,5 +1,6 @@
 package com.gdn.venice.client.app.finance.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -39,6 +40,7 @@ ManualJournalPresenter.MyView {
 	ToolStripButton newButton;
 	ToolStripButton removeButton; 
 	ToolStripButton printButton;
+	ToolStripButton submitForApprovalButton;
 
 	@Inject
 	public ManualJournalView() {
@@ -62,11 +64,18 @@ ManualJournalPresenter.MyView {
 		printButton.setTooltip("Print Manual Journal List");
 		printButton.setTitle("Print");
 		
+		submitForApprovalButton = new ToolStripButton();
+		submitForApprovalButton.setIcon("[SKIN]/icons/process.png");
+		submitForApprovalButton.setTooltip("Submit for Approval");
+		submitForApprovalButton.setTitle("Submit");
+		submitForApprovalButton.disable();
+		
 		manualJournalToolStrip.addButton(newButton);
 		manualJournalToolStrip.addButton(removeButton);
 		
 		manualJournalToolStrip.addSeparator();
 		manualJournalToolStrip.addButton(printButton);
+		manualJournalToolStrip.addButton(submitForApprovalButton);
 		
 		manualJournal = new JournalVLayoutWidget(true, this); 
 
@@ -122,7 +131,38 @@ ManualJournalPresenter.MyView {
 				PrintUtility.printComponent(manualJournalLayout);	
 			}
 		});
+		
+		submitForApprovalButton.addClickHandler(new ClickHandler() {
+			
+			/* (non-Javadoc)
+			 * @see com.smartgwt.client.widgets.events.ClickHandler#onClick(com.smartgwt.client.widgets.events.ClickEvent)
+			 */
+			@Override
+			public void onClick(ClickEvent event) {
+				/*
+				 * Get the selected journal group ids and add them to
+				 * a list then pass the list top the submit for
+				 * approval handler.
+				 */
+				ListGridRecord[] selection = manualJournal.getJournalList().getSelection();
+				ArrayList<String> journalGroupIdList = new ArrayList<String>();
+				for(int i=0; i < selection.length; ++i){
+					journalGroupIdList.add(selection[i].getAttribute(DataNameTokens.FINJOURNALAPPROVALGROUP_JOURNALGROUPID));
+				}
+				getUiHandlers().onSubmitForApproval(journalGroupIdList);				
+			}
+		});
+		
 		manualJournal.bindCustomUiHandlers();
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.gdn.venice.client.app.finance.presenter.JournalPresenter.MyView#refreshJournalData()
+	 */
+	@Override
+	public void refreshJournalData() {
+		manualJournal.refreshJournalData();
+		
 	}
 	
 	public ManualJournalUiHandlers getManualJournalUiHandlers() {
@@ -132,5 +172,9 @@ ManualJournalPresenter.MyView {
 	@Override
 	public void loadManualJournalDetail(DataSource dataSource, LinkedHashMap<String, String> accountMap, ListGridRecord record) {
 		manualJournal.createOrEditManualJournalDetail(dataSource, accountMap, record);
+	}
+	
+	public ToolStripButton getSubmitForApprovalButton() {
+		return submitForApprovalButton;
 	}
 }

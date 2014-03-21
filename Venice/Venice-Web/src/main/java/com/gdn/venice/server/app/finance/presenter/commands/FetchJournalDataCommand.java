@@ -39,6 +39,15 @@ public class FetchJournalDataCommand implements RafDsCommand {
 		
 		JPQLAdvancedQueryCriteria criteriaAndTaskCriteria = null;
 		//check for taskid parameter, it shall be there if this screen is called from ToDoList for approval purpose
+		
+		if(request.getParams()!=null && request.getParams().get(DataNameTokens.TASKID)!=null || !bManualJournal){
+			
+			criteriaAndTaskCriteria = new JPQLAdvancedQueryCriteria("and");
+			if (criteria!=null) {
+				criteriaAndTaskCriteria.add(criteria);
+			}
+		}
+		
 		if (request.getParams()!=null && request.getParams().get(DataNameTokens.TASKID)!=null) {
 			String taskId = request.getParams().get(DataNameTokens.TASKID);
 			BPMAdapter bpmAdapter = BPMAdapter.getBPMAdapter(userName, BPMAdapter.getUserPasswordFromLDAP(userName));
@@ -61,10 +70,7 @@ public class FetchJournalDataCommand implements RafDsCommand {
 //				}
 //			}
 			
-			criteriaAndTaskCriteria = new JPQLAdvancedQueryCriteria("and");
-			if (criteria!=null) {
-				criteriaAndTaskCriteria.add(criteria);
-			}
+			
 //			criteriaAndTaskCriteria.add(taskCriteria);			
 			request.setCriteria(criteriaAndTaskCriteria);
 			
@@ -111,6 +117,19 @@ public class FetchJournalDataCommand implements RafDsCommand {
 				
 				finJournalApprovalGroupList = sessionHome.queryByRange(select, 0, 50);
 			} else {
+				
+				if(!bManualJournal){
+
+					JPQLSimpleQueryCriteria approvalDescCriteria = new JPQLSimpleQueryCriteria();
+					approvalDescCriteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC));
+					approvalDescCriteria.setFieldName(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC);
+
+					approvalDescCriteria.setValue(VeniceConstants.FIN_APPROVAL_STATUS_DESC_APPROVED);
+					approvalDescCriteria.setOperator("equals");
+					
+					criteriaAndTaskCriteria.add(approvalDescCriteria);
+				}
+				
 				FinJournalApprovalGroup finJournalAppprovalGroup = new FinJournalApprovalGroup();
 				
 				if (criteriaAndTaskCriteria!=null) {
