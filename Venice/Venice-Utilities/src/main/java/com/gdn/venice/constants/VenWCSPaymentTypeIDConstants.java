@@ -21,7 +21,9 @@ public enum VenWCSPaymentTypeIDConstants {
 	 VEN_WCS_PAYMENT_TYPE_ID_KlikPAYKlikBCA(17), 
 	 VEN_WCS_PAYMENT_TYPE_ID_TelkomselPoin(18),
 	 VEN_WCS_PAYMENT_TYPE_ID_BCACreditCard(19),
-	 VEN_WCS_PAYMENT_TYPE_ID_ANZA(20);
+	 VEN_WCS_PAYMENT_TYPE_ID_ANZA(20),
+	 VEN_WCS_PAYMENT_TYPE_ID_CIMBCreditCard(21),
+	 VEN_WCS_PAYMENT_TYPE_ID_DanamonCreditCard(22);
 	 
 	 private long id;
 	 
