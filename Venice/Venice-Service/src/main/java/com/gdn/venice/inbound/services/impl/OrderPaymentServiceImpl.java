@@ -114,9 +114,20 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 	
 	@Override
 	public boolean isPaymentApproved(Payment payment) {
-		if (!isPaymentExist(payment)) return false;
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "isPaymentApproved::payment = " + payment);
+		
+		if (!isPaymentExist(payment)) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "isPaymentApproved::payment not exist!");
+			return false;
+		}
 		
 		VenOrderPayment venOrderPayment = getVenOrderPayment(payment);
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "isPaymentApproved::venOrderPayment = " + venOrderPayment);
 		
 		if (venOrderPayment == null) return false;
 		

@@ -362,13 +362,19 @@ public class OrderServiceImpl implements OrderService {
 
 		// If the order is RMA do nothing with payments because there are none
 		if (!venOrder.getRmaFlag()) {
+			/*
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "createOrder::rma flag false, remove existing payment");
+			*/
 			// Remove any existing order payment allocations that were allocated at VA stage
-			orderPaymentAllocationService.removeOrderPaymentAllocationList(venOrder);
+			//orderPaymentAllocationService.removeOrderPaymentAllocationList(venOrder);
+			/*
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "createOrder::done remove existing payment");
+			*/
 			
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "createOrder::processing payment");
 			orderPaymentService.processPayment(order, venOrder);
 		}
 
