@@ -318,6 +318,7 @@ public interface VeniceConstants {
 	public static final long FIN_JOURNAL_PAYMENT = 4;
 	public static final long FIN_JOURNAL_MANUAL = 5;
 	public static final long FIN_JOURNAL_ALLOCATION = 6;
+	public static final long FIN_JOURNAL_CANCEL_REFUND_OTHERS = 7;
 	public static final long VEN_BANK_ID_ANZ= 7;
 	
 	

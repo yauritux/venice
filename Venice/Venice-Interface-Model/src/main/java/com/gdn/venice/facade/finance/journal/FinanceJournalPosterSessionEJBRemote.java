@@ -115,6 +115,9 @@ public interface FinanceJournalPosterSessionEJBRemote {
 	 */
 	public Boolean postRefundJournalTransaction(Long reconciliationRecordId,
 			Double refundAmount, Double fee, int refundType, boolean printjournal);
+	
+	public Boolean postCancelRefundJournalTransaction(Long reconciliationRecordId,
+			Double refundAmount, Double fee, int refundType, boolean printjournal);
 
 	/**
 	 * Creates a balancing journal transaction that will act as an adjustment to

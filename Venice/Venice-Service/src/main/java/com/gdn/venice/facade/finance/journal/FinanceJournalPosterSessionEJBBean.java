@@ -9610,4 +9610,480 @@ public class FinanceJournalPosterSessionEJBBean implements
 				+ duration + "ms");
 		return true;
 	}
+	
+	
+	
+	
+	
+	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.gdn.venice.facade.finance.journal.FinanceJournalPosterSessionEJBRemote
+	 * #postRefundJournalTransaction(Long reconciliationRecordId, Double
+	 * refundAmount, Double fee, , int refundType)
+	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public Boolean postCancelRefundJournalTransaction(Long reconciliationRecordId,
+			Double cancelRefundAmount, Double cancelFee, int refundType,
+			boolean printjournal) {
+		_log.debug("postCancelRefundJournalTransaction()");
+		Long startTime = System.currentTimeMillis();
+
+		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
+
+		try {
+			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
+					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
+							"FinArFundsInReconRecordSessionEJBBeanLocal");
+
+			VenOrderPaymentAllocationSessionEJBLocal orderPaymentAllocationHome = (VenOrderPaymentAllocationSessionEJBLocal) this._genericLocator
+					.lookupLocal(
+							VenOrderPaymentAllocationSessionEJBLocal.class,
+							"VenOrderPaymentAllocationSessionEJBBeanLocal");
+
+			VenOrderPaymentSessionEJBLocal orderPaymentHome = (VenOrderPaymentSessionEJBLocal) this._genericLocator
+					.lookupLocal(VenOrderPaymentSessionEJBLocal.class,
+							"VenOrderPaymentSessionEJBBeanLocal");
+
+			VenOrderSessionEJBLocal orderHome = (VenOrderSessionEJBLocal) this._genericLocator
+					.lookupLocal(VenOrderSessionEJBLocal.class,
+							"VenOrderSessionEJBBeanLocal");
+
+			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
+					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
+							"FinJournalTransactionSessionEJBBeanLocal");
+
+			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
+					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
+							"FinJournalApprovalGroupSessionEJBBeanLocal");
+
+			FinArFundsInRefundSessionEJBLocal refundRecordHome = (FinArFundsInRefundSessionEJBLocal) this._genericLocator
+					.lookupLocal(FinArFundsInRefundSessionEJBLocal.class,
+							"FinArFundsInRefundSessionEJBBeanLocal");
+
+			/*
+			 * Read all the relevant funds in records from the database and
+			 * determine how much has been paid as well as the remaining balance
+			 * according to the reconciliation
+			 */
+			List<FinArFundsInReconRecord> reconRecordList = fundsInReconRecordHome
+					.queryByRange(
+							"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
+									+ reconciliationRecordId
+									+ " and o.finArFundsInActionApplied.actionAppliedId<>"
+									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
+							0, 0);
+			if (reconRecordList.isEmpty()) {
+				throw new EJBException("Reconciliation record not found:"
+						+ reconciliationRecordId);
+			}
+			FinArFundsInReconRecord reconciliationRecord = reconRecordList
+					.get(0);
+
+			VenOrderPayment venOrderPayment = null;
+
+			/*
+			 * For unexpected/unmatched payments there may not be a
+			 * VenOrderPayment
+			 */
+			if (reconciliationRecord.getVenOrderPayment() != null) {
+				List<VenOrderPayment> venOrderPaymentList = orderPaymentHome
+						.queryByRange(
+								"select o from VenOrderPayment o where o.orderPaymentId = "
+										+ reconciliationRecord
+												.getVenOrderPayment()
+												.getOrderPaymentId(), 0, 0);
+				if (!venOrderPaymentList.isEmpty()) {
+					venOrderPayment = venOrderPaymentList.get(0);
+				}
+			}
+
+			BigDecimal remainingUnallocatedAmount = null;
+			remainingUnallocatedAmount = reconciliationRecord
+					.getProviderReportPaidAmount();
+			/*
+			 * If there is a VenOrderPayment record then... Ascertain how much
+			 * of the payment has been allocated to orders already and throw an
+			 * exception if there are not enough funds to allocate
+			 */
+
+			if (venOrderPayment != null) {
+				List<VenOrderPaymentAllocation> orderPaymentAllocationList = orderPaymentAllocationHome
+						.queryByRange(
+								"select o from VenOrderPaymentAllocation o where o.venOrderPayment.orderPaymentId = "
+										+ venOrderPayment.getOrderPaymentId(),
+								0, 0);
+				BigDecimal allocatedAmount = new BigDecimal(0);
+
+				/*
+				 * Get the amount of funds that have been allocated from the
+				 * payment amount. Check that the order has not been cancelled.
+				 * If the order has been cancelled then the balance of funds can
+				 * be made available for refund.
+				 */
+				remainingUnallocatedAmount = reconciliationRecord
+						.getProviderReportPaidAmount()
+						.subtract(allocatedAmount);
+				if (orderPaymentAllocationList != null) {
+					for (VenOrderPaymentAllocation allocation : orderPaymentAllocationList) {
+						List<VenOrder> allocatedOrderList = orderHome
+								.queryByRange(
+										"select o from VenOrder o where o.orderId = "
+												+ allocation.getId()
+														.getOrderId(), 0, 0);
+						VenOrder allocatedOrder = allocatedOrderList.get(0);
+						if (allocatedOrder.getVenOrderStatus()
+								.getOrderStatusId() != VeniceConstants.VEN_ORDER_STATUS_X) {
+							allocatedAmount = allocatedAmount.add(allocation
+									.getAllocationAmount());
+						}
+					}
+
+					if (remainingUnallocatedAmount.compareTo(new BigDecimal(
+							cancelRefundAmount - cancelFee)) < 0) {
+						throw new EJBException(
+								"Insufficient unallocated payment funds available to serve this request");
+					}
+				}
+			}
+
+			// FinAccount finAccountRefundPelanggan = new FinAccount(); //
+			// better to use 'finAccountRefund' as var name instead of
+			// 'finAccountRefundPelanggan' because it will represent those 2
+			// accounts
+			FinAccount finAccountRefund = new FinAccount();
+			long accountRefund = 0;
+
+			switch (refundType) {
+			case VeniceConstants.FIN_REFUND_TYPE_BANK:
+				finAccountRefund
+						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
+				accountRefund = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK;
+				break;
+			case VeniceConstants.FIN_REFUND_TYPE_CUSTOMER:
+				finAccountRefund
+						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
+				accountRefund = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
+				break;
+			default:
+				break;
+			// no action. should produce an error later because of the empty
+			// account id
+			}
+
+			/*
+			 * switch-case is better for performance in this particular problem
+			 * (yauri @Sep 18, 2013 10:06AM) if (refundType ==
+			 * VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
+			 * finAccountRefundPelanggan
+			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
+			 * accountRefund=
+			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
+			 * } else if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
+			 * finAccountRefundPelanggan
+			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
+			 * accountRefund=
+			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK; }
+			 */
+
+			if (printjournal) {
+				/*
+				 * Lookup the refund journal approval group for the day If there
+				 * is none then create it
+				 */
+				FinJournal finJournalRefund = new FinJournal();
+				finJournalRefund
+						.setJournalId(VeniceConstants.FIN_JOURNAL_CANCEL_REFUND_OTHERS);
+				FinJournalApprovalGroup finJournalApprovalGroup = null;
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
+				// List<FinJournalApprovalGroup> finJournalApprovalGroupList =
+				// journalApprovalGroupHome.queryByRange(
+				// "select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Refund Journal for:"
+				// + sdf.format(new Date()) + "'" +
+				// " and o.finApprovalStatus.approvalStatusId = " +
+				// VeniceConstants.FIN_APPROVAL_STATUS_NEW, 0, 0);
+				if (finJournalApprovalGroup == null) {
+					finJournalApprovalGroup = new FinJournalApprovalGroup();
+					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
+					finApprovalStatus
+							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+					finJournalApprovalGroup
+							.setFinApprovalStatus(finApprovalStatus);
+					finJournalApprovalGroup.setFinJournal(finJournalRefund);
+					finJournalApprovalGroup
+							.setJournalGroupDesc("Cancel Refund Journal for:"
+									+ sdf.format(new Date()));
+					finJournalApprovalGroup
+							.setJournalGroupTimestamp(new Timestamp(System
+									.currentTimeMillis()));
+
+					// Persist the journal group
+					finJournalApprovalGroup = journalApprovalGroupHome
+							.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				}
+				// else {
+				// finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
+				// }
+
+				String wcsOrderId = reconciliationRecord.getWcsOrderId() != null ? reconciliationRecord
+						.getWcsOrderId() : "";
+
+				// Create the DEBIT journal transaction for REFUND against UANG
+				// MUKA
+				// PELANGGAN
+				FinJournalTransaction cancelRefundJournalTransaction = new FinJournalTransaction();
+				/*
+				 * refundJournalTransaction.setComments("Refund DEBIT for Order:"
+				 * +
+				 * reconciliationRecord.getWcsOrderId()!=null?reconciliationRecord
+				 * .getWcsOrderId():"" + " Payment:" +
+				 * reconciliationRecord.getProviderReportPaymentId());
+				 */// replaces with the following line (yauri @ Sep 18, 2013
+					// 7:25AM) due to the bug found in previous comment
+				cancelRefundJournalTransaction
+						.setComments("Cancel Refund Pelanggan DEBIT for Order:"
+								+ wcsOrderId
+								+ " Payment:"
+								+ reconciliationRecord
+										.getProviderReportPaymentId());
+				cancelRefundJournalTransaction.setCreditDebitFlag(true);//
+				cancelRefundJournalTransaction
+						.setFinJournalApprovalGroup(finJournalApprovalGroup);
+
+				FinAccount finAccountUangMukaPelanggan = new FinAccount();
+				if (reconciliationRecord.getFinArReconResult()
+						.getReconResultId() == VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED) {
+					finAccountUangMukaPelanggan
+							.setAccountId(VeniceConstants.FIN_ACCOUNT_2230002);
+				} else {
+					finAccountUangMukaPelanggan
+							.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+				}
+				cancelRefundJournalTransaction
+						.setFinAccount(finAccountUangMukaPelanggan);
+
+				cancelRefundJournalTransaction
+						.setFinArFundsInReconRecords(reconRecordList);
+
+				cancelRefundJournalTransaction.setFinJournal(finJournalRefund);
+				cancelRefundJournalTransaction.setFinPeriod(FinancePeriodUtil
+						.getCurrentPeriod());
+
+				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
+				finTransactionStatus
+						.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
+				cancelRefundJournalTransaction
+						.setFinTransactionStatus(finTransactionStatus);
+
+				FinTransactionType finTransactionType = new FinTransactionType();
+				if (reconciliationRecord.getFinArReconResult()
+						.getReconResultId() == VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED) {
+					finTransactionType
+							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI);
+				} else {
+					finTransactionType
+							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI);
+				}
+				cancelRefundJournalTransaction
+						.setFinTransactionType(finTransactionType);
+
+				// refundJournalTransaction.setTransactionAmount(reconciliationRecord.getProviderReportPaidAmount());
+				// // replace with the following line by yauri @Sept 18, 2013
+				// 07:11AM
+				cancelRefundJournalTransaction.setTransactionAmount(new BigDecimal(
+						cancelRefundAmount + ""));
+				cancelRefundJournalTransaction.setTransactionTimestamp(new Timestamp(
+						System.currentTimeMillis()));
+
+				// String
+				// wcsOrderId=reconciliationRecord.getWcsOrderId()!=null?reconciliationRecord.getWcsOrderId():"";
+				// // moved onto top by yauri @Sept 18, 2013 07:13AM
+				VenBank venBank = reconciliationRecord.getVenOrderPayment() != null ? reconciliationRecord
+						.getVenOrderPayment().getVenBank()
+						: reconciliationRecord.getFinArFundsInReport()
+								.getFinArFundsInReportType().getVenBank();
+
+						cancelRefundJournalTransaction.setWcsOrderID(wcsOrderId);
+						cancelRefundJournalTransaction.setVenBank(venBank);
+				// Persist the DEBIT journal transaction for the refund
+						cancelRefundJournalTransaction = journalTransactionHome
+						.persistFinJournalTransaction(cancelRefundJournalTransaction);
+				transactionList.add(cancelRefundJournalTransaction);
+
+				// Create the CREDIT journal transaction for REFUND against
+				// REFUND-------------------------------
+				// PELANGGAN
+				_log.info("FinanceJournalPosterSessionEJBBean:: Creating CREDIT Journal Transaction for CANCEL REFUND CUSTOMER");
+				FinJournalTransaction cancelRefundPelangganJournalTransaction = new FinJournalTransaction();
+				cancelRefundPelangganJournalTransaction
+						.setComments("Cancel Refund Pelanggan CREDIT for Order:"
+								+ wcsOrderId // reconciliationRecord.getWcsOrderId()
+								+ " Payment:"
+								+ reconciliationRecord
+										.getProviderReportPaymentId());
+				cancelRefundPelangganJournalTransaction.setCreditDebitFlag(false);//
+				cancelRefundPelangganJournalTransaction
+						.setFinJournalApprovalGroup(finJournalApprovalGroup);
+
+				// finAccountRefundPelanggan.setAccountId(new
+				// Long(refundType+""));
+				// refundPelangganJournalTransaction.setFinAccount(finAccountRefundPelanggan);
+				cancelRefundPelangganJournalTransaction
+						.setFinAccount(finAccountRefund);
+
+				cancelRefundPelangganJournalTransaction
+						.setFinArFundsInReconRecords(reconRecordList);
+				cancelRefundPelangganJournalTransaction
+						.setFinJournal(finJournalRefund);
+				cancelRefundPelangganJournalTransaction
+						.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+				cancelRefundPelangganJournalTransaction
+						.setFinTransactionStatus(finTransactionStatus);
+				cancelRefundPelangganJournalTransaction
+						.setFinTransactionType(finTransactionType);
+				cancelRefundPelangganJournalTransaction
+						.setTransactionAmount(new BigDecimal(cancelRefundAmount + ""));
+				cancelRefundPelangganJournalTransaction
+						.setTransactionTimestamp(new Timestamp(System
+								.currentTimeMillis()));
+
+				cancelRefundPelangganJournalTransaction.setWcsOrderID(wcsOrderId);
+				cancelRefundPelangganJournalTransaction.setVenBank(venBank);
+				// Persist the CREDIT journal transaction for the refund
+				cancelRefundPelangganJournalTransaction = journalTransactionHome
+						.persistFinJournalTransaction(cancelRefundPelangganJournalTransaction);
+				transactionList.add(cancelRefundPelangganJournalTransaction);
+
+				if (cancelFee > 0) {
+					// Create the CREDIT journal transaction for fees
+					FinJournalTransaction processFeeJournalTransaction = new FinJournalTransaction();
+					processFeeJournalTransaction
+							.setComments("Processing Fee (Cancel Refund) CREDIT for Order:"
+									+ wcsOrderId // reconciliationRecord.getWcsOrderId()!=null?reconciliationRecord.getWcsOrderId():""
+									+ " Payment:"
+									+ reconciliationRecord
+											.getProviderReportPaymentId());
+					cancelRefundJournalTransaction.setCreditDebitFlag(false);//
+					processFeeJournalTransaction
+							.setFinJournalApprovalGroup(finJournalApprovalGroup);
+
+					FinAccount finAccountProcessingFee = new FinAccount();
+
+					/*
+					 * The fees are either taken from the bank or the customer
+					 * as a processing fee
+					 */
+					if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
+						finAccountProcessingFee
+								.setAccountId(VeniceConstants.FIN_ACCOUNT_5110003);
+					} else if (refundType == VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
+						finAccountProcessingFee
+								.setAccountId(VeniceConstants.FIN_ACCOUNT_4110007);
+					}
+					processFeeJournalTransaction
+							.setFinAccount(finAccountProcessingFee);
+
+					processFeeJournalTransaction
+							.setFinArFundsInReconRecords(reconRecordList);
+
+					processFeeJournalTransaction
+							.setFinJournal(finJournalRefund);
+					processFeeJournalTransaction.setFinPeriod(FinancePeriodUtil
+							.getCurrentPeriod());
+
+					processFeeJournalTransaction
+							.setFinTransactionStatus(finTransactionStatus);
+
+					FinTransactionType finTransactionTypeProcessFee = new FinTransactionType();
+					finTransactionTypeProcessFee
+							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PROCESS_FEE);
+					processFeeJournalTransaction
+							.setFinTransactionType(finTransactionTypeProcessFee);
+
+					processFeeJournalTransaction
+							.setTransactionAmount(new BigDecimal(cancelFee));
+					processFeeJournalTransaction.setCreditDebitFlag(true);//
+					processFeeJournalTransaction
+							.setTransactionTimestamp(new Timestamp(System
+									.currentTimeMillis()));
+
+					processFeeJournalTransaction.setWcsOrderID(wcsOrderId);
+					processFeeJournalTransaction.setVenBank(venBank);
+					// Persist the DEBIT journal transaction for the refund
+					processFeeJournalTransaction = journalTransactionHome
+							.persistFinJournalTransaction(processFeeJournalTransaction);
+					transactionList.add(processFeeJournalTransaction);
+				}
+
+				// Create a refund record
+				FinArFundsInRefund finArFundsInRefund = new FinArFundsInRefund();
+				finArFundsInRefund
+						.setFinArFundsInReconRecord(reconciliationRecord);
+				finArFundsInRefund.setApAmount(new BigDecimal(cancelRefundAmount));
+				finArFundsInRefund.setRefundTimestamp(new Timestamp(System
+						.currentTimeMillis()));
+				finArFundsInRefund.setRefundType(reconciliationRecord
+						.getFinArFundsInActionApplied().getActionAppliedDesc());
+				refundRecordHome.persistFinArFundsInRefund(finArFundsInRefund);
+			} else {
+				reconciliationRecord.setRefundAmount(reconciliationRecord
+						.getRefundAmount().add(new BigDecimal(cancelRefundAmount)));
+				/*
+				 * 1) Flag the recon record as being refunded 2) Adjust the
+				 * balance to equal the remianing unallocated amount 3) Merge
+				 * the funds in record
+				 */
+				FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();
+				finArFundsInActionApplied.setActionAppliedId(accountRefund);
+				reconciliationRecord
+						.setFinArFundsInActionApplied(finArFundsInActionApplied);
+
+				// FinArReconResult finArReconResult = new FinArReconResult();
+				// finArReconResult.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_REFUNDED);
+				// reconciliationRecord.setFinArReconResult(finArReconResult);
+
+				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
+				finApprovalStatus
+						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+				reconciliationRecord.setFinApprovalStatus(finApprovalStatus);
+
+				// reconciliationRecord.setRemainingBalanceAmount(remainingUnallocatedAmount.subtract(new
+				// BigDecimal(refundAmount)));
+				// reconciliationRecord.setRemainingBalanceAmount(new
+				// BigDecimal(refundAmount).subtract(reconciliationRecord.getProviderReportPaidAmount()).add(reconciliationRecord.getPaymentAmount()!=null?reconciliationRecord.getPaymentAmount():new
+				// BigDecimal("0")));
+				reconciliationRecord = fundsInReconRecordHome
+						.mergeFinArFundsInReconRecord(reconciliationRecord);
+
+				/*
+				 * Note that we do not do anything with the transactionList here
+				 */
+			}
+
+		} catch (Exception e) {
+			String errMsg = "An Exception occured when posting cancel refund journal transactions:";
+			_log.error(errMsg + e.getMessage());
+			e.printStackTrace();
+			throw new EJBException(errMsg + e.getMessage());
+		} finally {
+			try {
+				if (_genericLocator != null) {
+					_genericLocator.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		Long endTime = System.currentTimeMillis();
+		Long duration = endTime - startTime;
+		_log.debug("postCancelRefundJournalTransaction()" + " completed in "
+				+ duration + "ms");
+		return true;
+
+	}
+	
 }
