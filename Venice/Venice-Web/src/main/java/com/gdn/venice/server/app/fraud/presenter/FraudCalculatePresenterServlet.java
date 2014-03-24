@@ -29,7 +29,7 @@ import com.gdn.venice.util.VeniceConstants;
 public class FraudCalculatePresenterServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	protected static Logger _log = null;
-       
+	
     public FraudCalculatePresenterServlet() {
         super();
 		Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();

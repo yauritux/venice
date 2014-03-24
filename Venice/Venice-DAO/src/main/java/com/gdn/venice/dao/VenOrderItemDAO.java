@@ -64,6 +64,21 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 		  "INNER JOIN FETCH ls.logLogisticsProvider AS lp " +
 		  "WHERE oi.venOrder = ?1";
 	
+	public static final String FIND_WITH_VENORDERITEMADDRESS_VENCOUNTRY_BY_VENORDER_SQL =
+		"SELECT oi " + 
+	    "FROM VenOrderItem oi " + 
+	    "INNER JOIN FETCH oi.venOrderItemAddress oia " +
+	    "INNER JOIN FETCH oia.venAddress a " +
+	    "INNER JOIN FETCH a.venCountry c " +
+	    "WHERE oi.venOrder = ?1";
+	
+	public static final String FIND_BY_VENORDER_ADDRESSSTREET_SQL = 
+		"SELECT o " +
+		"FROM VenOrderItem o " +
+		"JOIN o.venAddress a " +
+		"WHERE o.venOrder = ?1 " +
+		"AND UPPER(a.streetAddress1) LIKE %?2%";
+	
 	@Query(COUNT_BY_WCSORDERITEMID_SQL)
     public int countByWcsOrderItemId(String wcsOrderItemId);
 	
@@ -91,4 +106,10 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 	
 	@Query(FIND_WITH_LOGISTICPROVIDER_BY_VENORDER_SQL)
 	public List<VenOrderItem> findWithLogisticProviderByVenOrder(VenOrder venOrder);
+	
+	@Query(FIND_WITH_VENORDERITEMADDRESS_VENCOUNTRY_BY_VENORDER_SQL)
+	public List<VenOrderItem> findWithVenOrderItemAddressVenCountryByVenOrder(VenOrder venOrder);
+	
+	@Query(FIND_BY_VENORDER_ADDRESSSTREET_SQL)
+	public List<VenOrderItem> findByVenOrderAddressStreet(VenOrder order, String address);
 }

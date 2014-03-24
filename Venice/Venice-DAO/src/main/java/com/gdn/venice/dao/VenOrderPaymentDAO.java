@@ -24,6 +24,12 @@ public interface VenOrderPaymentDAO extends JpaRepository<VenOrderPayment, Long>
 		"o.venPaymentType.paymentTypeId = " + VeniceConstants.VEN_PAYMENT_TYPE_ID_IB + " AND " +
 		"b.bankId = ?2";
 	
+	public static final String GET_ORDERPAYMENTAMOUNTSUM_BY_CREDITCARDNUMBER_PAYMENTTIMERANGE  =
+		   "SELECT COALESCE(SUM(op.amount),0) " +
+		   "FROM VenOrderPayment op " +
+		   "WHERE op.maskedCreditCardNumber = ?1 AND " +
+		   " op.paymentTimestamp BETWEEN ?2 AND ?3 ";
+	
 	public List<VenOrderPayment> findByWcsPaymentId(String wcsPaymentId);
 	
 	public VenOrderPayment findByReferenceIdAndAmount(String referenceId, BigDecimal amount);
@@ -32,4 +38,7 @@ public interface VenOrderPaymentDAO extends JpaRepository<VenOrderPayment, Long>
 	
 	@Query(FIND_BY_REFERENCEID_BANKID)
 	public VenOrderPayment findWithBankByReferenceIdAndBankId(String referenceId, Long bankId);
+	
+	@Query(GET_ORDERPAYMENTAMOUNTSUM_BY_CREDITCARDNUMBER_PAYMENTTIMERANGE)
+	public BigDecimal getOrderPaymentAmountSumByCreditCardNumberPaymentTimeRange(String maskedCreditCardNumber, String dateStart, String dateEnd);
 }

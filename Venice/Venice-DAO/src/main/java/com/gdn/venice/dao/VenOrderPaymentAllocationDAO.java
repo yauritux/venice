@@ -17,8 +17,10 @@ import com.gdn.venice.util.VeniceConstants;
  */
 public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaymentAllocation, Long>{
 
-	public static final String FIND_BY_VEN_ORDER 
-	  = "select o from VenOrderPaymentAllocation o where o.venOrder = ?1";
+	public static final String FIND_BY_VEN_ORDER = 
+		       "SELECT o " +
+		       "FROM VenOrderPaymentAllocation o " +
+		       "WHERE o.venOrder = ?1";
 	
 	public static final String FIND_BY_CREDITCARD_DETAIL = 
 		       "SELECT o " +
@@ -56,6 +58,25 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   "WHERE " +
 		   " op.referenceId = ?1 ";
 	
+	public static final String COUNT_BY_PAYMENTTIMERANGE_CREDITCARD_NOTSAMEORDER_SQL =
+		   "SELECT COUNT(o) " +
+		   "FROM VenOrderPaymentAllocation AS opa " +
+		   " JOIN o.venOrderPayment AS op " +
+		   "WHERE " +
+		   " opa.venOrder <> ?1 AND " +
+		   " op.maskedCreditCardNumber like ?2 AND " +
+		   " op.paymentTimestamp BETWEEN ?3 AND ?4 ";
+	
+	public static final String COUNT_MASKEDCREDITCARD_BY_IPADDRESS_ORDERDATERANGE_SQL = 
+		   "SELECT COUNT(op.masked_credit_card_number) " +
+		   "FROM VenOrderPaymentAllocation AS opa " +
+		   " JOIN opa.venOrderPayment AS op " +
+		   " JOIN opa.venOrder AS o "+
+		   " WHERE op.venPaymentType.paymentTypeId = " + VeniceConstants.VEN_PAYMENT_TYPE_ID_CC +
+		   " AND o.ipAddress = ?1 " +
+		   " AND op.maskedCreditCardNumber IS NOT NULL " +
+		   " AND o.orderDate BETWEEN ?2 AND ?3 GROUP BY op.maskedCreditCardNumber ";
+	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
@@ -70,4 +91,10 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(FIND_BY_PAYMENTREFERENCEID)
 	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByPaymentReferenceId(String referenceId);
+	
+	@Query(COUNT_BY_PAYMENTTIMERANGE_CREDITCARD_NOTSAMEORDER_SQL)
+	public int countByPaymentTimeRangeCreditCardNotSameOrder(VenOrder order, String maskedCreditCard, String dateStart, String dateEnd);
+	
+	@Query(COUNT_MASKEDCREDITCARD_BY_IPADDRESS_ORDERDATERANGE_SQL)
+	public List<Integer> countMaskedCreditCardByIpAddressOrderDateRange(String ipAddress, String dateStart, String dateEnd);
 }
