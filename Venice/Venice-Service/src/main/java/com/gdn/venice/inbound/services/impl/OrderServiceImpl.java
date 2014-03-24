@@ -84,12 +84,6 @@ public class OrderServiceImpl implements OrderService {
 	@PersistenceContext
 	private EntityManager em;
 	
-	/*
-	@Autowired
-	OrderReceiver orderReceiver;
-	@Autowired
-	Command createOrderCmd;
-	*/
 	@Autowired
 	VenOrderDAO venOrderDAO;
 	
@@ -141,10 +135,6 @@ public class OrderServiceImpl implements OrderService {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "OrderServiceImpl::createOrder::all basic validation passed");
 				
-		//OrderReceiver orderReceiver = new OrderReceiverImpl(order);
-		//Command createOrderCmd = new CreateOrderCommand(orderReceiver);
-		//createOrderCmd.execute();
-		
 		/*
 		 * Check that none of the order items already exist and remove any party
 		 * record from merchant to prevent data problems from WCS
@@ -387,169 +377,8 @@ public class OrderServiceImpl implements OrderService {
 			orderPaymentAllocationService.removeOrderPaymentAllocationList(venOrder);
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "createOrder::done remove existing payment");
-			// An array list of order payment allocations
-			List<VenOrderPaymentAllocation> venOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>();
-			List<VenOrderPayment> venOrderPaymentList = new ArrayList<VenOrderPayment>();
-
-			//Allocate the payments to the order.
-			CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::Allocate the payments to the order");				
-			if (order.getPayments() != null && order.getPayments().size() > 0) {
-				Iterator<?> paymentIterator = order.getPayments().iterator();
-				while (paymentIterator.hasNext()) {
-					Payment next = (Payment) paymentIterator.next();
-					//Ignore partial fulfillment payments ... looks like a work around in WCS ... no need for this in Venice
-					if (!next.getPaymentType().equals(VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_PartialFulfillment.desc())) {
-						VenOrderPayment venOrderPayment = new VenOrderPayment();
-	
-						//If the payment already exists then just fish it
-						//from the DB. This is the case for VA payments as
-						//they are received before the confirmed order.
-						List<VenOrderPayment> venOrderPaymentList2 = orderPaymentService.findByWcsPaymentId(next.getPaymentId().getCode());
-						
-						if (venOrderPaymentList2 != null && (venOrderPaymentList2.size() > 0)) {
-							venOrderPayment = venOrderPaymentList2.get(0);
-						}
-						// Map the payment with dozer
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::Mapping the VenOrderPayment object...");
-						mapper.map(next, venOrderPayment);
-
-						// Set the payment type based on the WCS payment type
-						// VenPaymentType venPaymentType = new VenPaymentType();
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::mapping payment type");
-						
-						venOrderPayment = OrderUtil.getVenOrderPaymentByWCSPaymentType(venOrderPayment, next);
-						venOrderPaymentList.add(venOrderPayment);
-					}
-				}					
-				
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::persist payment");
-				venOrderPaymentList = orderPaymentService.persistOrderPaymentList(venOrderPaymentList);
-
-				paymentIterator = venOrderPaymentList.iterator();
-				BigDecimal paymentBalance = venOrder.getAmount();
-				int p=0;
-				while (paymentIterator.hasNext()) {
-					VenOrderPayment next = (VenOrderPayment) paymentIterator.next();
-
-					//Only include the allocations for non-VA payments
-					//because VA payments are already in the DB
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::allocate payment");
-					
-					//semua Payment di allocate, untuk payment VA dan non-VA.
 			
-					//if (!next.getVenPaymentType().getPaymentTypeCode().equals(VEN_PAYMENT_TYPE_VA)) {
-						// Build the allocation list manually based on the payment
-						VenOrderPaymentAllocation allocation = new VenOrderPaymentAllocation();
-						allocation.setVenOrder(venOrder);
-						BigDecimal paymentAmount = next.getAmount();
-						
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::Order Amount = "+paymentBalance);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::paymentBalance.compareTo(new BigDecimal(0)):  "
-						+paymentBalance.compareTo(new BigDecimal(0)) );
-						
-						// If the balance is greater than zero
-						if (paymentBalance.compareTo(new BigDecimal(0)) >= 0) {
-						
-							//If the payment amount is greater than the
-							//balance then allocate the balance amount else
-							//allocate the payment amount.
-							if (paymentBalance.compareTo(paymentAmount) < 0) {
-								allocation.setAllocationAmount(paymentBalance);
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "createOrder::Order Allocation Amount is paymentBalance = "+paymentBalance);
-							} else {
-								allocation.setAllocationAmount(paymentAmount);
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "createOrder::Order Allocation Amount is paymentAmount = "+paymentAmount);
-							}
-							
-							paymentBalance = paymentBalance.subtract(paymentAmount);
-							allocation.setVenOrderPayment(next);
-
-							// Need a primary key object...
-							VenOrderPaymentAllocationPK venOrderPaymentAllocationPK = new VenOrderPaymentAllocationPK();
-							venOrderPaymentAllocationPK.setOrderPaymentId(next.getOrderPaymentId());
-							venOrderPaymentAllocationPK.setOrderId(venOrder.getOrderId());
-							allocation.setId(venOrderPaymentAllocationPK);
-
-							venOrderPaymentAllocationList.add(allocation);
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "createOrder::venOrder Payment Allocation List size from looping ke-"
-							   + p +" = "+venOrderPaymentAllocationList.size());
-							p++;
-						}
-					//}
-				}
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "createOrder::persist payment allocation");
-				
-				venOrderPaymentAllocationList = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
-				venOrder.setVenOrderPaymentAllocations(venOrderPaymentAllocationList);
-				
-				//Here we need to create a dummy reconciliation records
-				//for the non-VA payments so that they appear in the 
-				//reconciliation screen as unreconciled.
-				//Later these records will be updated when the funds in
-				//reports are processed 					
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::create reconciliation record");
-				for (VenOrderPayment orderPayment : venOrderPaymentList) {
-					//Only insert reconciliation records for non-VA payments here
-					//because the VA records will have been inserted when a VA payment is received.
-					if (orderPayment.getVenPaymentType().getPaymentTypeId() != VeniceConstants.VEN_PAYMENT_TYPE_ID_VA 
-							&& orderPayment.getVenPaymentType().getPaymentTypeId() != VeniceConstants.VEN_PAYMENT_TYPE_ID_CS) {
-						FinArFundsInReconRecord reconRecord = new FinArFundsInReconRecord();
-
-						FinArReconResult result = new FinArReconResult();
-						result.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_NONE);
-						reconRecord.setFinArReconResult(result);
-						
-						FinArFundsInActionApplied actionApplied = new FinArFundsInActionApplied();
-						actionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
-						reconRecord.setFinArFundsInActionApplied(actionApplied);
-
-						FinApprovalStatus approvalStatus = new FinApprovalStatus();
-						approvalStatus.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
-						reconRecord.setFinApprovalStatus(approvalStatus);
-						
-						reconRecord.setVenOrderPayment(orderPayment);
-						reconRecord.setWcsOrderId(venOrder.getWcsOrderId());
-						reconRecord.setOrderDate(venOrder.getOrderDate());
-						reconRecord.setPaymentAmount(orderPayment.getAmount());
-						reconRecord.setNomorReff(payment.getReferenceId()!=null?payment.getReferenceId():"");
-
-						// balance per payment amount - handling fee = payment amount, jadi bukan amount order total keseluruhan
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								//, "createOrder::payment Amount  = "+payment.getAmount());
-								, "createOrder::payment Amount  = " + orderPayment.getAmount());
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								//, "createOrder::HandlingFee = "+payment.getHandlingFee());
-								, "createOrder::HandlingFee = " + orderPayment.getHandlingFee());
-						BigDecimal remaining = orderPayment.getAmount().subtract(orderPayment.getHandlingFee()); 
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::setRemainingBalanceAmount = " + remaining);
-						
-						//reconRecord.setRemainingBalanceAmount(orderPayment.getAmount());
-						reconRecord.setRemainingBalanceAmount(remaining);
-						reconRecord.setUserLogonName("System");	
-						
-						reconRecord = finArFundsInReconRecordService.persist(reconRecord);
-						/*
-						try {
-							finArFundsInReconRecordDAO.save(reconRecord);
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "createOrder::successfully persisted FinArFundInReconRecord");
-						} catch (Exception e) {
-							CommonUtil.logError(this.getClass().getCanonicalName()
-									, e);
-						}
-						*/
-						
-					}
-				}
-			}			
+			orderPaymentService.processPayment(order, venOrder);
 		}
 
 		return Boolean.TRUE;
