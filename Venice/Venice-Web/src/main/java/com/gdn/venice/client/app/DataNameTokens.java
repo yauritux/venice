@@ -73,6 +73,8 @@ public class DataNameTokens {
 	public static String FRDCUSTOMERWHITELIST_REMARK="FrdCustomerWhitelist.remark";
 	public static String FRDCUSTOMERWHITELIST_CREATEDBY="FrdCustomerWhitelist.createdby";
 	public static String FRDCUSTOMERWHITELIST_CREATED="FrdCustomerWhitelist.created";
+
+
 	
 	public static String FRDFRAUDPOINT_FRAUDPOINTSREFERENCEID="FrdFraudPointsReference.fraudPointsReferenceId";
 	public static String FRDFRAUDPOINT_FRAUDREFERENCEDESCRIPTION="FrdFraudPointsReference.fraudReferenceDescription";
@@ -336,6 +338,7 @@ public class DataNameTokens {
 	public static String FINSALESRECORD_VENORDERITEM_VENORDER_WCSORDERID = "FinSalesRecord.venOrderItem.venOrder.wcsOrderId";
 	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_WCSMERCHANTID = "FinSalesRecord.venOrderItem.venMerchantProduct.venMerchant.wcsMerchantId";
 	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_VENPARTY_FULLORLEGALNAME = "FinSalesRecord.venOrderItem.venMerchantProduct.venMerchant.venParty.fullOrLegalName";
+	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_MERCHANTPRODUCTSKU = "FinSalesRecord.venOrderItem.venMerchantProduct.merchantProductSku";
 	public static String FINSALESRECORD_VENORDERITEM_WCSORDERITEMID = "FinSalesRecord.venOrderItem.wcsOrderItemId";	
 	public static String FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_WCSPRODUCTNAME = "FinSalesRecord.venOrderItem.venMerchantProduct.wcsProductName";
 	public static String FINSALESRECORD_VENORDERITEM_QUANTITY = "FinSalesRecord.venOrderItem.quantity";
@@ -921,7 +924,7 @@ public class DataNameTokens {
 	public static String FINARFUNDSINREFUND_REFUNDTIMESTAMP = "FinArFundsInRefund.refundTimestamp";	
 	public static String FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME = "FinArFundsInRefund.venOrder.venCustomer.venParty.fullOrLegalName";
 	public static String FINARFUNDSINREFUND_ACTION_TAKEN = "FinArFundsInRefund.refundType";
-	public static String FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE = "FinArFundsInRefund.finArFundsInReconRecord.providerReportFeeAmount";
+	public static String FINARFUNDSINREFUND_BANKFEE = "FinArFundsInRefund.feeAmount";
 	public static String FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON = "FinArFundsInRefund.finArFundsInReconRecord.comment";
 	public static String FINARFUNDSINREFUND_FEEAMOUNT= "FinArFundsInRefund.feeAmount";
 	//This is handled in the client/server side by code
@@ -963,6 +966,8 @@ public class DataNameTokens {
 	public static String FINJOURNALTRANSACTION_REFF = "FinJournalTransaction.wcsOrderID";
 	public static String FINJOURNALTRANSACTION_PAYMENT_TYPE = "FinJournalTransaction.paymenttype";
 	public static String FINJOURNALTRANSACTION_GROUP_JOURNAL = "FinJournalTransaction.groupJournal";
+	
+	public static String FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS= "FinJournalTransaction.finArFundsInReconRecords.comment";
 	
 	//Manual Journal Screen - Manual Journal Detail
 	public static String FINAPMANUALJOURNALTRANSACTION_VENORDER_ORDERID = "FinApManualJournalTransaction.venOrder.orderId";
@@ -1213,6 +1218,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_GENUINEDATE, "java.sql.Timestamp");
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_REMARK, "java.lang.String");
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_CREATED, "java.sql.Timestamp");
+		
 		
 		fieldClassMap.put(FRDFRAUDPOINT_FRAUDPOINTSREFERENCEID, "java.lang.Long");
 		fieldClassMap.put(FRDFRAUDPOINT_FRAUDREFERENCEDESCRIPTION, "java.lang.String");
@@ -1869,6 +1875,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENORDER_WCSORDERID, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_WCSMERCHANTID, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_VENMERCHANT_VENPARTY_FULLORLEGALNAME, "java.lang.String");
+		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_MERCHANTPRODUCTSKU, "java.lang.String");		
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_WCSORDERITEMID, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_VENMERCHANTPRODUCT_WCSPRODUCTNAME, "java.lang.String");
 		fieldClassMap.put(FINSALESRECORD_VENORDERITEM_QUANTITY, "java.lang.Integer");
@@ -1930,7 +1937,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINREFUND_REFUNDTIMESTAMP, "java.sql.Timestamp");		
 		fieldClassMap.put(FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME, "java.lang.String");
 		fieldClassMap.put(FINARFUNDSINREFUND_ACTION_TAKEN, "java.lang.String");
-		fieldClassMap.put(FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE, "java.math.BigDecimal");
+		fieldClassMap.put(FINARFUNDSINREFUND_BANKFEE, "java.math.BigDecimal");
 		fieldClassMap.put(FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON, "java.lang.String");
 		fieldClassMap.put(FINARFUNDSINREFUND_FEEAMOUNT, "java.math.BigDecimal");		
 		
@@ -1959,7 +1966,9 @@ public class DataNameTokens {
 		fieldClassMap.put(FINJOURNALTRANSACTION_COMMENTS, "java.lang.String");
 		fieldClassMap.put(FINJOURNALTRANSACTION_REFF, "java.lang.String");
 		fieldClassMap.put(FINJOURNALTRANSACTION_GROUP_JOURNAL, "java.lang.String");		
-		fieldClassMap.put(FINJOURNALTRANSACTION_PAYMENT_TYPE, "java.lang.String");			
+		fieldClassMap.put(FINJOURNALTRANSACTION_PAYMENT_TYPE, "java.lang.String");
+
+		fieldClassMap.put(FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, "java.lang.String");	
 		
 		fieldClassMap.put(FINJOURNALTRANSACTION_FINJOURNALAPPROVALGROUP_JOURNALGROUPID, "java.lang.Long");				
 		

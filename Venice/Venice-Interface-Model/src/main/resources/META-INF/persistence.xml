@@ -241,6 +241,8 @@
 		<class>com.gdn.venice.persistence.FinArFundsInActionAppliedHistory</class>
 		<class>com.gdn.venice.persistence.FrdParameterRule41</class>
 		<class>com.gdn.venice.persistence.FrdParameterRule42</class>
+		<class>com.gdn.venice.persistence.FrdParameterRule43</class>
+		<class>com.gdn.venice.persistence.FrdParameterRule44</class>
 
 		<!-- Use this for Geronimo OpenJPA -->
 		<!-- <shared-cache-mode>NONE</shared-cache-mode> -->

@@ -97,9 +97,9 @@ public class FetchRefundPaymentProcessingDataCommand implements RafDsCommand {
 							(finArFundsInRefund.getFinArFundsInReconRecord()!=null &&
 									finArFundsInRefund.getFinArFundsInReconRecord().getOrderDate()!=null)?
 							formatter.format(finArFundsInRefund.getFinArFundsInReconRecord().getOrderDate()):"");
-					map.put(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE, 
-							(finArFundsInRefund.getFinArFundsInReconRecord()!=null ?
-									finArFundsInRefund.getFinArFundsInReconRecord().getProviderReportFeeAmount()+"":""));
+					map.put(DataNameTokens.FINARFUNDSINREFUND_BANKFEE, 
+							(finArFundsInRefund.getFeeAmount()!=null ?
+									finArFundsInRefund.getFeeAmount()+"":""));
 					map.put(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON, 
 							(finArFundsInRefund.getFinArFundsInReconRecord()!=null )?
 							finArFundsInRefund.getFinArFundsInReconRecord().getComment():"");	

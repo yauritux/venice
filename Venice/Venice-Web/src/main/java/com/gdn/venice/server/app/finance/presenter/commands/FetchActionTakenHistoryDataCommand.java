@@ -43,7 +43,7 @@ public class FetchActionTakenHistoryDataCommand implements RafDsCommand {
 							HashMap<String, String> map = new HashMap<String, String>();													
 							map.put(DataNameTokens.FINARFUNDSINACTIONAPPLIEDHISTORY_ID, actionList.get(i).getActionTakenId()+"");
 							map.put(DataNameTokens.FINARFUNDSINACTIONAPPLIEDHISTORY_DATE, formatter.format(actionList.get(i).getActionTakenTimestamp())+"");
-							map.put(DataNameTokens.FINARFUNDSINACTIONAPPLIEDHISTORY_APPLIED_DESC, actionList.get(i).getFinArFundsInActionApplied().getActionAppliedDesc()+"");
+							map.put(DataNameTokens.FINARFUNDSINACTIONAPPLIEDHISTORY_APPLIED_DESC, actionList.get(i).getFinArFundsInActionApplied()!=null?actionList.get(i).getFinArFundsInActionApplied().getActionAppliedDesc()+"":"");
 							map.put(DataNameTokens.FINARFUNDSINACTIONAPPLIEDHISTORY_FINARFUNDSINRECONRECORD_NOMORREFF, actionList.get(i).getReferenceId()+"");				
 							map.put(DataNameTokens.FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT, actionList.get(i).getAmount()+"");
 						dataList.add(map);					

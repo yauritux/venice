@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -446,8 +447,9 @@ public class SalesRecordCleanupGeneratorBatchJob {
 
             boolean isPPh23 = (venSettlementRecord.getPph23() != null) ? venSettlementRecord.getPph23() : false;
             if (isPPh23) {
-                pph23Amount = (finSalesRecord.getGdnCommissionAmount().add(finSalesRecord.getGdnTransactionFeeAmount())).multiply(new BigDecimal(0.02));
+                pph23Amount = ((finSalesRecord.getGdnCommissionAmount().add(finSalesRecord.getGdnTransactionFeeAmount())).divide(new BigDecimal(1.1),RoundingMode.HALF_UP)).multiply(new BigDecimal(0.02));
             }
+            pph23Amount.setScale(2, RoundingMode.HALF_UP);
             _log.debug("pph 23 amount: " + pph23Amount);
             finSalesRecord.setPph23Amount(pph23Amount);
 
@@ -723,6 +725,18 @@ public class SalesRecordCleanupGeneratorBatchJob {
             _log.info("Query: " + query);
             List<VenOrderItem> items = itemHome.queryByRange(query, 0, 1000);
             _log.info("Query returns: " + items.size() + " row(s)");
+
+            List<VenOrderItem> failed = new ArrayList<VenOrderItem>();
+
+            for (VenOrderItem item : items) {
+                try {
+                    item.setSalesBatchStatus("In Process Cleanup");
+                    item = itemHome.mergeVenOrderItem(item);
+                } catch (Exception e) {
+                    _log.error("Update sales in process status failed for item: " + item.getWcsOrderItemId(), e);
+                    failed.add(item);
+                }
+            }
 
             for (VenOrderItem item : items) {
                 try {

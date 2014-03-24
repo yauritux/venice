@@ -18,7 +18,7 @@ import com.gdn.venice.util.CommonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MandiriIBFundInServiceImplTest {
-private MandiriIBFundInServiceImpl sut;
+	private MandiriIBFundInServiceImpl sut;
 	
 	VeniceEnvironment veniceEnv;
 	

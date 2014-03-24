@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 
 import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.facade.FinArFundsInReconRecordSessionEJBRemote;
 import com.gdn.venice.facade.FinJournalTransactionSessionEJBRemote;
 import com.gdn.venice.persistence.FinArFundsInReconRecord;
@@ -192,10 +193,31 @@ public class JournalExport {
 							(finJournalTransaction.getFinTransactionStatus() != null) ? finJournalTransaction
 									.getFinTransactionStatus()
 									.getTransactionStatusDesc() : ""));
+					
+					
 					nameCell = row.createCell(startCol + 7);
-					nameCell.setCellValue(new HSSFRichTextString(
-							finJournalTransaction.getComments()));
+					if(finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Cash Receive Journal")) {
+						if((finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Payment Not Recognized") || finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Refunded"))) {
+							if(i==0) {
+								nameCell.setCellValue(new HSSFRichTextString(
+										finArFundsInReconRecordList.get(0).getComment()));
+							}
+							else {
+								nameCell.setCellValue(new HSSFRichTextString(
+										""));
+							}
+						}
+						else {
+							nameCell.setCellValue(new HSSFRichTextString(
+									finJournalTransaction.getComments()));
+						}
+					}
+					else {
+						nameCell.setCellValue(new HSSFRichTextString(
+								finJournalTransaction.getComments()));
+					}
 
+					
 					for (int j = startCol; j < 8 + startCol; j++) {
 						HSSFCell cells = row.getCell(j);
 						if (startRow % 2 == 0){

@@ -147,10 +147,6 @@ public class KlikPayIBFundInServiceImpl  extends AbstractFundInService{
 		return fundInData;
 	}
 	
-	public boolean isPaymentAmountNotLessThanZero(BigDecimal paymentAmount){
-		return !(paymentAmount.compareTo(new BigDecimal(0)) < 0);
-	}
-	
 	public FinArFundsInReconRecord processEachFundIn(PojoInterface pojo, FinArFundsInReport finArFundsInReport) throws ParseException{
 		FinArFundsInReconRecord fundInRecon = null;
 		

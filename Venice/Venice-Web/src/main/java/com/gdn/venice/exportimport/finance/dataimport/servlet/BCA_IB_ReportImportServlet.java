@@ -41,8 +41,6 @@ public class BCA_IB_ReportImportServlet extends HttpServlet {
         _log = loggerFactory.getLog4JLogger("com.gdn.venice.finance.dataimport.servlet.BCA_IB_ReportImportServlet");
     }
     protected static Logger _log = null;
-    @PersistenceContext(unitName = "GDN-Venice-Persistence", type = PersistenceContextType.TRANSACTION)
-    protected EntityManager em;
     private String notificationText = "";
 
     /**

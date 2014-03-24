@@ -148,7 +148,7 @@ public class VenMerchantProduct implements Serializable {
 	public String getMerchantProductSku() {
 		return merchantProductSku;
 	}
-	
+
 	public void setMerchantProductSku(String merchantProductSku) {
 		this.merchantProductSku = merchantProductSku;
 	}
