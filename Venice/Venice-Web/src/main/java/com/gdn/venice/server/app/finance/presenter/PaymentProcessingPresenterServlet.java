@@ -22,6 +22,8 @@ import com.gdn.venice.server.app.finance.presenter.commands.FetchRefundPaymentPr
 import com.gdn.venice.server.app.finance.presenter.commands.FinishPaymentCommand;
 import com.gdn.venice.server.app.finance.presenter.commands.MakePaymentCommand;
 import com.gdn.venice.server.app.finance.presenter.commands.PaymentsProcessCommand;
+import com.gdn.venice.server.app.finance.presenter.commands.UpdateFundInReconciliationDataCommand;
+import com.gdn.venice.server.app.finance.presenter.commands.UpdateRefundPaymentProcessingDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -194,7 +196,15 @@ public class PaymentProcessingPresenterServlet extends HttpServlet {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} 
+			} else if (method.equals("UpdateRefundPaymentProcessingData")) {
+				RafDsCommand updateRefundPaymentProcessingData = new UpdateRefundPaymentProcessingDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = updateRefundPaymentProcessingData.execute();
+				try {
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} 			
 		} else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");			
 			String requestBody = Util.extractRequestBody(request);

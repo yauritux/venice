@@ -741,7 +741,19 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                                 venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_IB);
                                 venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_IB);
                                 venOrderPayment.setVenPaymentType(venPaymentType);
-                            }
+                            }else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VEN_WCS_PAYMENT_TYPE_BCACreditCard)) {
+                                venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
+                                venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
+                                venOrderPayment.setVenPaymentType(venPaymentType);
+                            }else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VEN_WCS_PAYMENT_TYPE_ANZ)) {
+                                venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
+                                venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
+                                venOrderPayment.setVenPaymentType(venPaymentType);
+                            }else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VEN_WCS_PAYMENT_TYPE_CIMBCreditCard)) {
+                                venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
+                                venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
+                                venOrderPayment.setVenPaymentType(venPaymentType);
+                            }                            
                             venOrderPaymentList.add(venOrderPayment);
                         }
                     }

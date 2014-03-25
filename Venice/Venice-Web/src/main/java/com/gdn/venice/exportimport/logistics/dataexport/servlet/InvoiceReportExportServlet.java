@@ -94,9 +94,9 @@ public class InvoiceReportExportServlet extends HttpServlet {
 			String queryAirwayBill;
 
 			if (recon.equalsIgnoreCase("all")) {
-				queryAirwayBill = "select o from LogInvoiceAirwaybillRecord o join fetch o.logAirwayBills where o.logInvoiceReportUpload.invoiceNumber = '"+ invoiceNumber+ "' and o.logInvoiceReportUpload.logLogisticsProvider.logisticsProviderCode = '"+ logistic + "'";
+				queryAirwayBill = "select distinct o from LogInvoiceAirwaybillRecord o join fetch o.logAirwayBills where o.logInvoiceReportUpload.invoiceNumber = '"+ invoiceNumber+ "' and o.logInvoiceReportUpload.logLogisticsProvider.logisticsProviderCode = '"+ logistic + "'";
 			} else {
-				queryAirwayBill = "select o from LogInvoiceAirwaybillRecord o join fetch o.logAirwayBills where o.logInvoiceReportUpload.invoiceNumber = '"+ invoiceNumber+ "' and o.logInvoiceReportUpload.logLogisticsProvider.logisticsProviderCode = '"+ logistic+ "' and o.invoiceResultStatus = 'Problem Exists'";
+				queryAirwayBill = "select distinct o from LogInvoiceAirwaybillRecord o join fetch o.logAirwayBills where o.logInvoiceReportUpload.invoiceNumber = '"+ invoiceNumber+ "' and o.logInvoiceReportUpload.logLogisticsProvider.logisticsProviderCode = '"+ logistic+ "' and o.invoiceResultStatus = 'Problem Exists'";
 			}
 
 			_log.debug("queryAirwayBill: " + queryAirwayBill);

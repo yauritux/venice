@@ -1383,7 +1383,7 @@ public class FraudData {
 				new DataSourceTextField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_AMOUNT, "Amount"),				
 				new DataSourceTextField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_TENOR, "Tenor"),
 				new DataSourceTextField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_CUSTOMERUSERNAME, "Customer Username"),
-				new DataSourceTextField(DataNameTokens.VENCUSTOMER_VENPARTY_FULLORLEGALNAME, "Customer Name"),
+				new DataSourceTextField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME, "Customer Name"),
 				new DataSourceTextField(DataNameTokens.VENORDERPAYMENTALLOCATION_VENORDERPAYMENT_INSTALLMENTSENTFLAG, "Sent to BCA")
 				};
 		dataSourceFields[0].setPrimaryKey(true);		

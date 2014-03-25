@@ -17,6 +17,7 @@ import com.gdn.venice.facade.VenOrderSessionEJBRemote;
 import com.gdn.venice.persistence.FinArFundsInJournalTransaction;
 import com.gdn.venice.persistence.FinArFundsInReconRecord;
 import com.gdn.venice.persistence.VenOrder;
+import com.gdn.venice.persistence.VenOrderStatusHistory;
 import com.gdn.venice.server.bpmenablement.BPMAdapter;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -208,14 +209,25 @@ public class FetchFundInReconciliationDataCommand implements RafDsCommand {
 					map.put(DataNameTokens.FINARFUNDSINRECONRECORD_AGING, new Long(aging).toString());
 				}
 				
-				
 				if(fundInReconRecord.getWcsOrderId()!=null){
 					List<VenOrder>  venOrderList = null;
-					String selectOrder = "select u from VenOrder u where u.wcsOrderId =  '"+fundInReconRecord.getWcsOrderId()+"'";
+					String selectOrder = "select u from VenOrder u join fetch u.venOrderStatusHistories o where u.wcsOrderId =  '"+fundInReconRecord.getWcsOrderId()+"'";
 					venOrderList = venOrderSessionHome.queryByRange(selectOrder, 0, 0);
-					if(venOrderList!=null ) {
+					if(venOrderList!=null && venOrderList.size() > 0 ) {
 						if(venOrderList.get(0).getVenOrderStatus().getOrderStatusId().equals(VeniceConstants.VEN_ORDER_STATUS_X)){	
-							if(aging>5 && fundInReconRecord.getReconcilliationRecordTimestamp()==null) show=false;														
+							if(aging>5 && fundInReconRecord.getReconcilliationRecordTimestamp()==null 
+							  && fundInReconRecord.getVenOrderPayment().getVenPaymentType().getPaymentTypeId().equals(VeniceConstants.VEN_PAYMENT_TYPE_ID_VA)) {
+								show=false;}							
+							else if(fundInReconRecord.getReconcilliationRecordTimestamp()==null 
+							&& !fundInReconRecord.getVenOrderPayment().getVenPaymentType().getPaymentTypeId().equals(VeniceConstants.VEN_PAYMENT_TYPE_ID_VA)) {
+								for (VenOrderStatusHistory item : venOrderList.get(0).getVenOrderStatusHistories()){
+									if(item.getVenOrderStatus().getOrderStatusId().equals(VeniceConstants.VEN_ORDER_STATUS_FP)){
+										show=true;break;
+									}else{
+										show=false;
+									}									
+								}
+							}			
 						}
 						if(show){
 							map.put(DataNameTokens.FINARFUNDSINRECONRECORD_STATUSORDER, venOrderList!=null?venOrderList.get(0).getVenOrderStatus().getOrderStatusCode():"");
