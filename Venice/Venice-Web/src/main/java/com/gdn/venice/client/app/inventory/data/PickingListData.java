@@ -17,10 +17,10 @@ public class PickingListData {
 	public static DataSource getPickingListData(String warehouseId, int page, int limit) {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceIntegerField(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID, "Warehouse Item ID"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, "Warehouse Item SKU"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME, "Item SKU Name"),				
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_STOCKTYPE, "Type"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_MERCHANT, "Supplier"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_MERCHANT, "Merchant"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_QTY, "Qty"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_QTYPICKED, "Qty Picked")};
 		dataSourceFields[0].setPrimaryKey(true);
@@ -39,7 +39,7 @@ public class PickingListData {
 	public static DataSource getPickingListItemDetailData(String warehouseItemId) {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_ITEMID, "Item ID"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, "Warehouse Item SKU"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME, "Item SKU Name"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_STOCKTYPE, "Type"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLIST_MERCHANT, "Merchant"),

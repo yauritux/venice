@@ -98,4 +98,8 @@ public class DataWidgetNameTokens {
 	public static String  INV_GRNCREATETREENODE = "InvGRNCreateTreeNode";
 	
 	public static String  INV_PICKINGLISTTREENODE = "InvPickingListTreeNode";
+	
+	public static String  INV_PUTAWAYTREENODE = "InvPutawayTreeNode";
+	public static String  INV_CREATEPUTAWAYTREENODE = "InvCreatePutawayTreeNode";
+	public static String  INV_INPUTPUTAWAYLOCATIONTREENODE = "InvInputPutawayLocationTreeNode";
 }

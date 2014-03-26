@@ -3,6 +3,8 @@ package com.gdn.venice.client.app;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.smartgwt.client.data.fields.DataSourceTextField;
+
 /**
  * DataNameTokens.java
  * 
@@ -1264,6 +1266,15 @@ public class DataNameTokens {
     	public static String INV_PICKINGLIST_SALESORDERTIPEPENANGANAN = "tipePenanganan";
     	public static String INV_PICKINGLIST_SHELFCODE = "shelfCode";
     	public static String INV_PICKINGLIST_WAREHOUSESTORAGEID = "shelfStorageId";
+    	
+    	public static String INV_PUTAWAY_GRN_ITEMID = "grnItemId";
+    	public static String INV_PUTAWAY_GRN_GRNNUMBER = "grnNumber";
+    	public static String INV_PUTAWAY_GRN_ITEMCODE = "itemCode";
+    	public static String INV_PUTAWAY_GRN_ITEMDESC = "itemDescription";
+    	public static String INV_PUTAWAY_GRN_SHELFCODE = "shelfCode";
+    	public static String INV_PUTAWAY_GRN_QTY = "quantity";
+    	public static String INV_PUTAWAY_GRN_TYPE = "type";
+
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type

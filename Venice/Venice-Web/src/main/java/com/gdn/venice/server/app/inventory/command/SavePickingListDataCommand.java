@@ -77,15 +77,13 @@ public class SavePickingListDataCommand implements RafRpcCommand {
 					String value = itemMapEntry.getValue();
 											
 					if(key.equals(DataNameTokens.INV_PICKINGLIST_ITEMID)){	
-						whi.setId(new Long(value));
-						System.out.println("item id: "+value);
-						
-						whi.setItem(item);
-						pl.setWarehouseItem(whi);
-					}
-					
-					if(key.equals(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID)){	
 						item.setId(new Long(value));
+						whi.setItem(item);
+						System.out.println("item id: "+value);
+					}					
+					if(key.equals(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID)){	
+						whi.setId(new Long(value));
+						pl.setWarehouseItem(whi);
 						System.out.println("warehouse item id: "+value);
 					}
 					if(key.equals(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME)){

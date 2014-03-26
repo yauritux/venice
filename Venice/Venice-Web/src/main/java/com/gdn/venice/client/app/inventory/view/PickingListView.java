@@ -9,6 +9,7 @@ import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
 import com.gdn.venice.client.app.inventory.view.handler.PickingListUiHandler;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -60,6 +61,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
     Window pickingListDetailWindow, attributeWindow;
 
     ToolStrip toolStrip;
+    ToolStripButton printButton;
     VLayout headerLayout;
     ComboBoxItem warehouseItemComboBox;
     DynamicForm itemDetailForm;
@@ -72,11 +74,12 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
         toolStrip.setWidth100();
         toolStrip.setPadding(2);
 
-		ToolStripButton printButton = new ToolStripButton();
+		printButton = new ToolStripButton();
 		printButton.setIcon("[SKIN]/icons/printer.png");
 		printButton.setTooltip("Print");
 		printButton.setTitle("Print");
-        
+		printButton.setDisabled(true);
+		
         toolStrip.addButton(printButton);
 
         layout = new RafViewLayout();
@@ -107,7 +110,37 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
 				refreshPickingListData();
 			}
-		});    
+		}); 
+                
+        printButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				ListGridRecord[] selectedRecords = warehouseItemListGrid.getRecords();				
+				StringBuilder sbSelectedRecords = new StringBuilder();
+				
+				for (int i = 0; i < selectedRecords.length; i++) {
+					ListGridRecord selectedRecord = selectedRecords[i];
+					
+					sbSelectedRecords.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
+					
+					if(i != selectedRecords.length -1)
+						sbSelectedRecords.append(";");
+				}
+				
+				String host = GWT.getHostPageBaseURL();
+
+				//If in debug mode then change the host URL to the servlet in the server side
+				if(host.contains("8889")){
+					host = "http://localhost:8090/";
+				}
+				
+				if(host.contains("Venice/")){
+					host = host.substring(0, host.indexOf("Venice/"));
+				}
+												
+				com.google.gwt.user.client.Window.open(host + "Venice/PickingListExportServlet?warehouseItemIds=" + sbSelectedRecords.toString(), "_blank", null);							
+			}
+		});
     }
     
 	private void buildWarehouseItemListGrid(String warehouseId) {
@@ -136,7 +169,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
         HLayout buttonSet = new HLayout(5);
         buttonSet.setAlign(Alignment.LEFT);
         buttonSet.setMembers(submitButton);
-                
+                        
         pickingListDetailWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {                
 					SC.ask("Data not submitted yet, are you sure you want to close?", new BooleanCallback() {
@@ -345,6 +378,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
 			@Override
 			public void onChanged(ChangedEvent event) {
 				buildWarehouseItemListGrid(warehouseItemComboBox.getValue().toString());
+				printButton.setDisabled(false);
 			}
 		});
         

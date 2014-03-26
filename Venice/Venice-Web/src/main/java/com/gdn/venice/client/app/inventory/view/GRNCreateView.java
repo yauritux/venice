@@ -9,7 +9,6 @@ import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.view.handler.GRNCreateUiHandler;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -17,15 +16,10 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
-import com.smartgwt.client.rpc.RPCCallback;
-import com.smartgwt.client.rpc.RPCManager;
-import com.smartgwt.client.rpc.RPCRequest;
-import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.types.SelectionAppearance;
 import com.smartgwt.client.types.SelectionStyle;
-import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.ImgButton;
@@ -162,31 +156,31 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         
         itemListGrid = buildItemListGrid(id);   
         
-        itemListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
-			@Override
-			public void onEditComplete(EditCompleteEvent event) {
-				final ListGridRecord selectedrecord = itemListGrid.getSelectedRecord();
-				 
-				RPCRequest request = new RPCRequest();
-                request.setActionURL(GWT.getHostPageBaseURL() + "GRNManagementPresenterServlet?method=getMaxGRNItemQuantityAllowed&type=RPC&asnItemId="+selectedrecord.getAttributeAsString(DataNameTokens.INV_ASN_ITEM_ID));
-                request.setHttpMethod("POST");
-                request.setUseSimpleHttp(true);
-               
-                RPCManager.sendRequest(request, new RPCCallback() {
-                    public void execute(RPCResponse response, Object rawData, RPCRequest request) {
-                        String rpcResponse = rawData.toString().trim();
-                        if (rpcResponse!=null) {	
-                    		if(Integer.parseInt(selectedrecord.getAttributeAsString(DataNameTokens.INV_POCFF_QTY))>Integer.parseInt(rpcResponse)){
-                    			SC.say("GRN item max allowed is "+rpcResponse);    
-                    			canSave=false;               			
-                    		}else{
-                    			canSave=true;
-                    		}
-                        }
-                    }
-                });				
-			}
-		});
+//        itemListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
+//			@Override
+//			public void onEditComplete(EditCompleteEvent event) {
+//				final ListGridRecord selectedrecord = itemListGrid.getSelectedRecord();
+//				 
+//				RPCRequest request = new RPCRequest();
+//                request.setActionURL(GWT.getHostPageBaseURL() + "GRNManagementPresenterServlet?method=getMaxGRNItemQuantityAllowed&type=RPC&asnItemId="+selectedrecord.getAttributeAsString(DataNameTokens.INV_ASN_ITEM_ID));
+//                request.setHttpMethod("POST");
+//                request.setUseSimpleHttp(true);
+//               
+//                RPCManager.sendRequest(request, new RPCCallback() {
+//                    public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+//                        String rpcResponse = rawData.toString().trim();
+//                        if (rpcResponse!=null) {	
+//                    		if(Integer.parseInt(selectedrecord.getAttributeAsString(DataNameTokens.INV_POCFF_QTY))>Integer.parseInt(rpcResponse)){
+//                    			SC.say("GRN item max allowed is "+rpcResponse);    
+//                    			canSave=false;               			
+//                    		}else{
+//                    			canSave=true;
+//                    		}
+//                        }
+//                    }
+//                });				
+//			}
+//		});
                 
         saveButton.addClickHandler(new ClickHandler() {
 	          @Override

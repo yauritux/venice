@@ -80,7 +80,8 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 					
 					if(k.equals(DataNameTokens.INV_ASN_ITEM_ID)){				
 						AdvanceShipNoticeItem item = new AdvanceShipNoticeItem();
-						item.setId(new Long(v));						
+						item.setId(new Long(v));
+						item.setAdvanceShipNotice(asn);
 						grnItem.setAdvanceShipNoticeItem(item);
 					}
 					if(k.equals(DataNameTokens.INV_POCFF_QTY)){
