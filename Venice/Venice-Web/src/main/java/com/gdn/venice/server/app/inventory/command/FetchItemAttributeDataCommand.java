@@ -81,7 +81,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
                 	}   
             	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
             		_log.info("reff type: consignment");
-            		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber().toString());
+            		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
                 	if(cffItemWrapper!=null){
                 		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
                 		_log.debug("CFF item found, id:"+item.getItem().getId());    

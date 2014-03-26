@@ -13,9 +13,8 @@ import com.gdn.venice.server.app.inventory.command.AddItemAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.DeleteItemAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNItemDataCommand;
-import com.gdn.venice.server.app.inventory.command.GetMaxGRNItemQuantityAllowedDataCommand;
-import com.gdn.venice.server.app.inventory.command.SaveGrnDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemAttributeDataCommand;
+import com.gdn.venice.server.app.inventory.command.SaveGrnDataCommand;
 import com.gdn.venice.server.app.inventory.command.UpdateItemAttributeDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
@@ -127,10 +126,6 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 			if(method.equals("saveGrnData")){					
 				RafRpcCommand saveGrnDataCommand = new SaveGrnDataCommand(username, requestBody);
 				retVal = saveGrnDataCommand.execute();
-			}else if(method.equals("getMaxGRNItemQuantityAllowed")){
-				String asnItemId = request.getParameter("asnItemId");
-				RafRpcCommand getMaxGRNItemQuantityAllowedDataCommand = new GetMaxGRNItemQuantityAllowedDataCommand(username, asnItemId);
-				retVal = getMaxGRNItemQuantityAllowedDataCommand.execute();
 			}
 		}
 		

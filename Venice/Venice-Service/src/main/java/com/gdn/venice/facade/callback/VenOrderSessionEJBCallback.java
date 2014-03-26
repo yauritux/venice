@@ -11,10 +11,12 @@ import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.facade.VenOrderSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderStatusHistorySessionEJBRemote;
+import com.gdn.venice.facade.VenSettlementRecordSessionEJBRemote;
 import com.gdn.venice.integration.outbound.Publisher;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderStatusHistory;
 import com.gdn.venice.persistence.VenOrderStatusHistoryPK;
+import com.gdn.venice.persistence.VenSettlementRecord;
 import com.gdn.venice.util.VeniceConstants;
 
 /**
@@ -120,6 +122,21 @@ public class VenOrderSessionEJBCallback implements SessionCallback {
 				_log.debug("done add order status history for order cancelled");				
 			}
 			
+			VenOrderSessionEJBRemote orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
+			List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o where o.wcsOrderId ='" + venOrder.getWcsOrderId() +"'", 0, 0);							
+			
+			Long existingStatus = venOrderList.get(0).getVenOrderStatus().getOrderStatusId();
+			if ((existingStatus == VeniceConstants.VEN_ORDER_STATUS_C && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP) 
+				|| (existingStatus == VeniceConstants.VEN_ORDER_STATUS_SF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP)) {
+				
+				_log.debug("get commision type from MTA");				
+				CommissionTypeRequester requester = new CommissionTypeRequester();
+				List<VenSettlementRecord> result = requester.getCommissionType(venOrderList.get(0));				
+				_log.debug("done get commision type from MTA");
+				
+				VenSettlementRecordSessionEJBRemote settlementHome = (VenSettlementRecordSessionEJBRemote) locator.lookup(VenSettlementRecordSessionEJBRemote.class, "VenSettlementRecordSessionEJBBean");
+				settlementHome.persistVenSettlementRecordList(result);
+			}
 		} catch (Exception e) {
 			String errMsg = "An exception occured when processing a preMerge callback for VenOrderSessionEJBCallback:" + e.getMessage();
 			_log.error(errMsg);

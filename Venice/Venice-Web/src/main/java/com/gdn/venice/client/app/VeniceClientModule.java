@@ -67,6 +67,7 @@ import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -82,6 +83,7 @@ import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.GoodIssuedNoteView;
 import com.gdn.venice.client.app.inventory.view.PackingListView;
 import com.gdn.venice.client.app.inventory.view.PickingListView;
+import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfEditWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfListFilterView;
@@ -387,75 +389,75 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 WarehouseListFilterPresenter.MyView.class,
                 WarehouseListFilterView.class,
                 WarehouseListFilterPresenter.MyProxy.class);
+    
+		bindPresenter(WarehouseAddWithApprovalPresenter.class,
+				WarehouseAddWithApprovalPresenter.MyView.class,
+				WarehouseAddWithApprovalView.class,
+				WarehouseAddWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(WarehouseEditWithApprovalPresenter.class,
+				WarehouseEditWithApprovalPresenter.MyView.class,
+				WarehouseEditWithApprovalView.class,
+				WarehouseEditWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(WarehouseNonActiveWithApprovalPresenter.class,
+				WarehouseNonActiveWithApprovalPresenter.MyView.class,
+				WarehouseNonActiveWithApprovalView.class,
+				WarehouseNonActiveWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfListFilterPresenter.class,
+				ShelfListFilterPresenter.MyView.class,
+				ShelfListFilterView.class,
+				ShelfListFilterPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfAddWithApprovalPresenter.class,
+				ShelfAddWithApprovalPresenter.MyView.class,
+				ShelfAddWithApprovalView.class,
+				ShelfAddWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfEditWithApprovalPresenter.class,
+				ShelfEditWithApprovalPresenter.MyView.class,
+				ShelfEditWithApprovalView.class,
+				ShelfEditWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(ShelfNonActiveWithApprovalPresenter.class,
+				ShelfNonActiveWithApprovalPresenter.MyView.class,
+				ShelfNonActiveWithApprovalView.class,
+				ShelfNonActiveWithApprovalPresenter.MyProxy.class);
+		
+		bindPresenter(CurrencyManagementPresenter.class,
+				CurrencyManagementPresenter.MyView.class,
+				CurrencyManagementView.class,
+				CurrencyManagementPresenter.MyProxy.class);
+		
+		bindPresenter(ASNListPresenter.class,
+				ASNListPresenter.MyView.class,
+				ASNListView.class,
+				ASNListPresenter.MyProxy.class);
+		
+		bindPresenter(GRNListPresenter.class,
+				GRNListPresenter.MyView.class,
+				GRNListView.class,
+				GRNListPresenter.MyProxy.class);
+		
+		bindPresenter(GRNCreatePresenter.class,
+				GRNCreatePresenter.MyView.class,
+				GRNCreateView.class,
+				GRNCreatePresenter.MyProxy.class);	
+		
+		bindPresenter(PickingListPresenter.class,
+				PickingListPresenter.MyView.class,
+				PickingListView.class,
+				PickingListPresenter.MyProxy.class);
+		
+		bindPresenter(PutawayCreatePresenter.class,
+				PutawayCreatePresenter.MyView.class,
+				PutawayCreateView.class,
+				PutawayCreatePresenter.MyProxy.class);
 
-        bindPresenter(WarehouseAddWithApprovalPresenter.class,
-                WarehouseAddWithApprovalPresenter.MyView.class,
-                WarehouseAddWithApprovalView.class,
-                WarehouseAddWithApprovalPresenter.MyProxy.class);
-
-        bindPresenter(WarehouseEditWithApprovalPresenter.class,
-                WarehouseEditWithApprovalPresenter.MyView.class,
-                WarehouseEditWithApprovalView.class,
-                WarehouseEditWithApprovalPresenter.MyProxy.class);
-
-        bindPresenter(WarehouseNonActiveWithApprovalPresenter.class,
-                WarehouseNonActiveWithApprovalPresenter.MyView.class,
-                WarehouseNonActiveWithApprovalView.class,
-                WarehouseNonActiveWithApprovalPresenter.MyProxy.class);
-
-        bindPresenter(ShelfListFilterPresenter.class,
-                ShelfListFilterPresenter.MyView.class,
-                ShelfListFilterView.class,
-                ShelfListFilterPresenter.MyProxy.class);
-
-        bindPresenter(ShelfAddWithApprovalPresenter.class,
-                ShelfAddWithApprovalPresenter.MyView.class,
-                ShelfAddWithApprovalView.class,
-                ShelfAddWithApprovalPresenter.MyProxy.class);
-
-        bindPresenter(ShelfEditWithApprovalPresenter.class,
-                ShelfEditWithApprovalPresenter.MyView.class,
-                ShelfEditWithApprovalView.class,
-                ShelfEditWithApprovalPresenter.MyProxy.class);
-
-        bindPresenter(ShelfNonActiveWithApprovalPresenter.class,
-                ShelfNonActiveWithApprovalPresenter.MyView.class,
-                ShelfNonActiveWithApprovalView.class,
-                ShelfNonActiveWithApprovalPresenter.MyProxy.class);
-
-        bindPresenter(CurrencyManagementPresenter.class,
-                CurrencyManagementPresenter.MyView.class,
-                CurrencyManagementView.class,
-                CurrencyManagementPresenter.MyProxy.class);
-
-        bindPresenter(ASNListPresenter.class,
-                ASNListPresenter.MyView.class,
-                ASNListView.class,
-                ASNListPresenter.MyProxy.class);
-
-        bindPresenter(GRNListPresenter.class,
-                GRNListPresenter.MyView.class,
-                GRNListView.class,
-                GRNListPresenter.MyProxy.class);
-
-        bindPresenter(GRNCreatePresenter.class,
-                GRNCreatePresenter.MyView.class,
-                GRNCreateView.class,
-                GRNCreatePresenter.MyProxy.class);
-
-        bindPresenter(PackingListPresenter.class,
-                PackingListPresenter.MyView.class,
-                PackingListView.class,
-                PackingListPresenter.MyProxy.class);
-
-        bindPresenter(PickingListPresenter.class,
-                PickingListPresenter.MyView.class,
-                PickingListView.class,
-                PickingListPresenter.MyProxy.class);
-        
-        bindPresenter(GoodIssuedNotePresenter.class,
+         bindPresenter(GoodIssuedNotePresenter.class,
                 GoodIssuedNotePresenter.MyView.class,
                 GoodIssuedNoteView.class,
                 GoodIssuedNotePresenter.MyProxy.class);
-    }
+	}
 }

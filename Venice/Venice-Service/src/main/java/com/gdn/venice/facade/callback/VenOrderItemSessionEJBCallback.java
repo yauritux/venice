@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
@@ -17,6 +18,8 @@ import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.facade.LogAirwayBillSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderItemStatusHistorySessionEJBRemote;
+import com.gdn.venice.facade.VenOrderSessionEJBRemote;
+import com.gdn.venice.facade.VenSettlementRecordSessionEJBRemote;
 import com.gdn.venice.integration.outbound.Publisher;
 import com.gdn.venice.persistence.LogAirwayBill;
 import com.gdn.venice.persistence.LogApprovalStatus;
@@ -33,6 +36,7 @@ import com.gdn.venice.persistence.VenOrderItemStatusHistoryPK;
 import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenParty;
 import com.gdn.venice.persistence.VenRecipient;
+import com.gdn.venice.persistence.VenSettlementRecord;
 import com.gdn.venice.util.VeniceConstants;
 
 /**
@@ -186,7 +190,20 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
                         || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_CX && newStatus == VeniceConstants.VEN_ORDER_STATUS_D)
                         //ketika PF dan status order item diupdate jadi FP, maka publish FP untuk order item tersebut
                         || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP)) {
-
+                	
+        			if (existingStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP) {
+                		VenOrderSessionEJBRemote orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
+            			List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o where o.wcsOrderId ='" + venOrderItem.getVenOrder().getWcsOrderId() +"'", 0, 0);							
+            			                			
+        				_log.debug("get commision type from MTA");				
+        				CommissionTypeRequester requester = new CommissionTypeRequester();
+        				List<VenSettlementRecord> result = requester.getCommissionType(venOrderList.get(0));				
+        				_log.debug("done get commision type from MTA");
+        				
+        				VenSettlementRecordSessionEJBRemote settlementHome = (VenSettlementRecordSessionEJBRemote) locator.lookup(VenSettlementRecordSessionEJBRemote.class, "VenSettlementRecordSessionEJBBean");
+        				settlementHome.persistVenSettlementRecordList(result);
+        			}
+                	
                     _log.debug("condition for publish order item status is true");
 
                     // Fish out all of the South information for the venOrderItem

@@ -37,8 +37,7 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("masuk post warehouse management servlet");
-        String type = request.getParameter("type") == null ? "" : request.getParameter("type");
+        String type = request.getParameter("type") == null ? "" : request.getParameter("type");        
         String username = request.getParameter("username");
         if (username == null || username.trim().equals("")) {
             username = "olive";

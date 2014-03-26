@@ -200,16 +200,18 @@ public class ASNManagementService{
         }
 	}
 	
-	public ResultWrapper<ConsignmentFinalItem> getCFFItemData(RafDsRequest request, String id) throws HttpException, IOException{
-		_log.info("getCFFItemData");
+	public ResultWrapper<ConsignmentFinalItem> getCFFItemData(RafDsRequest request, Long id) throws HttpException, IOException{
+		System.out.println("getCFFItemData");
+		System.out.println("id: "+id);
+		System.out.println("username: "+request.getParams().get("username"));
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "consignmentFinal/getDetailItem?username=" + request.getParams().get("username")
                 + "&cffItemId=" + id;
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
                
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -217,7 +219,7 @@ public class ASNManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug("return value: "+sb.toString());
+            System.out.println("return value: "+sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ConsignmentFinalItem>>() {});
         } else {

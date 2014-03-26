@@ -146,10 +146,10 @@ public class GRNManagementService{
 	
 	public ResultWrapper<GoodReceivedNote> saveGrn(String username, GoodReceivedNote grn, List<GoodReceivedNoteItem> itemList) 
 			throws JsonGenerationException, JsonMappingException, IOException {
-		_log.info("saveGrn");
+		System.out.println("saveGrn");
 		String url=InventoryUtil.getStockholmProperties().getProperty("address")
 				+ "goodReceivedNote/addGRN?username=" + username;
-		_log.info("url: "+url);
+		System.out.println("url: "+url);
 		PostMethod httpPost = new PostMethod(url);
 		
 		GoodReceivedNoteItem[] item = itemList.toArray(new GoodReceivedNoteItem[0]);
@@ -159,13 +159,13 @@ public class GRNManagementService{
 		grnRequest.setGrnItem(item);
 		
 		String json = mapper.writeValueAsString(grnRequest);
-		_log.debug("json: "+json);
+		System.out.println("json: "+json);
 		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
 
 		httpPost.setRequestHeader("Content-Type", "application/json");
 
 		int httpCode = httpClient.executeMethod(httpPost);
-		_log.info("response code: "+httpCode);
+		System.out.println("response code: "+httpCode);
 		if (httpCode == HttpStatus.SC_OK) {
 			InputStream is = httpPost.getResponseBodyAsStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -174,35 +174,11 @@ public class GRNManagementService{
 				sb.append(line);
 			}
 			is.close();
-			_log.debug(sb.toString());
+			System.out.println(sb.toString());
 			return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<GoodReceivedNote>>() {});
 		} else {
 			return null;
 		}
-	}
-	
-	public Integer getASNItemQuantityAlreadyCreated(String asnItemId) throws HttpException, IOException{
-		_log.info("getASNItemQuantityAlreadyCreated");
-		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "goodReceivedNote/getASNItemQuantityAlreadyCreated?asnItemId=" + asnItemId;
-        PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
-                 
-        int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            _log.debug("return value: "+sb.toString());
-            is.close();
-            return new Integer(sb.toString());
-        } else {
-        	return null;
-        }
 	}	
 	
 	public ResultWrapper<AdvanceShipNoticeItem> findItemByASNItemId(String asnItemId) throws HttpException, IOException{
@@ -281,15 +257,15 @@ public class GRNManagementService{
 	}
 	
 	public ResultWrapper<GoodReceivedNoteItem> findItemByGRNItemId(String grnItemId) throws HttpException, IOException{
-		_log.info("findItemByGRNItemId");
+		System.out.println("findItemByGRNItemId");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "goodReceivedNote/findItemByGRNItemId?asnItemId=" +grnItemId;
+                + "goodReceivedNote/findItemByGRNItemId?grnItemId=" +grnItemId;
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
     	        
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -297,7 +273,7 @@ public class GRNManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug(sb.toString());
+            System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<GoodReceivedNoteItem>>() {});
         } else {
