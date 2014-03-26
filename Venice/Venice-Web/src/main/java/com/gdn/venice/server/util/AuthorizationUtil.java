@@ -62,7 +62,7 @@ public class AuthorizationUtil {
             RafUserRoleSessionEJBRemote rafRoleHome = (RafUserRoleSessionEJBRemote) locator
                     .lookup(RafUserRoleSessionEJBRemote.class, "RafUserRoleSessionEJBBean");
 
-            rafUserRoleList = rafRoleHome.queryByRange("select o from RafUserRole o where o.rafUser.loginName = '" + userName + "'", 0, 0);
+            rafUserRoleList = rafRoleHome.queryByRange("select o from RafUserRole o join fetch o.rafUser a where a.loginName = '" + userName + "'", 0, 0);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

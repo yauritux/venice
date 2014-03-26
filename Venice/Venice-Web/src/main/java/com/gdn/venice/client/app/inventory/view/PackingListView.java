@@ -8,6 +8,8 @@ import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.PackingListData;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.view.handler.PackingListUiHandler;
+import com.gdn.venice.client.data.RafDataSource;
+import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,14 +19,20 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.TitleOrientation;
+import com.smartgwt.client.util.EventHandler;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.IButton;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
+import com.smartgwt.client.widgets.events.KeyPressEvent;
+import com.smartgwt.client.widgets.events.KeyPressHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -41,7 +49,9 @@ import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  *
@@ -50,22 +60,18 @@ import java.util.LinkedHashMap;
 public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> implements
         PackingListPresenter.MyView {
 
+    private int records;
     RafViewLayout packingListLayout;
-    ListGrid packingListGrid, salesOrderGrid;
+    ListGrid packingListGrid, salesOrderGrid, attributeGrid;
     Window packingDetailWindow, attributeWindow;
     DynamicForm warehouseSelectionForm;
     ComboBoxItem cbWarehouse;
+    ToolStripButton toolstrip;
 
     @Inject
     public PackingListView() {
-        cbWarehouse = new ComboBoxItem();
-        
-        warehouseSelectionForm = new DynamicForm();
-        warehouseSelectionForm.setWidth100();
-        warehouseSelectionForm.setPadding(5);
-        warehouseSelectionForm.setFields(cbWarehouse);
-
         packingListLayout = new RafViewLayout();
+        toolstrip = new ToolStripButton();
 
         packingListGrid = new ListGrid();
         packingListGrid.setWidth100();
@@ -74,6 +80,8 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         packingListGrid.setSortField(0);
         packingListGrid.setShowFilterEditor(true);
         packingListGrid.setShowRowNumbers(true);
+        packingListGrid.setAutoFetchData(Boolean.TRUE);
+        packingListGrid.setAutoFitData(Autofit.BOTH);
 
         salesOrderGrid = new ListGrid();
         salesOrderGrid.setWidth100();
@@ -82,6 +90,16 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         salesOrderGrid.setSortField(0);
         salesOrderGrid.setShowFilterEditor(true);
         salesOrderGrid.setShowRowNumbers(true);
+        salesOrderGrid.setAutoFetchData(Boolean.TRUE);
+
+        attributeGrid = new ListGrid();
+        attributeGrid.setWidth100();
+        attributeGrid.setHeight100();
+        attributeGrid.setShowAllRecords(true);
+        attributeGrid.setSortField(0);
+        attributeGrid.setShowFilterEditor(false);
+        attributeGrid.setShowRowNumbers(true);
+        attributeGrid.setAutoFetchData(Boolean.TRUE);
 
         bindCustomUiHandlers();
     }
@@ -92,13 +110,6 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
             public void onCellClick(CellClickEvent event) {
                 ListGridRecord record = packingListGrid.getSelectedRecord();
                 buildPackingDetailWindow(record).show();
-            }
-        });
-
-        cbWarehouse.addChangedHandler(new ChangedHandler() {
-            @Override
-            public void onChanged(ChangedEvent event) {
-                loadPackingData(cbWarehouse.getValue().toString());
             }
         });
 
@@ -113,9 +124,11 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
             @Override
             public void onCellClick(CellClickEvent event) {
                 ListGridRecord record = salesOrderGrid.getSelectedRecord();
-                if (record.getAttributeAsBoolean(DataNameTokens.INV_SO_ITEMHASATTRIBUTE)) {
-                    buildAttributeWindow(record.getAttribute(DataNameTokens.INV_SO_ID),
-                            record.getAttributeAsInt(DataNameTokens.INV_SO_QUANTITY)).show();
+                if (record.getAttribute(DataNameTokens.INV_SO_ITEMHASATTRIBUTE).equals(Boolean.toString(true))) {
+                    getUiHandlers().onSalesOrderGridClicked(record.getAttribute(DataNameTokens.INV_SO_ID),
+                            record.getAttribute(DataNameTokens.INV_SO_ITEMID), record.getAttribute(DataNameTokens.INV_SO_QUANTITY));
+                } else {
+                    SC.say("The record selected have no attribute");
                 }
             }
         });
@@ -153,15 +166,6 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         ToolStripButton closeButton = new ToolStripButton();
         closeButton.setTitle("Close");
 
-        ToolStrip packingToolStrip = new ToolStrip();
-        packingToolStrip.addButton(submitButton);
-        packingToolStrip.addSeparator();
-        packingToolStrip.addButton(printAwbButton);
-        packingToolStrip.addSeparator();
-        packingToolStrip.addButton(printLblButton);
-        packingToolStrip.addSeparator();
-        packingToolStrip.addButton(closeButton);
-
         VLayout packingDetailLayout = new VLayout();
         packingDetailLayout.setHeight100();
         packingDetailLayout.setWidth100();
@@ -185,19 +189,39 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         logistic.setValue(record.getAttribute(DataNameTokens.INV_AWB_LOGNAME));
 
         TextItem claimedBy = new TextItem(DataNameTokens.INV_AWB_CLAIMEDBY, "Claimed By");
-        claimedBy.setValue(record.getAttribute(DataNameTokens.INV_AWB_CLAIMEDBY));
 
         packingInfoForm.setFields(packingNo, awbNo, puDate, logistic, claimedBy);
         packingInfoForm.setDisabled(true);
 
-        DataSource ds = PackingListData.getAllSalesData(awbId, 1, 20);
+        String username = MainPagePresenter.signedInUser == null
+                || MainPagePresenter.signedInUser.trim().isEmpty()
+                ? "olive" : MainPagePresenter.signedInUser;
+        DataSource ds = PackingListData.getAllSalesData(awbId, username);
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
 
         salesOrderGrid.setDataSource(ds);
-        salesOrderGrid.setAutoFetchData(Boolean.TRUE);
         salesOrderGrid.setFields(listGridField);
-        salesOrderGrid.getField(DataNameTokens.INV_AWB_ID).setHidden(Boolean.TRUE);
+        salesOrderGrid.getField(DataNameTokens.INV_SO_ID).setHidden(Boolean.TRUE);
+        salesOrderGrid.getField(DataNameTokens.INV_SO_ITEMHASATTRIBUTE).setHidden(Boolean.TRUE);
+        salesOrderGrid.getField(DataNameTokens.INV_SO_ATTRIBUTE).setHidden(Boolean.TRUE);
+        salesOrderGrid.getField(DataNameTokens.INV_AWB_CLAIMEDBY).setHidden(Boolean.TRUE);
+        salesOrderGrid.getField(DataNameTokens.INV_SO_ITEMID).setHidden(Boolean.TRUE);
         salesOrderGrid.setAutoFitData(Autofit.BOTH);
+
+//        String claimer = salesOrderGrid.getRecord(0).getAttribute(DataNameTokens.INV_AWB_CLAIMEDBY);
+//        claimedBy.setValue(claimer);
+
+        ToolStrip packingToolStrip = new ToolStrip();
+        packingToolStrip.setWidth100();
+//        if (username.trim().equals(claimer)) {
+        packingToolStrip.addButton(submitButton);
+        packingToolStrip.addSeparator();
+        packingToolStrip.addButton(printAwbButton);
+        packingToolStrip.addSeparator();
+        packingToolStrip.addButton(printLblButton);
+        packingToolStrip.addSeparator();
+//        }
+        packingToolStrip.addButton(closeButton);
 
         closeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -209,6 +233,7 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         submitButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                getUiHandlers().onSavePacking(MainPagePresenter.signedInUser, awbId);
             }
         });
 
@@ -224,7 +249,9 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         return packingDetailWindow;
     }
 
-    private Window buildAttributeWindow(String salesOrderId, int quantity) {
+    @Override
+    public Window buildAttributeWindow(final String salesOrderId, final int quantity, final DataSourceField[] dataSourceFields) {
+        records = 0;
         attributeWindow = new Window();
         attributeWindow.setWidth(600);
         attributeWindow.setHeight(400);
@@ -248,7 +275,42 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         HLayout buttonSet = new HLayout(5);
 
         IButton closeButton = new IButton("Cancel");
-        IButton saveButton = new IButton("Save");
+        final IButton saveButton = new IButton("Save");
+        saveButton.setDisabled(true);
+
+        buttonSet.setAlign(Alignment.CENTER);
+        buttonSet.setMembers(closeButton, saveButton);
+
+        dataSourceFields[0].setPrimaryKey(true);
+        RafDataSource ds = new RafDataSource(
+                "/response/data/*",
+                null,
+                null,
+                null,
+                null,
+                dataSourceFields);
+
+        ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
+
+        attributeGrid.setDataSource(ds);
+        attributeGrid.setFields(listGridField);
+
+        attributeGrid.addKeyPressHandler(new KeyPressHandler() {
+            @Override
+            public void onKeyPress(KeyPressEvent event) {
+                if (records < quantity) {
+                    records++;
+                }
+
+                if (EventHandler.getKey().equalsIgnoreCase("Enter")
+                        && records < quantity) {
+                    attributeGrid.startEditingNew();
+                } else {
+                    saveButton.setDisabled(false);
+                }
+            }
+        });
+
 
         closeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -260,13 +322,40 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         saveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                StringBuilder sb = new StringBuilder();
+                Set<String> attr = new HashSet<String>();
+                String attributeValue;
+                for (int r = 0; r < quantity; r++) {
+                    for (int c = 0; c < dataSourceFields.length; c++) {
+                        if (attributeGrid.getEditValueAsString(r, dataSourceFields[c].getName()) == null
+                                || attributeGrid.getEditValueAsString(r, dataSourceFields[c].getName()).isEmpty()) {
+                            SC.warn("All attributes must be filled");
+                            return;
+                        } else {
+                            attributeValue = dataSourceFields[c].getName() + ":" + attributeGrid.getEditValueAsString(r, dataSourceFields[c].getName());
+                            if (attr.contains(attributeValue)) {
+                                SC.warn(attributeValue + ", ERROR: cannot be inputed more than once");
+                                return;
+                            } else {
+                                attr.add(attributeValue);
+                            }
+                        }
+                    }
+                }
+
+                for (String string : attr) {
+                    if (!sb.toString().isEmpty()) {
+                        sb.append(";");
+                    }
+                    sb.append(string);
+                }
+
+                getUiHandlers().onSaveAttribute(MainPagePresenter.signedInUser,
+                        sb.toString(), salesOrderId);
             }
         });
 
-        buttonSet.setAlign(Alignment.CENTER);
-        buttonSet.setMembers(closeButton, saveButton);
-
-        attributeLayout.setMembers(buttonSet);
+        attributeLayout.setMembers(attributeGrid, buttonSet);
         attributeWindow.addItem(attributeLayout);
 
         return attributeWindow;
@@ -276,7 +365,21 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
     public void loadAllWarehouseData(LinkedHashMap<String, String> warehouse) {
         cbWarehouse = new ComboBoxItem("warehouse", "Select warehouse");
         cbWarehouse.setValueMap(warehouse);
-        packingListLayout.setMembers(warehouseSelectionForm);
+
+        warehouseSelectionForm = new DynamicForm();
+        warehouseSelectionForm.setWidth100();
+        warehouseSelectionForm.setPadding(20);
+        warehouseSelectionForm.setFields(cbWarehouse);
+        warehouseSelectionForm.setTitleOrientation(TitleOrientation.TOP);
+
+        cbWarehouse.addChangedHandler(new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent event) {
+                loadPackingData(cbWarehouse.getValue().toString());
+            }
+        });
+
+        packingListLayout.setMembers(toolstrip, warehouseSelectionForm);
     }
 
     public void loadPackingData(String warehouseId) {
@@ -284,12 +387,11 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
 
         packingListGrid.setDataSource(ds);
-        packingListGrid.setAutoFetchData(Boolean.TRUE);
         packingListGrid.setFields(listGridField);
         packingListGrid.getField(DataNameTokens.INV_AWB_ID).setHidden(Boolean.TRUE);
-        packingListGrid.setAutoFitData(Autofit.BOTH);
 
-        packingListLayout.setMembers(warehouseSelectionForm, packingListGrid);
+        refreshAllPackingListData();
+        packingListLayout.setMembers(toolstrip, warehouseSelectionForm, packingListGrid);
     }
 
     @Override
@@ -307,5 +409,20 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
     @Override
     public Widget asWidget() {
         return packingListLayout;
+    }
+
+    @Override
+    public Window getAttributeWindow() {
+        return attributeWindow;
+    }
+
+    @Override
+    public Window getPackingDetailWindow() {
+        return packingDetailWindow;
+    }
+
+    @Override
+    public ListGrid getAttributeGrid() {
+        return attributeGrid;
     }
 }

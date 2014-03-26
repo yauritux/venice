@@ -4,11 +4,8 @@
  */
 package com.gdn.venice.server.app.inventory.presenter;
 
-import com.gdn.venice.server.app.inventory.command.FetchAttributeNameDataCommand;
-import com.gdn.venice.server.app.inventory.command.FetchReadyPackingDataCommand;
-import com.gdn.venice.server.app.inventory.command.FetchSalesOrderAWBInfoDetailDataCommand;
-import com.gdn.venice.server.app.inventory.command.SaveAttributeDataCommand;
-import com.gdn.venice.server.app.inventory.command.SavePackingDataCommand;
+import com.gdn.venice.server.app.inventory.command.CheckAwbNumberCommand;
+import com.gdn.venice.server.app.inventory.command.FetchGinDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -25,11 +22,11 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Maria Olivia
  */
-public class PackingListPresenterServlet extends HttpServlet {
+public class GINPresenterServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    public PackingListPresenterServlet() {
+    public GINPresenterServlet() {
         super();
     }
 
@@ -48,6 +45,7 @@ public class PackingListPresenterServlet extends HttpServlet {
         RafDsCommand rafDsCommand = null;
 
         if (type.equals(RafDsCommand.DataSource)) {
+            System.out.println("DataSource");
             String requestBody = Util.extractRequestBody(request);
             params.put("limit", request.getParameter("limit"));
             params.put("page", request.getParameter("page"));
@@ -59,14 +57,11 @@ public class PackingListPresenterServlet extends HttpServlet {
                 e.printStackTrace();
             }
 
-            if (method.equals("fetchPackingData")) {
-                System.out.println("fetchPackingData");
-                params.put("warehouseId", request.getParameter("warehouseId"));
+            if (method.equals("fetchGinData")) {
+                System.out.println("fetchGinData");
+                params.put("warehouseCode", request.getParameter("warehouseCode"));
                 rafDsRequest.setParams(params);
-                rafDsCommand = new FetchReadyPackingDataCommand(rafDsRequest);
-            } else if (method.equals("fetchSalesData")) {
-                System.out.println("fetchSalesData");
-                rafDsCommand = new FetchSalesOrderAWBInfoDetailDataCommand(request.getParameter("awbInfoId"), username);
+                rafDsCommand = new FetchGinDataCommand(rafDsRequest);
             }
 
             if (rafDsCommand != null) {
@@ -79,15 +74,14 @@ public class PackingListPresenterServlet extends HttpServlet {
                 }
             }
         } else {
-            if (method.equals("fetchAttributeName")) {
-                RafRpcCommand fetchAttributeNameCommand = new FetchAttributeNameDataCommand(request.getParameter("itemId"), username);
-                retVal = fetchAttributeNameCommand.execute();
-            } else if (method.equals("saveAttribute")) {
-                RafRpcCommand saveAttributeCommand = new SaveAttributeDataCommand(username, request.getParameter("salesOrderId"), Util.extractRequestBody(request));
-                retVal = saveAttributeCommand.execute();
-            } else if (method.equals("savePacking")) {
-                RafRpcCommand savePackingCommand = new SavePackingDataCommand(username, request.getParameter("awbInfoId"));
-                retVal = savePackingCommand.execute();
+            if (method.equals("checkAirwayBillNumber")) {
+                RafRpcCommand cekAwbCommand = new CheckAwbNumberCommand(request.getParameter("awbNumber"),
+                        request.getParameter("logistic"), request.getParameter("warehouseCode"));
+                retVal = cekAwbCommand.execute();
+            } else if (method.equals("saveGIN")) {
+                RafRpcCommand cekAwbCommand = new CheckAwbNumberCommand(request.getParameter("awbNumber"),
+                        request.getParameter("logistic"), request.getParameter("warehouseCode"));
+                retVal = cekAwbCommand.execute();
             }
         }
 

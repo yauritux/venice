@@ -16,7 +16,7 @@ import com.smartgwt.client.data.fields.DataSourceTextField;
  * @author Maria Olivia
  */
 public class PackingListData {
-    
+
     public static RafDataSource getAllPackingData(String warehouseId, int page, int limit) {
         String fetchUrl = GWT.getHostPageBaseURL() + PackingListPresenter.packingListPresenterServlet
                 + "?method=fetchPackingData&type=DataSource&warehouseId=" + warehouseId + "&limit=" + limit + "&page=" + page;
@@ -38,10 +38,10 @@ public class PackingListData {
 
         return retVal;
     }
-    
-    public static RafDataSource getAllSalesData(String awbInfoId, int page, int limit) {
+
+    public static RafDataSource getAllSalesData(String awbInfoId, String username) {
         String fetchUrl = GWT.getHostPageBaseURL() + PackingListPresenter.packingListPresenterServlet
-                + "?method=fetchSalesData&type=DataSource&awbInfoId=" + awbInfoId;
+                + "?method=fetchSalesData&type=DataSource&awbInfoId=" + awbInfoId + "&username=" + username;
         DataSourceField[] dataSourceFields = {
             new DataSourceTextField(DataNameTokens.INV_SO_ID, "SO ID"),
             new DataSourceTextField(DataNameTokens.INV_SO_ORDERID, "Order ID"),
@@ -52,7 +52,9 @@ public class PackingListData {
             new DataSourceTextField(DataNameTokens.INV_SO_ITEMUOM, "UoM"),
             new DataSourceTextField(DataNameTokens.INV_SO_ITEMPHOTO, "Item Photo"),
             new DataSourceTextField(DataNameTokens.INV_SO_ITEMHASATTRIBUTE, "Has Attribute"),
-            new DataSourceTextField(DataNameTokens.INV_SO_ATTRIBUTE, "Attributes")
+            new DataSourceTextField(DataNameTokens.INV_SO_ATTRIBUTE, "Attributes"),
+            new DataSourceTextField(DataNameTokens.INV_AWB_CLAIMEDBY, "Claimed By"),
+            new DataSourceTextField(DataNameTokens.INV_SO_ITEMID, "Item ID")
         };
         dataSourceFields[0].setPrimaryKey(true);
         RafDataSource retVal = new RafDataSource(

@@ -37,7 +37,7 @@ public class FetchCurrencyDataCommand implements RafDsCommand {
         try {
             currencyService = new CurrencyManagementService();
             InventoryPagingWrapper<Currency> currencysWrapper = currencyService.getCurrencyData(request);
-            if (currencysWrapper != null) {
+            if (currencysWrapper.isSuccess()) {
                 //Put result
                 System.out.println(currencysWrapper.getContent().size());
                 for (Currency currency : currencysWrapper.getContent()) {

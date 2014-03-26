@@ -87,6 +87,8 @@ public class NameTokens {
         
         public static final String packingListPage = "!packingListPage";
         
+        public static final String ginPage = "!ginPage";
+        
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;
 	}

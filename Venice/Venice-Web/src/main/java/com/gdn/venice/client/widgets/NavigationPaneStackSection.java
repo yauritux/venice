@@ -57,8 +57,8 @@ public class NavigationPaneStackSection extends SectionStackSection {
 	public NavigationPaneTreeNodeRecord getTreeNodeForPageName(String pageName) {
 		for (int i = 0; i < this.sectionData.length; i++) { 
 			NavigationPaneTreeNodeRecord record = this.sectionData[i];
-                        SC.say("Page Name: " + pageName + "Record Page Name: " + record.getPageName()
-                                + "length: "+sectionData.length + "index: " + i);
+//                        SC.say("Page Name: " + pageName + "Record Page Name: " + record.getPageName()
+//                                + "length: "+sectionData.length + "index: " + i);
 			if (pageName.equals(record.getPageName())) {
 				return this.sectionData[i];
 			}

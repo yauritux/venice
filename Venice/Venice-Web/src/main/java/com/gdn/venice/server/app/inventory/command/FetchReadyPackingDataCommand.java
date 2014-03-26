@@ -4,12 +4,10 @@
  */
 package com.gdn.venice.server.app.inventory.command;
 
-import com.gdn.inventory.exchange.entity.Warehouse;
 import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.PackingListService;
-import com.gdn.venice.server.app.inventory.service.WarehouseManagementService;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
@@ -38,7 +36,7 @@ public class FetchReadyPackingDataCommand implements RafDsCommand {
         try {
             packingService = new PackingListService();
             InventoryPagingWrapper<AWBInfo> wrapper = packingService.getReadyPackingData(request);
-            if (wrapper != null) {
+            if (wrapper.isSuccess()) {
                 //Put result
                 for (AWBInfo awbInfo : wrapper.getContent()) {
                     HashMap<String, String> map = new HashMap<String, String>();

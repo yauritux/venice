@@ -25,7 +25,7 @@ public class FetchPickingListStorageDetailDataCommand implements RafDsCommand {
     private RafDsRequest request;
     PickingListManagementService pickingListService;
     protected static Logger _log = null;
-    
+
     public FetchPickingListStorageDetailDataCommand(RafDsRequest request) {
         this.request = request;
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
@@ -34,34 +34,34 @@ public class FetchPickingListStorageDetailDataCommand implements RafDsCommand {
 
     @Override
     public RafDsResponse execute() {
-    	_log.info("FetchPickingListStorageDetailDataCommand");
+        _log.info("FetchPickingListStorageDetailDataCommand");
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
-        
+
         try {
-        		pickingListService = new PickingListManagementService();
-        		ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);
-                if(detailWrapper != null){
-                	System.out.println("detailWrapper not null");
-                	PickingListDetail detail = detailWrapper.getContent();
-                	if(detail.getWhItemStorageStock()!=null){
-                		System.out.println("getWhItemStorageStock not null");
-                		List<WarehouseItemStorageStock> list = detail.getWhItemStorageStock();
-                		for(WarehouseItemStorageStock wiss : list){        	 
-                    		HashMap<String, String> map = new HashMap<String, String>();
-        	                map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSESTORAGEID, wiss.getId().toString());
-        	                map.put(DataNameTokens.INV_PICKINGLIST_SHELFCODE, wiss.getStorage().getShelf().getCode());
-        	                map.put(DataNameTokens.INV_PICKINGLIST_QTY, Integer.toString(wiss.getQuantity()));
-        	                map.put(DataNameTokens.INV_PICKINGLIST_QTYPICKED, "");
-        	                	                    
-        	                dataList.add(map);
-                		}
-                	}
-                	
-	                rafDsResponse.setStatus(0);
-	                rafDsResponse.setStartRow(request.getStartRow());
-	                rafDsResponse.setTotalRows(dataList.size());
-	                rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
+            pickingListService = new PickingListManagementService();
+            ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);
+            if (detailWrapper.isSuccess()) {
+                System.out.println("detailWrapper not null");
+                PickingListDetail detail = detailWrapper.getContent();
+                if (detail.getWhItemStorageStock() != null) {
+                    System.out.println("getWhItemStorageStock not null");
+                    List<WarehouseItemStorageStock> list = detail.getWhItemStorageStock();
+                    for (WarehouseItemStorageStock wiss : list) {
+                        HashMap<String, String> map = new HashMap<String, String>();
+                        map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSESTORAGEID, wiss.getId().toString());
+                        map.put(DataNameTokens.INV_PICKINGLIST_SHELFCODE, wiss.getStorage().getShelf().getCode());
+                        map.put(DataNameTokens.INV_PICKINGLIST_QTY, Integer.toString(wiss.getQuantity()));
+                        map.put(DataNameTokens.INV_PICKINGLIST_QTYPICKED, "");
+
+                        dataList.add(map);
+                    }
+                }
+
+                rafDsResponse.setStatus(0);
+                rafDsResponse.setStartRow(request.getStartRow());
+                rafDsResponse.setTotalRows(dataList.size());
+                rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
             }
         } catch (Throwable e) {
             e.printStackTrace();

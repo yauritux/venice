@@ -7,6 +7,7 @@ package com.gdn.venice.server.app.inventory.service;
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.gdn.inventory.exchange.entity.AttributeName;
 import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
+import com.gdn.inventory.exchange.entity.module.outbound.GoodIssuedNote;
 import com.gdn.inventory.exchange.entity.module.outbound.SalesOrderAWBInfo;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.HeaderAndDetailWrapper;
@@ -34,20 +35,20 @@ import org.codehaus.jackson.type.TypeReference;
  *
  * @author Maria Olivia
  */
-public class PackingListService {
+public class GINService {
 
     HttpClient httpClient;
     ObjectMapper mapper;
 
-    public PackingListService() {
+    public GINService() {
         httpClient = new HttpClient();
         mapper = new ObjectMapper();
     }
 
-    public InventoryPagingWrapper<AWBInfo> getReadyPackingData(RafDsRequest request) throws IOException {
+    public InventoryPagingWrapper<GoodIssuedNote> getGinData(RafDsRequest request) throws IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "packingList/getPackingList?warehouseId=" + request.getParams().get("warehouseId")
-                + "&page=" + request.getParams().get("page")
+                + "gin/getGinList?warehouseCode=" + request.getParams().get("warehouseCode")
+                + "&pageNumber=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
         System.out.println(url);
@@ -78,17 +79,16 @@ public class PackingListService {
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<AWBInfo>>() {
+            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<GoodIssuedNote>>() {
             });
         } else {
             return null;
         }
     }
 
-    public HeaderAndDetailWrapper<String, SalesOrderAWBInfo> getDetailPackingData(String awbInfoId, String username) throws IOException {
+    public ResultWrapper<List<AWBInfo>> getGinDetailData(String ginId) throws IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "packingList/getDetail?awbInfoId=" + awbInfoId
-                + "&username=" + username;
+                + "packingList/getGinDetail?ginId=" + ginId;
         PostMethod httpPost = new PostMethod(url);
         System.out.println(url);
 
@@ -103,74 +103,20 @@ public class PackingListService {
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<HeaderAndDetailWrapper<String, SalesOrderAWBInfo>>() {
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<AWBInfo>>>() {
             });
         } else {
             return null;
         }
     }
 
-    public List<AttributeName> getAttributeNameListByItemId(String itemId, String username) throws IOException {
+    public ResultWrapper<AWBInfo> getAwbDetail(String awbNumber) throws IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "attributeName/findByItemId?id=" + itemId
-                + "&username=" + username;
-        PostMethod httpPost = new PostMethod(url);
-        System.out.println(url);
-
-        int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println(httpCode);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            System.out.println(sb.toString());
-            is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<List<AttributeName>>() {
-            });
-        } else {
-            return null;
-        }
-    }
-
-    public ResultWrapper<Map<String, String>> saveAttributes(String username, String salesOrderId, Set<String> attribute) throws JsonGenerationException, JsonMappingException, IOException {
-        String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "packingList/checkAttribute?username=" + username + "&salesOrderId=" + salesOrderId;
-        System.out.println(url);
-        PostMethod httpPost = new PostMethod(url);
-        String json = mapper.writeValueAsString(attribute);
-        System.out.println(json);
-        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-        httpPost.setRequestHeader("Content-Type", "application/json");
-
-        int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println(httpCode);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            is.close();
-            System.out.println(sb.toString());
-            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<Map<String, String>>>() {
-            });
-        } else {
-            return null;
-        }
-    }
-
-    public ResultWrapper<AWBInfo> savePacking(String username, String awbInfoId) throws IOException {
-        String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "packingList/submitPacking?username=" + username + "&awbInfoId=" + awbInfoId;
+                + "gin/getAwb?awbNumber=" + awbNumber;
         System.out.println(url);
         PostMethod httpPost = new PostMethod(url);
 
         int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println(httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));

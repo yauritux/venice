@@ -25,7 +25,7 @@ public class FetchPickingListItemDetailDataCommand implements RafDsCommand {
     private RafDsRequest request;
     PickingListManagementService pickingListService;
     protected static Logger _log = null;
-    
+
     public FetchPickingListItemDetailDataCommand(RafDsRequest request) {
         this.request = request;
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
@@ -38,35 +38,35 @@ public class FetchPickingListItemDetailDataCommand implements RafDsCommand {
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         _log.info("FetchPickingListItemDetailDataCommand");
         try {
-        		pickingListService = new PickingListManagementService();
-        		ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);
-                if(detailWrapper != null){
-                	PickingListDetail detail = detailWrapper.getContent();
-	                HashMap<String, String> map = new HashMap<String, String>();
-	                map.put(DataNameTokens.INV_PICKINGLIST_ITEMID, detail.getItem().getId().toString());
-	                map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, detail.getItem().getCode());
-	                map.put(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME, detail.getItem().getName());
-	                
-	                ResultWrapper<WarehouseItem> warehouseItemWrapper = pickingListService.getWarehouseItem(request);
-	                
-	                String stockType="", merchant="";
-	                if(warehouseItemWrapper!=null){
-	                	stockType = warehouseItemWrapper.getContent().getStockType().name();
-	                	merchant = warehouseItemWrapper.getContent().getSupplier().getName();
-	                }
-	                map.put(DataNameTokens.INV_PICKINGLIST_STOCKTYPE, stockType);
-	                map.put(DataNameTokens.INV_PICKINGLIST_MERCHANT, merchant);
-	                String width = Float.toString(detail.getItem().getWidth());
-	                String height = Float.toString(detail.getItem().getHeight());
-	                String length = Float.toString(detail.getItem().getLength());
-	                map.put(DataNameTokens.INV_PICKINGLIST_DIMENSION, width+"x"+height+"x"+length);
-	                map.put(DataNameTokens.INV_PICKINGLIST_WEIGHT, Float.toString(detail.getItem().getWeight()));
-	                map.put(DataNameTokens.INV_PICKINGLIST_UOM, detail.getItem().getItemUnit());
-	                map.put(DataNameTokens.INV_PICKINGLIST_ATTRIBUTE, Boolean.valueOf(detail.getItem().isHasAttribute()).toString());
-	                	                    
-	                dataList.add(map);
-	
-	                rafDsResponse.setStatus(0);
+            pickingListService = new PickingListManagementService();
+            ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);
+            if (detailWrapper != null) {
+                PickingListDetail detail = detailWrapper.getContent();
+                HashMap<String, String> map = new HashMap<String, String>();
+                map.put(DataNameTokens.INV_PICKINGLIST_ITEMID, detail.getItem().getId().toString());
+                map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, detail.getItem().getCode());
+                map.put(DataNameTokens.INV_PICKINGLIST_ITEMSKUNAME, detail.getItem().getName());
+
+                ResultWrapper<WarehouseItem> warehouseItemWrapper = pickingListService.getWarehouseItem(request);
+
+                String stockType = "", merchant = "";
+                if (warehouseItemWrapper != null) {
+                    stockType = warehouseItemWrapper.getContent().getStockType().name();
+                    merchant = warehouseItemWrapper.getContent().getSupplier().getName();
+                }
+                map.put(DataNameTokens.INV_PICKINGLIST_STOCKTYPE, stockType);
+                map.put(DataNameTokens.INV_PICKINGLIST_MERCHANT, merchant);
+                String width = Float.toString(detail.getItem().getWidth());
+                String height = Float.toString(detail.getItem().getHeight());
+                String length = Float.toString(detail.getItem().getLength());
+                map.put(DataNameTokens.INV_PICKINGLIST_DIMENSION, width + "x" + height + "x" + length);
+                map.put(DataNameTokens.INV_PICKINGLIST_WEIGHT, Float.toString(detail.getItem().getWeight()));
+                map.put(DataNameTokens.INV_PICKINGLIST_UOM, detail.getItem().getItemUnit());
+                map.put(DataNameTokens.INV_PICKINGLIST_ATTRIBUTE, Boolean.valueOf(detail.getItem().isHasAttribute()).toString());
+
+                dataList.add(map);
+
+                rafDsResponse.setStatus(0);
             }
         } catch (Throwable e) {
             e.printStackTrace();

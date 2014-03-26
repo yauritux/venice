@@ -37,9 +37,8 @@ public class FetchWarehouseDataCommand implements RafDsCommand {
         try {
             warehouseService = new WarehouseManagementService();
             InventoryPagingWrapper<Warehouse> warehousesWrapper = warehouseService.getWarehouseData(request);
-            if (warehousesWrapper != null) {
+            if (warehousesWrapper.isSuccess()) {
                 //Put result
-                System.out.println(warehousesWrapper.getContent().size());
                 for (Warehouse warehouse : warehousesWrapper.getContent()) {
                     HashMap<String, String> map = new HashMap<String, String>();
                     map.put(DataNameTokens.INV_WAREHOUSE_ID, warehouse.getId().toString());

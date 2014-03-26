@@ -37,25 +37,25 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	System.out.println("masuk post warehouse management servlet");
-        String type = request.getParameter("type") == null ? "" : request.getParameter("type");        
+        System.out.println("masuk post warehouse management servlet");
+        String type = request.getParameter("type") == null ? "" : request.getParameter("type");
         String username = request.getParameter("username");
-        if(username == null || username.trim().equals("")){
-        	username = "olive";
-        }        
+        if (username == null || username.trim().equals("")) {
+            username = "olive";
+        }
         String retVal = "";
 
         String method = request.getParameter("method");
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("username", username.trim());
-        
+
         if (type.equals(RafDsCommand.DataSource)) {
-        	System.out.println("Masuk data source");
+            System.out.println("Masuk data source");
             String requestBody = Util.extractRequestBody(request);
             params.put("limit", request.getParameter("limit"));
             params.put("page", request.getParameter("page"));
-            
+
             RafDsRequest rafDsRequest = null;
             try {
                 rafDsRequest = RafDsRequest.convertXmltoRafDsRequest(requestBody);
@@ -64,9 +64,9 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
             }
 
             if (method.equals("fetchWarehouseData")) {
-            	System.out.println("fetchWarehouseData");
-            	rafDsRequest.setParams(params);
-            	RafDsCommand rafDsCommand = new FetchWarehouseDataCommand(rafDsRequest);
+                System.out.println("fetchWarehouseData");
+                rafDsRequest.setParams(params);
+                RafDsCommand rafDsCommand = new FetchWarehouseDataCommand(rafDsRequest);
                 RafDsResponse rafDsResponse = rafDsCommand.execute();
                 try {
                     retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
@@ -75,9 +75,9 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
                     e.printStackTrace();
                 }
             } else if (method.equals("fetchWarehouseInProcessCreateData")) {
-            	System.out.println("fetchWarehouseInProcessCreateData");
-            	params.put(DataNameTokens.INV_WAREHOUSE_APPROVALTYPE, ApprovalStatus.APPROVAL_CREATE.toString());
-            	rafDsRequest.setParams(params);
+                System.out.println("fetchWarehouseInProcessCreateData");
+                params.put(DataNameTokens.INV_WAREHOUSE_APPROVALTYPE, ApprovalStatus.APPROVAL_CREATE.toString());
+                rafDsRequest.setParams(params);
                 RafDsCommand rafDsCommand = new FetchWarehouseInProcessDataCommand(rafDsRequest);
                 RafDsResponse rafDsResponse = rafDsCommand.execute();
                 try {
@@ -86,9 +86,9 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
                     e.printStackTrace();
                 }
             } else if (method.equals("fetchWarehouseInProcessEditData")) {
-            	System.out.println("fetchWarehouseInProcessEditData");
-            	params.put(DataNameTokens.INV_WAREHOUSE_APPROVALTYPE, ApprovalStatus.APPROVAL_UPDATE.toString());
-            	rafDsRequest.setParams(params);
+                System.out.println("fetchWarehouseInProcessEditData");
+                params.put(DataNameTokens.INV_WAREHOUSE_APPROVALTYPE, ApprovalStatus.APPROVAL_UPDATE.toString());
+                rafDsRequest.setParams(params);
                 RafDsCommand rafDsCommand = new FetchWarehouseInProcessDataCommand(rafDsRequest);
                 RafDsResponse rafDsResponse = rafDsCommand.execute();
                 try {
@@ -97,9 +97,9 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
                     e.printStackTrace();
                 }
             } else if (method.equals("fetchWarehouseInProcessNonActiveData")) {
-            	System.out.println("fetchWarehouseInProcessNonActiveData");
-            	params.put(DataNameTokens.INV_WAREHOUSE_APPROVALTYPE, ApprovalStatus.APPROVAL_NON_ACTIVE.toString());
-            	rafDsRequest.setParams(params);
+                System.out.println("fetchWarehouseInProcessNonActiveData");
+                params.put(DataNameTokens.INV_WAREHOUSE_APPROVALTYPE, ApprovalStatus.APPROVAL_NON_ACTIVE.toString());
+                rafDsRequest.setParams(params);
                 RafDsCommand rafDsCommand = new FetchWarehouseInProcessDataCommand(rafDsRequest);
                 RafDsResponse rafDsResponse = rafDsCommand.execute();
                 try {
@@ -110,15 +110,16 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
             }
         } else {
             System.out.println("Masuk RPC");
-            if (method.equals("fetchWarehouseComboBoxData")){            	
-				RafRpcCommand fetchWarehouseComboBoxDataCommand = new FetchWarehouseComboBoxDataCommand(request.getParameter("username"));
-				retVal = fetchWarehouseComboBoxDataCommand.execute();		
-			}else{
-	            String requestBody = Util.extractRequestBody(request);
-	            System.out.println(requestBody);
-	            RafRpcCommand saveWarehouseCommand = new SaveOrUpdateWarehouseWIPDataCommand(username, requestBody);
-	            retVal = saveWarehouseCommand.execute();
-			}
+            if (method.equals("fetchWarehouseComboBoxData")) {
+                RafRpcCommand fetchWarehouseComboBoxDataCommand = new FetchWarehouseComboBoxDataCommand(username, 
+                        Boolean.parseBoolean(request.getParameter("isCode")));
+                retVal = fetchWarehouseComboBoxDataCommand.execute();
+            } else {
+                String requestBody = Util.extractRequestBody(request);
+                System.out.println(requestBody);
+                RafRpcCommand saveWarehouseCommand = new SaveOrUpdateWarehouseWIPDataCommand(username, requestBody);
+                retVal = saveWarehouseCommand.execute();
+            }
         }
 
         response.getOutputStream().println(retVal);
