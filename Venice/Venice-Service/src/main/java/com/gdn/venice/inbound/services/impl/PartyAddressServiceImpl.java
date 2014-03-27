@@ -76,7 +76,8 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 		
 		for (VenPartyAddress newVenPartyAddress : newPartyAddresses) {
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "VenParty = " + newVenPartyAddress.getVenParty() + ", street = " + newVenPartyAddress.getVenAddress().getStreetAddress1());
+					, "updatePartyAddressList::VenParty = " + newVenPartyAddress.getVenParty() 
+					+ ", street = " + newVenPartyAddress.getVenAddress().getStreetAddress1());
 			for (VenPartyAddress existingVenPartyAddress : existingPartyAddresses) {
 				if (existingVenPartyAddress.getVenAddress().equals(newVenPartyAddress.getVenAddress())) {
 					isAddressEqual=true; 
@@ -175,10 +176,10 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 					//newVenPartyAddressList.add(next);
 					//newVenPartyAddressList.add(venPartyAddress);
 					
-					VenPartyAddress persistedVenPartyAddress = venPartyAddress;
+					VenPartyAddress persistedVenPartyAddress = venPartyAddress;					
 					if (!em.contains(venPartyAddress)) {
 						persistedVenPartyAddress = venPartyAddressDAO.save(venPartyAddress); 
-					}
+					}					
 					newVenPartyAddressList.add(persistedVenPartyAddress);
 				}
 			} catch (Exception e) {

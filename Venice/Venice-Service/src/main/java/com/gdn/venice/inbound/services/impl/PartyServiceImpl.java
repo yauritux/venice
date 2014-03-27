@@ -152,7 +152,8 @@ public class PartyServiceImpl implements PartyService {
 					
 					List<VenPartyAddress> newPartyVenAddresses = new ArrayList<VenPartyAddress>();
 					for (VenPartyAddress venPartyAddress : venParty.getVenPartyAddresses()) {
-						venPartyAddress.setVenParty(venParty);
+						venPartyAddress.setVenParty(existingParty);
+						//venPartyAddress.setVenParty(venParty);
 						newPartyVenAddresses.add(venPartyAddress);
 					}
 					
