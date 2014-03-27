@@ -167,18 +167,22 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistContactDetails::start persisting contact detail");
 					VenContactDetail venContactDetail = null;
-					/*
+					
 					if (!em.contains(next)) {
 						// next (venContactDetail instance) is in detach mode, hence need to call save explicitly as shown below
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistContactDetails::calling save on venContactDetailDAO explicitly");
 						venContactDetail = venContactDetailDAO.save(next);
 					} else {
 						venContactDetail = next;
 					}
-					*/
+
+					/*
 					venContactDetail = next;
 					if (em.contains(venContactDetail)) {
 						em.detach(venContactDetail);
 					}
+					*/
 					newVenContactDetailList.add(venContactDetail);
 				}
 		}
@@ -204,15 +208,6 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 		references = contactDetailTypeService.synchronizeVenContactDetailTypeReferences(references);
 
 		// Push the keys back into the record
-		/*
-		Iterator<Object> referencesIterator = references.iterator();
-		while (referencesIterator.hasNext()) {
-			Object next = referencesIterator.next();
-			if (next instanceof VenContactDetailType) {
-				venContactDetail.setVenContactDetailType((VenContactDetailType) next);
-			}
-		}
-		*/
 		for (VenContactDetailType contactDetailType : references) {
 			venContactDetail.setVenContactDetailType(contactDetailType);
 		}
@@ -228,10 +223,8 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenContactDetailReferences::BEGIN,contactDetailReferences=" + contactDetailReferences);
-		//if (contactDetailReferences == null || contactDetailReferences.isEmpty()) return null;
 		
-		List<VenContactDetail> synchronizedContactDetailReferences 
-		   = new ArrayList<VenContactDetail>();
+		List<VenContactDetail> synchronizedContactDetailReferences = new ArrayList<VenContactDetail>();
 		
 		if (contactDetailReferences != null) {
 			for (VenContactDetail contactDetail : contactDetailReferences) {
@@ -242,14 +235,17 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 										+ contactDetail.getVenContactDetailType());
 						// Synchronize the reference data
 						VenContactDetail venContactDetail = synchronizeVenContactDetailReferenceData(contactDetail);
-						// Synchronize the object						
-						/*
-						VenContactDetail synchronizedVenContactDetail = venContactDetailDAO.save(venContactDetail);
+						
+						// Synchronize the object
+						VenContactDetail synchronizedVenContactDetail = venContactDetailDAO.save(venContactDetail);					
 						synchronizedContactDetailReferences.add(synchronizedVenContactDetail);
-						*/
+						
+						/*
 						if (em.contains(venContactDetail)) {
 							em.detach(venContactDetail);
 						}
+						*/
+						
 						synchronizedContactDetailReferences.add(venContactDetail);						
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenContactDetailReferences::successfully added synchronizedVenContactDetail into synchronizedContactDetailReferences");

@@ -99,15 +99,24 @@ public class CustomerServiceImpl implements CustomerService {
 				VenCustomer customer = venCustomer;
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::persisting venCustomer");
-				//venCustomer.setVenParty(customer.getVenParty());
-				/*
+				
+				//venCustomer.setVenParty(customer.getVenParty());				
 				if (!em.contains(venCustomer)) {
-					//venCustomer is in detach mode, hence we need to call save explicitly 
+					//venCustomer is in detach mode, hence we need to call save explicitly
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistCustomer::calling customerDAO.save explicitly");
 					venCustomer = venCustomerDAO.save(venCustomer);
-				}
-				*/
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistCustomer::venCustomer is persisted");					
+				}				
+				
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "persistCustomer::venParty ID = " + (customer.getVenParty() != null ? customer.getVenParty().getPartyId() : 0));
 				venCustomer.setVenParty(customer.getVenParty()); // attached object will be automatically persisted by the JPA transaction, thus no need to explicitly call save again
-			} catch (Exception e) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "persistCustomer::successfully set " + customer.getVenParty() + " into venCustomer");
+				
+			} catch (Exception e) { 
 				e.printStackTrace();
 				throw CommonUtil.logAndReturnException(new CannotPersistCustomerException(
 						e.getMessage(), VeniceExceptionConstants.VEN_EX_100001)

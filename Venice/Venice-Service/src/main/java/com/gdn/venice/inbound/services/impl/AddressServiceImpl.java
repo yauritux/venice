@@ -48,8 +48,8 @@ public class AddressServiceImpl implements AddressService {
 	private StateService stateService;
 	
 	@PersistenceContext
-	private EntityManager em;	
-
+	private EntityManager em;
+	
 	/**
 	 * updateAddressList - compares the existing address list with the new address list,
 	 * writes any new addresses to the database and returns the updated address list.
@@ -59,6 +59,7 @@ public class AddressServiceImpl implements AddressService {
 	 * @return the updated address list
 	 * @throws InvalidOrderException 
 	 */	
+	/*
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenAddress> updateAddressList(
@@ -80,11 +81,9 @@ public class AddressServiceImpl implements AddressService {
 						&& ((existingVenAddress.getVenCity() == null && newVenAddress.getVenCity() == null) || ((existingVenAddress.getVenCity()!=null?existingVenAddress.getVenCity().getCityCode():null)==null?"":existingVenAddress.getVenCity().getCityCode().trim()).equalsIgnoreCase((newVenAddress.getVenCity()!=null?newVenAddress.getVenCity().getCityCode():null)==null?"":newVenAddress.getVenCity().getCityCode().trim()))
 						&& ((existingVenAddress.getVenCountry() == null && newVenAddress.getVenCountry() == null) || (existingVenAddress.getVenCountry().getCountryCode()==null?"":existingVenAddress.getVenCountry().getCountryCode().trim()).equalsIgnoreCase(newVenAddress.getVenCountry().getCountryCode()==null?"":newVenAddress.getVenCountry().getCountryCode().trim()))
 						&& ((existingVenAddress.getVenState() == null && newVenAddress.getVenState() == null) || ((existingVenAddress.getVenState()!=null?existingVenAddress.getVenState().getStateCode():null)==null?"":existingVenAddress.getVenState().getStateCode().trim()).equalsIgnoreCase((newVenAddress.getVenState()!=null?newVenAddress.getVenState().getStateCode():null)==null?"":newVenAddress.getVenState().getStateCode().trim()))){
-					/*
-					 * The address is assumed to be equal, not that the equals() 
-					 * operation can't be used because it is implemented by 
-					 * JPA on the primary key. Add it to the list
-					 */
+					//The address is assumed to be equal, not that the equals() 
+					//operation can't be used because it is implemented by 
+					//JPA on the primary key. Add it to the list
 					isAddressEqual=true;
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "updateAddressList::party address equal with existing.");
 					updatedVenAddressList.add(existingVenAddress);
@@ -96,26 +95,27 @@ public class AddressServiceImpl implements AddressService {
 				}
 			}
 			if(isAddressEqual==false){
-				/*
-				 * The address is a new address so it needs to be persisted
-				 */
+				//The address is a new address so it needs to be persisted
 				CommonUtil.logDebug(this.getClass().getCanonicalName(), "updateAddressList::party address is new address.");
 				newVenAddress.setVenPartyAddresses(tempAddress.getVenPartyAddresses());
 				persistVenAddressList.add(newVenAddress);
 			}
 		}	
-		
-		/*
-		 * Persist any addresses that are new
-		 */
+				
+		//Persist any addresses that are new		
 		if(!persistVenAddressList.isEmpty()){
 			persistVenAddressList = persistAddressList(persistVenAddressList);
 			
 			//Add the persisted addresses to the new list
 			updatedVenAddressList.addAll(persistVenAddressList);
 		}
+		for (VenAddress updatedAddress : updatedVenAddressList) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "updateAddressList::updatedAddress Street Address 1 = " + updatedAddress.getStreetAddress1());
+		}
 		return updatedVenAddressList;
-	}
+	}	
+	*/
 
 	/**
 	 * Persists a list of addresses.
@@ -200,7 +200,11 @@ public class AddressServiceImpl implements AddressService {
 					
 					if (!em.contains(venAddress)) {
 						// venAddress is in detach mode, hence we need to call save explicitly
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistAddress::attaching venAddress");
 						venAddress = venAddressDAO.save(venAddress);
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistAddress::venAddress is attached");						
 					}					
 					
 					//reattach after persisted
@@ -214,7 +218,11 @@ public class AddressServiceImpl implements AddressService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistAddress::merge address");
 				if (!em.contains(venAddress)) {
 					// venAddress is in detach mode, hence we need to call save explicitly
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistAddress::attaching venAddress");					
 					venAddress = venAddressDAO.save(venAddress);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistAddress::venAddress is attached");					
 				}				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistAddress::successfully merged venAddress");				
@@ -223,6 +231,8 @@ public class AddressServiceImpl implements AddressService {
 		}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "persistAddress::EOM, returning venAddress " + venAddress);
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persistAddress::EOM, returning venAddress street address-1=" + venAddress.getStreetAddress1());		
 		return venAddress;
 	}
 
@@ -238,58 +248,31 @@ public class AddressServiceImpl implements AddressService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenAddressReferenceData::BEGIN, venAddress = " + venAddress);		
 		
-		/*
-		List<VenCity> cityReferences = new ArrayList<VenCity>();
-		cityReferences.add(venAddress.getVenCity());
-		List<VenCountry> countryReferences = new ArrayList<VenCountry>();
-		countryReferences.add(venAddress.getVenCountry());
-		List<VenState> stateReferences = new ArrayList<VenState>();
-		stateReferences.add(venAddress.getVenState());
-		*/
-		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenAddressReferenceData::calling synchronize methods for city, country, and state");
 		
-		VenCity synchCity = cityService.synchronizeVenCity(venAddress.getVenCity());
+		VenCity venCity = venAddress.getVenCity();
+		em.detach(venCity);
+		//VenCity synchCity = cityService.synchronizeVenCity(venAddress.getVenCity());
+		VenCity synchCity = cityService.synchronizeVenCity(venCity);		
 		venAddress.setVenCity(synchCity);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenAddressReferenceData::city has been synchronized, result = " + synchCity);
 		
-		VenCountry synchCountry = countryService.synchronizeVenCountry(venAddress.getVenCountry());
+		VenCountry venCountry = venAddress.getVenCountry();
+		em.detach(venCountry);
+		VenCountry synchCountry = countryService.synchronizeVenCountry(venCountry);
 		venAddress.setVenCountry(synchCountry);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenAddressReferenceData::country has been synchronized, result = " + synchCountry);		
 		
-		VenState synchState = stateService.synchronizeVenState(venAddress.getVenState());
+		VenState venState = venAddress.getVenState();
+		em.detach(venState);
+		VenState synchState = stateService.synchronizeVenState(venState);
 		venAddress.setVenState(synchState);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenAddressReferenceData::state has been synchronized, result = " + synchState);		
 		
-		/*
-		cityReferences = cityService.synchronizeVenCityReferences(cityReferences);
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenAddressReferenceData::city has been synchronized, result = " + cityReferences);
-		
-		countryReferences = countryService.synchronizeVenCountryReferences(countryReferences);
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenAddressReferenceData::country has been synchronized, result = " + countryReferences);
-		
-		stateReferences = stateService.synchronizeVenStateReferences(stateReferences);
-		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenAddressReferenceData::state has been synchronized, result = " + stateReferences);
-			
-		for (VenCity city : cityReferences) { // weird, isn't it ? do we need loop on this 'kind' of logic ?
-			venAddress.setVenCity(city);
-		}
-		
-		for (VenCountry country : countryReferences) {
-			venAddress.setVenCountry(country);
-		}
-		
-		for (VenState state : stateReferences) {
-			venAddress.setVenState(state);
-		}		
-		*/
-		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeReferenceData::EOM, returning venAddress = " + venAddress);
+		
 		return venAddress;
 	}
 

@@ -28,7 +28,7 @@ public class ContactDetailTypeServiceImpl implements ContactDetailTypeService {
 	
 	@Autowired
 	private VenContactDetailTypeDAO venContactDetailTypeDAO;
-
+	
 	@Override
 	public List<VenContactDetailType> synchronizeVenContactDetailTypeReferences(
 			List<VenContactDetailType> contactDetailTypes) throws VeniceInternalException {
@@ -36,7 +36,6 @@ public class ContactDetailTypeServiceImpl implements ContactDetailTypeService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenContactDetailTypeReferences::BEGIN,contactDetailTypes="
 				  + contactDetailTypes);
-		//if (contactDetailTypes == null || contactDetailTypes.isEmpty()) return null;
 		
 		List<VenContactDetailType> synchronizedContactDetailTypes = new ArrayList<VenContactDetailType>();
 		
@@ -47,8 +46,7 @@ public class ContactDetailTypeServiceImpl implements ContactDetailTypeService {
 							, "synchronizeVenContactDetailTypeReferences::Restricting VenContactDetailType... :" 
 									+ contactDetailType.getContactDetailTypeDesc());
 
-					List<VenContactDetailType> contactDetailTypeList 
-					= venContactDetailTypeDAO.findByContactDetailTypeDesc(contactDetailType.getContactDetailTypeDesc());
+					List<VenContactDetailType> contactDetailTypeList = venContactDetailTypeDAO.findByContactDetailTypeDesc(contactDetailType.getContactDetailTypeDesc());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "::synchronizeVenContactDetailTypeReferences::contactDetailTypeList.size = "
 									+ (contactDetailTypeList != null ? contactDetailTypeList.size() : 0));

@@ -15,6 +15,9 @@ public interface PartyAddressService {
 	
 	public List<VenPartyAddress> findByVenParty(VenParty party);
 	
+	public List<VenPartyAddress> updatePartyAddressList(List<VenPartyAddress> existingPartyAddresses
+			, List<VenPartyAddress> newPartyAddresses) throws VeniceInternalException;
+	
 	public List<VenPartyAddress> persistPartyAddresses(
 			List<VenPartyAddress> partyAddresses) throws VeniceInternalException;
 }

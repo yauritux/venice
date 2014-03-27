@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gdn.venice.constants.LoggerLevel;
+import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenCountryDAO;
+import com.gdn.venice.exception.VenCountrySynchronizingError;
 import com.gdn.venice.inbound.services.CountryService;
 import com.gdn.venice.persistence.VenCountry;
 import com.gdn.venice.util.CommonUtil;
@@ -37,15 +40,24 @@ public class CountryServiceImpl implements CountryService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::BEGIN,venCountry = " + venCountry);
 		VenCountry synchCountry = venCountry;
 		if (venCountry != null && venCountry.getCountryCode() != null) {
-			CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::countryCode=  " + venCountry.getCountryCode());
-			List<VenCountry> countryList = venCountryDAO.findByCountryCode(venCountry.getCountryCode());
-			if (countryList == null || countryList.isEmpty()) {
-				if (!em.contains(venCountry)) {
-					//venCountry in detach mode, hence need to explicitly call save 
-					synchCountry = venCountryDAO.saveAndFlush(venCountry);
-				} 
-			} else {
-				synchCountry = countryList.get(0);
+			try {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::countryCode=  " + venCountry.getCountryCode());
+				List<VenCountry> countryList = venCountryDAO.findByCountryCode(venCountry.getCountryCode());
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::countryList found = "
+						+ (countryList != null ? countryList.size() : 0));			
+				if (countryList == null || countryList.isEmpty()) {
+					if (!em.contains(venCountry)) {
+						//venCountry in detach mode, hence need to explicitly call save 
+						synchCountry = venCountryDAO.save(venCountry);
+					} 
+				} else {
+					synchCountry = countryList.get(0);
+				}
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName()
+						, e);
+				CommonUtil.logAndReturnException(new VenCountrySynchronizingError("Error in synchronizing VenCountry"
+						, VeniceExceptionConstants.VEN_EX_130003), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
 			}
 		}
 		return synchCountry;
