@@ -167,18 +167,22 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistContactDetails::start persisting contact detail");
 					VenContactDetail venContactDetail = null;
-					/*
+					
 					if (!em.contains(next)) {
 						// next (venContactDetail instance) is in detach mode, hence need to call save explicitly as shown below
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistContactDetails::calling save on venContactDetailDAO explicitly");
 						venContactDetail = venContactDetailDAO.save(next);
 					} else {
 						venContactDetail = next;
 					}
-					*/
+
+					/*
 					venContactDetail = next;
 					if (em.contains(venContactDetail)) {
 						em.detach(venContactDetail);
 					}
+					*/
 					newVenContactDetailList.add(venContactDetail);
 				}
 		}

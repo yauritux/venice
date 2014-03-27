@@ -12,8 +12,6 @@ import com.gdn.venice.persistence.VenContactDetailType;
  */
 public interface ContactDetailTypeService {
 	
-	public VenContactDetailType synchronizeVenContactDetailType(VenContactDetailType venContactDetailType) 
-	   throws VeniceInternalException;
 	public List<VenContactDetailType> synchronizeVenContactDetailTypeReferences(
 			List<VenContactDetailType> contactDetailTypes) throws VeniceInternalException;
 }
