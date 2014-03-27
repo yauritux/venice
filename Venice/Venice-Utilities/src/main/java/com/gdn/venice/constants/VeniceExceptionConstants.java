@@ -46,6 +46,7 @@ public enum VeniceExceptionConstants {
 	VEN_EX_130002("Error occured while synchronizing VenCity"),
 	VEN_EX_130003("Error occured while synchronizing VenCountry"),
 	VEN_EX_130004("Error occured while synchronizing VenState"),
+	VEN_EX_130005("Error occured while synchronizing VenContactDetailType"),
 	VEN_EX_200001("Bank does not exist"),
 	VEN_EX_300001("Fraud Check Value does not exist"),
 	VEN_EX_400001("Payment Status does not exist"),
