@@ -165,11 +165,9 @@ public class MainPagePresenter extends Presenter<MainPagePresenter.MyView, MainP
                 new RPCCallback() {
                     public void execute(RPCResponse response,
                             Object rawData, RPCRequest request) {
-                        SC.say("Presenter Role: " + rawData.toString());
                         MainPagePresenter.signedInUserRole = rawData.toString();
                     }
                 });
-
     }
 
     /**
