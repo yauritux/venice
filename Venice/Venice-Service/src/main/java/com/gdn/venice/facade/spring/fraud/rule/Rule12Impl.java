@@ -15,8 +15,11 @@ import com.gdn.venice.persistence.FrdParameterRule12;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule12Impl {
+/**
+ * Multiple cards used from a single IP address
+ */
+@Service("Rule12")
+public class Rule12Impl implements Rule{
 	private static final String CLASS_NAME = Rule12Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	

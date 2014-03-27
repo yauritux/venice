@@ -12,8 +12,11 @@ import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule9Impl {
+/**
+ * Shipping to a single address, but transactions placed on multiple cards
+ */
+@Service("Rule9")
+public class Rule9Impl implements Rule{
 	private static final String CLASS_NAME = Rule9Impl.class.getCanonicalName();
 	
 	@Autowired

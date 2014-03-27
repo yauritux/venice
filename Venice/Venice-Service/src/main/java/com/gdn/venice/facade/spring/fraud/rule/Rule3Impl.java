@@ -15,8 +15,11 @@ import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.persistence.VenProductCategory;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule3Impl {
+/**
+ * Order that include several of the same time
+ */
+@Service("Rule3")
+public class Rule3Impl implements Rule {
 	private static final String CLASS_NAME = Rule3Impl.class.getCanonicalName();
 	
 	@Autowired

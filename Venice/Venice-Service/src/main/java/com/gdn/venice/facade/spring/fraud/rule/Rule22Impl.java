@@ -15,8 +15,12 @@ import com.gdn.venice.persistence.FrdParameterRule22;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule22Impl {
+/**
+ * Customer Shopping Limit per Month
+ */
+
+@Service("Rule22")
+public class Rule22Impl implements Rule {
 	private static final String CLASS_NAME = Rule22Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	

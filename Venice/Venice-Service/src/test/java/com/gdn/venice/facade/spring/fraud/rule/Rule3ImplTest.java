@@ -12,6 +12,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.gdn.venice.constants.VeniceEnvironment;
+import com.gdn.venice.util.CommonUtil;
+
 @RunWith(MockitoJUnitRunner.class)
 public class Rule3ImplTest {
 	
@@ -20,6 +23,7 @@ public class Rule3ImplTest {
 	@Before
 	public void setup(){
 		sut = new Rule3Impl();
+		CommonUtil.veniceEnv = VeniceEnvironment.TESTING;
 	}
 	
 	@Test
@@ -51,6 +55,7 @@ public class Rule3ImplTest {
 	@After
 	public void shutdown(){
 		sut = null;
+		CommonUtil.veniceEnv = VeniceEnvironment.PRODUCTION;
 	}
 	
 }

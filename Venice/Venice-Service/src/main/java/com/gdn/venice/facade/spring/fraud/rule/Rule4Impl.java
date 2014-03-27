@@ -8,8 +8,11 @@ import com.gdn.venice.persistence.FrdParameterRule4;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule4Impl {
+/**
+ * Order made up of big ticket items
+ */
+@Service("Rule4")
+public class Rule4Impl implements Rule{
 	private static final String CLASS_NAME = Rule4Impl.class.getCanonicalName();
 	
 	@Autowired

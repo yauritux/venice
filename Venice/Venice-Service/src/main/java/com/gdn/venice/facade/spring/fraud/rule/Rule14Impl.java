@@ -12,8 +12,12 @@ import com.gdn.venice.persistence.VenCustomer;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule14Impl {
+/**
+ * Order from internet addresses that make use of free email services
+ *
+ */
+@Service("Rule14")
+public class Rule14Impl implements Rule{
 	private static final String CLASS_NAME = Rule14Impl.class.getCanonicalName();
 	
 	@Autowired

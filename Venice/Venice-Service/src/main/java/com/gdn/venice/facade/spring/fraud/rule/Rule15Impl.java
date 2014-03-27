@@ -10,8 +10,11 @@ import com.gdn.venice.persistence.VenBinCreditLimitEstimate;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule15Impl {
+/**
+ * Bin number not registered
+ */
+@Service("Rule15")
+public class Rule15Impl implements Rule{
 	private static final String CLASS_NAME = Rule15Impl.class.getCanonicalName();
 	
 	@Autowired

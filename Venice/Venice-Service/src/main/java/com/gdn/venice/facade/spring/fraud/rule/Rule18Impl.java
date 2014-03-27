@@ -18,8 +18,8 @@ import com.gdn.venice.util.CommonUtil;
 /**
  * Validity of Wording Customer, Shipping, Billing Address
  */
-@Service
-public class Rule18Impl {
+@Service("Rule18")
+public class Rule18Impl implements Rule {
 	private static final String CLASS_NAME = Rule18Impl.class.getCanonicalName();
 	
 	@Autowired

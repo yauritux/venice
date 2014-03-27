@@ -14,8 +14,12 @@ import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule5Impl {
+/**
+ * Rush or overnight shipping
+ *
+ */
+@Service("Rule5")
+public class Rule5Impl implements Rule{
 	private static final String CLASS_NAME = Rule5Impl.class.getCanonicalName();
 	
 	@Autowired

@@ -20,8 +20,12 @@ import com.gdn.venice.persistence.VenBinCreditLimitEstimate;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule10Impl {
+/**
+ * Multiple transactions on one card over a very short period of time
+ *
+ */
+@Service("Rule10")
+public class Rule10Impl implements Rule{
 	private static final String CLASS_NAME = Rule10Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");	
 	

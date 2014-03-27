@@ -11,8 +11,11 @@ import com.gdn.venice.persistence.VenCustomer;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule1Impl {
+/**
+ * First time shopper
+ */
+@Service("Rule1")
+public class Rule1Impl implements Rule{
 	private static final String CLASS_NAME = Rule1Impl.class.getCanonicalName();
 	
 	@Autowired

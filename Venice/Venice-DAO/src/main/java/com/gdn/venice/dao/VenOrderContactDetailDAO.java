@@ -1,5 +1,7 @@
 package com.gdn.venice.dao;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -20,6 +22,38 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 		"WHERE cd.venContactDetailType.contactDetailTypeId = 3 " +
 		"AND o.venOrder = ?1";
 	
+	public static final String FIND_BY_CONTACTTYPEPHONE_VENORDER =
+		"SELECT o " +
+		"FROM VenOrderContactDetail o " +
+		"JOIN FETCH o.venContactDetail cd " +
+		"WHERE cd.venContactDetailType.contactDetailTypeId = 0 " +
+		"AND o.venOrder = ?1";
+	
+	public static final String FIND_BY_CONTACTTYPEMOBILE_CONTACTTYPEPHONE_VENORDER =
+		"SELECT o " +
+		"FROM VenOrderContactDetail o " +
+		"JOIN FETCH o.venContactDetail cd " +
+		"WHERE (cd.venContactDetailType.contactDetailTypeId = 1 " +
+		"    OR cd.venContactDetailType.contactDetailTypeId = 0 " +
+		"       ) " +
+		"AND o.venOrder = ?1";
+	
+	public static final String FIND_BY_CONTACTTYPEMOBILE_VENORDER =
+		"SELECT o " +
+		"FROM VenOrderContactDetail o " +
+		"JOIN FETCH o.venContactDetail cd " +
+		"WHERE cd.venContactDetailType.contactDetailTypeId = 1 " +
+		"AND o.venOrder = ?1";
+	
 	@Query(FIND_BY_CONTACTTYPEEMAIL_VENORDER)
 	public VenOrderContactDetail findByContactEmailVenOrder(VenOrder order);
+	
+	@Query(FIND_BY_CONTACTTYPEPHONE_VENORDER)
+	public List<VenOrderContactDetail> findByContactPhoneVenOrder(VenOrder order);
+	
+	@Query(FIND_BY_CONTACTTYPEMOBILE_CONTACTTYPEPHONE_VENORDER)
+	public List<VenOrderContactDetail> findByContactMobileContactPhoneVenOrder(VenOrder order);
+	
+	@Query(FIND_BY_CONTACTTYPEMOBILE_VENORDER)
+	public List<VenOrderContactDetail> findByContactMobileVenOrder(VenOrder order);
 }

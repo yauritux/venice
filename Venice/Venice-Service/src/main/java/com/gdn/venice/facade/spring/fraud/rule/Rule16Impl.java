@@ -20,8 +20,11 @@ import com.gdn.venice.persistence.VenOrderAddress;
 import com.gdn.venice.persistence.VenOrderContactDetail;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule16Impl {
+/**
+ * Same customer with different credit card
+ */
+@Service("Rule16")
+public class Rule16Impl implements Rule {
 	private static final String CLASS_NAME = Rule16Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	

@@ -7,8 +7,11 @@ import com.gdn.venice.dao.FrdParameterRule17DAO;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule17Impl {
+/**
+ * City blacklist
+ */
+@Service("Rule17")
+public class Rule17Impl implements Rule{
 	private static final String CLASS_NAME = Rule17Impl.class.getCanonicalName();
 	
 	@Autowired

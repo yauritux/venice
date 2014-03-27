@@ -15,8 +15,8 @@ import com.gdn.venice.util.CommonUtil;
 /**
  *  Company Shipping Address
  */
-@Service
-public class Rule25Impl {
+@Service("Rule25")
+public class Rule25Impl implements Rule{
 	private static final String CLASS_NAME = Rule25Impl.class.getCanonicalName();
 	
 	@Autowired

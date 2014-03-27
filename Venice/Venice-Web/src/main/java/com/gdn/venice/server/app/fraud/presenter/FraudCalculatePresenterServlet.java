@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.client.app.task.ProcessNameTokens;
+import com.gdn.venice.facade.FraudCalculationSessionEJBRemote;
 import com.gdn.venice.facade.FrdFraudSuspicionCaseSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderPaymentSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderSessionEJBRemote;
@@ -105,7 +106,8 @@ public class FraudCalculatePresenterServlet extends HttpServlet {
 						//Jika belum ada di fraud case
 						if (fraudCaseList.size() == 0) {										
 							_log.info("Start calling fraud rules to calculate wcs order id: "+venOrder.getWcsOrderId());
-							FraudRules fraudRules = new FraudRules();
+							FraudCalculationSessionEJBRemote fraudRules = (FraudCalculationSessionEJBRemote) locator.lookup(FraudCalculationSessionEJBRemote.class, "FraudCalculationSessionEJBBean");
+							
 							isSuccessCalculate = fraudRules.calculateFraudRules(venOrder);
 							
 							if(isSuccessCalculate==false){

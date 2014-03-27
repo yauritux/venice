@@ -28,7 +28,7 @@ public class FraudCalculationServiceImpl implements FraudCalculationService {
 	
 	public boolean isMIGSReportUploaded(VenOrder venOrder){
 		String maskedCreditCardNumber = venOrder.getVenOrderPaymentAllocations().get(0).getVenOrderPayment().getMaskedCreditCardNumber();
-		return maskedCreditCardNumber != null && !maskedCreditCardNumber.trim().equalsIgnoreCase("");
+		return (maskedCreditCardNumber != null && !maskedCreditCardNumber.trim().equalsIgnoreCase(""));
 	}
 	
 	public boolean isRiskPointCalculatedBefore(VenOrder venOrder){

@@ -9,9 +9,12 @@ import com.gdn.venice.dao.FrdParameterRule21DAO;
 import com.gdn.venice.persistence.FrdParameterRule21;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
+/**
+ * Order timestamp Blacklist
+ */
 
-@Service
-public class Rule21Impl {
+@Service("Rule21")
+public class Rule21Impl implements Rule {
 	private static final String CLASS_NAME = Rule21Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIME = new SimpleDateFormat("HH:mm:ss");
 	

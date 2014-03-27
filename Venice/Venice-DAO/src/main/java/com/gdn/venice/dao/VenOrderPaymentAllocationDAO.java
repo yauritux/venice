@@ -77,6 +77,27 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   " AND op.maskedCreditCardNumber IS NOT NULL " +
 		   " AND o.orderDate BETWEEN ?2 AND ?3 GROUP BY op.maskedCreditCardNumber ";
 	
+	public static final String FIND_BY_VENORDER_ORDERPAYMENTLESSTHANLIMIT_SQL = 
+		   "SELECT o " +
+		   "FROM VenOrderPaymentAllocation o " +
+		   "WHERE o.venOrder = ?1 " +
+		   "AND o.venOrderPayment.amount < ?2 ";
+	
+	public static final String FIND_BY_VENORDER_PAYMENTTYPECC_SQL = 
+		   "SELECT o " +
+		   "FROM VenOrderPaymentAllocation o " +
+		   " JOIN FETCH opa.venOrderPayment op " +
+		   "WHERE o.venOrder = ?1 " +
+		   "AND o.venOrderPayment.venPaymentType.paymentTypeId="+VeniceConstants.VEN_PAYMENT_TYPE_ID_CC;
+	
+	public static final String FIND_WITH_VENADDRESS_VENCITY_BY_VENORDER = 
+		   "SELECT o " +
+		   "FROM VenOrderPaymentAllocation o " +
+		   "INNER JOIN FETCH o.venOrderPayment op " +
+		   "INNER JOIN FETCH op.venAddress a " +
+		   "INNER JOIN FETCH a.venCity c " +
+		   "WHERE o.venOrder = ?1 ";
+	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
@@ -97,4 +118,13 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(COUNT_MASKEDCREDITCARD_BY_IPADDRESS_ORDERDATERANGE_SQL)
 	public List<Integer> countMaskedCreditCardByIpAddressOrderDateRange(String ipAddress, String dateStart, String dateEnd);
+	
+	@Query(FIND_BY_VENORDER_ORDERPAYMENTLESSTHANLIMIT_SQL)
+	public List<VenOrderPaymentAllocation> findByVenOrderOrderPaymentLessThanLimit(VenOrder venOrder, int amountLimit);
+	
+	@Query(FIND_BY_VENORDER_PAYMENTTYPECC_SQL) 
+	public List<VenOrderPaymentAllocation> findByVenOrderPaymentTypeCC(VenOrder venOrder);
+	
+	@Query(FIND_WITH_VENADDRESS_VENCITY_BY_VENORDER)
+	public List<VenOrderPaymentAllocation> findWithVenAddressVenCityByVenOrder(VenOrder order);
 }

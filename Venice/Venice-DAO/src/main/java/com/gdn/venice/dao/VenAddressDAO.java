@@ -51,6 +51,17 @@ public interface VenAddressDAO extends JpaRepository<VenAddress, Long>{
 		") " +
 		"GROUP BY o.streetAddress1 ";
 	
+	public static final String FIND_WITH_VENCITY_BY_ORDER = 
+		"SELECT o " +
+		"FROM VenAddress o " +
+		"INNER JOIN FETCH o.venCity c " +
+		"WHERE o.addressId in " +
+		"( " +
+		"	SELECT b.venAddress.addressId " +
+		"   FROM VenOrderAddress b " +
+		"   WHERE b.venOrder = ?1 " +
+		")";
+	
 	@Query(FIND_ORDERADDRESS_BY_ORDER)
 	public VenAddress findOrderAddressByOrder(VenOrder order);
 	
@@ -59,6 +70,9 @@ public interface VenAddressDAO extends JpaRepository<VenAddress, Long>{
 	
 	@Query(FIND_GROUPED_ITEMADDRESS_BY_ORDER)
 	public List<String> findGroupedItemAddressByOrder(VenOrder order);
+	
+	@Query(FIND_WITH_VENCITY_BY_ORDER)
+	public VenAddress findWithVenCityByOrder(VenOrder order);
 	
 	
 }

@@ -15,8 +15,8 @@ import com.gdn.venice.util.CommonUtil;
 /**
  * Class for calculate fraud rule 20: UMR by 33 Province
  */
-@Service
-public class Rule20Impl {
+@Service("Rule20")
+public class Rule20Impl implements Rule{
 private static final String CLASS_NAME = Rule20Impl.class.getCanonicalName();
 	
 	@Autowired

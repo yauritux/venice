@@ -15,8 +15,8 @@ import com.gdn.venice.util.CommonUtil;
 /**
  * Validity of Address
  */
-@Service
-public class Rule19Impl {
+@Service("Rule19")
+public class Rule19Impl implements Rule {
 	private static final String CLASS_NAME = Rule19Impl.class.getCanonicalName();
 	
 	@Autowired

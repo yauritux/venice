@@ -8,8 +8,11 @@ import com.gdn.venice.persistence.FrdParameterRule2;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule2Impl {
+/**
+ * Larger than normal order
+ */
+@Service("Rule2")
+public class Rule2Impl implements Rule{
 	private static final String CLASS_NAME = Rule2Impl.class.getCanonicalName();
 	
 	@Autowired

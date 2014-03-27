@@ -11,8 +11,12 @@ import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderContactDetail;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule23Impl {
+/**
+ * Customer name vs Customer email
+ */
+
+@Service("Rule23")
+public class Rule23Impl implements Rule{
 	private static final String CLASS_NAME = Rule23Impl.class.getCanonicalName();
 	
 	@Autowired

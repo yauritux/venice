@@ -13,8 +13,12 @@ import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule6Impl {
+/**
+ * Shipping to an international address
+ *
+ */
+@Service("Rule6")
+public class Rule6Impl implements Rule{
 	private static final String CLASS_NAME = Rule6Impl.class.getCanonicalName();
 	
 	@Autowired

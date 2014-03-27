@@ -9,8 +9,12 @@ import com.gdn.venice.persistence.FrdParameterRule8;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule8Impl {
+/**
+ * Payment Type
+ *
+ */
+@Service("Rule8")
+public class Rule8Impl implements Rule{
 	private static final String CLASS_NAME = Rule8Impl.class.getCanonicalName();
 	
 	@Autowired

@@ -11,8 +11,8 @@ import com.gdn.venice.util.CommonUtil;
 /**
  *  Total Order Amount 
  */
-@Service
-public class Rule24Impl {
+@Service("Rule24")
+public class Rule24Impl implements Rule {
 	private static final String CLASS_NAME = Rule24Impl.class.getCanonicalName();
 	
 	@Autowired

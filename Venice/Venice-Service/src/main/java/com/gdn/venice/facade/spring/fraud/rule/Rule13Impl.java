@@ -15,8 +15,11 @@ import com.gdn.venice.persistence.FrdParameterRule13;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.CommonUtil;
 
-@Service
-public class Rule13Impl {
+/**
+ * IP address company
+ */
+@Service("Rule13")
+public class Rule13Impl implements Rule{
 	private static final String CLASS_NAME = Rule13Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	

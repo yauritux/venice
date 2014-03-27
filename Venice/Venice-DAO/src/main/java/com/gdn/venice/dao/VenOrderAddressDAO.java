@@ -28,6 +28,13 @@ public interface VenOrderAddressDAO extends JpaRepository<VenOrderAddress, Long>
 		"INNER JOIN FETCH a.venState s " +
 		"WHERE o.venOrder = ?1 ";
 	
+	public static final String FIND_WITH_VENADDRESS_VENCITY_BY_VENORDER = 
+		"SELECT o " +
+		"FROM VenOrderAddress o " +
+		"INNER JOIN FETCH o.venAddress a " +
+		"INNER JOIN FETCH a.venCity c " +
+		"WHERE o.venOrder = ?1 ";
+	
 	public List<VenOrderAddress> findByVenOrder(VenOrder order);
 	
 	@Query(FIND_WITH_VENADDRESS_BY_VENORDER)
@@ -35,4 +42,7 @@ public interface VenOrderAddressDAO extends JpaRepository<VenOrderAddress, Long>
 	
 	@Query(FIND_WITH_VENADDRESS_VENSTATE_BY_VENORDER)
 	public VenOrderAddress findWithVenAddressVenStateByVenOrder(VenOrder order);
+	
+	@Query(FIND_WITH_VENADDRESS_VENCITY_BY_VENORDER)
+	public VenOrderAddress findWithVenAddressVenCityByVenOrder(VenOrder order);
 }
