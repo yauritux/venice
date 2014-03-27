@@ -34,6 +34,8 @@ import org.dozer.MappingException;
 import org.hibernate.ejb.EntityManagerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.djarum.raf.utilities.JPQLStringEscapeUtility;
 import com.djarum.raf.utilities.Locator;
@@ -120,8 +122,9 @@ import com.gdn.venice.factory.VenOrderStatusFP;
 import com.gdn.venice.inbound.commands.Command;
 import com.gdn.venice.inbound.commands.impl.CreateOrderCommand;
 import com.gdn.venice.inbound.receivers.OrderReceiver;
+import com.gdn.venice.inbound.services.CustomerService;
 import com.gdn.venice.inbound.services.MerchantProductService;
-import com.gdn.venice.inbound.services.OrderService;
+import com.gdn.venice.inbound.services.PartyService;
 import com.gdn.venice.persistence.FinApprovalStatus;
 import com.gdn.venice.persistence.FinArFundsInActionApplied;
 import com.gdn.venice.persistence.FinArFundsInReconRecord;
@@ -241,10 +244,18 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
     VenOrderItemService venOrderItemService;
     
     @Autowired
-    OrderReceiver orderReceiver;
+    private CustomerService customerService;
     
     @Autowired
+    private OrderReceiver orderReceiver;
+    
+    @Autowired
+    private PartyService partyService;
+    
+    /*
+    @Autowired
     OrderService orderService;
+    */
     
     @Autowired
     MerchantProductService merchantProductService;
@@ -893,6 +904,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
      * com.gdn.venice.integration.services.VenInboundServiceSessionEJBRemote#
      * createOrderVAPayment (com.gdn.integration.jaxb.Order)
      */
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Boolean createOrderVAPayment(Order order) {
         _log.debug("createOrderVAPayment() - wcsOrderId:" + order.getOrderId().getCode());
         Long startTime = System.currentTimeMillis();
@@ -1004,12 +1016,18 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         VenCustomer venCustomer = new VenCustomer();
         
         try{
-            venCustomer = persistCustomer(venOrder.getVenCustomer());
+            //venCustomer = persistCustomer(venOrder.getVenCustomer());
+        	venCustomer = customerService.persistCustomer(venOrder.getVenCustomer());
         }catch(MappingException e){
             String errMsg = "createOrderVAPayment: An Exception occured when mapping customer object:" + e.getMessage();
-            _log.error(errMsg);
+        	CommonUtil.logError(this.getClass().getCanonicalName(), errMsg);
             e.printStackTrace();
             throw new EJBException(errMsg);
+        }catch (VeniceInternalException e) {
+        	String errMsg = "createOrderVAPayment: An Exception occured when persisting customer object:" + e.getMessage();
+        	CommonUtil.logError(this.getClass().getCanonicalName(), errMsg);
+        	e.printStackTrace();
+        	throw new EJBException(errMsg);
         }
         venOrder.setVenCustomer(venCustomer);
         // Synchronize the reference data
@@ -3561,7 +3579,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 }
 
                 // Persist the customer
-                venOrder.setVenCustomer(this.persistCustomer(customer));
+                //venOrder.setVenCustomer(this.persistCustomer(customer));
+                venOrder.setVenCustomer(customerService.persistCustomer(customer));
 
                 VenAddress orderAddress = new VenAddress();
                 orderAddress = this.persistAddress(venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress());
@@ -3688,7 +3707,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
         return venRetur;
     }
-
+    
+    /*
     private VenCustomer persistCustomer(VenCustomer venCustomer) {
         if (venCustomer != null) {
             try {
@@ -3727,6 +3747,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
         return venCustomer;
     }
+    */
 
     /**
      * Synchronizes the data for the direct VenCustomer references
@@ -4181,7 +4202,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                     venMerchant.getVenParty().setVenPartyType(venPartyType);
 
                     // Persist the party
-                    venMerchant.setVenParty(this.persistParty(venMerchant.getVenParty(), "Merchant"));
+                    //venMerchant.setVenParty(this.persistParty(venMerchant.getVenParty(), "Merchant"));
+                    venMerchant.setVenParty(partyService.persistParty(venMerchant.getVenParty(), "Merchant"));
                 }
 
                 // If the merchant exists then merge else persist
@@ -4367,7 +4389,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 venPartyType.setPartyTypeId(new Long(VEN_PARTY_TYPE_RECIPIENT));
                 venRecipient.getVenParty().setVenPartyType(venPartyType);
 
-                venRecipient.setVenParty(this.persistParty(venRecipient.getVenParty(), "Recipient"));
+                //venRecipient.setVenParty(this.persistParty(venRecipient.getVenParty(), "Recipient"));
+                venRecipient.setVenParty(partyService.persistParty(venRecipient.getVenParty(), "Recipient"));
                 // Synchronize the reference data
                 venRecipient = this.synchronizeVenRecipientReferenceData(venRecipient);
                 // Persist the object
@@ -4416,6 +4439,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
      * @param venParty
      * @return the persisted object
      */
+    /*
     VenParty persistParty(VenParty venParty, String type) {
         if (venParty != null) {
             try {
@@ -4432,11 +4456,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                     existingParty = this.retrieveExistingParty(venParty.getFullOrLegalName());
                 }
 
-                /*
-                 * If the party already exists then the existing party 
-                 * addresses and contacts may have changed so we
-                 * need to synchronize them
-                 */
+                //If the party already exists then the existing party 
+                //addresses and contacts may have changed so we
+                //need to synchronize them
                 if (existingParty != null) {
                     _log.debug("existing Party not null");
 
@@ -4456,16 +4478,15 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                         }
                     }
 
-                    /*
-                     * If any new addresses are provided then check that 
-                     * the existing addresses match the new addresses
-                     * else add the new addresses for the party 
-                     */
+                    //If any new addresses are provided then check that 
+                    //the existing addresses match the new addresses
+                    //else add the new addresses for the party 
 
 
                     if (!newAddressList.isEmpty()) {
                         _log.debug("New ven Party Address is not empty and Update Address List");
-                        List<VenAddress> updatedAddressList = this.updateAddressList(existingAddressList, newAddressList);
+                        //List<VenAddress> updatedAddressList = this.updateAddressList(existingAddressList, newAddressList);
+                        List<VenPartyAddress> updatedPartyAddressList =  
                         _log.debug("updatedAddressList size => " + updatedAddressList.size());
                         List<VenAddress> tempAddressList = new ArrayList<VenAddress>();
 
@@ -4516,12 +4537,10 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                         _log.debug("done add All VenParty Addresses");
                     }
 
-                    /*
-                     * If any new contact details are provided then check
-                     * that the new contact details match the existing 
-                     * contact details else add the new contact details
-                     * to the party and then merge.
-                     */
+                    //If any new contact details are provided then check
+                    //that the new contact details match the existing 
+                    //contact details else add the new contact details
+                    //to the party and then merge.
 
                     _log.debug("Get old and new party ven contact Detail  ");
                     //Get the existing contact details
@@ -4620,6 +4639,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
         return venParty;
     }
+    */
 
     /**
      * updateAddressList - compares the existing address list with the new
@@ -4630,6 +4650,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
      * @param newVenAddressList
      * @return the updated address list
      */
+    /*
     List<VenAddress> updateAddressList(List<VenAddress> existingVenAddressList, List<VenAddress> newVenAddressList) {
         List<VenAddress> updatedVenAddressList = new ArrayList<VenAddress>();
         List<VenAddress> persistVenAddressList = new ArrayList<VenAddress>();
@@ -4646,11 +4667,10 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                         && ((existingVenAddress.getVenCity() == null && newVenAddress.getVenCity() == null) || ((existingVenAddress.getVenCity() != null ? existingVenAddress.getVenCity().getCityCode() : null) == null ? "" : existingVenAddress.getVenCity().getCityCode().trim()).equalsIgnoreCase((newVenAddress.getVenCity() != null ? newVenAddress.getVenCity().getCityCode() : null) == null ? "" : newVenAddress.getVenCity().getCityCode().trim()))
                         && ((existingVenAddress.getVenCountry() == null && newVenAddress.getVenCountry() == null) || (existingVenAddress.getVenCountry().getCountryCode() == null ? "" : existingVenAddress.getVenCountry().getCountryCode().trim()).equalsIgnoreCase(newVenAddress.getVenCountry().getCountryCode() == null ? "" : newVenAddress.getVenCountry().getCountryCode().trim()))
                         && ((existingVenAddress.getVenState() == null && newVenAddress.getVenState() == null) || ((existingVenAddress.getVenState() != null ? existingVenAddress.getVenState().getStateCode() : null) == null ? "" : existingVenAddress.getVenState().getStateCode().trim()).equalsIgnoreCase((newVenAddress.getVenState() != null ? newVenAddress.getVenState().getStateCode() : null) == null ? "" : newVenAddress.getVenState().getStateCode().trim()))) {
-                    /*
-                     * The address is assumed to be equal, not that the equals() 
-                     * operation can't be used because it is implemented by 
-                     * JPA on the primary key. Add it to the list
-                     */
+                    
+                    //The address is assumed to be equal, not that the equals() 
+                    //operation can't be used because it is implemented by 
+                    //JPA on the primary key. Add it to the list
                     isAddressEqual = true;
                     _log.debug("\n party address equal with existing.");
                     updatedVenAddressList.add(existingVenAddress);
@@ -4660,11 +4680,11 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                     isAddressEqual = false;
                     tempAddress = existingVenAddress;
                 }
-            }
+            } // end of loop existingAddressList
             if (isAddressEqual == false) {
-                /*
-                 * The address is a new address so it needs to be persisted
-                 */
+               
+                //The address is a new address so it needs to be persisted
+                
                 _log.debug("\n party address is new address.");
                 newVenAddress.setVenPartyAddresses(tempAddress.getVenPartyAddresses());
                 persistVenAddressList.add(newVenAddress);
@@ -4672,9 +4692,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
 
 
-        /*
-         * Persist any addresses that are new
-         */
+        
+        //Persist any addresses that are new
+        
         if (!persistVenAddressList.isEmpty()) {
             persistVenAddressList = this.persistAddressList(persistVenAddressList);
 
@@ -4683,7 +4703,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         }
         return updatedVenAddressList;
     }
-
+    */
+    
     /**
      * updateContactDetailList - compares the existing contact detail list with
      * the new contact detail list, writes any new contact details to the
@@ -6651,7 +6672,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 }
 
                 // Persist the customer
-                venOrder.setVenCustomer(this.persistCustomer(customer));
+                //venOrder.setVenCustomer(this.persistCustomer(customer));
+                venOrder.setVenCustomer(customerService.persistCustomer(customer));
 
                 VenOrderStatus venReturStatus = new VenOrderStatus();
                 venReturStatus.setOrderStatusId(VeniceConstants.VEN_ORDER_STATUS_B);
