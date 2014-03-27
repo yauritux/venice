@@ -86,7 +86,7 @@ public class PartyServiceImpl implements PartyService {
 
 				// Get any existing party based on customer username
 				existingParty = retrieveExistingParty(venParty
-						.getVenCustomers().get(0).getCustomerUserName());
+						.getVenCustomers().get(0).getCustomerUserName(), true);
 			} else {
 				CommonUtil.logDebug(
 						this.getClass().getCanonicalName(),
@@ -95,7 +95,7 @@ public class PartyServiceImpl implements PartyService {
 
 				// Get any existing party based on full or legal name
 				existingParty = retrieveExistingParty(venParty
-						.getFullOrLegalName());
+						.getFullOrLegalName(), false);
 			}
 
 			/*
@@ -106,8 +106,9 @@ public class PartyServiceImpl implements PartyService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName(),
 						"persistParty::existing Party not null");
 
-				// Get the existing addresses
-				List<VenAddress> existingAddressList = new ArrayList<VenAddress>();
+				// Get the existing addresses				
+				/*
+				List<VenAddress> existingAddressList = new ArrayList<VenAddress>();				
 				for (VenPartyAddress venPartyAddress : existingParty
 						.getVenPartyAddresses()) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(),
@@ -115,9 +116,9 @@ public class PartyServiceImpl implements PartyService {
 									+ venPartyAddress.getVenAddress()
 											.getAddressId());
 					existingAddressList.add(venPartyAddress.getVenAddress());
-				}
+				}				
 
-				// Get the new addresses
+				// Get the new addresses				
 				List<VenAddress> newAddressList = new ArrayList<VenAddress>();
 				if (venParty.getVenPartyAddresses() != null) {
 					for (VenPartyAddress venPartyAddress : venParty
@@ -129,34 +130,67 @@ public class PartyServiceImpl implements PartyService {
 						newAddressList.add(venPartyAddress.getVenAddress());
 					}
 				}
+				*/				
 
 				/*
 				 * If any new addresses are provided then check that the
 				 * existing addresses match the new addresses else add the new
 				 * addresses for the party
 				 */
-				if (!newAddressList.isEmpty()) {
+				//if (!newAddressList.isEmpty()) {
+				if (!venParty.getVenPartyAddresses().isEmpty()) {
 					CommonUtil
 							.logDebug(this.getClass().getCanonicalName(),
-									"persistParty::New ven Party Address is not empty and Update Address List");
-					List<VenAddress> updatedAddressList = addressService
-							.updateAddressList(existingAddressList,
-									newAddressList);
+									"persistParty::New ven Party Address is not empty and consequently, Updating Address List");
+					//List<VenAddress> updatedAddressList = addressService.updateAddressList(existingAddressList, newAddressList);
+					
+					List<VenPartyAddress> existingPartyVenAddresses = new ArrayList<VenPartyAddress>();
+					for (VenPartyAddress venPartyAddress : existingParty.getVenPartyAddresses()) {
+						venPartyAddress.setVenParty(existingParty); //we need to do this in order to avoid NullPointerException because of bidirectional design
+						existingPartyVenAddresses.add(venPartyAddress);
+					}
+					
+					List<VenPartyAddress> newPartyVenAddresses = new ArrayList<VenPartyAddress>();
+					for (VenPartyAddress venPartyAddress : venParty.getVenPartyAddresses()) {
+						venPartyAddress.setVenParty(venParty);
+						newPartyVenAddresses.add(venPartyAddress);
+					}
+					
+					List<VenPartyAddress> updatedPartyAddressList = partyAddressService.updatePartyAddressList(existingPartyVenAddresses, newPartyVenAddresses);
 					CommonUtil.logDebug(this.getClass().getCanonicalName(),
 							"persistParty::updatedAddressList size => "
-									+ updatedAddressList.size());
-					List<VenAddress> tempAddressList = new ArrayList<VenAddress>();
+									+ (updatedPartyAddressList != null ? updatedPartyAddressList.size() : 0));
+					//List<VenAddress> tempAddressList = new ArrayList<VenAddress>();
 
-					tempAddressList.addAll(updatedAddressList);
+					//tempAddressList.addAll(updatedAddressList);
+					
+					/*
+					for (VenAddress updatedAddress : updatedAddressList) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistParty::updatedAddress Street Address 1 = " + updatedAddress.getStreetAddress1());
+						tempAddressList.add(updatedAddress);
+					}
+					*/
 
+					/*
 					CommonUtil.logDebug(this.getClass().getCanonicalName(),
 							"persistParty::Remove old VenAddress");
 					// Remove all the existing addresses
 					updatedAddressList.removeAll(existingAddressList);
+					*/
+					
+					/*
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistParty::Removing old VenPartyAddress");
+					updatedPartyAddressList.removeAll(existingParty.getVenPartyAddresses());
+					*/					
 
 					// Setup the new VenPartyAddress records
 					List<VenPartyAddress> venPartyAddressList = new ArrayList<VenPartyAddress>();
+					/*
 					for (VenAddress updatedAddress : updatedAddressList) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistParty::setup new venParrtyAddress = " + updatedAddress.getStreetAddress1());
 						VenPartyAddress venPartyAddress = new VenPartyAddress();
 						VenAddressType venAddressType = new VenAddressType();
 						venAddressType
@@ -170,7 +204,24 @@ public class PartyServiceImpl implements PartyService {
 
 						venPartyAddressList.add(venPartyAddress);
 					}
+					*/
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistParty::updatedPartyAddressList members = "
+							+ (updatedPartyAddressList != null ? updatedPartyAddressList.size() : 0));
+					
+					for (VenPartyAddress venPartyAddress : updatedPartyAddressList) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistParty::setup new VenPartyAddress = " + venPartyAddress.getVenAddress().getStreetAddress1());
+						VenAddressType venAddressType = new VenAddressType();
+						venAddressType.setAddressTypeId(VeniceConstants.VEN_ADDRESS_TYPE_DEFAULT);
+						
+						venPartyAddress.setVenAddressType(venAddressType);
+						venPartyAddress.setVenParty(existingParty);
+						venPartyAddressList.add(venPartyAddress);
+					}
 
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistParty::venPartyAddressList members = " + (venPartyAddressList != null ? venPartyAddressList.size() : 0));
 					CommonUtil.logDebug(this.getClass().getCanonicalName(),
 							"persistParty::persist Party Addresses ");
 					// Persist the new VenPartyAddress records
@@ -181,7 +232,8 @@ public class PartyServiceImpl implements PartyService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(),
 							"persistParty::size=" + (venPartyAddressList != null ? venPartyAddressList.size() : 0));
 
-					if (updatedAddressList == null || updatedAddressList.size() == 0) {
+					/*
+					if (updatedAddressList == null || updatedAddressList.isEmpty()) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName(),
 								"persistParty::updatedAddressList.size == 0");
 						for (VenAddress updatedAddress : tempAddressList) {
@@ -206,6 +258,7 @@ public class PartyServiceImpl implements PartyService {
 							}
 						}
 					}
+					*/
 
 					// copy existing address list to new list so it can be added
 					// new address list
@@ -447,54 +500,48 @@ public class PartyServiceImpl implements PartyService {
 	 * Retreives an existing party from the cache along with contact and address
 	 * details
 	 * 
-	 * @param fullOrLegalName
+	 * @param name
 	 * @return the party if it exists else null
 	 */
 	@Override
-	public VenParty retrieveExistingParty(String custUserName)
+	public VenParty retrieveExistingParty(String name, boolean findByCustomer)
 			throws VeniceInternalException {
-		//String escapeChar = "";
-
 		CommonUtil.logDebug(this.getClass().getCanonicalName(),
-				"retrieveExistingParty::BEGIN, custUserName = " + custUserName);
-		List<VenCustomer> customerList = customerService
-				.findByCustomerName(JPQLStringEscapeUtility
-						.escapeJPQLStringData(custUserName, ""));
-		CommonUtil.logDebug(
-				this.getClass().getCanonicalName(),
-				"retrieveExistingParty::customerList size = "
-						+ customerList.size());
-		if (customerList != null && (customerList.size() > 0)) {
-			VenParty party = customerList.get(0).getVenParty();
-			/*
-			 * Fetch the list of contact details for the party
-			 */
-			List<VenContactDetail> venContactDetailList = contactDetailService
-					.findByParty(party);
-			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"retrieveExistingParty::Total existing vencontactdetail => "
-							+ venContactDetailList.size());
+				"retrieveExistingParty::BEGIN, name = " + name);
+		VenParty party = null;
+		if (findByCustomer) {
+			List<VenCustomer> customerList = customerService.findByCustomerName(
+					JPQLStringEscapeUtility.escapeJPQLStringData(name, ""));
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "retrieveExistingParty::finding by customerUserName, data found = "
+					+ (customerList != null ? customerList.size() : 0));
+			if (customerList != null && (!customerList.isEmpty())) {
+				party = customerList.get(0).getVenParty();
+			}
+		} else {
+			List<VenParty> venParties = venPartyDAO.findByLegalName(JPQLStringEscapeUtility.escapeJPQLStringData(name, ""));
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "retrieveExistingParty::venParties found = " + (venParties != null ? venParties.size() : 0));
+			if (venParties != null && (!venParties.isEmpty())) {
+				party = venParties.get(0);
+			}
+		}
+	    	
+		if (party != null) {
+			//Fetch the list of contact details for the party
+			List<VenContactDetail> venContactDetailList = contactDetailService.findByParty(party);
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "retrieveExistingParty::venContactDetailList found = " + (venContactDetailList != null ? venContactDetailList.size() : 0));
 			party.setVenContactDetails(venContactDetailList);
 
-			/*
-			 * Fetch the list of party addresses for the party
-			 */
-			List<VenPartyAddress> venPartyAddressList = partyAddressService
-					.findByVenParty(party);
-			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"retrieveExistingParty::Total existing VenPartyAddress => "
-							+ venPartyAddressList.size());
-			party.setVenPartyAddresses(venPartyAddressList);
-			CommonUtil
-					.logDebug(this.getClass().getCanonicalName(),
-							"retrieveExistingParty::successfully set venPartyAddressList into party");
-
-			return party;
-		} else {
-			CommonUtil
-					.logDebug(this.getClass().getCanonicalName(),
-							"retrieveExistingParty::Party cannot be found, returning null");
-			return null;
+			//Fetch the list of party addresses for the party
+			List<VenPartyAddress> venPartyAddresses = partyAddressService.findByVenParty(party);
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "retrieveExistingParty::Total existing VenPartyAddress found = "
+							+ (venPartyAddresses != null ? venPartyAddresses.size() : 0));
+			party.setVenPartyAddresses(venPartyAddresses);
 		}
+		
+		return party;
 	}
 }

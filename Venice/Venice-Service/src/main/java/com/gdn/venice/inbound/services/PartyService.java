@@ -15,7 +15,7 @@ public interface PartyService {
 	public List<VenParty> findByLegalName(String legalName);
 	public VenParty persistParty(VenParty venParty, String type) 
 			throws VeniceInternalException;
-	public VenParty retrieveExistingParty(String custUserName)
+	public VenParty retrieveExistingParty(String name, boolean findByCustomer)
 	        throws VeniceInternalException;	
 	public VenParty synchronizeVenPartyReferenceData(
 			VenParty venParty) throws VeniceInternalException;

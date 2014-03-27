@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gdn.venice.constants.LoggerLevel;
+import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenStateDAO;
+import com.gdn.venice.exception.VenStateSynchronizingError;
 import com.gdn.venice.inbound.services.StateService;
 import com.gdn.venice.persistence.VenState;
 import com.gdn.venice.util.CommonUtil;
@@ -38,15 +41,24 @@ public class StateServiceImpl implements StateService {
 		VenState synchState = venState;
 		
 		if (venState != null && venState.getStateCode() != null) {
-			CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateCode=" + venState.getStateCode());
-			List<VenState> stateList = venStateDAO.findByStateCode(venState.getStateCode());
-			if (stateList == null || stateList.isEmpty()) {
-				if (!em.contains(venState)) {
-					//venState in detach mode, hence need to explicitly call save
-					synchState = venStateDAO.save(venState);
+			try {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateCode=" + venState.getStateCode());
+				List<VenState> stateList = venStateDAO.findByStateCode(venState.getStateCode());
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateList found = "
+						+ (stateList != null ? stateList.size() : 0));
+				if (stateList == null || stateList.isEmpty()) {
+					if (!em.contains(venState)) {
+						//venState in detach mode, hence need to explicitly call save
+						synchState = venStateDAO.save(venState);
+					}
+				} else {
+					synchState = stateList.get(0);
 				}
-			} else {
-				synchState = stateList.get(0);
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName()
+						, e);
+				CommonUtil.logAndReturnException(new VenStateSynchronizingError("Error in synchronyzing VenState"
+						, VeniceExceptionConstants.VEN_EX_130004), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 			}
 		}
 		
