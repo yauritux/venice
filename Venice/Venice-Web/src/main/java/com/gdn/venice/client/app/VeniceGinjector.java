@@ -38,7 +38,6 @@ import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
-import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -216,9 +215,5 @@ public interface VeniceGinjector extends Ginjector {
   
   AsyncProvider<PutawayCreatePresenter> getPutawayCreatePresenter();
   
-  AsyncProvider<PutawayInputPresenter> getPutawayInputPresenter(); 
-
   AsyncProvider<GoodIssuedNotePresenter> getGINPresenter(); 
-
-  AsyncProvider<PutawayCreatePresenter> getPutawayCreatePresenter(); 
 }

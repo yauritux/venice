@@ -62,14 +62,9 @@ public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "user/getWarehouseList?username=" + username;
         PostMethod httpPost = new PostMethod(url);
-<<<<<<< HEAD
-    	HttpClient httpClient= new HttpClient();
-    	ObjectMapper mapper = new ObjectMapper();
-=======
-
         HttpClient httpClient = new HttpClient();
         ObjectMapper mapper = new ObjectMapper();
->>>>>>> refs/remotes/origin/stockholm/development_r1s8
+
         int httpCode = httpClient.executeMethod(httpPost);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();

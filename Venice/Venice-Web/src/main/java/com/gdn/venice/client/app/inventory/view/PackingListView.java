@@ -100,6 +100,7 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         attributeGrid.setShowFilterEditor(false);
         attributeGrid.setShowRowNumbers(true);
         attributeGrid.setAutoFetchData(Boolean.TRUE);
+        salesOrderGrid.setCanRemoveRecords(true);
 
         bindCustomUiHandlers();
     }
