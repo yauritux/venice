@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.fraud.presenter.BlackListMaintenancePresenter;
-import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule35Presenter;
 import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.CustomerBlackListMaintenancePresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudBinCreditLimitPresenter;
@@ -24,7 +23,6 @@ import com.smartgwt.client.data.fields.DataSourceDateTimeField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.DSOperationType;
 import com.smartgwt.client.types.FieldType;
-import com.smartgwt.client.util.SC;
 
 public class FraudData {
 	private static DataSource fraudCaseDataDs= null;
@@ -1374,31 +1372,6 @@ public class FraudData {
 			
 			return retVal;
 		}
-	
-	
-	public static DataSource getFraudParameterRule35Data() {
-		DataSourceField[] dataSourceFields = {
-				new DataSourceTextField(DataNameTokens.FRDPARAMETERRULE35_ID, "ID"),
-				new DataSourceTextField(DataNameTokens.FRDPARAMETERRULE35_ORDERID, "Order ID"), 
-				new DataSourceTextField(DataNameTokens.FRDPARAMETERRULE35_NOSURAT, "Nomor Surat"), 
-				new DataSourceField(DataNameTokens.FRDPARAMETERRULE35_ORDERDATE, FieldType.DATETIME,"Order Date"), 
-				new DataSourceTextField(DataNameTokens.FRDPARAMETERRULE35_CUSTOMERNAME, "Name Customer"),
-				new DataSourceTextField(DataNameTokens.FRDPARAMETERRULE35_EMAIL, "Email"),
-				new DataSourceTextField(DataNameTokens.FRDPARAMETERRULE35_CCNUMBER, "CC Number"),
-				new DataSourceTextField(DataNameTokens.FRDPARAMETERRULE35_REMARKS, "Remark"),
-		};
-		dataSourceFields[0].setPrimaryKey(true);
-		RafDataSource customerGreyListDataDs = new RafDataSource(
-				"/response/data/*",
-				GWT.getHostPageBaseURL() + FraudParameterRule35Presenter.fraudParameterRule35PresenterServlet + "?method=fetchFraudParameterRule35Data&type=DataSource",
-				GWT.getHostPageBaseURL() + FraudParameterRule35Presenter.fraudParameterRule35PresenterServlet + "?method=addFraudParameterRule35Data&type=DataSource",
-				GWT.getHostPageBaseURL() + FraudParameterRule35Presenter.fraudParameterRule35PresenterServlet + "?method=updateFraudParameterRule35Data&type=DataSource",
-				GWT.getHostPageBaseURL() + FraudParameterRule35Presenter.fraudParameterRule35PresenterServlet + "?method=deleteFraudParameterRule35Data&type=DataSource",
-				dataSourceFields);
-		
-		return customerGreyListDataDs;
-	   		
-	}
 	
 	public static RafDataSource getConvertInstallmentData() {
 		DataSourceField[] dataSourceFields = {
