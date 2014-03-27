@@ -25,7 +25,7 @@ public class FetchPickingListStorageDetailDataCommand implements RafDsCommand {
     private RafDsRequest request;
     PickingListManagementService pickingListService;
     protected static Logger _log = null;
-    
+
     public FetchPickingListStorageDetailDataCommand(RafDsRequest request) {
         this.request = request;
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
@@ -34,10 +34,10 @@ public class FetchPickingListStorageDetailDataCommand implements RafDsCommand {
 
     @Override
     public RafDsResponse execute() {
-    	_log.info("FetchPickingListStorageDetailDataCommand");
+        _log.info("FetchPickingListStorageDetailDataCommand");
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
-        
+
         try {
         		pickingListService = new PickingListManagementService();
         		ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);

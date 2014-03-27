@@ -1,5 +1,6 @@
 package com.gdn.venice.server.app.inventory.command;
 
+import com.gdn.inventory.exchange.entity.WarehouseUser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +14,6 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-
-import com.gdn.inventory.exchange.entity.WarehouseUser;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.util.Util;
@@ -22,40 +21,55 @@ import com.gdn.venice.util.InventoryUtil;
 
 /**
  * Fetch Command for warehouse combo box
- * 
+ *
  * @author Roland
  */
+public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand {
 
-public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand{	
-	String username;
-	
-	public FetchWarehouseComboBoxDataCommand(String username) {
-		this.username = username;
-	}
+    String username;
+    boolean isCode;
 
-	public String execute() {
-		HashMap<String, String> map = new HashMap<String, String>();
-		try{		
-			username = "roland";
-			ResultWrapper<List<WarehouseUser>> whuWrapper = getWarehouseUserData(username);
-			if(whuWrapper.isSuccess()){
-				for(WarehouseUser wu : whuWrapper.getContent()){
-    				map.put("data"+wu.getWarehouse().getId().toString(), wu.getWarehouse().getName());
+    public FetchWarehouseComboBoxDataCommand(String username, boolean isCode) {
+        this.username = username;
+        this.isCode = isCode;
+    }
+
+    /*
+     * Edited by Maria Olivia 20140320
+     */
+    public String execute() {
+        HashMap<String, String> map = new HashMap<String, String>();
+        try {
+            ResultWrapper<List<WarehouseUser>> whuWrapper = getWarehouseUserData(username);
+            System.out.println(isCode);
+            if (whuWrapper.isSuccess()) {
+                for (WarehouseUser wu : whuWrapper.getContent()) {
+                    if (isCode) {
+                        map.put("data" + wu.getWarehouse().getCode(), wu.getWarehouse().getName());
+                    } else {
+                        map.put("data" + wu.getWarehouse().getId().toString(), wu.getWarehouse().getName());
+                    }
                 }
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
-		return Util.formXMLfromHashMap(map);
-	}	
-	
-	public ResultWrapper<List<WarehouseUser>> getWarehouseUserData(String username) throws HttpException, IOException{
-		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Util.formXMLfromHashMap(map);
+    }
+
+    public ResultWrapper<List<WarehouseUser>> getWarehouseUserData(String username) throws HttpException, IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "user/getWarehouseList?username=" + username;
         PostMethod httpPost = new PostMethod(url);
+<<<<<<< HEAD
     	HttpClient httpClient= new HttpClient();
     	ObjectMapper mapper = new ObjectMapper();
+=======
+
+        HttpClient httpClient = new HttpClient();
+        ObjectMapper mapper = new ObjectMapper();
+>>>>>>> refs/remotes/origin/stockholm/development_r1s8
         int httpCode = httpClient.executeMethod(httpPost);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
@@ -65,9 +79,11 @@ public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand{
                 sb.append(line);
             }
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<WarehouseUser>>>() {});
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<WarehouseUser>>>() {
+            });
         } else {
-        	return null;
+            return null;
         }
-	}
+    }
 }

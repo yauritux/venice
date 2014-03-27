@@ -25,7 +25,7 @@ public class FetchPickingListItemDetailDataCommand implements RafDsCommand {
     private RafDsRequest request;
     PickingListManagementService pickingListService;
     protected static Logger _log = null;
-    
+
     public FetchPickingListItemDetailDataCommand(RafDsRequest request) {
         this.request = request;
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();

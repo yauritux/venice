@@ -17,25 +17,27 @@ import com.smartgwt.client.data.fields.DataSourceTextField;
  */
 public class CurrencyData {
 
-	public static RafDataSource getAllCurrencyData(String username, int page, int limit) {
-		System.out.println(username+" "+page+" "+limit);
-		String fetchUrl = GWT.getHostPageBaseURL() + CurrencyManagementPresenter.currencyManagementPresenterServlet 
-				+ "?method=fetchCurrencyData&type=DataSource&username="+username+"&limit="+limit+"&page="+page;
-		System.out.println(fetchUrl);
-		DataSourceField[] dataSourceFields = {
-				new DataSourceTextField(DataNameTokens.INV_CURRENCY_ID, "Currency ID"),
-				new DataSourceTextField(DataNameTokens.INV_CURRENCY_CURRENCY, "Currency"),
-				new DataSourceTextField(DataNameTokens.INV_CURRENCY_RATE, "Value")
-		};
-		dataSourceFields[0].setPrimaryKey(true);
-		RafDataSource retVal = new RafDataSource(
-				"/response/data/*",
-				fetchUrl,
-				null,
-				null,
-				null,
-				dataSourceFields);
+    public static RafDataSource getAllCurrencyData(String username, int page, int limit) {
+        System.out.println(username + " " + page + " " + limit);
+        String fetchUrl = GWT.getHostPageBaseURL() + CurrencyManagementPresenter.currencyManagementPresenterServlet
+                + "?method=fetchCurrencyData&type=DataSource&username=" + username + "&limit=" + limit + "&page=" + page;
+        System.out.println(fetchUrl);
+        DataSourceField[] dataSourceFields = {
+            new DataSourceTextField(DataNameTokens.INV_CURRENCY_ID, "Currency ID"),
+            new DataSourceTextField(DataNameTokens.INV_CURRENCY_CURRENCY, "Currency"),
+            new DataSourceTextField(DataNameTokens.INV_CURRENCY_RATE, "Value"),
+            new DataSourceTextField(DataNameTokens.INV_CURRENCY_UPDATE_DATE, "Last Updated"),
+            new DataSourceTextField(DataNameTokens.INV_CURRENCY_UPDATED_BY, "Updated By")
+        };
+        dataSourceFields[0].setPrimaryKey(true);
+        RafDataSource retVal = new RafDataSource(
+                "/response/data/*",
+                fetchUrl,
+                null,
+                null,
+                null,
+                dataSourceFields);
 
-		return retVal;
-	}
+        return retVal;
+    }
 }

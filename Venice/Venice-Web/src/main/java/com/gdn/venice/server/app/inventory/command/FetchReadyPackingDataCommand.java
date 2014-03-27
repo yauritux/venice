@@ -4,28 +4,27 @@
  */
 package com.gdn.venice.server.app.inventory.command;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import com.gdn.inventory.exchange.entity.Currency;
+import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
-import com.gdn.venice.server.app.inventory.service.CurrencyManagementService;
+import com.gdn.venice.server.app.inventory.service.PackingListService;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *
  * @author Maria Olivia
  */
-public class FetchCurrencyDataCommand implements RafDsCommand {
+public class FetchReadyPackingDataCommand implements RafDsCommand {
 
     private RafDsRequest request;
-    CurrencyManagementService currencyService;
+    PackingListService packingService;
 
-    public FetchCurrencyDataCommand(RafDsRequest request) {
+    public FetchReadyPackingDataCommand(RafDsRequest request) {
         this.request = request;
     }
 
@@ -35,26 +34,24 @@ public class FetchCurrencyDataCommand implements RafDsCommand {
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
 
         try {
-            currencyService = new CurrencyManagementService();
-            InventoryPagingWrapper<Currency> currencysWrapper = currencyService.getCurrencyData(request);
-            if (currencysWrapper.isSuccess()) {
+            packingService = new PackingListService();
+            InventoryPagingWrapper<AWBInfo> wrapper = packingService.getReadyPackingData(request);
+            if (wrapper.isSuccess()) {
                 //Put result
-                System.out.println(currencysWrapper.getContent().size());
-                for (Currency currency : currencysWrapper.getContent()) {
+                for (AWBInfo awbInfo : wrapper.getContent()) {
                     HashMap<String, String> map = new HashMap<String, String>();
-                    map.put(DataNameTokens.INV_CURRENCY_ID, currency.getId().toString());
-                    map.put(DataNameTokens.INV_CURRENCY_CURRENCY, currency.getCurrency());
-                    map.put(DataNameTokens.INV_CURRENCY_RATE, currency.getRate() + "");
-                    map.put(DataNameTokens.INV_CURRENCY_UPDATE_DATE, currency.getUpdatedDate().toString());
-                    map.put(DataNameTokens.INV_CURRENCY_UPDATED_BY, currency.getUpdatedBy());
-
+                    map.put(DataNameTokens.INV_AWB_ID, awbInfo.getId().toString());
+                    map.put(DataNameTokens.INV_AWB_NO, awbInfo.getAirwayBillNumber());
+                    map.put(DataNameTokens.INV_AWB_PUDATE, awbInfo.getPuDate().toString());
+                    map.put(DataNameTokens.INV_AWB_LOGNAME, awbInfo.getLogisticCode());
+                    map.put(DataNameTokens.INV_AWB_STATUS, awbInfo.getStatus().getValue());
                     dataList.add(map);
                 }
 
                 //Set DSResponse's properties
                 rafDsResponse.setStatus(0);
                 rafDsResponse.setStartRow(request.getStartRow());
-                rafDsResponse.setTotalRows(Integer.parseInt(currencysWrapper.getTotalElements() + ""));
+                rafDsResponse.setTotalRows(Integer.parseInt(wrapper.getTotalElements() + ""));
                 rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
             }
         } catch (Throwable e) {

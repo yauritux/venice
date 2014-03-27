@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.BkgndRepeat;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.grid.events.RecordClickEvent;
 import com.smartgwt.client.widgets.grid.events.RecordClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -123,7 +124,6 @@ public class MainPageView extends ViewWithUiHandlers<MainPageUiHandlers>  implem
 	private void onTreeNodeRecordClicked(RecordClickEvent event) {
 		Record record = event.getRecord();  
 		String name = record.getAttributeAsString("PageName");
-
 		if (getUiHandlers() != null) {
 			getUiHandlers().onNavigationPaneSectionClicked(((TreeGrid) event.getSource()).getSelectedPaths(), name);
 		}  

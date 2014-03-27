@@ -22,7 +22,6 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.widgets.IButton;
-import com.smartgwt.client.widgets.Label;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
@@ -49,15 +48,13 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
  * @author Maria Olivia
  */
 public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagementUiHandler> implements
-		CurrencyManagementPresenter.MyView {
+        CurrencyManagementPresenter.MyView {
 
     RafViewLayout currencyLayout;
     ListGrid currencyListGrid;
     Window currencyDetailWindow, addCurrencyWindow;
-    
     private static final int NEW_CURRENCY = 0;
     private static final int EXISTING_CURRENCY = 1;
-    
     /*
      * The toolstrip objects for the header
      */
@@ -104,17 +101,16 @@ public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagemen
         addButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-            	buildCurrencyDetailWindow(null, NEW_CURRENCY).show();
+                buildCurrencyDetailWindow(null, NEW_CURRENCY).show();
             }
         });
-        
+
         currencyListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
-			
-			@Override
-			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
-				refreshAllCurrencyData();
-			}
-		});
+            @Override
+            public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
+                refreshAllCurrencyData();
+            }
+        });
     }
 
     private Window buildCurrencyDetailWindow(final ListGridRecord record, final int operation) {
@@ -131,7 +127,7 @@ public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagemen
                 currencyDetailWindow.destroy();
             }
         });
-        	
+
         VLayout currencyDetailLayout = new VLayout();
         currencyDetailLayout.setHeight100();
         currencyDetailLayout.setWidth100();
@@ -143,51 +139,62 @@ public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagemen
         final TextItem curCurrency = new TextItem(DataNameTokens.INV_CURRENCY_CURRENCY, "Currency");
         curCurrency.setRequired(Boolean.TRUE);
         curCurrency.setRequiredMessage(errMsg);
-        final TextItem curValue = new TextItem(DataNameTokens.INV_CURRENCY_RATE, "Value");
+        curCurrency.setKeyPressFilter("[a-z]");
+        final TextItem curValue = new TextItem(DataNameTokens.INV_CURRENCY_RATE, "Value (number only[0-9.])");
         curValue.setRequired(Boolean.TRUE);
         curValue.setRequiredMessage(errMsg);
-        final Label infoLabel = new Label();
-        
-        curCurrency.addChangedHandler(new ChangedHandler() {			
-			@Override
-			public void onChanged(ChangedEvent event) {
-				infoLabel.setContents("1 "+ curCurrency.getValueAsString() + " = Rp " + curValue.getValueAsString());
-			}
-		});
-        
-        curValue.addChangedHandler(new ChangedHandler() {			
-			@Override
-			public void onChanged(ChangedEvent event) {
-				infoLabel.setContents("1 "+ curCurrency.getValueAsString() + " = Rp " + curValue.getValueAsString());
-			}
-		});
-        
-        warehouseDetailForm.setFields(curCurrency, curValue);
-        
+        curValue.setKeyPressFilter("[0-9.]");
+        final TextItem infoLabel = new TextItem("info", "");
+        infoLabel.setDisabled(Boolean.TRUE);
+
+        curCurrency.addChangedHandler(new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent event) {
+                String currency = curCurrency == null || curCurrency.getValueAsString() == null
+                        || curCurrency.getValueAsString().isEmpty()? "": curCurrency.getValueAsString(),
+                        rate = Util.formatStringAsCurrency(curValue.getValueAsString() == null? "0.00": curValue.getValueAsString(), "000,000,000.00");
+                
+                infoLabel.setValue("1 " + currency + " = " + rate);
+            }
+        });
+
+        curValue.addChangedHandler(new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent event) {
+                String currency = curCurrency == null || curCurrency.getValueAsString() == null
+                        || curCurrency.getValueAsString().isEmpty()? "": curCurrency.getValueAsString(),
+                        rate = Util.formatStringAsCurrency(curValue.getValueAsString() == null? "0.00": curValue.getValueAsString(), "000,000,000.00");
+                
+                infoLabel.setValue("1 " + currency + " = " + rate);
+            }
+        });
+
+        warehouseDetailForm.setFields(curCurrency, curValue, infoLabel);
+
         HLayout buttonSet = new HLayout(5);
         IButton closeButton = new IButton("Close");
         final IButton editButton = new IButton();
-        
-        if(operation == NEW_CURRENCY){
-        	currencyDetailWindow.setTitle("Add New Currency");
-        	editButton.setTitle("Save");
+
+        if (operation == NEW_CURRENCY) {
+            currencyDetailWindow.setTitle("Add New Currency");
+            editButton.setTitle("Save");
             buttonSet.setMembers(closeButton, editButton);
         } else {
             currencyDetailWindow.setTitle("Currency Detail");
             warehouseDetailForm.setDisabled(true);
             curCurrency.setValue(record.getAttribute(DataNameTokens.INV_CURRENCY_CURRENCY));
             curValue.setValue(record.getAttribute(DataNameTokens.INV_CURRENCY_RATE));
-        	editButton.setTitle("Edit");
-        	IButton deleteButton = new IButton("Delete");
-        	
-        	deleteButton.addClickHandler(new ClickHandler() {				
-				@Override
-				public void onClick(ClickEvent event) {
-					getUiHandlers().deleteCurrency(MainPagePresenter.signedInUser, 
-							record.getAttribute(DataNameTokens.INV_CURRENCY_ID));
-				}
-			});
-        	
+            editButton.setTitle("Edit");
+            IButton deleteButton = new IButton("Delete");
+
+            deleteButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    getUiHandlers().deleteCurrency(MainPagePresenter.signedInUser,
+                            record.getAttribute(DataNameTokens.INV_CURRENCY_ID));
+                }
+            });
+
             buttonSet.setMembers(closeButton, editButton, deleteButton);
         }
 
@@ -201,24 +208,24 @@ public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagemen
         editButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-            	if(editButton.getTitle().equals("Edit")){
-            		warehouseDetailForm.setDisabled(false);
-            		editButton.setTitle("Save");
-            	} else {
-            		if(warehouseDetailForm.validate()){
-    	                HashMap<String, String> data = new HashMap<String, String>();
-    	                if(operation == EXISTING_CURRENCY){
-    	                	data.put(DataNameTokens.INV_CURRENCY_ID, 
-    	                			record.getAttribute(DataNameTokens.INV_CURRENCY_ID));
-    	                }
-    	                data.put(DataNameTokens.INV_CURRENCY_CURRENCY, curCurrency.getValueAsString());
-    	                data.put(DataNameTokens.INV_CURRENCY_RATE, curValue.getValueAsString());
-    	                getUiHandlers().saveOrUpdateCurrencyData(MainPagePresenter.signedInUser, data);
-            		}
-            	}
+                if (editButton.getTitle().equals("Edit")) {
+                    warehouseDetailForm.setDisabled(false);
+                    editButton.setTitle("Save");
+                } else {
+                    if (warehouseDetailForm.validate()) {
+                        HashMap<String, String> data = new HashMap<String, String>();
+                        if (operation == EXISTING_CURRENCY) {
+                            data.put(DataNameTokens.INV_CURRENCY_ID,
+                                    record.getAttribute(DataNameTokens.INV_CURRENCY_ID));
+                        }
+                        data.put(DataNameTokens.INV_CURRENCY_CURRENCY, curCurrency.getValueAsString());
+                        data.put(DataNameTokens.INV_CURRENCY_RATE, curValue.getValueAsString());
+                        getUiHandlers().saveOrUpdateCurrencyData(MainPagePresenter.signedInUser, data);
+                    }
+                }
             }
         });
-        
+
         buttonSet.setAlign(Alignment.CENTER);
 
         currencyDetailLayout.setMembers(warehouseDetailForm, buttonSet);
@@ -258,8 +265,8 @@ public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagemen
         return currencyLayout;
     }
 
-	@Override
-	public Window getDetailWindow() {
-		return currencyDetailWindow;
-	}
+    @Override
+    public Window getDetailWindow() {
+        return currencyDetailWindow;
+    }
 }
