@@ -60,7 +60,7 @@ public class AddItemAttributeDataCommand implements RafDsCommand {
         	ResultWrapper<AdvanceShipNoticeItem> asnItemWrapper = asnService.getSingleASNItemData(itemIdParam);
         	Long itemId = null;
         	
-        	if(asnItemWrapper!=null){
+        	if(asnItemWrapper.isSuccess()){
         		AdvanceShipNoticeItem asnItem = asnItemWrapper.getContent();       		
 		  
             	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
@@ -75,7 +75,7 @@ public class AddItemAttributeDataCommand implements RafDsCommand {
                 	}   
             	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
             		_log.info("reff type: consignment");
-            		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber().toString());
+            		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
                 	if(cffItemWrapper!=null){
                 		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
                 		_log.debug("CFF item found, id:"+item.getItem().getId());  
