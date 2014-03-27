@@ -39,7 +39,17 @@ public class FetchJournalDataCommand implements RafDsCommand {
 		
 		JPQLAdvancedQueryCriteria criteriaAndTaskCriteria = null;
 		//check for taskid parameter, it shall be there if this screen is called from ToDoList for approval purpose
+		
+		if(request.getParams()!=null && request.getParams().get(DataNameTokens.TASKID)!=null || !bManualJournal){
+			
+			criteriaAndTaskCriteria = new JPQLAdvancedQueryCriteria("and");
+			if (criteria!=null) {
+				criteriaAndTaskCriteria.add(criteria);
+			}
+		}
+		
 		if (request.getParams()!=null && request.getParams().get(DataNameTokens.TASKID)!=null) {
+			//view to do list
 			String taskId = request.getParams().get(DataNameTokens.TASKID);
 			BPMAdapter bpmAdapter = BPMAdapter.getBPMAdapter(userName, BPMAdapter.getUserPasswordFromLDAP(userName));
 			
@@ -61,10 +71,7 @@ public class FetchJournalDataCommand implements RafDsCommand {
 //				}
 //			}
 			
-			criteriaAndTaskCriteria = new JPQLAdvancedQueryCriteria("and");
-			if (criteria!=null) {
-				criteriaAndTaskCriteria.add(criteria);
-			}
+			
 //			criteriaAndTaskCriteria.add(taskCriteria);			
 			request.setCriteria(criteriaAndTaskCriteria);
 			
@@ -88,6 +95,19 @@ public class FetchJournalDataCommand implements RafDsCommand {
 			inCriteria.setOperator("IN");
 			
 			criteriaAndTaskCriteria.add(inCriteria);			
+		} else {
+			//journal 
+			if(!bManualJournal){
+
+				JPQLSimpleQueryCriteria approvalDescCriteria = new JPQLSimpleQueryCriteria();
+				approvalDescCriteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC));
+				approvalDescCriteria.setFieldName(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC);
+
+				approvalDescCriteria.setValue(VeniceConstants.FIN_APPROVAL_STATUS_DESC_APPROVED);
+				approvalDescCriteria.setOperator("equals");
+				
+				criteriaAndTaskCriteria.add(approvalDescCriteria);
+			}
 		}
 		
 		RafDsResponse rafDsResponse = new RafDsResponse();		
@@ -103,14 +123,20 @@ public class FetchJournalDataCommand implements RafDsCommand {
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = null;
 			
 			if ((criteria == null && criteriaAndTaskCriteria == null) || (criteria!=null && !criteria.getListIterator().hasNext()) || (criteriaAndTaskCriteria!=null && !criteriaAndTaskCriteria.getListIterator().hasNext())) {
-				
-				String select = "select o from FinJournalApprovalGroup o";
+				String select="";
+				if (request.getParams()!=null && request.getParams().get(DataNameTokens.TASKID)!=null) {
+				select = "select o from FinJournalApprovalGroup o";
+				} else {
+				select = "select o from FinJournalApprovalGroup o where o.finApprovalStatus.approvalStatusDesc ='"+VeniceConstants.FIN_APPROVAL_STATUS_DESC_APPROVED+"'";
+				}
 				if (bManualJournal) {
 					select = "select o from FinJournalApprovalGroup o where o.finJournal.journalId="+VeniceConstants.FIN_JOURNAL_MANUAL;
 				}
 				
 				finJournalApprovalGroupList = sessionHome.queryByRange(select, 0, 50);
 			} else {
+				
+				
 				FinJournalApprovalGroup finJournalAppprovalGroup = new FinJournalApprovalGroup();
 				
 				if (criteriaAndTaskCriteria!=null) {

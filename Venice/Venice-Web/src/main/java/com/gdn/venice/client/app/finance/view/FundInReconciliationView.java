@@ -1567,7 +1567,7 @@ public class FundInReconciliationView extends ViewWithUiHandlers<FundInReconcili
 								 * Hanya Order yang statusnya baru dan bukan order no payment yang bisa di allocate
 								 */		
 									boolean bCancelRefundButton = (selectedRecords[i].getAttributeAsString(DataNameTokens.FINARFUNDSINRECONRECORD_FINARRECONRESULT_RECONRESULTDESC).equals(DataConstantNameTokens.FINARRECONRESULT_RECONRESULTDESC_NOPAYMENT)
-											|| selectedRecords[i].getAttributeAsString(DataNameTokens.FINARFUNDSINRECONRECORD_FINAPPROVALSTATUS_APPROVALSTATUSDESC).equals(DataConstantNameTokens.FINAPPROVALSTATUS_APPROVALSTATUSDESC_SUBMITTED)
+											|| !selectedRecords[i].getAttributeAsString(DataNameTokens.FINARFUNDSINRECONRECORD_FINAPPROVALSTATUS_APPROVALSTATUSDESC).equals(DataConstantNameTokens.FINAPPROVALSTATUS_APPROVALSTATUSDESC_APPROVED)
 											|| selectedRecords[i].getAttributeAsString(DataNameTokens.FINARFUNDSINRECONRECORD_FINARFUNDINREPORTTIME_REPORT_TIME_DESC).equals(DataConstantNameTokens.FINARFUNDSINRECONRECORD_FINARFUNDINREPORTTIME_REPORT_TIME_DESC_REALTIME));							
 								
 								

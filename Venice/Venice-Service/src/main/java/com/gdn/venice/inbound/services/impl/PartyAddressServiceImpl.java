@@ -61,7 +61,8 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 				id.setAddressTypeId(next.getVenAddressType().getAddressTypeId());
 				next.setId(id);
 				// Persist the object
-				newVenPartyAddressList.add(venPartyAddressDAO.save(next));
+				//newVenPartyAddressList.add(venPartyAddressDAO.save(next));
+				newVenPartyAddressList.add(next);
 			}
 		}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()

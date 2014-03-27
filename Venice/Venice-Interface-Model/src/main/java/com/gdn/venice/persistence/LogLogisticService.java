@@ -1,9 +1,16 @@
 package com.gdn.venice.persistence;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 
 /**
@@ -38,8 +45,10 @@ public class LogLogisticService implements Serializable {
 	private LogLogisticsServiceType logLogisticsServiceType;
 
 	//bi-directional many-to-one association to VenOrderItem
+    /*
 	@OneToMany(mappedBy="logLogisticService")
 	private List<VenOrderItem> venOrderItems;
+	*/
 
     public LogLogisticService() {
     }
@@ -84,6 +93,7 @@ public class LogLogisticService implements Serializable {
 		this.logLogisticsServiceType = logLogisticsServiceType;
 	}
 	
+	/*
 	public List<VenOrderItem> getVenOrderItems() {
 		return this.venOrderItems;
 	}
@@ -91,5 +101,6 @@ public class LogLogisticService implements Serializable {
 	public void setVenOrderItems(List<VenOrderItem> venOrderItems) {
 		this.venOrderItems = venOrderItems;
 	}
+	*/
 	
 }

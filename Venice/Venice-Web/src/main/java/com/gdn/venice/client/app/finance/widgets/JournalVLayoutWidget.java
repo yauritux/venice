@@ -165,6 +165,9 @@ public class JournalVLayoutWidget extends VLayout {
 		journalList.getField(DataNameTokens.FINJOURNALAPPROVALGROUP_JOURNALGROUPDESC).setWidth("40%");
 		journalList.getField(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC).setWidth("10%");
 //		journalList.getField(DataNameTokens.FINJOURNALAPPROVALGROUP_JOURNALGROUPTIMESTAMP).setDateFormatter(DateDisplayFormat.TOEUROPEANSHORTDATETIME);
+		if(!bManualJournal){
+			journalList.getField(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC).setCanFilter(false);
+		}
 		
 		journalListLayout.addMember(journalList);
 	}
@@ -208,6 +211,24 @@ public class JournalVLayoutWidget extends VLayout {
 						((JournalView) view).getExportButton().setDisabled(exportDisabled);
 					}
 				}
+				
+				if(view instanceof ManualJournalView){
+					((ManualJournalView) view).getSubmitForApprovalButton().setDisabled(true);
+					if(selectedRecords.length > 0){
+						Boolean bDisabled = false;
+						
+						for(int i=0; i< selectedRecords.length; ++i){
+							
+							if(!selectedRecords[i].getAttribute(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC).equals("New")
+									&& !selectedRecords[i].getAttribute(DataNameTokens.FINJOURNALAPPROVALGROUP_FINAPPROVALSTATUS_APPROVALSTATUSDESC).equals("Rejected")){
+								bDisabled = true;
+								break;
+							}
+						}
+						((ManualJournalView) view).getSubmitForApprovalButton().setDisabled(bDisabled);
+					}
+				}
+				
 
 				/*
 				 * If a single record is selected then show the details

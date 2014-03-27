@@ -54,7 +54,7 @@ public class OrderItemStatusHistoryServiceImpl implements OrderItemStatusHistory
 		venOrderItemStatusHistory.setVenOrderItem(venOrderItem);
 		venOrderItemStatusHistory.setStatusChangeReason("Updated by System");
 		venOrderItemStatusHistory.setVenOrderStatus(venOrderStatus);
-		
+				
 		venOrderItemStatusHistory = venOrderItemStatusHistoryDAO.save(venOrderItemStatusHistory);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "done add order item status history");
 		

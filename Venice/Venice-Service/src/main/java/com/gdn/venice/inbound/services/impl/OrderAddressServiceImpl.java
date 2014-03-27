@@ -1,5 +1,8 @@
 package com.gdn.venice.inbound.services.impl;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,6 +29,9 @@ public class OrderAddressServiceImpl implements OrderAddressService {
 	@Autowired
 	private VenOrderAddressDAO venOrderAddressDAO;
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenOrderAddress persist(VenOrderAddress venOrderAddress)
@@ -36,14 +42,17 @@ public class OrderAddressServiceImpl implements OrderAddressService {
 		
 		VenOrderAddress persistedOrderAddress = null;
 		
-		if (venOrderAddress != null) {
-			try {
-				persistedOrderAddress = venOrderAddressDAO.save(venOrderAddress);
-			} catch (Exception e) {
-				CommonUtil.logAndReturnException(new CannotPersistOrderAddressException(
-						"Cannot persist VenOrderAddress," + e, VeniceExceptionConstants.VEN_EX_000030)
-				     , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-			}
+		if (venOrderAddress != null) {					
+			if (!em.contains(venOrderAddress)) {
+				//venOrderAddress is in detach mode, hence need to call save explicitly
+				try {
+					persistedOrderAddress = venOrderAddressDAO.save(venOrderAddress);
+				} catch (Exception e) {
+					CommonUtil.logAndReturnException(new CannotPersistOrderAddressException(
+							"Cannot persist VenOrderAddress," + e, VeniceExceptionConstants.VEN_EX_000030)
+					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+				}			
+			}			
 		} 
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()

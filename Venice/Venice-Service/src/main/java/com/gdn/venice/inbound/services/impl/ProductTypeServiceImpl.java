@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -14,6 +17,7 @@ import com.gdn.venice.dao.VenProductTypeDAO;
 import com.gdn.venice.exception.CannotPersistProductTypeException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.ProductTypeService;
+import com.gdn.venice.persistence.VenMerchantProduct;
 import com.gdn.venice.persistence.VenProductType;
 import com.gdn.venice.util.CommonUtil;
 
@@ -29,6 +33,9 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 	@Autowired
 	private VenProductTypeDAO venProductTypeDAO;
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@Override
 	public List<VenProductType> synchronizeVenProductTypeReferences(
 			List<VenProductType> productTypeRefs)
@@ -40,6 +47,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 		List<VenProductType> synchronizedProductTypeRefs = new ArrayList<VenProductType>();
 		
 		for (VenProductType productType : productTypeRefs) {
+			em.detach(productType);
 			if (productType.getProductTypeCode() != null) {
 				try {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -50,13 +58,22 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenProductTypeReferences::productTypeList = "
 									+ productTypeList);
-					if (productTypeList == null || (productTypeList.isEmpty())) {
+					if (productTypeList == null || (productTypeList.isEmpty())) {						
 						VenProductType venProductType = venProductTypeDAO.save(productType);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenProductTypeReferences::productType is saved");
-						synchronizedProductTypeRefs.add(venProductType);
-					} else {
+								, "synchronizeVenProductTypeReferences::productType is saved");						
+						//em.detach(venProductType);						
+						synchronizedProductTypeRefs.add(venProductType);						
+					} else {						
 						VenProductType venProductType = productTypeList.get(0);
+						/*
+						List<VenMerchantProduct> productTypeMerchantProducts = (venProductType.getVenMerchantProducts() != null
+								&& (!venProductType.getVenMerchantProducts().isEmpty())
+								? new ArrayList<VenMerchantProduct>(venProductType.getVenMerchantProducts())
+										: new ArrayList<VenMerchantProduct>());
+					    */					
+						//em.detach(venProductType);
+						//venProductType.setVenMerchantProducts(productTypeMerchantProducts);
 						synchronizedProductTypeRefs.add(venProductType);
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenProductTypeReferences::successfully added venProductType into synchronizedProductTypeRefs");

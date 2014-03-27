@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,8 +27,32 @@ public class CityServiceImpl implements CityService {
 	
 	@Autowired
 	private VenCityDAO venCityDAO;
+	
+	@PersistenceContext
+	private EntityManager em;
 
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public VenCity synchronizeVenCity(VenCity venCity) {
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCity::BEGIN,venCity=" + venCity);
+		VenCity synchCity = venCity;
+		if (venCity != null && venCity.getCityCode() != null) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCity::cityCode = " + venCity.getCityCode());
+			List<VenCity> cityList = venCityDAO.findByCityCode(venCity.getCityCode());
+			if (cityList == null || cityList.isEmpty()) {
+				if (!em.contains(venCity)) {
+					//venCity is in detach mode, hence need to explicitly call save method
+					synchCity = venCityDAO.saveAndFlush(venCity);
+				}
+			} else {
+				synchCity = cityList.get(0);
+			}
+		}
+		return synchCity;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenCity> synchronizeVenCityReferences(
 			List<VenCity> cityReferences) {
 		
@@ -36,30 +63,7 @@ public class CityServiceImpl implements CityService {
 		
 		if (cityReferences != null) {
 			for (VenCity city : cityReferences) {
-				if (city.getCityCode() != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenCityReferences::Synchronizing VenCity... :" + city.getCityCode());
-					/*
-					List<VenCity> cityList = venCityDAO.findByCityCode(city.getCityCode());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenCityReferences::cityList size = "
-									+ cityList.size());
-					if (cityList == null || (cityList.size() == 0)) {
-						VenCity venCity = venCityDAO.save(city);
-						synchronizedVenCities.add(venCity);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenCityReferences::successfully added venCity " + venCity 
-								+ " into synchronizedVenCities collection");
-					} else {
-						VenCity venCity = cityList.get(0);
-						synchronizedVenCities.add(venCity);
-					*/
-					VenCity venCity = venCityDAO.save(city);
-					synchronizedVenCities.add(venCity);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "successfully added venCity into synchronizedVenCities collection");
-					//}
-				}			
+				synchronizedVenCities.add(synchronizeVenCity(city));
 			} //End Of 'for'
 		}
 		

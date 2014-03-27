@@ -1,8 +1,10 @@
 package com.gdn.venice.inbound.services.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ public class RecipientServiceImpl implements RecipientService {
 	@Autowired
 	private PartyService partyService;
 	
+	@PersistenceContext
+	private EntityManager em;
+	
 	/**
 	 * Persists a recipient using the session tier
 	 * 
@@ -57,11 +62,22 @@ public class RecipientServiceImpl implements RecipientService {
 			venPartyType.setPartyTypeId(new Long(VenPartyTypeConstants.VEN_PARTY_TYPE_RECIPIENT.code()));
 			venRecipient.getVenParty().setVenPartyType(venPartyType);
 
-			venRecipient.setVenParty(partyService.persistParty(venRecipient.getVenParty(), "Recipient"));
+			VenParty persistedParty = partyService.persistParty(venRecipient.getVenParty(), "Recipient");
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "persistRecipient::persistedParty ID = " + persistedParty.getPartyId());
+			venRecipient.setVenParty(persistedParty);
 			// Synchronize the reference data
 			venRecipient = this.synchronizeVenRecipientReferenceData(venRecipient);
 			// Persist the object
-			venRecipient = venRecipientDAO.save(venRecipient);
+			
+			if (!em.contains(venRecipient)) {
+				try {
+					venRecipient = venRecipientDAO.save(venRecipient);
+				} catch (Exception e) {
+					CommonUtil.logError(this.getClass().getCanonicalName(), e);
+					throw new VeniceInternalException("Cannot persist VenRecipient", e);
+				}
+			}
 		}
 		return venRecipient;
 	}

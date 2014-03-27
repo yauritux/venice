@@ -13,6 +13,8 @@ import com.gdn.venice.persistence.VenOrderPaymentAllocation;
  */
 public interface OrderPaymentAllocationService {
 
+	public VenOrderPaymentAllocation persist(VenOrderPaymentAllocation venOrderPaymentAllocation) 
+	  throws VeniceInternalException;
 	public List<VenOrderPaymentAllocation> persistOrderPaymentAllocationList(
 			List<VenOrderPaymentAllocation> venOrderPaymentAllocationList) throws VeniceInternalException;	
 	public Boolean removeOrderPaymentAllocationList(VenOrder venOrder);	

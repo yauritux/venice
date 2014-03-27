@@ -12,19 +12,21 @@ public class OrderVAReceiverImpl implements OrderReceiver {
 	
 	private Order order;
 	
-	public OrderVAReceiverImpl(Order order) {
-		super();
+	@Override
+	public void setOrder(Order order) {
 		this.order = order;
 	}
+	
+	public OrderVAReceiverImpl() {}
 
 	@Override
-	public boolean createOrder() {
-		return true;
+	public Boolean createOrder() {
+		return Boolean.TRUE;
 	}
 
 	@Override
-	public boolean updateOrder() {
-		return true;
+	public Boolean updateOrder() {
+		return Boolean.TRUE;
 	}
 
 }

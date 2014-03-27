@@ -12,6 +12,8 @@ import com.gdn.venice.persistence.VenBank;
  */
 public interface BankService {
 
+	public VenBank synchronizeVenBank(VenBank venBank)
+	   throws VeniceInternalException;
 	public List<VenBank> synchronizeVenBankReferences(List<VenBank> bankReferences) 
 	   throws VeniceInternalException;
 }

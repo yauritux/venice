@@ -179,8 +179,8 @@ public class DataConstantNameTokens {
 	public static String FRAUD_RULE_34="Rule 34 - IP geolocation information";
 	public static String FRAUD_RULE_35="Rule 35 - Grey list";
 	public static String FRAUD_RULE_36="Rule 36 - Black List";
-	public static String FRAUD_RULE_37="Rule 37 - MIGS History with same credit card";
-	public static String FRAUD_RULE_38="Rule 38 - MIGS History with different credit card";	
+	public static String FRAUD_RULE_37="Rule 37 - Attempt CC with same credit card";
+	public static String FRAUD_RULE_38="Rule 38 - Attempt CC with different credit card";	
 	public static String FRAUD_RULE_39="Rule 39 - Pasca bayar";
 	public static String FRAUD_RULE_40="Rule 40 - Handphone area vs customer location";
 	public static String FRAUD_RULE_41="Rule 41 - Attempt CC";

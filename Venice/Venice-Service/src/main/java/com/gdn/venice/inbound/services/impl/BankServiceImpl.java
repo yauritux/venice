@@ -30,34 +30,46 @@ public class BankServiceImpl implements BankService {
 	private VenBankDAO venBankDAO;
 	
 	@Override
+	public VenBank synchronizeVenBank(VenBank venBank) throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenBank::BEGIN, venBank = " + venBank);
+		VenBank synchBank = null;
+		if (venBank != null && venBank.getBankCode() != null) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "synchronizeVenBank::venBank code = " + venBank.getBankCode());			
+			synchBank = venBankDAO.findByBankCode(venBank.getBankCode());
+			if (synchBank == null) {
+				throw CommonUtil.logAndReturnException(new BankNotFoundException(
+						"Bank does not exist!", VeniceExceptionConstants.VEN_EX_200001)
+				   , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			}
+			return synchBank;
+		} 
+		return synchBank;
+	}
+	
+	@Override
 	public List<VenBank> synchronizeVenBankReferences(
 			List<VenBank> bankReferences) throws VeniceInternalException {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenBankReferences::bankReferences = " + bankReferences);
-		//if (bankReferences == null || bankReferences.isEmpty()) return null;
 		
 		List<VenBank> synchronizedBankReferences = new ArrayList<VenBank>();
 		
 		if (bankReferences != null) {
-			for (VenBank bank : bankReferences) {
-				if (bank.getBankCode() != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenBankReferences::Restricting VenBank... :" + bank.getBankCode());
-					VenBank venBank = venBankDAO.findByBankCode(bank.getBankCode());
-					if (venBank == null) {
-						throw CommonUtil.logAndReturnException(new BankNotFoundException(
-								"Bank does not exist", VeniceExceptionConstants.VEN_EX_200001)
-						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-					} else {
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenBankReferences::adding venBank into synchronizedBankReferences");
-						synchronizedBankReferences.add(venBank);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenBankReferences::successfully added venBank into synchronizedBankReferences");
-					}
-				}	
-			} //end of 'for'
+			try {
+				for (VenBank bank : bankReferences) {
+					synchronizedBankReferences.add(synchronizeVenBank(bank));
+				} //end of 'for'
+			} catch (VeniceInternalException e) {
+				throw CommonUtil.logAndReturnException(e
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			} catch (Exception e) {
+				throw CommonUtil.logAndReturnException(new BankNotFoundException(
+						"Bank does not exist", VeniceExceptionConstants.VEN_EX_200001)
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			}
 		}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
