@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -37,6 +40,9 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 	
 	@Autowired
 	private AddressService addressService;
+	
+	@PersistenceContext
+	private EntityManager em;
 	
 	@Override
 	public List<VenPartyAddress> findByVenParty(VenParty party) {
@@ -167,7 +173,13 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 					// Persist the object
 					//newVenPartyAddressList.add(venPartyAddressDAO.save(next));
 					//newVenPartyAddressList.add(next);
-					newVenPartyAddressList.add(venPartyAddress);
+					//newVenPartyAddressList.add(venPartyAddress);
+					
+					VenPartyAddress persistedVenPartyAddress = venPartyAddress;
+					if (!em.contains(venPartyAddress)) {
+						persistedVenPartyAddress = venPartyAddressDAO.save(venPartyAddress); 
+					}
+					newVenPartyAddressList.add(persistedVenPartyAddress);
 				}
 			} catch (Exception e) {
 				CommonUtil.logError(this.getClass().getCanonicalName(), e);
