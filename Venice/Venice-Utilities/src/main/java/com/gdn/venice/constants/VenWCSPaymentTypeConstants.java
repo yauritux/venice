@@ -26,6 +26,7 @@ public enum VenWCSPaymentTypeConstants {
 	 VEN_WCS_PAYMENT_TYPE_TelkomselPoin(18, "TelkomselPoin"),
 	 VEN_WCS_PAYMENT_TYPE_BCACreditCard(19, "BCACreditCard"),	
 	 VEN_WCS_PAYMENT_TYPE_ANZ(20, "ANZ"),
+	 VEN_WCS_PAYMENT_TYPE_CIMBCreditCard(21, "CIMBCreditCard"),
 	//this is only for wcs
 	 VEN_WCS_PAYMENT_TYPE_PartialFulfillment(19, "PartialFulfillment");
 	 

@@ -157,14 +157,16 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 		BigDecimal discountAmount = new BigDecimal(rec.getDiscAmt());
 		
 		Date tgl=SDF_yyyyMMdd_HHmmss.parse(rec.getTransDate().replaceAll("\\.", "").substring(0, 8)+" "+transactionTime);		
+		Date paymentDate = SDF_yyyy_MM_dd.parse(rec.getTransDate().substring(0, 4)+"-"+rec.getTransDate().substring(4, 6)+"-"+rec.getTransDate().substring(6, 8));
+		
 		
 		if(!isFundInOkToContinue(referenceId, new java.sql.Timestamp(tgl.getTime())+"", paymentAmount, REPORT_TYPE)) {
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(referenceId, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(referenceId, paymentAmount, REPORT_TYPE,paymentDate);
 		
-		if(order != null && !isOrderPaymentExist(referenceId, paymentAmount, REPORT_TYPE)){
+		if(order != null && !isOrderPaymentExist(referenceId, paymentAmount, REPORT_TYPE,paymentDate)){
 			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + referenceId);
 			return null;
 		}
@@ -173,7 +175,7 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 			VenOrderPaymentAllocation orderPaymentAllocation 
 				= getPaymentAllocationByRelatedPayment(referenceId, 
 						                               paymentAmount, 
-						                               REPORT_TYPE);
+						                               REPORT_TYPE,paymentDate);
 			
 			List<FinArFundsInReconRecord> fundInReconList = orderPaymentAllocation.getVenOrderPayment().getFinArFundsInReconRecords();
 			fundInRecon = fundInReconList.get(0);
