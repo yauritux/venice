@@ -13,6 +13,10 @@ import javax.persistence.TableGenerator;
 
 /**
  * The persistent class for the ven_city database table.
+ * Change History:
+ *  March 27, 2014 (1:59PM) - yauritux : 
+ *    - override equals and hashCode methods 
+ *    - removes bidirectional association (one-to-many)
  * 
  */
 @Entity
@@ -74,5 +78,44 @@ public class VenCity implements Serializable {
 		this.venAddresses = venAddresses;
 	}
 	*/
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		
+		if (!(obj instanceof VenCity)) {
+			return false;
+		}
+		
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		VenCity venCity = (VenCity) obj;
+		
+		if ((this.cityCode != null) && (venCity.getCityCode() != null) && (!this.cityCode.equalsIgnoreCase(venCity.getCityCode()))) {
+			return false;
+		}
+		
+		if ((this.cityName != null) && (venCity.getCityName() != null) && (!this.cityCode.equalsIgnoreCase(venCity.getCityCode()))) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		int prime = 31;
+		int result = 1;
+		
+		result = prime * result + (cityId != null ? cityId.hashCode() : 0);
+		result = prime * result + (cityCode != null ? cityCode.hashCode() : 0);
+		result = prime * result + (cityName != null ? cityName.hashCode() : 0);
+		
+		return result;
+	}
 	
 }
