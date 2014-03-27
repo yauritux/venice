@@ -601,7 +601,19 @@
     <display-name>PickingListExportServlet</display-name>
     <servlet-name>PickingListExportServlet</servlet-name>
     <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListExportServlet</servlet-class>
-  </servlet> 
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>PackingListPresenterServlet</display-name>
+    <servlet-name>PackingListPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.PackingListPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>GINPresenterServlet</display-name>
+    <servlet-name>GINPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.GINPresenterServlet</servlet-class>
+  </servlet>
   <servlet>
     <description></description>
     <display-name>PutawayManagementPresenterServlet</display-name>
@@ -811,7 +823,15 @@
   <servlet-mapping>
     <servlet-name>PutawayManagementPresenterServlet</servlet-name>
     <url-pattern>/PutawayManagementPresenterServlet</url-pattern>
-  </servlet-mapping>    
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>PackingListPresenterServlet</servlet-name>
+    <url-pattern>/PackingListPresenterServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GINPresenterServlet</servlet-name>
+    <url-pattern>/GINPresenterServlet</url-pattern>
+  </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>
