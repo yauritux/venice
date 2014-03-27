@@ -60,15 +60,15 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	public static final String COUNT_BY_PAYMENTTIMERANGE_CREDITCARD_NOTSAMEORDER_SQL =
 		   "SELECT COUNT(o) " +
-		   "FROM VenOrderPaymentAllocation AS opa " +
+		   "FROM VenOrderPaymentAllocation AS o " +
 		   " JOIN o.venOrderPayment AS op " +
 		   "WHERE " +
-		   " opa.venOrder <> ?1 AND " +
+		   " o.venOrder <> ?1 AND " +
 		   " op.maskedCreditCardNumber like ?2 AND " +
 		   " op.paymentTimestamp BETWEEN ?3 AND ?4 ";
 	
 	public static final String COUNT_MASKEDCREDITCARD_BY_IPADDRESS_ORDERDATERANGE_SQL = 
-		   "SELECT COUNT(op.masked_credit_card_number) " +
+		   "SELECT COUNT(op.maskedCreditCardNumber) " +
 		   "FROM VenOrderPaymentAllocation AS opa " +
 		   " JOIN opa.venOrderPayment AS op " +
 		   " JOIN opa.venOrder AS o "+
@@ -86,7 +86,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	public static final String FIND_BY_VENORDER_PAYMENTTYPECC_SQL = 
 		   "SELECT o " +
 		   "FROM VenOrderPaymentAllocation o " +
-		   " JOIN FETCH opa.venOrderPayment op " +
+		   " JOIN FETCH o.venOrderPayment op " +
 		   "WHERE o.venOrder = ?1 " +
 		   "AND o.venOrderPayment.venPaymentType.paymentTypeId="+VeniceConstants.VEN_PAYMENT_TYPE_ID_CC;
 	

@@ -40,8 +40,8 @@ public enum FraudRuleConstants {
 	FRAUD_RULE_34("Rule 34 - IP geolocation information"),
 	FRAUD_RULE_35("Rule 35 - Grey list"),
 	FRAUD_RULE_36("Rule 36 - Black List"),
-	FRAUD_RULE_37("Rule 37 - MIGS History with same credit card"),
-	FRAUD_RULE_38("Rule 38 - MIGS History with different credit card"),	
+	FRAUD_RULE_37("Rule 37 - Attempt CC with same credit card"),
+	FRAUD_RULE_38("Rule 38 - Attempt CC with different credit card"),	
 	FRAUD_RULE_39("Rule 39 - Pasca bayar"),
 	FRAUD_RULE_40("Rule 40 - Handphone area vs customer location"),
 	

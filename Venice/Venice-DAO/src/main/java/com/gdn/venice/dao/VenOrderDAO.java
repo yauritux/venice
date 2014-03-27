@@ -18,7 +18,7 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 		"INNER JOIN FETCH opa.venOrderPayment op " +
 		"WHERE o.venOrderStatus.orderStatusId = " + VeniceConstants.VEN_ORDER_STATUS_C +
 		" AND op.venPaymentType.paymentTypeId = " + VeniceConstants.VEN_PAYMENT_TYPE_ID_CC +
-		" AND o.orderDate => ?1 ";
+		" AND o.orderDate >= ?1 ";
 	
 	public static final String FIND_WITH_WCSPAYMENTTYPE_BY_ORDER =
 		"SELECT o " +
@@ -32,22 +32,22 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 		"SELECT o " +
 		"FROM VenOrder o " +
 		"INNER JOIN FETCH o.venCustomer c " +
-		"INNER JOIN FETCH c.venParty p" +
+		"INNER JOIN FETCH c.venParty p " +
 		"WHERE o = ?1 ";
 	
 	public static final String FIND_OTHER_BY_STATUS_C_AND_ORDERDATERANGE =
 		"SELECT o " +
 		"FROM VenOrder o " +
 		"WHERE o <> ?1 " +
-		"AND o.venOrderStatus.orderStatusId = " + VeniceConstants.VEN_ORDER_STATUS_C +
-		"AND o.orderDate BETWEEN ?2 AND ?3 ";
+		" AND o.venOrderStatus.orderStatusId = " + VeniceConstants.VEN_ORDER_STATUS_C +
+		" AND o.orderDate BETWEEN ?2 AND ?3 ";
 	
 	public static final String GET_AMOUNTSUM_BY_ORDER_OR_CUSTOMER_ORDERDATERANGE = 
 		"SELECT COALESCE(SUM(o.amount),0) " +
 		"FROM VenOrder o " +
 		"WHERE o= ?1 " +
-	    "OR (o.venCustomer = ?2 " +
-		"AND orderDate BETWEEN ?3 AND ?4)";
+	    " OR (o.venCustomer = ?2 " +
+		" AND orderDate BETWEEN ?3 AND ?4)";
 	
 	public VenOrder findByWcsOrderId(String wcsOrderId);
 	

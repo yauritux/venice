@@ -23,7 +23,7 @@ public interface FrdParameterRule31DAO extends JpaRepository<FrdParameterRule31,
 		"and a.noCc in " +
 		" (select o.venOrderPayment.maskedCreditCardNumber " +
 		"  from VenOrderPaymentAllocation o " +
-		"  where o.venOrder.orderId= ?1" +
+		"  where o.venOrder.orderId= ?1 " +
 		"  )";
 	
 	@Query(FIND_BY_GENUINE_LIST)

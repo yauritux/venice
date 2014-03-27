@@ -67,7 +67,7 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 	public static final String FIND_WITH_VENORDERITEMADDRESS_VENCOUNTRY_BY_VENORDER_SQL =
 		"SELECT oi " + 
 	    "FROM VenOrderItem oi " + 
-	    "INNER JOIN FETCH oi.venOrderItemAddress oia " +
+	    "INNER JOIN FETCH oi.venOrderItemAddresses oia " +
 	    "INNER JOIN FETCH oia.venAddress a " +
 	    "INNER JOIN FETCH a.venCountry c " +
 	    "WHERE oi.venOrder = ?1";
