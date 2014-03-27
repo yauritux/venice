@@ -6,6 +6,7 @@ package com.gdn.venice.server.app.inventory.service;
 
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.gdn.inventory.exchange.entity.AttributeName;
+import com.gdn.inventory.exchange.entity.WarehouseWIP;
 import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
 import com.gdn.inventory.exchange.entity.module.outbound.GoodIssuedNote;
 import com.gdn.inventory.exchange.entity.module.outbound.SalesOrderAWBInfo;
@@ -127,6 +128,57 @@ public class GINService {
             is.close();
             System.out.println(sb.toString());
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<AWBInfo>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<GoodIssuedNote> saveGIN(String username, GoodIssuedNote newGin, String awbNumberArray) throws JsonGenerationException, JsonMappingException, IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "gin/createGin?username=" + username+"&awbNumberArray="+awbNumberArray;
+        System.out.println(url);
+        PostMethod httpPost = new PostMethod(url);
+        String json = mapper.writeValueAsString(newGin);
+        System.out.println(json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+        httpPost.setRequestHeader("Content-Type", "application/json");
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println(httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<GoodIssuedNote>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<List<AWBInfo>> getAwbList(String ginId) throws IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "gin/getAwbList?ginId=" + ginId;
+        System.out.println(url);
+        PostMethod httpPost = new PostMethod(url);
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<AWBInfo>>>() {
             });
         } else {
             return null;

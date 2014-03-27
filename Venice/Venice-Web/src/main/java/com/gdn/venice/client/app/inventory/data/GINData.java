@@ -39,4 +39,22 @@ public class GINData {
 
         return retVal;
     }
+    
+    public static RafDataSource getAwbListData(String ginId) {
+        String fetchUrl = GWT.getHostPageBaseURL() + GoodIssuedNotePresenter.ginPresenterServlet
+                + "?method=fetchAwbListData&type=DataSource&ginId=" + ginId;
+        DataSourceField[] dataSourceFields = {
+            new DataSourceTextField(DataNameTokens.INV_GIN_AWB_NO, "AWB NO")
+        };
+        dataSourceFields[0].setPrimaryKey(true);
+        RafDataSource retVal = new RafDataSource(
+                "/response/data/*",
+                fetchUrl,
+                null,
+                null,
+                null,
+                dataSourceFields);
+
+        return retVal;
+    }
 }

@@ -194,12 +194,11 @@ public class GoodIssuedNoteView extends ViewWithUiHandlers<GoodIssuedNoteUiHandl
             logistic.setValue(record.getAttribute(DataNameTokens.INV_GIN_LOGISTIC));
             logistic.setDisabled(true);
             packingToolStrip.addButton(printGinButton);
-            DataSource ds = PackingListData.getAllSalesData(record.getAttribute(DataNameTokens.INV_GIN_ID), username);
+            DataSource ds = GINData.getAwbListData(record.getAttribute(DataNameTokens.INV_GIN_ID));
             ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
 
             awbGinGrid.setDataSource(ds);
             awbGinGrid.setFields(listGridField);
-            awbGinGrid.getField(DataNameTokens.INV_GIN_AWB_ID).setHidden(Boolean.TRUE);
             refreshAwbGinListData();
         } else {
             ginDetailWindow.setTitle("Add New GIN");
@@ -261,8 +260,8 @@ public class GoodIssuedNoteView extends ViewWithUiHandlers<GoodIssuedNoteUiHandl
             public void onClick(ClickEvent event) {
                 HashMap<String, String> data = new HashMap<String, String>();
                 data.put(DataNameTokens.INV_GIN_WAREHOUSECODE, whCode.getValueAsString());
-                data.put(DataNameTokens.INV_GIN_LOGISTIC, whCode.getValueAsString());
-                data.put(DataNameTokens.INV_GIN_NOTE, whCode.getValueAsString());
+                data.put(DataNameTokens.INV_GIN_LOGISTIC, logistic.getDisplayValue());
+                data.put(DataNameTokens.INV_GIN_NOTE, spcNote.getValueAsString());
 
                 StringBuilder sb = new StringBuilder();
                 for (int r = 0; r < recordNumber; r++) {

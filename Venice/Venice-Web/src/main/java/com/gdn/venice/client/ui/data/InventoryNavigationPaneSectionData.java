@@ -37,9 +37,9 @@ public class InventoryNavigationPaneSectionData {
                     new NavigationPaneTreeNodeRecord("15", "14", "Create Good Received Note", NameTokens.grnCreatePage, "IM14", DataWidgetNameTokens.INV_GRNCREATETREENODE),
                     new NavigationPaneTreeNodeRecord("16", "14", "Good Received Note List", NameTokens.grnListPage, "IM15", DataWidgetNameTokens.INV_GRNLISTTREENODE),
                     new NavigationPaneTreeNodeRecord("17", "1", "Picking List", NameTokens.pickingListPage, "IM16", DataWidgetNameTokens.INV_PICKINGLISTTREENODE),
-		  			new NavigationPaneTreeNodeRecord("18", "1", "Putaway", null, "IM17", DataWidgetNameTokens.INV_PUTAWAYTREENODE),
-		  			new NavigationPaneTreeNodeRecord("19", "18", "Create Putaway", NameTokens.putawayCreatePage, "IM18", DataWidgetNameTokens.INV_CREATEPUTAWAYTREENODE),
-		  			new NavigationPaneTreeNodeRecord("20", "18", "Input Putaway Location", NameTokens.putawayInputLocationPage, "IM19", DataWidgetNameTokens.INV_INPUTPUTAWAYLOCATIONTREENODE),
+                    new NavigationPaneTreeNodeRecord("18", "1", "Putaway", null, "IM17", DataWidgetNameTokens.INV_PUTAWAYTREENODE),
+                    new NavigationPaneTreeNodeRecord("19", "18", "Create Putaway", NameTokens.putawayCreatePage, "IM18", DataWidgetNameTokens.INV_CREATEPUTAWAYTREENODE),
+                    new NavigationPaneTreeNodeRecord("20", "18", "Input Putaway Location", NameTokens.putawayInputLocationPage, "IM19", DataWidgetNameTokens.INV_INPUTPUTAWAYLOCATIONTREENODE),
                     new NavigationPaneTreeNodeRecord("21", "1", "Packing List", NameTokens.packingListPage, "IM20", DataWidgetNameTokens.INV_PACKINGLISTTREENODE),
                     new NavigationPaneTreeNodeRecord("22", "1", "Good Issued Note", NameTokens.ginPage, "IM21", DataWidgetNameTokens.INV_GINTREENODE)
                 };

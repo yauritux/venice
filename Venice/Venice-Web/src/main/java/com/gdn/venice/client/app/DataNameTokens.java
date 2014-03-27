@@ -1297,6 +1297,7 @@ public class DataNameTokens {
         public static String INV_SO_ORDERITEMID = "orderItemId";
         public static String INV_SO_MERCHANTSKU = "merchantSKU";
         public static String INV_SO_QUANTITY = "quantity";
+        public static String INV_SO_DISCRIMINATOR = "discriminator";
         public static String INV_SO_ITEMID = "itemId";
         public static String INV_SO_ITEMDESC = "itemDesc";
         public static String INV_SO_ITEMUOM = "itemUom";

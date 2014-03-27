@@ -5,7 +5,9 @@
 package com.gdn.venice.server.app.inventory.presenter;
 
 import com.gdn.venice.server.app.inventory.command.CheckAwbNumberCommand;
+import com.gdn.venice.server.app.inventory.command.FetchAwbGinListDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGinDataCommand;
+import com.gdn.venice.server.app.inventory.command.SaveGINDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -58,10 +60,11 @@ public class GINPresenterServlet extends HttpServlet {
             }
 
             if (method.equals("fetchGinData")) {
-                System.out.println("fetchGinData");
                 params.put("warehouseCode", request.getParameter("warehouseCode"));
                 rafDsRequest.setParams(params);
                 rafDsCommand = new FetchGinDataCommand(rafDsRequest);
+            } else if(method.equals("fetchAwbListData")){
+                rafDsCommand = new FetchAwbGinListDataCommand(request.getParameter("ginId"));
             }
 
             if (rafDsCommand != null) {
@@ -79,8 +82,7 @@ public class GINPresenterServlet extends HttpServlet {
                         request.getParameter("logistic"), request.getParameter("warehouseCode"));
                 retVal = cekAwbCommand.execute();
             } else if (method.equals("saveGIN")) {
-                RafRpcCommand cekAwbCommand = new CheckAwbNumberCommand(request.getParameter("awbNumber"),
-                        request.getParameter("logistic"), request.getParameter("warehouseCode"));
+                RafRpcCommand cekAwbCommand = new SaveGINDataCommand(username, Util.extractRequestBody(request));
                 retVal = cekAwbCommand.execute();
             }
         }

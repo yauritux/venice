@@ -35,7 +35,8 @@ public class CheckAwbNumberCommand implements RafRpcCommand {
             if (wrapper != null) {
                 if (wrapper.isSuccess()) {
                     AWBInfo awb = wrapper.getContent();
-                    if (awb != null && awb.getStatus() == AWBInfoStatus.COMPLETED) {
+                    if (awb != null && awb.getStatus() == AWBInfoStatus.COMPLETED 
+                            && awb.getGin() == null) {
                         if (!awb.getLogisticCode().equalsIgnoreCase(logistic)) {
                             return "Attended for other logistic";
                         } else {

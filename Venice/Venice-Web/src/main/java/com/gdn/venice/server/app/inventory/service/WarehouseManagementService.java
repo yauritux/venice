@@ -177,4 +177,27 @@ public class WarehouseManagementService {
             return null;
         }
     }
+
+    public ResultWrapper<Warehouse> findByCode(String warehouseCode) throws HttpException, IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "warehouse/findByCode?warehouseCode=" + warehouseCode;
+        GetMethod httpGet = new GetMethod(url);
+        int httpCode = httpClient.executeMethod(httpGet);
+
+        if (httpCode == HttpStatus.SC_OK) {
+            System.out.println("status OK");
+            InputStream is = httpGet.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<Warehouse>>() {
+            });
+        } else {
+            return null;
+        }
+    }
 }
