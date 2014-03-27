@@ -58,7 +58,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         		_log.info("item id from grn item");
         		ResultWrapper<GoodReceivedNoteItem> grnItemWrapper = grnService.findItemByGRNItemId(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID));
         		
-        		if(grnItemWrapper!=null){
+        		if(grnItemWrapper.isSuccess()){
         			itemIdParam = grnItemWrapper.getContent().getAdvanceShipNoticeItem().getId().toString();
         		}
         	}
@@ -66,13 +66,13 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         	ResultWrapper<AdvanceShipNoticeItem> asnItemWrapper = asnService.getSingleASNItemData(itemIdParam);
         	Long itemId = null;
         	
-        	if(asnItemWrapper!=null){
+        	if(asnItemWrapper.isSuccess()){
         		AdvanceShipNoticeItem asnItem = asnItemWrapper.getContent();       		
 		  
             	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
             		_log.info("reff type: purchase order");                		                		
             		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
-                	if(poItemWrapper!=null){
+                	if(poItemWrapper.isSuccess()){
                 		PurchaseRequisitionItem item = poItemWrapper.getContent().getPurchaseRequisitionItem();
                 		_log.debug("PO item found, id:"+item.getItem().getId());    
                 		itemId=item.getItem().getId();
@@ -82,7 +82,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
             	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
             		_log.info("reff type: consignment");
             		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
-                	if(cffItemWrapper!=null){
+                	if(cffItemWrapper.isSuccess()){
                 		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
                 		_log.debug("CFF item found, id:"+item.getItem().getId());    
                 		itemId=item.getItem().getId();

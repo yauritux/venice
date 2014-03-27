@@ -54,7 +54,6 @@ public class SavePickingListDataCommand implements RafRpcCommand {
 	public String execute() {
 		System.out.println("SavePickingListDataCommand");
 		PickingListDetail pld= new PickingListDetail();
-
 		
 		ResultWrapper<PickingListDetail> pldWrapper;
 		try {
@@ -183,12 +182,8 @@ public class SavePickingListDataCommand implements RafRpcCommand {
 			
 			pldWrapper = pickingListService.submitPickingList(username, pld);
 			
-			if(pldWrapper != null){
-				if(!pldWrapper.isSuccess()){
-					return pldWrapper.getError();
-				}
-			} else {
-				return "Failed saving list, error connection";
+			if(!pldWrapper.isSuccess()){
+				return pldWrapper.getError();
 			}
 		} catch (Exception e) {
 			return "Failed saving list, try again later. If error persist please contact administrator";

@@ -9,8 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.app.inventory.command.FetchPutawayDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchPutawayDetailGRNItemDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchPutawayGRNItemDataCommand;
 import com.gdn.venice.server.app.inventory.command.SavePutawayDataCommand;
+import com.gdn.venice.server.app.inventory.command.SavePutawayInputLocationDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -58,6 +61,10 @@ public class PutawayManagementPresenterServlet extends HttpServlet{
 				params.put(DataNameTokens.INV_WAREHOUSE_ID, request.getParameter(DataNameTokens.INV_WAREHOUSE_ID));				
 			}
 			
+			if (request.getParameter(DataNameTokens.INV_PUTAWAY_GRN_ID)!=null) {
+				params.put(DataNameTokens.INV_PUTAWAY_GRN_ID, request.getParameter(DataNameTokens.INV_PUTAWAY_GRN_ID));				
+			}
+			
 			rafDsRequest.setParams(params);			
 			String method = request.getParameter("method");
 			
@@ -69,13 +76,33 @@ public class PutawayManagementPresenterServlet extends HttpServlet{
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-			}						
+			}else if(method.equals("fetchPutawayData")){
+				RafDsCommand fetchPutawayDataCommand = new FetchPutawayDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchPutawayDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else if(method.equals("fetchPutawayDetailGRNItemData")){
+				RafDsCommand fetchPutawayDetailGRNItemDataCommand = new FetchPutawayDetailGRNItemDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchPutawayDetailGRNItemDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}				
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");		
 			if(method.equals("submitPutawayData")){					
 				RafRpcCommand savePutawayDataCommand = new SavePutawayDataCommand(username, requestBody);
 				retVal = savePutawayDataCommand.execute();
-			}
+			}else if(method.equals("savePutawayInputLocationData")){
+				System.out.println("masuk servlet savePutawayInputLocationData");
+				RafRpcCommand savePutawayInputLocationDataCommand = new SavePutawayInputLocationDataCommand(username, requestBody);
+				retVal = savePutawayInputLocationDataCommand.execute();
+			}			
 		}
 		
 		response.getOutputStream().println(retVal);

@@ -66,6 +66,7 @@ import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
+import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -80,6 +81,7 @@ import com.gdn.venice.client.app.inventory.view.GRNCreateView;
 import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.PickingListView;
 import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
+import com.gdn.venice.client.app.inventory.view.PutawayInputView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfEditWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfListFilterView;
@@ -451,5 +453,10 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				PutawayCreatePresenter.MyView.class,
 				PutawayCreateView.class,
 				PutawayCreatePresenter.MyProxy.class);
+		
+		bindPresenter(PutawayInputPresenter.class,
+				PutawayInputPresenter.MyView.class,
+				PutawayInputView.class,
+				PutawayInputPresenter.MyProxy.class);
 	}
 }

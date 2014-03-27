@@ -39,8 +39,7 @@ public class FetchPickingListDataCommand implements RafDsCommand {
         try {
         		pickingListService = new PickingListManagementService();
                 InventoryPagingWrapper<WarehouseItem> warehouseItemwrapper = pickingListService.getPickingList(request);
-                if(warehouseItemwrapper != null){
-	 		        
+                if(warehouseItemwrapper.isSuccess()){	 		        
 	                for(WarehouseItem whi : warehouseItemwrapper.getContent()){
 	                    HashMap<String, String> map = new HashMap<String, String>();
 	                    map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID, Long.toString(whi.getId()));                    	                    

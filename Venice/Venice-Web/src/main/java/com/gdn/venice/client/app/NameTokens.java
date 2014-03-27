@@ -86,7 +86,7 @@ public class NameTokens {
 	public static final String pickingListPage = "!pickingListPage";
 	
 	public static final String putawayCreatePage = "!putawayCreatePage";
-	public static final String putawayInputLocationPage = "!putawayInputLocationPage";
+	public static final String putawayInputPage = "!putawayInputPage";
         
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;

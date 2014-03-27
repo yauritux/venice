@@ -38,7 +38,7 @@ public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand{
 		try{		
 			username = "roland";
 			ResultWrapper<List<WarehouseUser>> whuWrapper = getWarehouseUserData(username);
-			if(whuWrapper!=null){
+			if(whuWrapper.isSuccess()){
 				for(WarehouseUser wu : whuWrapper.getContent()){
     				map.put("data"+wu.getWarehouse().getId().toString(), wu.getWarehouse().getName());
                 }
@@ -54,7 +54,6 @@ public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand{
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "user/getWarehouseList?username=" + username;
         PostMethod httpPost = new PostMethod(url);
-    	
     	HttpClient httpClient= new HttpClient();
     	ObjectMapper mapper = new ObjectMapper();
         int httpCode = httpClient.executeMethod(httpPost);

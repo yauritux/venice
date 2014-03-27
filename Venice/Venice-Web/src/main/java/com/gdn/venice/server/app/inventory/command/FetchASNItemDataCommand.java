@@ -45,13 +45,12 @@ public class FetchASNItemDataCommand implements RafDsCommand {
         try {
     		asnService = new ASNManagementService();        		
     		InventoryPagingWrapper<AdvanceShipNoticeItem> asnWrapper = asnService.getASNItemData(request, request.getParams().get(DataNameTokens.INV_ASN_ID));
-            if(asnWrapper != null){     
-            	
+            if(asnWrapper.isSuccess()){                 	
             	for(AdvanceShipNoticeItem asnItem: asnWrapper.getContent()){
             		if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
             			_log.info("reff type: purchase order");                		                		
                 		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
-                    	if(poItemWrapper!=null){
+                    	if(poItemWrapper.isSuccess()){
                     		PurchaseRequisitionItem item = poItemWrapper.getContent().getPurchaseRequisitionItem();
                     		_log.debug("PO item found, code:"+item.getItem().getCode());    
                     		
@@ -75,7 +74,7 @@ public class FetchASNItemDataCommand implements RafDsCommand {
                 	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
                 		_log.info("reff type: consignment");
                 		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
-                    	if(cffItemWrapper!=null){
+                    	if(cffItemWrapper.isSuccess()){
                     		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
                     		_log.debug("CFF item found, code:"+item.getItem().getCode());    
                     		

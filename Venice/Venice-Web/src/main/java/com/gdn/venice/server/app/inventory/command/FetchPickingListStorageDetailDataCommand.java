@@ -41,7 +41,7 @@ public class FetchPickingListStorageDetailDataCommand implements RafDsCommand {
         try {
         		pickingListService = new PickingListManagementService();
         		ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);
-                if(detailWrapper != null){
+                if(detailWrapper.isSuccess()){
                 	System.out.println("detailWrapper not null");
                 	PickingListDetail detail = detailWrapper.getContent();
                 	if(detail.getWhItemStorageStock()!=null){

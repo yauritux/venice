@@ -40,16 +40,16 @@ public class PickingListManagementService{
 	}
 	
 	public InventoryPagingWrapper<WarehouseItem> getPickingList(RafDsRequest request) throws HttpException, IOException{
-		_log.info("getPickingList");
+		System.out.println("getPickingList");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "pickingList/getPickingList?warehouseId=" + request.getParams().get("warehouseId")
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
         
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -57,7 +57,7 @@ public class PickingListManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug(sb.toString());
+            System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<WarehouseItem>>() {});
         } else {

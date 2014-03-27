@@ -95,13 +95,10 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 			_log.debug("item size: "+itemList.size());			
 			grnWrapper = grnService.saveGrn(username, grn, itemList);
 			
-			if(grnWrapper != null){
-				if(!grnWrapper.isSuccess()){
-					return grnWrapper.getError();
-				}
-			} else {
-				return "Failed saving grn, error connection";
+			if(!grnWrapper.isSuccess()){
+				return grnWrapper.getError();
 			}
+
 		} catch (Exception e) {
 			return "Failed saving grn, try again later. If error persist please contact administrator";
 		}

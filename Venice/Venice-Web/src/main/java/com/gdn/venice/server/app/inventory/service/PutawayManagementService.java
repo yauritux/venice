@@ -24,6 +24,7 @@ import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
 import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNoteItem;
 import com.gdn.inventory.exchange.entity.module.inbound.Putaway;
+import com.gdn.inventory.exchange.entity.module.inbound.PutawayDetail;
 import com.gdn.inventory.exchange.entity.module.inbound.PutawayItem;
 import com.gdn.inventory.exchange.type.StockType;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
@@ -189,5 +190,91 @@ public class PutawayManagementService{
         	return null;
         }
 	}
+	
+	public InventoryPagingWrapper<Putaway> getPutawayListByWarehouseId(String warehouseId) throws HttpException, IOException{
+		System.out.println("getPutawayListByWarehouseId");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "putaway/getPutawayListByWarehouse?warehouseId=" +warehouseId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<Putaway>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public InventoryPagingWrapper<GoodReceivedNoteItem> getGRNItemDataListByGrnId(String grnId) throws HttpException, IOException{
+		System.out.println("getGRNItemDataListByGrnId");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "goodReceivedNote/findItemByGRNId?grnId=" +grnId+"&page=1&limit=20";
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<GoodReceivedNoteItem>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public ResultWrapper<PutawayDetail> savePutawayInputLocation(String username, List<PutawayDetail> putawayDetailList) 
+			throws JsonGenerationException, JsonMappingException, IOException {
+		System.out.println("savePutawayInputLocation");
+		String url=InventoryUtil.getStockholmProperties().getProperty("address")
+				+ "putaway/addPutawayInputLocation?username=" + username;
+		System.out.println("url: "+url);
+		PostMethod httpPost = new PostMethod(url);
+		
+		PutawayDetail[] putawayDetail = putawayDetailList.toArray(new PutawayDetail[0]);
+		
+		PutawayRequest putawayRequest = new PutawayRequest();
+		putawayRequest.setPutawayDetail(putawayDetail);
+		
+		String json = mapper.writeValueAsString(putawayRequest);
+		System.out.println("json: "+json);
+		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+
+		httpPost.setRequestHeader("Content-Type", "application/json");
+
+		int httpCode = httpClient.executeMethod(httpPost);
+		System.out.println("response code: "+httpCode);
+		if (httpCode == HttpStatus.SC_OK) {
+			InputStream is = httpPost.getResponseBodyAsStream();
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			StringBuilder sb = new StringBuilder();
+			for (String line = br.readLine(); line != null; line = br.readLine()) {
+				sb.append(line);
+			}
+			is.close();
+			System.out.println(sb.toString());
+			return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PutawayDetail>>() {});
+		} else {
+			return null;
+		}
+	}	
 }
 

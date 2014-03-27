@@ -33,7 +33,7 @@ public class FetchShelfDataCommand implements RafDsCommand {
         try {
         		shelfService = new ShelfManagementService();
                 InventoryPagingWrapper<Shelf> shelfWrapper = shelfService.getShelfData(request);
-                if(shelfWrapper != null){
+                if(shelfWrapper.isSuccess()){
 
                 System.out.println(shelfWrapper.getContent().size());
                 for(Shelf shelf : shelfWrapper.getContent()){

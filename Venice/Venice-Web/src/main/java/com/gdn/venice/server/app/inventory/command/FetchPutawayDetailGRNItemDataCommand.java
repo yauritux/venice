@@ -32,7 +32,7 @@ import com.gdn.venice.server.data.RafDsResponse;
  *
  * @author Roland
  */
-public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
+public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
 
     private RafDsRequest request;
     GRNManagementService grnService;
@@ -40,22 +40,29 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     PutawayManagementService putawayService;
     protected static Logger _log = null;
     
-    public FetchPutawayGRNItemDataCommand(RafDsRequest request) {
+    public FetchPutawayDetailGRNItemDataCommand(RafDsRequest request) {
         this.request = request;
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.command.FetchPutawayGRNItemDataCommand");
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.command.FetchPutawayDetailGRNItemDataCommand");
     }
 
     @Override
     public RafDsResponse execute() {
-    	_log.info("FetchPutawayGRNItemDataCommand");
+    	_log.info("FetchPutawayDetailGRNItemDataCommand");
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         try {
         	putawayService = new PutawayManagementService();
-        	InventoryPagingWrapper<GoodReceivedNoteItem> grnItemWrapper = putawayService.getGRNItemDataListByWarehouseId(request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
-        	if(grnItemWrapper.isSuccess()){     
-            	
+        	
+        	InventoryPagingWrapper<GoodReceivedNoteItem> grnItemWrapper = null;
+        	if(request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID)!=null){
+        		System.out.println("fetch grn item for add putaway");
+        		grnItemWrapper = putawayService.getGRNItemDataListByWarehouseId(request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
+        	}else if(request.getParams().get(DataNameTokens.INV_PUTAWAY_GRN_ID)!=null){
+        		System.out.println("fetch grn item for input putaway location");
+        		grnItemWrapper = putawayService.getGRNItemDataListByGrnId(request.getParams().get(DataNameTokens.INV_PUTAWAY_GRN_ID));
+        	}
+        	if(grnItemWrapper.isSuccess()){                 	
 	    		asnService = new ASNManagementService(); 
             	for(GoodReceivedNoteItem grnItem : grnItemWrapper.getContent()){  
             		
@@ -91,7 +98,7 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    	}
     	                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
     	                    }
-    	                    
+    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
    	                    
@@ -133,6 +140,7 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    	}
     	                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
     	                    }
+    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
     	                        	                    

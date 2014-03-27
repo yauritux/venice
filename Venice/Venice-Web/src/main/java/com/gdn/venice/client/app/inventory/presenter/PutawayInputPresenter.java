@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.NameTokens;
-import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
-import com.gdn.venice.client.app.inventory.view.handler.PutawayCreateUiHandler;
+import com.gdn.venice.client.app.inventory.view.PutawayInputView;
+import com.gdn.venice.client.app.inventory.view.handler.PutawayInputUiHandler;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
@@ -27,33 +27,36 @@ import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Window;
 
 /**
- * Presenter for create putaway
+ * Presenter for input putaway location
  * 
  * @author Roland
  */
-public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyView, PutawayCreatePresenter.MyProxy>
-		implements PutawayCreateUiHandler {
+public class PutawayInputPresenter extends Presenter<PutawayInputPresenter.MyView, PutawayInputPresenter.MyProxy>
+		implements PutawayInputUiHandler {
 	
-	PutawayCreateView view;
+	PutawayInputView view;
 	
 	public static final String putawayManagementPresenterServlet = "PutawayManagementPresenterServlet";
 	
 	protected final DispatchAsync dispatcher;
 
 	@ProxyCodeSplit
-	@NameToken(NameTokens.putawayCreatePage)
-	public interface MyProxy extends Proxy<PutawayCreatePresenter>, Place {
+	@NameToken(NameTokens.putawayInputPage)
+	public interface MyProxy extends Proxy<PutawayInputPresenter>, Place {
 	}
 
-	public interface MyView extends View, HasUiHandlers<PutawayCreateUiHandler> {
+	public interface MyView extends View, HasUiHandlers<PutawayInputUiHandler> {
 		public void loadPutawayData(LinkedHashMap<String, String> warehouseMap);
 		public void refreshPutawayData();
+		public void refreshGrnData();
+		public Window getPutawayDetailWindow();
 	}
 
 	@Inject
-	public PutawayCreatePresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+	public PutawayInputPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 		
@@ -88,12 +91,12 @@ public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyV
 	}
 	
 	@Override
-	public void onSubmitClicked(HashMap<String, String> itemDataMap) {
+	public void onSaveClicked(HashMap<String, String> itemDataMap, Window putawayDetailWindow) {
 		RPCRequest request=new RPCRequest();		
 		String itemMap = Util.formXMLfromHashMap(itemDataMap);		
 		request.setData(itemMap);
 		
-		request.setActionURL(GWT.getHostPageBaseURL() + putawayManagementPresenterServlet + "?method=submitPutawayData&type=RPC");
+		request.setActionURL(GWT.getHostPageBaseURL() + putawayManagementPresenterServlet + "?method=savePutawayInputLocationData&type=RPC");
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setWillHandleError(true);
@@ -106,7 +109,8 @@ public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyV
 						String rpcResponse = rawData.toString();
 						
 						if (rpcResponse.startsWith("0")) {
-                            SC.say("Data submitted");
+                            SC.say("Data saved");
+                            getView().getPutawayDetailWindow().destroy();
 							getView().refreshPutawayData();
 						} else {
 							SC.warn(rpcResponse);

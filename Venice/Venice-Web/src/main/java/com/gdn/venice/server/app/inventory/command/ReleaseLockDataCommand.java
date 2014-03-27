@@ -27,17 +27,13 @@ public class ReleaseLockDataCommand implements RafRpcCommand {
 		_log.info("ReleaseLockDataCommand");
 		ResultWrapper<PickingListDetail> plWrapper;
 		try {
-			pickingListService = new PickingListManagementService();
-			
+			pickingListService = new PickingListManagementService();			
 			plWrapper = pickingListService.releasePickingLock(username, warehouseId);
 			
-			if(plWrapper != null){
-				if(!plWrapper.isSuccess()){
-					return plWrapper.getError();
-				}
-			} else {
-				return "Failed release lock, error connection";
+			if(!plWrapper.isSuccess()){
+				return plWrapper.getError();
 			}
+			
 		} catch (Exception e) {
 			return "Failed release lock, try again later. If error persist please contact administrator";
 		}

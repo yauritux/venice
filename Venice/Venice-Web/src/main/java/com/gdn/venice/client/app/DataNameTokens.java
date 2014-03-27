@@ -3,8 +3,6 @@ package com.gdn.venice.client.app;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.smartgwt.client.data.fields.DataSourceTextField;
-
 /**
  * DataNameTokens.java
  * 
@@ -1274,8 +1272,17 @@ public class DataNameTokens {
     	public static String INV_PUTAWAY_GRN_SHELFCODE = "shelfCode";
     	public static String INV_PUTAWAY_GRN_QTY = "quantity";
     	public static String INV_PUTAWAY_GRN_TYPE = "type";
+    	public static String INV_PUTAWAY_GRN_WAREHOUSEITEMID = "warehouseItemId";
+    	
+    	public static String INV_PUTAWAY_GRN_SHELFCODE_INPUT = "shelfCodeInput";
+    	public static String INV_PUTAWAY_GRN_QTY_INPUT = "quantityInput";
 
-                
+    	public static String INV_PUTAWAY_ID = "putawayId";
+    	public static String INV_PUTAWAY_CREATEDDATE = "createdDate";
+    	public static String INV_PUTAWAY_NUMBER = "putawayNumber";
+    	public static String INV_PUTAWAY_STATUS = "putawayStatus";
+    	public static String INV_PUTAWAY_TYPE = "putawayType";
+    	public static String INV_PUTAWAY_GRN_ID = "grnId";
 	/**
 	 * This constructor adds all of the name token and the wrapper type
 	 * definitions into the Map. This should really be removed so that the 

@@ -97,7 +97,7 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 				if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
             		System.out.println("reff type: purchase order");                		                		
             		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
-                	if(poItemWrapper!=null){
+                	if(poItemWrapper.isSuccess()){
                 		PurchaseRequisitionItem prItem = poItemWrapper.getContent().getPurchaseRequisitionItem();
                 		System.out.println("PO item found, id:"+prItem.getItem().getId());                    		                   				             
                 		itemId = prItem.getItem().getId();      	                    	                    
@@ -107,7 +107,7 @@ public class SavePutawayDataCommand implements RafRpcCommand {
             	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
             		System.out.println("reff type: consignment");
             		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
-                	if(cffItemWrapper!=null){
+                	if(cffItemWrapper.isSuccess()){
                 		ConsignmentApprovalItem cafItem = cffItemWrapper.getContent().getConsignmentApprovalItem();
                 		System.out.println("CFF item found, id:"+cafItem.getItem().getId());                    		                   				             
                 		itemId = cafItem.getItem().getId();                                   	                        	             
@@ -118,7 +118,6 @@ public class SavePutawayDataCommand implements RafRpcCommand {
             	
 				Item item = new Item();
 				item = putawayService.findItemById(username, itemId);
-								System.out.println("itemmmmmm id: "+item.getId());
 				putawayItem.setItem(item);
 				itemList.add(putawayItem);
 			}
@@ -137,12 +136,8 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 						
 			System.out.println("item size: "+itemList.size());			
 			putawayWrapper = putawayService.savePutaway(username, putaway, itemList);
-			if(putawayWrapper != null){
-				if(!putawayWrapper.isSuccess()){
-					return putawayWrapper.getError();
-				}
-			} else {
-				return "Failed saving putaway, error connection";
+			if(!putawayWrapper.isSuccess()){
+				return putawayWrapper.getError();
 			}
 		} catch (Exception e) {
 			return "Failed saving putaway, try again later. If error persist please contact administrator";

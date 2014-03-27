@@ -38,7 +38,7 @@ public class InventoryNavigationPaneSectionData {
 		  new NavigationPaneTreeNodeRecord("17", "1", "Picking List", NameTokens.pickingListPage, "IM16", DataWidgetNameTokens.INV_PICKINGLISTTREENODE),
 		  new NavigationPaneTreeNodeRecord("18", "1", "Putaway", null, "IM17", DataWidgetNameTokens.INV_PUTAWAYTREENODE),
 		  new NavigationPaneTreeNodeRecord("19", "18", "Create Putaway", NameTokens.putawayCreatePage, "IM18", DataWidgetNameTokens.INV_CREATEPUTAWAYTREENODE),
-		  new NavigationPaneTreeNodeRecord("20", "18", "Input Putaway Location", NameTokens.putawayInputLocationPage, "IM19", DataWidgetNameTokens.INV_INPUTPUTAWAYLOCATIONTREENODE)
+		  new NavigationPaneTreeNodeRecord("20", "18", "Input Putaway Location", NameTokens.putawayInputPage, "IM19", DataWidgetNameTokens.INV_INPUTPUTAWAYLOCATIONTREENODE)
 		};
 	  }
 }

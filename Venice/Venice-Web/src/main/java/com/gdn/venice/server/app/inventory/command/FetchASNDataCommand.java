@@ -43,7 +43,7 @@ public class FetchASNDataCommand implements RafDsCommand {
         try {
         		asnService = new ASNManagementService();
                 InventoryPagingWrapper<AdvanceShipNotice> asnWrapper = asnService.getASNDataList(request);
-                if(asnWrapper != null){
+                if(asnWrapper.isSuccess()){
 	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	 		        
 	                for(AdvanceShipNotice asn : asnWrapper.getContent()){
