@@ -20,8 +20,7 @@ import com.smartgwt.client.data.DataSource;
 
 /**
  * Presenter for Fraud Parameter 35 - Customer Grey List
- * 
- * @author
+ *
  */
 
 public class FraudParameterRule35Presenter extends Presenter<FraudParameterRule35Presenter.MyView, FraudParameterRule35Presenter.MyProxy>
