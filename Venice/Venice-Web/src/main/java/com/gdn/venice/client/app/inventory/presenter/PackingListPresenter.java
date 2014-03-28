@@ -206,4 +206,38 @@ public class PackingListPresenter extends Presenter<PackingListPresenter.MyView,
             SC.warn("Failed saving packing data, please try again later");
         }
     }
+
+    @Override
+    public void onRejectPacking(String salesOrderId) {
+        try {
+            RPCRequest request = new RPCRequest();
+            request.setActionURL(GWT.getHostPageBaseURL() + packingListPresenterServlet
+                    + "?method=rejectPacking&type=RPC&username=" + MainPagePresenter.signedInUser + "&salesOrderId=" + salesOrderId);
+            request.setHttpMethod("POST");
+            request.setUseSimpleHttp(true);
+            request.setWillHandleError(true);
+            RPCManager.setPromptStyle(PromptStyle.DIALOG);
+            RPCManager.setDefaultPrompt("Submitting request...");
+            RPCManager.setShowPrompt(true);
+
+            RPCManager.sendRequest(request,
+                    new RPCCallback() {
+                        @Override
+                        public void execute(RPCResponse response,
+                                Object rawData, RPCRequest request) {
+                            String rpcResponse = rawData.toString();
+
+                            if (rpcResponse.startsWith("0")) {
+                                SC.say("Sales order rejected. AWB cannot be packed until all Sales Order's picked");
+                                getView().getPackingDetailWindow().destroy();
+                                getView().refreshAllPackingListData();
+                            } else {
+                                SC.warn(rpcResponse);
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            SC.warn("Failed reject packing, please try again later");
+        }
+    }
 }

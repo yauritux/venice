@@ -42,10 +42,10 @@ public class FetchCurrencyDataCommand implements RafDsCommand {
                 System.out.println(currencysWrapper.getContent().size());
                 for (Currency currency : currencysWrapper.getContent()) {
                     HashMap<String, String> map = new HashMap<String, String>();
-                    map.put(DataNameTokens.INV_CURRENCY_ID, currency.getId().toString());
+                    map.put(DataNameTokens.INV_CURRENCY_ID, currency.getId()+"");
                     map.put(DataNameTokens.INV_CURRENCY_CURRENCY, currency.getCurrency());
                     map.put(DataNameTokens.INV_CURRENCY_RATE, currency.getRate() + "");
-                    map.put(DataNameTokens.INV_CURRENCY_UPDATE_DATE, currency.getUpdatedDate().toString());
+                    map.put(DataNameTokens.INV_CURRENCY_UPDATE_DATE, currency.getUpdatedDate()+"");
                     map.put(DataNameTokens.INV_CURRENCY_UPDATED_BY, currency.getUpdatedBy());
 
                     dataList.add(map);

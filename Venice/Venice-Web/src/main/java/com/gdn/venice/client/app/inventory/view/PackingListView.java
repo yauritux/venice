@@ -82,6 +82,7 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         packingListGrid.setShowRowNumbers(true);
         packingListGrid.setAutoFetchData(Boolean.TRUE);
         packingListGrid.setAutoFitData(Autofit.BOTH);
+        packingListGrid.setCanSelectText(true);
 
         salesOrderGrid = new ListGrid();
         salesOrderGrid.setWidth100();
@@ -91,6 +92,8 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         salesOrderGrid.setShowFilterEditor(true);
         salesOrderGrid.setShowRowNumbers(true);
         salesOrderGrid.setAutoFetchData(Boolean.TRUE);
+        salesOrderGrid.setCanSelectText(true);
+        salesOrderGrid.setCanRemoveRecords(true);
 
         attributeGrid = new ListGrid();
         attributeGrid.setWidth100();
@@ -100,7 +103,7 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         attributeGrid.setShowFilterEditor(false);
         attributeGrid.setShowRowNumbers(true);
         attributeGrid.setAutoFetchData(Boolean.TRUE);
-        salesOrderGrid.setCanRemoveRecords(true);
+        attributeGrid.setCanSelectText(true);
 
         bindCustomUiHandlers();
     }
@@ -125,11 +128,15 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
             @Override
             public void onCellClick(CellClickEvent event) {
                 ListGridRecord record = salesOrderGrid.getSelectedRecord();
-                if (record.getAttribute(DataNameTokens.INV_SO_ITEMHASATTRIBUTE).equals(Boolean.toString(true))) {
-                    getUiHandlers().onSalesOrderGridClicked(record.getAttribute(DataNameTokens.INV_SO_ID),
-                            record.getAttribute(DataNameTokens.INV_SO_ITEMID), record.getAttribute(DataNameTokens.INV_SO_QUANTITY));
+                if (event.getColNum() == 8) {
+                    getUiHandlers().onRejectPacking(record.getAttribute(DataNameTokens.INV_SO_ID));
                 } else {
-                    SC.say("The record selected have no attribute");
+                    if (record.getAttribute(DataNameTokens.INV_SO_ITEMHASATTRIBUTE).equals(Boolean.toString(true))) {
+                        getUiHandlers().onSalesOrderGridClicked(record.getAttribute(DataNameTokens.INV_SO_ID),
+                                record.getAttribute(DataNameTokens.INV_SO_ITEMID), record.getAttribute(DataNameTokens.INV_SO_QUANTITY));
+                    } else {
+                        SC.say("The record selected have no attribute");
+                    }
                 }
             }
         });
@@ -209,18 +216,24 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         salesOrderGrid.getField(DataNameTokens.INV_SO_ITEMID).setHidden(Boolean.TRUE);
         salesOrderGrid.setAutoFitData(Autofit.BOTH);
 
-//        String claimer = salesOrderGrid.getRecord(0).getAttribute(DataNameTokens.INV_AWB_CLAIMEDBY);
+        String claimer = salesOrderGrid.getRecord(0).getAttribute(DataNameTokens.INV_AWB_CLAIMEDBY);
+        SC.say(claimer);
 //        claimedBy.setValue(claimer);
 
         ToolStrip packingToolStrip = new ToolStrip();
         packingToolStrip.setWidth100();
 //        if (username.trim().equals(claimer)) {
-        packingToolStrip.addButton(submitButton);
-        packingToolStrip.addSeparator();
-        packingToolStrip.addButton(printAwbButton);
-        packingToolStrip.addSeparator();
-        packingToolStrip.addButton(printLblButton);
-        packingToolStrip.addSeparator();
+        if (!record.getAttribute(DataNameTokens.INV_AWB_STATUS).equalsIgnoreCase("completed")) {
+            packingToolStrip.addButton(submitButton);
+            packingToolStrip.addSeparator();
+        } else {
+            if (!Boolean.parseBoolean(record.getAttribute(DataNameTokens.INV_AWB_OFFLINE))) {
+                packingToolStrip.addButton(printAwbButton);
+                packingToolStrip.addSeparator();
+            }
+            packingToolStrip.addButton(printLblButton);
+            packingToolStrip.addSeparator();
+        }
 //        }
         packingToolStrip.addButton(closeButton);
 
@@ -312,7 +325,6 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
             }
         });
 
-
         closeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -390,6 +402,7 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         packingListGrid.setDataSource(ds);
         packingListGrid.setFields(listGridField);
         packingListGrid.getField(DataNameTokens.INV_AWB_ID).setHidden(Boolean.TRUE);
+        packingListGrid.getField(DataNameTokens.INV_AWB_OFFLINE).setHidden(Boolean.TRUE);
 
         refreshAllPackingListData();
         packingListLayout.setMembers(toolstrip, warehouseSelectionForm, packingListGrid);

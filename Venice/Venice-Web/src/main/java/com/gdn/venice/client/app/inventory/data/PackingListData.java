@@ -25,7 +25,8 @@ public class PackingListData {
             new DataSourceTextField(DataNameTokens.INV_AWB_NO, "AWB No"),
             new DataSourceTextField(DataNameTokens.INV_AWB_PUDATE, "PU Date"),
             new DataSourceTextField(DataNameTokens.INV_AWB_LOGNAME, "Logistic"),
-            new DataSourceTextField(DataNameTokens.INV_AWB_STATUS, "Status")
+            new DataSourceTextField(DataNameTokens.INV_AWB_STATUS, "Status"),
+            new DataSourceTextField(DataNameTokens.INV_AWB_OFFLINE, "Is Offline")
         };
         dataSourceFields[0].setPrimaryKey(true);
         RafDataSource retVal = new RafDataSource(

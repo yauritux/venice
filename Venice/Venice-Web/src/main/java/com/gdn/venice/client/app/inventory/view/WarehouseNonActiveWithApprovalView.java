@@ -71,10 +71,10 @@ public class WarehouseNonActiveWithApprovalView extends ViewWithUiHandlers<Wareh
         warehouseListGrid.setHeight100();
         warehouseListGrid.setShowAllRecords(true);
         warehouseListGrid.setSortField(0);
-
         warehouseListGrid.setShowFilterEditor(true);
         warehouseListGrid.setCanResizeFields(true);
         warehouseListGrid.setShowRowNumbers(true);
+        warehouseListGrid.setCanSelectText(true);
 
         bindCustomUiHandlers();
     }

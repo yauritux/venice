@@ -45,6 +45,7 @@ public class FetchReadyPackingDataCommand implements RafDsCommand {
                     map.put(DataNameTokens.INV_AWB_PUDATE, awbInfo.getPuDate().toString());
                     map.put(DataNameTokens.INV_AWB_LOGNAME, awbInfo.getLogisticCode());
                     map.put(DataNameTokens.INV_AWB_STATUS, awbInfo.getStatus().getValue());
+                    map.put(DataNameTokens.INV_AWB_OFFLINE, awbInfo.isOrderOffline()+"");
                     dataList.add(map);
                 }
 
