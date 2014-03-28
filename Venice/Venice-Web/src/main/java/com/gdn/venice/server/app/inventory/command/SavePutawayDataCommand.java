@@ -57,14 +57,15 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 			grnService = new GRNManagementService();
 			asnService = new ASNManagementService();
 			ResultWrapper<GoodReceivedNoteItem> grni = null;
-			Putaway putaway = new Putaway();			
-			putaway.setCreatedBy(username);
+
 								
 			String grnItemId="", type="";
-			for(Map.Entry<String, String> entry : itemMap.entrySet()){
-				String val = entry.getValue();
-				
+			for(Map.Entry<String, String> entry : itemMap.entrySet()){				
+				Putaway putaway = new Putaway();			
+				putaway.setCreatedBy(username);				
 				PutawayItem putawayItem = new PutawayItem();
+				
+				String val = entry.getValue();
 				HashMap<String, String> map = InventoryUtil.convertToHashMap(val);
 				for(Map.Entry<String, String> e : map.entrySet()){
 					String key = e.getKey();
@@ -120,22 +121,22 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 				item = putawayService.findItemById(username, itemId);
 				putawayItem.setItem(item);
 				itemList.add(putawayItem);
+				
+				PutawayType pt = null;
+				if(type.equals("GRN")){
+					pt = PutawayType.GRN;
+				}else if(type.equals("PICKING_LIST")){
+					pt = PutawayType.PICKING_LIST;
+				}else if(type.equals("PACKING_LIST")){
+					pt = PutawayType.PACKING_LIST;
+				}
+				
+				putaway.setPutawayType(pt);	
+				putaway.setGoodReceivedNote(grni.getContent().getGoodReceivedNote());
 			}
-			
-			PutawayType pt = null;
-			if(type.equals("GRN")){
-				pt = PutawayType.GRN;
-			}else if(type.equals("PICKING_LIST")){
-				pt = PutawayType.PICKING_LIST;
-			}else if(type.equals("PACKING_LIST")){
-				pt = PutawayType.PACKING_LIST;
-			}
-			
-			putaway.setPutawayType(pt);	
-			putaway.setGoodReceivedNote(grni.getContent().getGoodReceivedNote());
-						
+									
 			System.out.println("item size: "+itemList.size());			
-			putawayWrapper = putawayService.savePutaway(username, putaway, itemList);
+			putawayWrapper = putawayService.savePutaway(username, itemList);
 			if(!putawayWrapper.isSuccess()){
 				return putawayWrapper.getError();
 			}
