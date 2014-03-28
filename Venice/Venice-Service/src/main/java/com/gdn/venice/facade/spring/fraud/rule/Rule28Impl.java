@@ -18,7 +18,7 @@ import com.gdn.venice.util.CommonUtil;
 /**
  * Same Product Category & Customer Email in one week
  */
-@Service
+@Service("Rule28")
 public class Rule28Impl {
 	private static final String CLASS_NAME = Rule28Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
