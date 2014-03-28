@@ -129,7 +129,7 @@ public class PutawayManagementService{
         }
 	}
 	
-	public ResultWrapper<Putaway> savePutaway(String username, Putaway putaway, List<PutawayItem> putawayItemList) 
+	public ResultWrapper<Putaway> savePutaway(String username, List<PutawayItem> putawayItemList) 
 			throws JsonGenerationException, JsonMappingException, IOException {
 		System.out.println("savePutaway");
 		String url=InventoryUtil.getStockholmProperties().getProperty("address")
@@ -140,7 +140,6 @@ public class PutawayManagementService{
 		PutawayItem[] item = putawayItemList.toArray(new PutawayItem[0]);
 		
 		PutawayRequest putawayRequest = new PutawayRequest();
-		putawayRequest.setPutaway(putaway);
 		putawayRequest.setPutawayItem(item);
 		
 		String json = mapper.writeValueAsString(putawayRequest);
