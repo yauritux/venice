@@ -460,6 +460,7 @@ public class VeniceClientModule extends AbstractPresenterModule {
         bindPresenter(PutawayInputPresenter.class,
         		PutawayInputPresenter.MyView.class,
                 PutawayInputView.class,
+                PutawayInputPresenter.MyProxy.class);
 
         bindPresenter(GoodIssuedNotePresenter.class,
                 GoodIssuedNotePresenter.MyView.class,
