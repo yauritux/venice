@@ -7,6 +7,7 @@ package com.gdn.venice.server.app.inventory.presenter;
 import com.gdn.venice.server.app.inventory.command.FetchAttributeNameDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchReadyPackingDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchSalesOrderAWBInfoDetailDataCommand;
+import com.gdn.venice.server.app.inventory.command.RejectPackingDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.SavePackingDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
@@ -88,6 +89,9 @@ public class PackingListPresenterServlet extends HttpServlet {
             } else if (method.equals("savePacking")) {
                 RafRpcCommand savePackingCommand = new SavePackingDataCommand(username, request.getParameter("awbInfoId"));
                 retVal = savePackingCommand.execute();
+            }else if (method.equals("rejectPacking")) {
+                RafRpcCommand rejectPackingCommand = new RejectPackingDataCommand(username, request.getParameter("salesOrderId"));
+                retVal = rejectPackingCommand.execute();
             }
         }
 

@@ -81,10 +81,10 @@ public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagemen
         currencyListGrid.setHeight100();
         currencyListGrid.setShowAllRecords(true);
         currencyListGrid.setSortField(0);
-
         currencyListGrid.setShowFilterEditor(true);
         currencyListGrid.setCanResizeFields(true);
         currencyListGrid.setShowRowNumbers(true);
+        currencyListGrid.setCanSelectText(true);
 
         bindCustomUiHandlers();
     }

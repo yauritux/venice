@@ -1297,6 +1297,7 @@ public class DataNameTokens {
         public static String INV_AWB_PUDATE = "puDate";
         public static String INV_AWB_LOGNAME = "logisticName";
         public static String INV_AWB_STATUS = "status";
+        public static String INV_AWB_OFFLINE = "awbOffline";
         public static String INV_AWB_CLAIMEDBY = "claimedBy";
         
         //Inventory Sales Order

@@ -77,6 +77,7 @@ public class WarehouseEditWithApprovalView extends ViewWithUiHandlers<WarehouseE
         warehouseListGrid.setShowFilterEditor(true);
         warehouseListGrid.setCanResizeFields(true);
         warehouseListGrid.setShowRowNumbers(true);
+        warehouseListGrid.setCanSelectText(true);
 
         bindCustomUiHandlers();
     }

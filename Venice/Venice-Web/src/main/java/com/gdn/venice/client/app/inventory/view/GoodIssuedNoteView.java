@@ -92,6 +92,7 @@ public class GoodIssuedNoteView extends ViewWithUiHandlers<GoodIssuedNoteUiHandl
         ginGrid.setShowRowNumbers(true);
         ginGrid.setAutoFetchData(Boolean.TRUE);
         ginGrid.setAutoFitData(Autofit.BOTH);
+        ginGrid.setCanSelectText(true);
 
         bindCustomUiHandlers();
     }
@@ -133,6 +134,7 @@ public class GoodIssuedNoteView extends ViewWithUiHandlers<GoodIssuedNoteUiHandl
         awbGinGrid.setSortField(0);
         awbGinGrid.setShowFilterEditor(false);
         awbGinGrid.setShowRowNumbers(true);
+        awbGinGrid.setCanSelectText(true);
 
         setRecordNumber(0);
         ginDetailWindow = new Window();
