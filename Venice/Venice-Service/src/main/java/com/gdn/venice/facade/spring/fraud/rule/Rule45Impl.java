@@ -80,6 +80,7 @@ public class Rule45Impl implements Rule  {
 	         		List<VenOrderContactDetail> orderHistoryEci5ContactDetail;	
 	         		List<VenOrderContactDetail> orderEci5ContactDetail=orderContactDetailSessionHome.queryByRange("select o from VenOrderContactDetail o where o.venOrder.orderId = " + venOrder.getOrderId() + " and (o.venContactDetail.venContactDetailType.contactDetailTypeId =" + VEN_CONTACT_DETAIL_ID_PHONE + " or o.venContactDetail.venContactDetailType.contactDetailTypeId =" + VEN_CONTACT_DETAIL_ID_MOBILE + " or o.venContactDetail.venContactDetailType.contactDetailTypeId =" + VEN_CONTACT_DETAIL_ID_EMAIL+")", 0, 1);	         		
 	         		List<VenOrderPaymentAllocation> orderHistoryEci5PaymentAllocation;
+	         		
 	         		if(orderEci5ContactDetail.size()>0){
 		         		for(int i=0;i<orderHistoryEci5Address.size();i++){
 		         			for(int j=0;j<orderEci5ContactDetail.size();j++){			         			
