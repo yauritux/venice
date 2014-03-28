@@ -9,6 +9,7 @@ import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
 import com.gdn.venice.client.app.inventory.view.handler.PickingListUiHandler;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -89,7 +90,7 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
         warehouseItemListGrid.setShowFilterEditor(true);
         warehouseItemListGrid.setCanResizeFields(true);
         warehouseItemListGrid.setShowRowNumbers(true);
-        warehouseItemListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
+        warehouseItemListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
 
         warehouseItemListGrid.addCellClickHandler(new CellClickHandler() {
             @Override
@@ -106,6 +107,37 @@ public class PickingListView extends ViewWithUiHandlers<PickingListUiHandler> im
                 refreshPickingListData();
             }
         });
+        
+        printButton.addClickHandler(new ClickHandler() {
+     			@Override
+     			public void onClick(ClickEvent event) {
+     				ListGridRecord[] selectedRecords = warehouseItemListGrid.getSelection();
+     				
+     				StringBuilder sbSelectedRecords = new StringBuilder();
+     				
+     				for (int i = 0; i < selectedRecords.length; i++) {
+     					ListGridRecord selectedRecord = selectedRecords[i];
+     					
+     					sbSelectedRecords.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID));
+     					
+     					if(i != selectedRecords.length -1)
+     						sbSelectedRecords.append(";");
+     				}
+     				
+     				String host = GWT.getHostPageBaseURL();
+
+     				if(host.contains("8889")){
+     					host = "http://localhost:8090/";
+     				}
+
+     				if(host.contains("Venice/")){
+     					host = host.substring(0, host.indexOf("Venice/"));
+     				}
+     												
+     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListExportServlet?warehouseItemIds=" + sbSelectedRecords.toString(), "_blank", null);
+     							
+     			}
+     		});
     }
 
     private void buildWarehouseItemListGrid(String warehouseId) {
