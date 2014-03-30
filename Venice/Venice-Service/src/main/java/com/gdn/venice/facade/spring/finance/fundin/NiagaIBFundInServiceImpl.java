@@ -163,13 +163,13 @@ public class NiagaIBFundInServiceImpl extends AbstractFundInService{
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(accountNo, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(accountNo, paymentAmount, REPORT_TYPE,null);
 		
 		if(isInternetBankingFundInAlreadyExist(accountNo, REPORT_TYPE.id())){
 			order = null;
 		}
 		
-		if(order != null && !isOrderPaymentExist(accountNo, paymentAmount, REPORT_TYPE)){
+		if(order != null && !isOrderPaymentExist(accountNo, paymentAmount, REPORT_TYPE,null)){
 			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + accountNo);
 			return null;
 		}
@@ -178,7 +178,7 @@ public class NiagaIBFundInServiceImpl extends AbstractFundInService{
 			VenOrderPaymentAllocation orderPaymentAllocation 
 				= getPaymentAllocationByRelatedPayment(accountNo, 
 						                               paymentAmount, 
-						                               REPORT_TYPE);
+						                               REPORT_TYPE,null);
 			
 			List<FinArFundsInReconRecord> fundInReconList = orderPaymentAllocation.getVenOrderPayment().getFinArFundsInReconRecords();
 			fundInRecon = fundInReconList.get(0);

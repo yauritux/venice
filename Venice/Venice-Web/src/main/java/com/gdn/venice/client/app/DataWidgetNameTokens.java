@@ -31,6 +31,7 @@ public class DataWidgetNameTokens {
 	public static String  FRD_FRAUDPARAMETERTREENODE = "FrdParameterTreeNode";
 	public static String  FRD_FRAUDPARAMETERRULE31TREENODE = "FrdParameterRule31TreeNode";
 	public static String  FRD_FRAUDINSTALLMENTBCA = "FrdFraudInstallmentBCAPageNode";
+	public static String  FRD_FRAUDPARAMETERRULE35TREENODE = "FrdParameterRule35TreeNode";
 	
 	public static String  LOG_LOGISTICSMODULETREENODE = "LogLogisticsModuleTreeNode";
 	public static String  LOG_LOGISTICSDASHBOARDTREENODE = "LogLogisticsDashboardTreeNode";

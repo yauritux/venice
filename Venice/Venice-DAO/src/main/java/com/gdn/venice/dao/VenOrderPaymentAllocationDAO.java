@@ -24,15 +24,16 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		       "WHERE o.venOrder = ?1";
 	
 	public static final String FIND_BY_CREDITCARD_DETAIL = 
-		       "SELECT o " +
-			   "FROM VenOrderPaymentAllocation AS o " +
-			   " JOIN FETCH o.venOrderPayment AS op " +
-			   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
-			   "WHERE " +
-			   " op.referenceId = ?1 AND " +
-			   " op.amount = ?2 AND " +
-			   " afirr.finArFundsInActionApplied.actionAppliedId <> "+VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED+" AND " +
-			   " afirr.reconcilliationRecordTimestamp IS NULL";
+	       "SELECT o " +
+		   "FROM VenOrderPaymentAllocation AS o " +
+		   " JOIN FETCH o.venOrderPayment AS op " +
+		   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
+		   "WHERE " +
+		   " op.referenceId = ?1 AND " +
+		   " op.amount = ?2 AND " +
+		   " ((op.venBank.bankId = "+VeniceConstants.VEN_BANK_ID_BCA+" AND cast(op.paymentTimestamp AS date ) = ?3)  OR op.venBank.bankId <> "+VeniceConstants.VEN_BANK_ID_BCA+") AND " +
+		   " afirr.finArFundsInActionApplied.actionAppliedId <> "+VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED+" AND " +
+		   " afirr.reconcilliationRecordTimestamp IS NULL";
 	
 	public static final String FIND_BY_INTERNET_BANKING_DETAIL =
 		   "SELECT o " +
@@ -103,7 +104,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
 	@Query(FIND_BY_CREDITCARD_DETAIL)
-	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByCreditCardDetail(String referenceId, BigDecimal amount);
+	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByCreditCardDetail(String referenceId, BigDecimal amount, Date paymentDate);
 	
 	@Query(FIND_BY_INTERNET_BANKING_DETAIL)
 	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByInternetBankingDetail(String referenceId);
