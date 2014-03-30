@@ -1,6 +1,7 @@
 package com.gdn.venice.dao;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,7 +29,7 @@ public interface VenOrderPaymentDAO extends JpaRepository<VenOrderPayment, Long>
 		   "SELECT COALESCE(SUM(op.amount),0) " +
 		   "FROM VenOrderPayment op " +
 		   "WHERE op.maskedCreditCardNumber = ?1 AND " +
-		   " op.paymentTimestamp BETWEEN ?2 AND ?3 ";
+		   " cast(op.paymentTimestamp AS date) BETWEEN ?2 AND ?3 ";
 	
 	public List<VenOrderPayment> findByWcsPaymentId(String wcsPaymentId);
 	
@@ -40,5 +41,5 @@ public interface VenOrderPaymentDAO extends JpaRepository<VenOrderPayment, Long>
 	public VenOrderPayment findWithBankByReferenceIdAndBankId(String referenceId, Long bankId);
 	
 	@Query(GET_ORDERPAYMENTAMOUNTSUM_BY_CREDITCARDNUMBER_PAYMENTTIMERANGE)
-	public BigDecimal getOrderPaymentAmountSumByCreditCardNumberPaymentTimeRange(String maskedCreditCardNumber, String dateStart, String dateEnd);
+	public BigDecimal getOrderPaymentAmountSumByCreditCardNumberPaymentTimeRange(String maskedCreditCardNumber, Date dateStart, Date dateEnd);
 }

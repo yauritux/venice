@@ -45,8 +45,8 @@ public class Rule22Impl implements Rule {
 	}
 	
 	public BigDecimal getTotalOrderAmountInAMonth(VenOrder order){
-		String startDate = convertToString(minusOneMonth(order.getOrderDate()));
-		String endDate = convertToString(order.getOrderDate());
+		Date startDate = minusOneMonth(order.getOrderDate());
+		Date endDate = order.getOrderDate();
 		
 		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
 		

@@ -1,6 +1,7 @@
 package com.gdn.venice.dao;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,14 +41,14 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 		"FROM VenOrder o " +
 		"WHERE o <> ?1 " +
 		" AND o.venOrderStatus.orderStatusId = " + VeniceConstants.VEN_ORDER_STATUS_C +
-		" AND o.orderDate BETWEEN ?2 AND ?3 ";
+		" AND cast(o.orderDate as date) BETWEEN ?2 AND ?3 ";
 	
 	public static final String GET_AMOUNTSUM_BY_ORDER_OR_CUSTOMER_ORDERDATERANGE = 
 		"SELECT COALESCE(SUM(o.amount),0) " +
 		"FROM VenOrder o " +
 		"WHERE o= ?1 " +
 	    " OR (o.venCustomer = ?2 " +
-		" AND orderDate BETWEEN ?3 AND ?4)";
+		" AND cast(o.orderDate as date) BETWEEN ?3 AND ?4)";
 	
 	public VenOrder findByWcsOrderId(String wcsOrderId);
 	
@@ -61,9 +62,9 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 	public VenOrder findWithVenCustomerByOrder(VenOrder order);
 	
 	@Query(FIND_OTHER_BY_STATUS_C_AND_ORDERDATERANGE)
-	public List<VenOrder> findOtherByStatusCOrderDateRange(VenOrder order, String startDate, String endDate);
+	public List<VenOrder> findOtherByStatusCOrderDateRange(VenOrder order, Date startDate, Date endDate);
 	
 	@Query(GET_AMOUNTSUM_BY_ORDER_OR_CUSTOMER_ORDERDATERANGE)
-	public BigDecimal getAmountSumByOrderOrCustomerOrderDateRange(VenOrder order, VenCustomer customer, String startDate, String endDate);
+	public BigDecimal getAmountSumByOrderOrCustomerOrderDateRange(VenOrder order, VenCustomer customer, Date startDate, Date endDate);
 	
 }

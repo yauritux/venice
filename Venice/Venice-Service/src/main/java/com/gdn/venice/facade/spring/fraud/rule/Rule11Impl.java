@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.gdn.venice.dao.FrdParameterRule11DAO;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
-import com.gdn.venice.persistence.FrdParameterRule9;
+import com.gdn.venice.persistence.FrdParameterRule11;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
 import com.gdn.venice.util.CommonUtil;
@@ -33,7 +33,7 @@ public class Rule11Impl implements Rule{
 		
 		String ruleCode = shippingAddressCode + paymentCode;
 		
-		FrdParameterRule9 rule = frdParameterRule11DAO.findByCode(ruleCode); 	
+		FrdParameterRule11 rule = frdParameterRule11DAO.findByCode(ruleCode); 	
 		
 		CommonUtil.logInfo(CLASS_NAME, "Order : " + order.getWcsOrderId() + ", Code Match : " + ruleCode);
 		

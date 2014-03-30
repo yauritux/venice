@@ -56,7 +56,7 @@ public class Rule7Impl implements Rule{
 		String currentPaymentDateStr = SDF_TIMESTAMP.format(paymentTimestamp);
 		
 		int totalPayment = venOrderPaymentAllocationDAO
-								.countByPaymentTimeRangeCreditCardNotSameOrder(order, maskedCreditCard, backedDateStr, currentPaymentDateStr);
+								.countByPaymentTimeRangeCreditCardNotSameOrder(order, maskedCreditCard, backedDate, paymentTimestamp);
 		
 		if(totalPayment > 0){
 			riskPoint += rule.getRiskPoint();

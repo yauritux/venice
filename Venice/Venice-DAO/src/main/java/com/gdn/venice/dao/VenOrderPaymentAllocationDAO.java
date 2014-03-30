@@ -1,6 +1,7 @@
 package com.gdn.venice.dao;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -65,7 +66,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   "WHERE " +
 		   " o.venOrder <> ?1 AND " +
 		   " op.maskedCreditCardNumber like ?2 AND " +
-		   " op.paymentTimestamp BETWEEN ?3 AND ?4 ";
+		   " cast(op.paymentTimestamp AS date) BETWEEN ?3 AND ?4 ";
 	
 	public static final String COUNT_MASKEDCREDITCARD_BY_IPADDRESS_ORDERDATERANGE_SQL = 
 		   "SELECT COUNT(op.maskedCreditCardNumber) " +
@@ -75,7 +76,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   " WHERE op.venPaymentType.paymentTypeId = " + VeniceConstants.VEN_PAYMENT_TYPE_ID_CC +
 		   " AND o.ipAddress = ?1 " +
 		   " AND op.maskedCreditCardNumber IS NOT NULL " +
-		   " AND o.orderDate BETWEEN ?2 AND ?3 GROUP BY op.maskedCreditCardNumber ";
+		   " AND cast(o.orderDate as date) BETWEEN ?2 AND ?3 GROUP BY op.maskedCreditCardNumber ";
 	
 	public static final String FIND_BY_VENORDER_ORDERPAYMENTLESSTHANLIMIT_SQL = 
 		   "SELECT o " +
@@ -114,10 +115,10 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	public List<VenOrderPaymentAllocation> findWithVenOrderPaymentFinArFundsInReconRecordByPaymentReferenceId(String referenceId);
 	
 	@Query(COUNT_BY_PAYMENTTIMERANGE_CREDITCARD_NOTSAMEORDER_SQL)
-	public int countByPaymentTimeRangeCreditCardNotSameOrder(VenOrder order, String maskedCreditCard, String dateStart, String dateEnd);
+	public int countByPaymentTimeRangeCreditCardNotSameOrder(VenOrder order, String maskedCreditCard, Date dateStart, Date dateEnd);
 	
 	@Query(COUNT_MASKEDCREDITCARD_BY_IPADDRESS_ORDERDATERANGE_SQL)
-	public List<Integer> countMaskedCreditCardByIpAddressOrderDateRange(String ipAddress, String dateStart, String dateEnd);
+	public List<Integer> countMaskedCreditCardByIpAddressOrderDateRange(String ipAddress, Date dateStart, Date dateEnd);
 	
 	@Query(FIND_BY_VENORDER_ORDERPAYMENTLESSTHANLIMIT_SQL)
 	public List<VenOrderPaymentAllocation> findByVenOrderOrderPaymentLessThanLimit(VenOrder venOrder, int amountLimit);

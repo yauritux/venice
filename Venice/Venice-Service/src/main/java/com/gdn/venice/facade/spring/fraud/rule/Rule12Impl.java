@@ -51,15 +51,13 @@ public class Rule12Impl implements Rule{
 		Timestamp orderDate = order.getOrderDate();
 		
 		Date backedDate = DateUtils.addDays(orderDate, -daySpan);
-		String backedDateStr = SDF_TIMESTAMP.format(backedDate);
-		String currentPaymentDateStr = SDF_TIMESTAMP.format(orderDate);
 		
 		List<Integer> totalCreditCard = venOrderPaymentAllocationDAO
-								.countMaskedCreditCardByIpAddressOrderDateRange(order.getIpAddress(), backedDateStr, currentPaymentDateStr);
+								.countMaskedCreditCardByIpAddressOrderDateRange(order.getIpAddress(), backedDate, orderDate);
 		
 		if(totalCreditCard.size() > minCCNumber){
 			riskPoint += rule.getRiskPoint();
-			CommonUtil.logInfo(CLASS_NAME, "IP address found : " + order.getIpAddress() + ", Start Date : " + backedDateStr + ", End Date : " + currentPaymentDateStr);
+			CommonUtil.logInfo(CLASS_NAME, "IP address found : " + order.getIpAddress() + ", Start Date : " + backedDate + ", End Date : " + orderDate);
 		}
 		
 		return riskPoint;
