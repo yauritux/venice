@@ -20,7 +20,9 @@ import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VenCSPaymentStatusIDConstants;
 import com.gdn.venice.constants.VenVAPaymentStatusIDConstants;
 import com.gdn.venice.constants.VenWCSPaymentTypeConstants;
+import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenOrderPaymentDAO;
+import com.gdn.venice.exception.CannotPersistFinArFundsInReconRecordException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.finance.services.FinArFundsInReconRecordService;
 import com.gdn.venice.inbound.services.AddressService;
@@ -215,6 +217,8 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 			
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::persist payment");
 			venOrderPaymentList = persistOrderPaymentList(venOrderPaymentList);
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "processPayment::venOrderPaymentList members = " + (venOrderPaymentList != null ? venOrderPaymentList.size() : 0));
 
 			//paymentIterator = venOrderPaymentList.iterator();
 			BigDecimal paymentBalance = venOrder.getAmount();
@@ -225,7 +229,8 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 
 				//Only include the allocations for non-VA payments
 				//because VA payments are already in the DB
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::allocate payment");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::allocate payment,payment type = "
+						+ venOrderPayment.getVenPaymentType().getPaymentTypeCode());
 				
 				//semua Payment di allocate, untuk payment VA dan non-VA.
 		
@@ -281,6 +286,8 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 					, "processPayment::persist payment allocation");
 			
 			venOrderPaymentAllocationList = orderPaymentAllocationService.persistOrderPaymentAllocationList(venOrderPaymentAllocationList);
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "processPayment::venOrderPaymentAllocationList members = " + (venOrderPaymentAllocationList != null ? venOrderPaymentAllocationList.size() : 0));
 			venOrder.setVenOrderPaymentAllocations(venOrderPaymentAllocationList);
 			
 			//Here we need to create a dummy reconciliation records
@@ -289,48 +296,61 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 			//Later these records will be updated when the funds in
 			//reports are processed 					
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::create reconciliation record");
-			for (VenOrderPayment payment : venOrderPaymentList) {
-				//Only insert reconciliation records for non-VA payments here
-				//because the VA records will have been inserted when a VA payment is received.
-				if (payment.getVenPaymentType().getPaymentTypeId() != VeniceConstants.VEN_PAYMENT_TYPE_ID_VA 
-						&& payment.getVenPaymentType().getPaymentTypeId() != VeniceConstants.VEN_PAYMENT_TYPE_ID_CS) {
-					FinArFundsInReconRecord reconRecord = new FinArFundsInReconRecord();
+			try {
+				for (VenOrderPayment payment : venOrderPaymentList) {
+					//Only insert reconciliation records for non-VA payments here
+					//because the VA records will have been inserted when a VA payment is received.
+					if (payment.getVenPaymentType().getPaymentTypeId() != VeniceConstants.VEN_PAYMENT_TYPE_ID_VA 
+							&& payment.getVenPaymentType().getPaymentTypeId() != VeniceConstants.VEN_PAYMENT_TYPE_ID_CS) {
+						FinArFundsInReconRecord reconRecord = new FinArFundsInReconRecord();
 
-					FinArReconResult result = new FinArReconResult();
-					result.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_NONE);
-					reconRecord.setFinArReconResult(result);
-					
-					FinArFundsInActionApplied actionApplied = new FinArFundsInActionApplied();
-					actionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
-					reconRecord.setFinArFundsInActionApplied(actionApplied);
+						FinArReconResult result = new FinArReconResult();
+						result.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_NONE);
+						reconRecord.setFinArReconResult(result);
 
-					FinApprovalStatus approvalStatus = new FinApprovalStatus();
-					approvalStatus.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
-					reconRecord.setFinApprovalStatus(approvalStatus);
-					
-					reconRecord.setVenOrderPayment(payment);
-					reconRecord.setWcsOrderId(venOrder.getWcsOrderId());
-					reconRecord.setOrderDate(venOrder.getOrderDate());
-					reconRecord.setPaymentAmount(payment.getAmount());
-					reconRecord.setNomorReff(payment.getReferenceId()!=null?payment.getReferenceId():"");
+						FinArFundsInActionApplied actionApplied = new FinArFundsInActionApplied();
+						actionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
+						reconRecord.setFinArFundsInActionApplied(actionApplied);
 
-					// balance per payment amount - handling fee = payment amount, jadi bukan amount order total keseluruhan
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processPayment::payment Amount  = " + payment.getAmount());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processPayment::HandlingFee = " + payment.getHandlingFee());
-					BigDecimal remaining = payment.getAmount().subtract(payment.getHandlingFee()); 
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processPayment::setRemainingBalanceAmount = " + remaining);
-					
-					reconRecord.setRemainingBalanceAmount(remaining);
-					reconRecord.setUserLogonName("System");	
-					
-					reconRecord = finArFundsInReconRecordService.persist(reconRecord);
-				}
+						FinApprovalStatus approvalStatus = new FinApprovalStatus();
+						approvalStatus.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+						reconRecord.setFinApprovalStatus(approvalStatus);
+
+						reconRecord.setVenOrderPayment(payment);
+						reconRecord.setWcsOrderId(venOrder.getWcsOrderId());
+						reconRecord.setOrderDate(venOrder.getOrderDate());
+						reconRecord.setPaymentAmount(payment.getAmount());
+						reconRecord.setNomorReff(payment.getReferenceId()!=null?payment.getReferenceId():"");
+
+						// balance per payment amount - handling fee = payment amount, jadi bukan amount order total keseluruhan
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "processPayment::payment Amount  = " + payment.getAmount());
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "processPayment::HandlingFee = " + payment.getHandlingFee());
+						BigDecimal remaining = payment.getAmount().subtract(payment.getHandlingFee()); 
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "processPayment::setRemainingBalanceAmount = " + remaining);
+
+						reconRecord.setRemainingBalanceAmount(remaining);
+						reconRecord.setUserLogonName("System");	
+
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "processPayment::persisting reconRecord");
+						reconRecord = finArFundsInReconRecordService.persist(reconRecord);
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "processPayment::reconRecord has been successfully persisted,reconRecord = " + reconRecord);
+					}
+				} //end of for 'venOrderPaymentList'
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), e);
+				e.printStackTrace();
+				CommonUtil.logAndReturnException(new CannotPersistFinArFundsInReconRecordException("Cannot persist FinArFundsInReconRecord"
+						, VeniceExceptionConstants.VEN_EX_800001), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 			}
 		}			
 
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "processPayment::EOM");
 		return true;
 	}
 	
@@ -390,6 +410,8 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 						VenOrderPayment venOrderPaymentPersisted = payment;
 						if (!em.contains(payment)) {
 							//payment in detach mode, hence need to explicitly call save as shown below
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "persistOrderPaymentList::calling venOrderPaymentDAO save explicitly");
 							venOrderPaymentPersisted = venOrderPaymentDAO.save(payment);
 						}
 						newVenOrderPaymentList.add(venOrderPaymentPersisted);
