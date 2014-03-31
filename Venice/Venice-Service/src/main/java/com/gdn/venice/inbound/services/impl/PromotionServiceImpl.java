@@ -36,6 +36,7 @@ public class PromotionServiceImpl implements PromotionService {
 	private EntityManager em;
 
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenPromotion> synchronizeVenPromotionReferences(
 			List<VenPromotion> promotionReferences)
 			throws VeniceInternalException {
@@ -67,7 +68,7 @@ public class PromotionServiceImpl implements PromotionService {
 									+ promotionExactList);
 
 					if (promotionExactList != null
-							&& (promotionExactList.size() > 0)) {
+							&& (!promotionExactList.isEmpty())) {
 						CommonUtil
 								.logDebug(this.getClass().getCanonicalName(),
 										"synchronizeVenPromotionReferences::exact promo found");
@@ -81,12 +82,12 @@ public class PromotionServiceImpl implements PromotionService {
 								VenPromotionType type = new VenPromotionType();
 								type.setPromotionType(VeniceConstants.VEN_PROMOTION_TYPE_FREESHIPPING);
 								venPromotion.setVenPromotionType(type);
-								/*
 								if (!em.contains(promotion)) {
 									// promotion is not in attach mode, hence should call save explicitly
+									CommonUtil.logDebug(this.getClass().getCanonicalName()
+											, "synchronizeVenPromotionReferences::calling venPromotionDAO save explicitly");
 									venPromotion = venPromotionDAO.save(promotion);
-								}
-								*/								
+								}								
 							}
 						}
 					} else {
@@ -102,7 +103,7 @@ public class PromotionServiceImpl implements PromotionService {
 								"synchronizeVenPromotionReferences::promotionUploadedList = "
 										+ promotionUploadedList);
 						if (promotionUploadedList != null
-								&& (promotionUploadedList.size() > 0)) {
+								&& (!promotionUploadedList.isEmpty())) {
 							CommonUtil
 									.logDebug(
 											this.getClass().getCanonicalName(),
@@ -130,13 +131,17 @@ public class PromotionServiceImpl implements PromotionService {
 									.logDebug(
 											this.getClass().getCanonicalName(),
 											"synchronizeVenPromotionReferences::no exact matching promo code, no uploaded promo, persist promo from inbound");
-							/*
+							
 							if (!em.contains(promotion)) {
 								// promotion is in detach mode, hence should call save explicitly
+								CommonUtil.logDebug(this.getClass().getCanonicalName()
+										, "synchronizeVenPromotionReferences::calling venPromotionDAO save explicitly");
 								venPromotion = venPromotionDAO.save(promotion);
+							} else {
+								CommonUtil.logDebug(this.getClass().getCanonicalName()
+										, "synchronizeVenPromotionReferences::promotion is in attached mode, no need to call save explicitly");
+								venPromotion = promotion;
 							}
-							*/
-							venPromotion = promotion;
 
 							// check the promo code for free shipping
 							if (venPromotion.getVenPromotionType() == null
@@ -148,12 +153,13 @@ public class PromotionServiceImpl implements PromotionService {
 									VenPromotionType type = new VenPromotionType();
 									type.setPromotionType(VeniceConstants.VEN_PROMOTION_TYPE_FREESHIPPING);
 									venPromotion.setVenPromotionType(type);
-									/*
+								
 									if (!em.contains(venPromotion)) {
 										// venPromotion is in detach mode, hence should call save explicitly
+										CommonUtil.logDebug(this.getClass().getCanonicalName()
+												, "synchronizeVenPromotionReferences::calling venPromotionDAO save explicitly");
 										venPromotion = venPromotionDAO.save(venPromotion);
 									}
-									*/
 									CommonUtil
 											.logDebug(this.getClass()
 													.getCanonicalName(),
@@ -165,9 +171,11 @@ public class PromotionServiceImpl implements PromotionService {
 					CommonUtil
 							.logDebug(this.getClass().getCanonicalName(),
 									"synchronizeVenPromotionReferences::adding venPromotion into retVal");
+					/*
 					if (em.contains(venPromotion)) {
 						em.detach(venPromotion);
 					}
+					*/
 					synchronizedPromotionRefs.add(venPromotion);
 					CommonUtil
 							.logDebug(this.getClass().getCanonicalName(),

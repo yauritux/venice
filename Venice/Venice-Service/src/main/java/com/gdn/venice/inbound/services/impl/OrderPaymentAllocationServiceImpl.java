@@ -45,7 +45,11 @@ public class OrderPaymentAllocationServiceImpl implements OrderPaymentAllocation
 			if (!em.contains(venOrderPaymentAllocation)) {
 				//venOrderPaymentAllocation in detach mode, need to explicitly call save
 				try {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persist::calling venOrderPaymentAllocationDAO save explicitly");
 					persistedOrderPaymentAllocation = venOrderPaymentAllocationDAO.save(venOrderPaymentAllocation);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persist::successfully persisted venOrderPaymentAllocation");
 				} catch (Exception e) {
 					CommonUtil.logAndReturnException(new CannotPersistOrderPaymentAllocationException(
 							"Cannot persist VenOrderPaymentAllocation, " + e, VeniceExceptionConstants.VEN_EX_000031)
@@ -53,6 +57,8 @@ public class OrderPaymentAllocationServiceImpl implements OrderPaymentAllocation
 				}
 			}
 		}
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persist::returning persistedOrderPaymentAllocation = " + persistedOrderPaymentAllocation);
 		return persistedOrderPaymentAllocation;
 	}
 	
@@ -71,25 +77,16 @@ public class OrderPaymentAllocationServiceImpl implements OrderPaymentAllocation
 				, "persistOrderPaymentAllocationList::BEGIN, venOrderPaymentAllocationList = " + venOrderPaymentAllocationList);
 		List<VenOrderPaymentAllocation> newVenOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>();
 		if (venOrderPaymentAllocationList != null	&& (!(venOrderPaymentAllocationList.isEmpty()))) {
-			/*
-			try {
-				newVenOrderPaymentAllocationList = venOrderPaymentAllocationDAO.save(venOrderPaymentAllocationList);
-			} catch (Exception e) {
-				CommonUtil.logAndReturnException(new CannotPersistOrderPaymentAllocationException(
-						"Cannot persist VenOrderPaymentAllocation, " + e, VeniceExceptionConstants.VEN_EX_000031)
-				     , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-			}
-			*/
 			for (VenOrderPaymentAllocation orderPaymentAllocation : venOrderPaymentAllocationList) {
 				newVenOrderPaymentAllocationList.add(persist(orderPaymentAllocation));
 			}
 		}else{
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "persistOrderPaymentAllocationList::Persisting VenOrderPaymentAllocation list is null");
+					, "persistOrderPaymentAllocationList::Persisting VenOrderPaymentAllocation list is null or empty");
 		}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistOrderPaymentAllocationList::returning newVenOrderPaymentAllocationList = "
-				  + newVenOrderPaymentAllocationList);
+				, "persistOrderPaymentAllocationList::returning newVenOrderPaymentAllocationList members = "
+				  + (newVenOrderPaymentAllocationList != null ? newVenOrderPaymentAllocationList.size() : 0));
 		return newVenOrderPaymentAllocationList;	
 	}
 
