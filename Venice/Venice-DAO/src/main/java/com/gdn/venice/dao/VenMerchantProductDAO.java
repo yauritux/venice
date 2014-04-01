@@ -30,5 +30,5 @@ public interface VenMerchantProductDAO extends JpaRepository<VenMerchantProduct,
 	public List<VenMerchantProduct> findByWcsProductSku(String wcsProductSku);
 	
 	@Query(FIND_SLOW_MOVING_PRODUCT)
-	public List<VenMerchantProduct> findSlowMovingProduct(String productIds);
+	public List<VenMerchantProduct> findSlowMovingProduct(List<Long> productIds);
 }

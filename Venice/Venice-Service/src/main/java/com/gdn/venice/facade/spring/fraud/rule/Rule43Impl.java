@@ -1,11 +1,12 @@
 package com.gdn.venice.facade.spring.fraud.rule;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.gdn.venice.dao.FrdParameterRule42DAO;
+import com.gdn.venice.dao.FrdParameterRule43DAO;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
@@ -19,14 +20,14 @@ public class Rule43Impl implements Rule {
 	private static final String CLASS_NAME = Rule43Impl.class.getCanonicalName();
 	
 	@Autowired
-	FrdParameterRule42DAO frdParameterRule42DAO;
+	FrdParameterRule43DAO frdParameterRule43DAO;
 	@Autowired
 	VenOrderPaymentAllocationDAO venOrderPaymentAllocationDAO;
 	
 	public int getRiskPoint(VenOrder order){
 		int totalRiskPoint = 0;
 		
-		int paymentLimit = getPaymentValue();
+		BigDecimal paymentLimit = getPaymentValue();
 		int riskPoint = getRiskPointValue();
 		
 		List<VenOrderPaymentAllocation> migsUploadList = venOrderPaymentAllocationDAO.findByVenOrderOrderPaymentLessThanLimit(order, paymentLimit);
@@ -40,11 +41,11 @@ public class Rule43Impl implements Rule {
 	}
 	
 	public int getRiskPointValue(){
-		return frdParameterRule42DAO.findByDescription("Risk Point").getRiskPoint();
+		return frdParameterRule43DAO.findByDescription("Risk Point").getValue();
 	}
 	
-	public int getPaymentValue(){
-		return frdParameterRule42DAO.findByDescription("Payment").getRiskPoint();
+	public BigDecimal getPaymentValue(){
+		return new BigDecimal(frdParameterRule43DAO.findByDescription("Payment").getValue());
 	}
 		
 }

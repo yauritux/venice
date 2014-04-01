@@ -42,7 +42,7 @@ public class Rule40Impl implements Rule {
 			
 			FrdParameterRule40 rule = frdParameterRule40DAO.findByNoHp(mobilePhoneNoPrefix);
 			
-			if(orderCity.contains(rule.getCityName().toUpperCase())){
+			if(rule != null && orderCity.contains(rule.getCityName().toUpperCase())){
 				totalRiskPoint = 0;
 				break;
 			}

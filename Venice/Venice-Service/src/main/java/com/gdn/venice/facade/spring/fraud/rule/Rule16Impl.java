@@ -53,7 +53,7 @@ public class Rule16Impl implements Rule {
 		
 		for (VenOrder otherOrder : otherOrderList) {
 			
-			String customerUsernameOtherOrder = getCustomerName(otherOrder);
+			String customerUsernameOtherOrder = getCustomerUsername(otherOrder);
 			String customerNameOtherOrder = getCustomerName(otherOrder);
 			
 			if(customerUsernameCurrentOrder.equalsIgnoreCase(customerUsernameOtherOrder) || 
@@ -132,7 +132,7 @@ public class Rule16Impl implements Rule {
 	public String getCustomerEmail(VenOrder order){
 		
 		VenOrderContactDetail contact = venOrderContactDetailDAO.findByContactEmailVenOrder(order.getOrderId());
-		return contact.getVenContactDetail().getContactDetail();
+		return (contact == null ? "" : contact.getVenContactDetail().getContactDetail());
 		
 	}
 	

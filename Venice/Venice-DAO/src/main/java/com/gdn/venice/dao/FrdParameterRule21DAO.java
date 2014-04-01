@@ -1,5 +1,7 @@
 package com.gdn.venice.dao;
 
+import java.sql.Time;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -13,5 +15,5 @@ public interface FrdParameterRule21DAO extends JpaRepository<FrdParameterRule21,
 		"WHERE ?1 BETWEEN o.minTime AND o.maxTime";
 	
 	@Query(FIND_BY_TIMERANGE)
-	public FrdParameterRule21 findByTimeRange(String orderTime);
+	public FrdParameterRule21 findByTimeRange(Time orderTime);
 }

@@ -1,5 +1,6 @@
 package com.gdn.venice.facade.spring.fraud.rule;
 
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class Rule21Impl implements Rule {
 	public int getRiskPoint(VenOrder order){
 		int totalRiskPoint = 0;
 		
-		String orderTime = SDF_TIME.format(order.getOrderDate().getTime());
+		Time orderTime = new Time(order.getOrderDate().getTime());
 		
 		FrdParameterRule21 rule = frdParameterRule21DAO.findByTimeRange(orderTime);
 		

@@ -1,5 +1,6 @@
 package com.gdn.venice.facade.spring.fraud.rule;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,13 +56,14 @@ public class Rule44Impl implements Rule {
 	}
 	
 	public List<VenMerchantProduct> getSlowMovingProductList(List<VenOrderItem> orderItemList){
-		String productIds = "";
+		List<Long> productIds = new ArrayList<Long>();
 		
 		for(int i=0; i < orderItemList.size();i++){	    			
-			if(i==0)
-				productIds=orderItemList.get(i).getVenMerchantProduct().getProductId().toString();
-			else
-				productIds=productIds+","+orderItemList.get(i).getVenMerchantProduct().getProductId();
+//			if(i==0)
+//				productIds=orderItemList.get(i).getVenMerchantProduct().getProductId().toString();
+//			else
+//				productIds=productIds+","+orderItemList.get(i).getVenMerchantProduct().getProductId();
+			productIds.add(orderItemList.get(i).getVenMerchantProduct().getProductId());
 		}	
 		
 		return venMerchantProductDAO.findSlowMovingProduct(productIds);

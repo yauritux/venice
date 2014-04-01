@@ -122,7 +122,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	public List<Integer> countMaskedCreditCardByIpAddressOrderDateRange(String ipAddress, Date dateStart, Date dateEnd);
 	
 	@Query(FIND_BY_VENORDER_ORDERPAYMENTLESSTHANLIMIT_SQL)
-	public List<VenOrderPaymentAllocation> findByVenOrderOrderPaymentLessThanLimit(VenOrder venOrder, int amountLimit);
+	public List<VenOrderPaymentAllocation> findByVenOrderOrderPaymentLessThanLimit(VenOrder venOrder, BigDecimal amountLimit);
 	
 	@Query(FIND_BY_VENORDER_PAYMENTTYPECC_SQL) 
 	public List<VenOrderPaymentAllocation> findByVenOrderPaymentTypeCC(VenOrder venOrder);

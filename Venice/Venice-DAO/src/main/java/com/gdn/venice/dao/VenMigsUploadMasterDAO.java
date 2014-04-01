@@ -14,7 +14,7 @@ public interface VenMigsUploadMasterDAO extends JpaRepository<VenMigsUploadMaste
 	public static final String FIND_BY_MERCHANTREFERENCE_CARDNUMBERNOTINORDERPAYMENT_RESPONSECODENOTAPPROVED = 
 		"select o " +
 		"from  VenMigsUploadMaster o " +
-		"where o.merchantTransactionReference like '?1-%' "+
+		"where o.merchantTransactionReference like ?1 "+
 		"and o.cardNumber " +
 		"not in (select b.venOrderPayment.maskedCreditCardNumber " +
 		"        from VenOrderPaymentAllocation b " +
@@ -23,7 +23,7 @@ public interface VenMigsUploadMasterDAO extends JpaRepository<VenMigsUploadMaste
 	
 	public static final String FIND_BY_MERCHANTREFERENCE_RESPONSECODEAPPROVED = 
 		"select o from VenMigsUploadMaster o " +
-		"where (o.merchantTransactionReference like '?1-%' or o.merchantTransactionReference = ?1) " +
+		"where (o.merchantTransactionReference like ?1 or o.merchantTransactionReference = ?1) " +
 		"and o.responseCode <> '"+VEN_MIGS_MASTER_UPLOAD_RESPONSE_CODE_APPROVE+"'";
 	
 	@Query(FIND_BY_MERCHANTREFERENCE_CARDNUMBERNOTINORDERPAYMENT_RESPONSECODENOTAPPROVED)
