@@ -99,7 +99,6 @@ public class TodolistCloserBatchJob {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		
 		System.out.println("TodolistCloserBatchJob completed.");
 		return Boolean.TRUE;		
 	}
