@@ -49,7 +49,7 @@ public class Rule16Impl implements Rule {
 		String customerAddressCurrentOrder = getCustomerAddress(order);
 		Timestamp orderTimestamp = order.getOrderDate();
 		
-		List<VenOrder> otherOrderList = venOrderDAO.findOtherByStatusCOrderDateRange(order, getStartRangeDate(orderTimestamp), getEndRangeDate(orderTimestamp));
+		List<VenOrder> otherOrderList = getOrdersToInvestigate(order, getStartRangeDate(orderTimestamp), getEndRangeDate(orderTimestamp));
 		
 		for (VenOrder otherOrder : otherOrderList) {
 			
@@ -95,23 +95,23 @@ public class Rule16Impl implements Rule {
 		return new Integer(config.getValue());
 	}
 	
-	public String getStartRangeDate(Timestamp timestamp){
+	public Date getStartRangeDate(Timestamp timestamp){
 		int daySpan = getDaySpanFromDBConfig();
 		Date startRangeDate = DateUtils.addDays(timestamp, -daySpan);
 		
-		return SDF_TIMESTAMP.format(startRangeDate);
+		return startRangeDate;
 	}
 	
-	public String getEndRangeDate(Timestamp timestamp){
+	public Date getEndRangeDate(Timestamp timestamp){
 		
-		return SDF_TIMESTAMP.format(timestamp.getTime());
+		return timestamp;
 	}
 	
 	public Timestamp getOrderDateTimestamp(VenOrder order){
 		return order.getOrderDate();
 	}
 	
-	public List<VenOrder> getOrdersToInvestigate(VenOrder otherThanThisOrder, String startDate, String endDate){
+	public List<VenOrder> getOrdersToInvestigate(VenOrder otherThanThisOrder, Date startDate, Date endDate){
 		return venOrderDAO.findOtherByStatusCOrderDateRange(otherThanThisOrder, startDate, endDate);
 	}
 	
@@ -131,7 +131,7 @@ public class Rule16Impl implements Rule {
 	
 	public String getCustomerEmail(VenOrder order){
 		
-		VenOrderContactDetail contact = venOrderContactDetailDAO.findByContactEmailVenOrder(order);
+		VenOrderContactDetail contact = venOrderContactDetailDAO.findByContactEmailVenOrder(order.getOrderId());
 		return contact.getVenContactDetail().getContactDetail();
 		
 	}

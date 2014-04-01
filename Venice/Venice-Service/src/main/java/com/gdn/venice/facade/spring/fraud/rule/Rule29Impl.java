@@ -31,8 +31,8 @@ public class Rule29Impl implements Rule{
 	public int getRiskPoint(VenOrder order){
 		int totalRiskPoint = 0;
 		
-		String startDate = getStartRangeDate(order.getOrderDate());
-		String endDate = getEndRangeDate(order.getOrderDate());
+		Date startDate = getStartRangeDate(order.getOrderDate());
+		Date endDate = getEndRangeDate(order.getOrderDate());
 		
 		FrdParameterRule26272829 rule = frdParameterRule26272829DAO.findByRule29OrderFromSameCustomerAddressInOrderDateRange(startDate, endDate, order.getOrderId());
 		
@@ -45,15 +45,15 @@ public class Rule29Impl implements Rule{
 		return totalRiskPoint;
 	}
 	
-	public String getStartRangeDate(Timestamp timestamp){
+	public Date getStartRangeDate(Timestamp timestamp){
 		int weekSpan = -1;
 		Date startRangeDate = DateUtils.addWeeks(timestamp, weekSpan);
-		return SDF_TIMESTAMP.format(startRangeDate);
+		return startRangeDate;
 	}
 	
-	public String getEndRangeDate(Timestamp timestamp){
+	public Date getEndRangeDate(Timestamp timestamp){
 		
-		return SDF_TIMESTAMP.format(timestamp.getTime());
+		return timestamp;
 	}
 		
 }

@@ -113,7 +113,7 @@ public class Rule35Impl implements Rule{
 	}
 	
 	public VenOrderContactDetail getCustomerEmail(VenOrder order){
-		return venOrderContactDetailDAO.findByContactEmailVenOrder(order);
+		return venOrderContactDetailDAO.findByContactEmailVenOrder(order.getOrderId());
 	}
 	
 	public List<FrdParameterRule35> getCustomerEmailGreyList(VenOrderContactDetail orderContactDetail){

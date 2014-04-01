@@ -132,13 +132,13 @@ public class XLIBFundInServiceImpl extends AbstractFundInService{
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(referrenceId, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(referrenceId, paymentAmount, REPORT_TYPE,null);
 		
 		if(isInternetBankingFundInAlreadyExist(referrenceId, REPORT_TYPE.id())){
 			order = null;
 		}
 		
-		if(order != null && !isOrderPaymentExist(referrenceId, paymentAmount.abs(), REPORT_TYPE)){
+		if(order != null && !isOrderPaymentExist(referrenceId, paymentAmount.abs(), REPORT_TYPE,null)){
 			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + referrenceId);
 			return null;
 		}
@@ -147,7 +147,7 @@ public class XLIBFundInServiceImpl extends AbstractFundInService{
 			VenOrderPaymentAllocation orderPaymentAllocation 
 				= getPaymentAllocationByRelatedPayment(referrenceId, 
 						                               paymentAmount.abs(), 
-						                               REPORT_TYPE);
+						                               REPORT_TYPE,null);
 			
 			List<FinArFundsInReconRecord> fundInReconList = orderPaymentAllocation.getVenOrderPayment().getFinArFundsInReconRecords();
 			fundInRecon = fundInReconList.get(0);

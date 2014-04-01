@@ -134,9 +134,9 @@ public class MandiriInstallmentCCFundInServiceImpl extends AbstractFundInService
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(authCode, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(authCode, paymentAmount, REPORT_TYPE,paymentDate);
 		
-		if(order != null && !isOrderPaymentExist(authCode, paymentAmount, REPORT_TYPE)){
+		if(order != null && !isOrderPaymentExist(authCode, paymentAmount, REPORT_TYPE,paymentDate)){
 			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + authCode);
 			return null;
 		}
@@ -145,7 +145,7 @@ public class MandiriInstallmentCCFundInServiceImpl extends AbstractFundInService
 			VenOrderPaymentAllocation orderPaymentAllocation 
 				= getPaymentAllocationByRelatedPayment(authCode, 
 						                               paymentAmount, 
-						                               REPORT_TYPE);
+						                               REPORT_TYPE,paymentDate);
 			
 			List<FinArFundsInReconRecord> fundInReconList = orderPaymentAllocation.getVenOrderPayment().getFinArFundsInReconRecords();
 			fundInRecon = fundInReconList.get(0);

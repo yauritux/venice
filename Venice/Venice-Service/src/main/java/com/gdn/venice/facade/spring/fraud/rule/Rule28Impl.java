@@ -19,7 +19,7 @@ import com.gdn.venice.util.CommonUtil;
  * Same Product Category & Customer Email in one week
  */
 @Service("Rule28")
-public class Rule28Impl {
+public class Rule28Impl implements Rule{
 	private static final String CLASS_NAME = Rule28Impl.class.getCanonicalName();
 	private static final SimpleDateFormat SDF_TIMESTAMP = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -32,8 +32,8 @@ public class Rule28Impl {
 		int totalRiskPoint = 0;
 		
 		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
-		String startDate = getStartRangeDate(order.getOrderDate());
-		String endDate = getEndRangeDate(order.getOrderDate());
+		Date startDate = getStartRangeDate(order.getOrderDate());
+		Date endDate = getEndRangeDate(order.getOrderDate());
 		
 		FrdParameterRule26272829 rule = frdParameterRule26272829DAO.findByRule28OrderFromSameCustomerSameProductCategoryInOrderDateRange(orderWithCustomer.getVenCustomer().getCustomerId(), startDate, endDate, order.getOrderId());
 		
@@ -46,15 +46,15 @@ public class Rule28Impl {
 		return totalRiskPoint;
 	}
 	
-	public String getStartRangeDate(Timestamp timestamp){
+	public Date getStartRangeDate(Timestamp timestamp){
 		int weekSpan = -1;
 		Date startRangeDate = DateUtils.addWeeks(timestamp, weekSpan);
-		return SDF_TIMESTAMP.format(startRangeDate);
+		return startRangeDate;
 	}
 	
-	public String getEndRangeDate(Timestamp timestamp){
+	public Date getEndRangeDate(Timestamp timestamp){
 		
-		return SDF_TIMESTAMP.format(timestamp.getTime());
+		return timestamp;
 	}
 		
 }

@@ -64,8 +64,8 @@ public class Rule10Impl implements Rule{
 
 	public BigDecimal getPaymentSum(VenOrder order) {
 		String maskedCreditCardNumber = getMaskedCreditCard(order);
-		String endRangeDate = SDF_TIMESTAMP.format(getOrderPaymentTimestamp(order));
-		String startRangeDate = getStartRangeDate(getOrderPaymentTimestamp(order));
+		Date endRangeDate = getOrderPaymentTimestamp(order);
+		Date startRangeDate = getStartRangeDate(getOrderPaymentTimestamp(order));
 		
 		return venOrderPaymentDAO.getOrderPaymentAmountSumByCreditCardNumberPaymentTimeRange(maskedCreditCardNumber, startRangeDate, endRangeDate);
 	}
@@ -101,11 +101,11 @@ public class Rule10Impl implements Rule{
 		return order.getVenOrderPaymentAllocations().get(0).getVenOrderPayment().getMaskedCreditCardNumber();
 	}
 	
-	public String getStartRangeDate(Timestamp timestamp){
+	public Date getStartRangeDate(Timestamp timestamp){
 		int daySpan = getDaySpanFromDBConfig();
 		Date startRangeDate = DateUtils.addDays(timestamp, -daySpan);
 		
-		return SDF_TIMESTAMP.format(startRangeDate);
+		return startRangeDate;
 	}
 	
 	public Timestamp getOrderPaymentTimestamp(VenOrder order){
