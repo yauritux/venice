@@ -82,7 +82,6 @@ public class TodolistCloserBatchJob {
 				}else if(processOrTask.equals("assign")){				
 					//untuk close task by assign
 					if(!task.getParticipantDisplayName().equals(processOrTaskName)){
-						System.out.println(task.getParticipantDisplayName());
 						taskIds.remove(taskIds.get(i));
 						--i;
 						--taskSize;
