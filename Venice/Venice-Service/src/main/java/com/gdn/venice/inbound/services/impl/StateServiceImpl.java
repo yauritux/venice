@@ -38,21 +38,31 @@ public class StateServiceImpl implements StateService {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenState synchronizeVenState(VenState venState) {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::BEGIN,venState = " + venState);
-		VenState synchState = venState;
+		VenState synchState = new VenState();
 		
 		if (venState != null && venState.getStateCode() != null) {
 			try {
 				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateCode=" + venState.getStateCode());
-				List<VenState> stateList = venStateDAO.findByStateCode(venState.getStateCode());
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateList found = "
-						+ (stateList != null ? stateList.size() : 0));
-				if (stateList == null || stateList.isEmpty()) {
-					if (!em.contains(venState)) {
-						//venState in detach mode, hence need to explicitly call save
-						synchState = venStateDAO.save(venState);
+				if (venState.getStateId() == null) {
+					List<VenState> stateList = venStateDAO.findByStateCode(venState.getStateCode());
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateList found = "
+							+ (stateList != null ? stateList.size() : 0));
+					if (stateList == null || stateList.isEmpty()) {
+						if (!em.contains(venState)) {
+							//venState in detach mode, hence need to explicitly call save
+							synchState = venStateDAO.save(venState);
+						} else {
+							synchState = venState;
+						}
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "synchronizeVenState::new venState is added successfully into DB");
+					} else {
+						synchState = stateList.get(0);
 					}
 				} else {
-					synchState = stateList.get(0);
+					//state already being synchronized
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::venState has been synchronized already, no need to perform twice");
+					synchState = venState;
 				}
 			} catch (Exception e) {
 				CommonUtil.logError(this.getClass().getCanonicalName()
@@ -60,8 +70,12 @@ public class StateServiceImpl implements StateService {
 				CommonUtil.logAndReturnException(new VenStateSynchronizingError("Error in synchronyzing VenState"
 						, VeniceExceptionConstants.VEN_EX_130004), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 			}
+		} else {
+			synchState = venState;
 		}
 		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenState::returning synchState = " + (synchState != null ? synchState.getStateCode() : synchState));
 		return synchState;
 	}
 	

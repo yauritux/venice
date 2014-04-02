@@ -133,8 +133,6 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 		if (venPartyAddressList != null && !venPartyAddressList.isEmpty()) {
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "persistPartyAddresses::Persisting VenPartyAddress list...:" + venPartyAddressList.size());
-			//Iterator<VenPartyAddress> i = venPartyAddressList.iterator();
-			//while (i.hasNext()) {
 			try {
 				for (VenPartyAddress venPartyAddress : venPartyAddressList) {
 
@@ -149,8 +147,6 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistPartyAddresses::venParty address ID = " + 
 					        (venPartyAddress.getVenAddress() != null ? venPartyAddress.getVenAddress().getAddressId() : 0));
-
-					//VenPartyAddress next = i.next();
 
 					// Set up the primary key object
 					VenPartyAddressPK id = new VenPartyAddressPK();

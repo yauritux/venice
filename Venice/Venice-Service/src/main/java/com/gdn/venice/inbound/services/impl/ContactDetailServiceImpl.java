@@ -43,6 +43,7 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 	private EntityManager em;
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.NEVER)
 	public List<VenContactDetail> findByParty(VenParty party) {
 		return venContactDetailDAO.findByParty(party);
 	}

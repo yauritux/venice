@@ -16,7 +16,6 @@ import com.gdn.venice.constants.VenPartyTypeConstants;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenCustomerDAO;
 import com.gdn.venice.exception.CannotPersistCustomerException;
-import com.gdn.venice.exception.InvalidOrderException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.CustomerService;
 import com.gdn.venice.inbound.services.PartyService;
