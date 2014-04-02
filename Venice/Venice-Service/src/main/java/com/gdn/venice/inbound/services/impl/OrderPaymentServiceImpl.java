@@ -234,7 +234,6 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 					, "processPayment::venOrderPaymentList members = " + (venOrderPaymentList != null ? venOrderPaymentList.size() : 0));
 
 			//paymentIterator = venOrderPaymentList.iterator();
-			BigDecimal paymentBalance = venOrder.getAmount();
 			int p=0;
 			//while (paymentIterator.hasNext()) {
 			for (VenOrderPayment venOrderPayment : venOrderPaymentList) {
@@ -255,28 +254,16 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 					BigDecimal paymentAmount = venOrderPayment.getAmount();
 					
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processPayment::Order Amount = "+paymentBalance);
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "processPayment::paymentBalance.compareTo(new BigDecimal(0)):  "
-					+paymentBalance.compareTo(new BigDecimal(0)) );
+							, "processPayment::paymentAmount.compareTo(new BigDecimal(0)):  "
+					+paymentAmount.compareTo(new BigDecimal(0)) );
 					
 					// If the balance is greater than zero
-					if (paymentBalance.compareTo(new BigDecimal(0)) >= 0) {
+					if (paymentAmount.compareTo(new BigDecimal(0)) >= 0) {
 					
-						//If the payment amount is greater than the
-						//balance then allocate the balance amount else
-						//allocate the payment amount.
-						if (paymentBalance.compareTo(paymentAmount) < 0) {
-							allocation.setAllocationAmount(paymentBalance);
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "processPayment::Order Allocation Amount is paymentBalance = "+paymentBalance);
-						} else {
-							allocation.setAllocationAmount(paymentAmount);
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "processPayment::Order Allocation Amount is paymentAmount = "+paymentAmount);
-						}
+						allocation.setAllocationAmount(paymentAmount);
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "processPayment::Order Allocation Amount is paymentAmount = "+paymentAmount);
 						
-						paymentBalance = paymentBalance.subtract(paymentAmount);
 						//allocation.setVenOrderPayment(next);
 						allocation.setVenOrderPayment(venOrderPayment);
 
@@ -350,11 +337,10 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 								, "processPayment::payment Amount  = " + payment.getAmount());
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "processPayment::HandlingFee = " + payment.getHandlingFee());
-						BigDecimal remaining = payment.getAmount().subtract(payment.getHandlingFee()); 
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "processPayment::setRemainingBalanceAmount = " + remaining);
+								, "processPayment::setRemainingBalanceAmount = " + payment.getAmount());
 
-						reconRecord.setRemainingBalanceAmount(remaining);
+						reconRecord.setRemainingBalanceAmount(payment.getAmount());
 						reconRecord.setUserLogonName("System");	
 
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
