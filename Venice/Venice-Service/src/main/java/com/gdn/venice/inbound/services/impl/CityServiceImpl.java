@@ -36,7 +36,7 @@ public class CityServiceImpl implements CityService {
 	private EntityManager em;
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public VenCity synchronizeVenCity(VenCity venCity) throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCity::BEGIN,venCity=" + venCity);
 		VenCity synchCity = new VenCity();
@@ -92,7 +92,7 @@ public class CityServiceImpl implements CityService {
 	}
 	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public List<VenCity> synchronizeVenCityReferences(
 			List<VenCity> cityReferences) throws VeniceInternalException {
 		

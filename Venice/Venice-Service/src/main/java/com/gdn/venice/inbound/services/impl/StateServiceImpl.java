@@ -35,7 +35,7 @@ public class StateServiceImpl implements StateService {
 	private EntityManager em;
 	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public VenState synchronizeVenState(VenState venState) {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::BEGIN,venState = " + venState);
 		VenState synchState = new VenState();
@@ -80,7 +80,7 @@ public class StateServiceImpl implements StateService {
 	}
 	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public List<VenState> synchronizeVenStateReferences(
 			List<VenState> stateReferences) {
 		

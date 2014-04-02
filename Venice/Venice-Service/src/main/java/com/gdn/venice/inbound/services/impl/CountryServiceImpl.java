@@ -35,7 +35,7 @@ public class CountryServiceImpl implements CountryService {
 	private EntityManager em;
 	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public VenCountry synchronizeVenCountry(VenCountry venCountry) {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::BEGIN,venCountry = " + venCountry);
 		VenCountry synchCountry = new VenCountry();
@@ -72,7 +72,7 @@ public class CountryServiceImpl implements CountryService {
 	}
 	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public List<VenCountry> synchronizeVenCountryReferences(
 			List<VenCountry> countryReferences) {
 		
