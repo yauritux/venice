@@ -174,6 +174,7 @@ public class WarehouseAddWithApprovalView extends ViewWithUiHandlers<WarehouseAd
                     if (warehouseDetailForm.validate()) {
                         HashMap<String, String> data = new HashMap<String, String>();
                         data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_CODE, "");
                         data.put(DataNameTokens.INV_WAREHOUSE_NAME, warehouseDetailForm.getValue("whName").toString());
                         data.put(DataNameTokens.INV_WAREHOUSE_DESCRIPTION, warehouseDetailForm.getValue("whDescription").toString());
                         data.put(DataNameTokens.INV_WAREHOUSE_ADDRESS, warehouseDetailForm.getValue("whAddress").toString());

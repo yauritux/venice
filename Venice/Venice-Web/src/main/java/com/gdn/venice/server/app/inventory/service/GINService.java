@@ -5,13 +5,9 @@
 package com.gdn.venice.server.app.inventory.service;
 
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
-import com.gdn.inventory.exchange.entity.AttributeName;
-import com.gdn.inventory.exchange.entity.WarehouseWIP;
 import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
 import com.gdn.inventory.exchange.entity.module.outbound.GoodIssuedNote;
-import com.gdn.inventory.exchange.entity.module.outbound.SalesOrderAWBInfo;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
-import com.gdn.inventory.wrapper.HeaderAndDetailWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
@@ -22,7 +18,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;

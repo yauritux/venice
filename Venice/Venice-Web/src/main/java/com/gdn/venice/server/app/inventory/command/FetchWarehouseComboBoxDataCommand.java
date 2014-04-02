@@ -26,59 +26,60 @@ import com.gdn.venice.util.InventoryUtil;
  */
 public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand {
 
-    String username;
-    boolean isCode;
+	String username;
+	boolean isCode;
 
-    public FetchWarehouseComboBoxDataCommand(String username, boolean isCode) {
-        this.username = username;
-        this.isCode = isCode;
-    }
+	public FetchWarehouseComboBoxDataCommand(String username, boolean isCode) {
+		this.username = username;
+		this.isCode = isCode;
+	}
 
-    /*
-     * Edited by Maria Olivia 20140320
-     */
-    public String execute() {
-        HashMap<String, String> map = new HashMap<String, String>();
-        try {
-            ResultWrapper<List<WarehouseUser>> whuWrapper = getWarehouseUserData(username);
-            System.out.println(isCode);
-            if (whuWrapper.isSuccess()) {
-                for (WarehouseUser wu : whuWrapper.getContent()) {
-                    if (isCode) {
-                        map.put("data" + wu.getWarehouse().getCode(), wu.getWarehouse().getName());
-                    } else {
-                        map.put("data" + wu.getWarehouse().getId().toString(), wu.getWarehouse().getName());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+	/*
+	 * Edited by Maria Olivia 20140320
+	 */
+	public String execute() {
+		HashMap<String, String> map = new HashMap<String, String>();
+		try {
+			ResultWrapper<List<WarehouseUser>> whuWrapper = getWarehouseUserData(username);
+			if(whuWrapper != null){
+				if (whuWrapper.isSuccess()) {
+					for (WarehouseUser wu : whuWrapper.getContent()) {
+						if (isCode) {
+							map.put("data" + wu.getWarehouse().getCode(), wu.getWarehouse().getName());
+						} else {
+							map.put("data" + wu.getWarehouse().getId().toString(), wu.getWarehouse().getName());
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return Util.formXMLfromHashMap(map);
-    }
+		return Util.formXMLfromHashMap(map);
+	}
 
-    public ResultWrapper<List<WarehouseUser>> getWarehouseUserData(String username) throws HttpException, IOException {
-        String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "user/getWarehouseList?username=" + username;
-        PostMethod httpPost = new PostMethod(url);
-        HttpClient httpClient = new HttpClient();
-        ObjectMapper mapper = new ObjectMapper();
+	public ResultWrapper<List<WarehouseUser>> getWarehouseUserData(String username) throws HttpException, IOException {
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+				+ "user/getWarehouseList?username=" + username;
+		PostMethod httpPost = new PostMethod(url);
+		HttpClient httpClient = new HttpClient();
+		ObjectMapper mapper = new ObjectMapper();
 
-        int httpCode = httpClient.executeMethod(httpPost);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            is.close();
-            System.out.println(sb.toString());
-            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<WarehouseUser>>>() {
-            });
-        } else {
-            return null;
-        }
-    }
+		int httpCode = httpClient.executeMethod(httpPost);
+		if (httpCode == HttpStatus.SC_OK) {
+			InputStream is = httpPost.getResponseBodyAsStream();
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			StringBuilder sb = new StringBuilder();
+			for (String line = br.readLine(); line != null; line = br.readLine()) {
+				sb.append(line);
+			}
+			is.close();
+			System.out.println(sb.toString());
+			return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<WarehouseUser>>>() {
+			});
+		} else {
+			return null;
+		}
+	}
 }
