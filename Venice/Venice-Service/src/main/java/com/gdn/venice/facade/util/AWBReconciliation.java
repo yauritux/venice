@@ -990,7 +990,10 @@ public class AWBReconciliation {
             correctWeight = correctWeight.setScale(2, RoundingMode.UP);
             correctWeight = BigDecimal.valueOf(0);
             for( AirwayBillTransactionItemResource airwayBillTransactionItemResourceList:  mtaAirwayBill.getItems()){
-            	 correctWeight = correctWeight.add(BigDecimal.valueOf(airwayBillTransactionItemResourceList.getPrintedWeight()));
+            	 correctWeight = correctWeight.add(BigDecimal.valueOf(airwayBillTransactionItemResourceList.getQuantity()*airwayBillTransactionItemResourceList.getWeight()));
+            	 _log.debug("Jumlah quantity "+airwayBillTransactionItemResourceList.getQuantity());
+            	 _log.debug("Jumlah berat "+airwayBillTransactionItemResourceList.getWeight());
+            	 _log.debug("Jumlah printedweight "+airwayBillTransactionItemResourceList.getPrintedWeight());
             }
 
             BigDecimal providerWeight = new BigDecimal("0");
