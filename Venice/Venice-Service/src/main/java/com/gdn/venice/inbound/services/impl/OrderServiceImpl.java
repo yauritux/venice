@@ -28,6 +28,7 @@ import com.gdn.venice.exception.CannotPersistCustomerException;
 import com.gdn.venice.exception.DuplicateWCSOrderIDException;
 import com.gdn.venice.exception.InvalidOrderException;
 import com.gdn.venice.exception.InvalidOrderItemException;
+import com.gdn.venice.exception.MerchantPartySynchFailedException;
 import com.gdn.venice.exception.OrderNotFoundException;
 import com.gdn.venice.exception.PaymentProcessorException;
 import com.gdn.venice.exception.VAOrderNotApprovedException;
@@ -280,86 +281,16 @@ public class OrderServiceImpl implements OrderService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::Persisted VenOrder = " + venOrder);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::done persist order");
 		
-		Pattern pattern = Pattern.compile("&");
-		for(String party : merchantProduct){				
-			String[] temp = pattern.split(party, 0);
-				
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "createOrder::show venParty in orderItem :  "+party);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "createOrder::string merchant :  "+temp[0]+" and "+temp[1]);
-				
-			if((temp[1] != null) && (!temp[1].trim().equals(""))){
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::temp[1] not empty");
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::orderItems = " + orderItems);
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::orderItems size = " + (orderItems != null ? orderItems.size() : 0));
-				for(int h =0; h < orderItems.size(); h++){
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::h=" + h + ",orderItems=" + orderItems.get(h));
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::venMerchantProduct = " + orderItems.get(h).getVenMerchantProduct());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::venMerchant = " 
-					+ orderItems.get(h).getVenMerchantProduct().getVenMerchant());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::wcsMerchantId = " 
-							+ orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId());
-					if(orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId().equals(temp[0].trim())){
-						//List<VenMerchant> venMerchantList = venMerchantDAO.findByWcsMerchantId(temp[0]);
-						List<VenMerchant> venMerchantList = merchantService.findByWcsMerchantId(temp[0]);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "createOrder::venMerchantList found = " + venMerchantList);
-						if (venMerchantList != null && venMerchantList.size() > 0) {
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "createOrder::venMerchantList size = " + venMerchantList.size());
-							if (venMerchantList.get(0).getVenParty() == null) {
-								//List<VenParty> venPartyList = venPartyDAO.findByLegalName(temp[1].trim());
-								List<VenParty> venPartyList = partyService.findByLegalName(temp[1]);
-								CommonUtil.logDebug(this.getClass().getCanonicalName()
-										, "createOrder::venPartyList found = " + venPartyList);
-								    if (venPartyList == null || venPartyList.size() == 0) { 
-								    	CommonUtil.logDebug(this.getClass().getCanonicalName()
-								    			, "createOrder::venPartyList is empty, creating new one");
-										VenParty venPartyitem = new VenParty();
-										VenPartyType venPartyType = new VenPartyType();
-										// set party type id = 1 adalah merchant
-										//venPartyType.setPartyTypeId(new Long(1));
-										venPartyType.setPartyTypeId(VenPartyTypeConstants.VEN_PARTY_TYPE_MERCHANT.code());
-										venPartyitem.setVenPartyType(venPartyType);
-										venPartyitem.setFullOrLegalName(temp[1]);	
-										CommonUtil.logDebug(this.getClass().getCanonicalName()
-												, "createOrder::persist venParty :  "+venPartyitem.getFullOrLegalName());
-										//venPartyitem = venPartyDAO.save(venPartyitem);
-										venMerchantList.get(0).setVenParty(venPartyitem);
-										VenMerchant venMerchant = venMerchantList.get(0);
-										//merchantService.persist(venMerchant);
-										CommonUtil.logDebug(this.getClass().getCanonicalName()
-												, "createOrder::added  new party for venmerchant (Merchant Id :"
-										          + orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId() +" )"
-										);			
-									}else{
-										venMerchantList.get(0).setVenParty(venPartyList.get(0));
-										VenMerchant venMerchant = venMerchantList.get(0);
-										//merchantService.persist(venMerchant);
-										CommonUtil.logDebug(this.getClass().getCanonicalName()
-												, "createOrder::add  party for venmerchant (Merchant Id :"
-										          + orderItems.get(h).getVenMerchantProduct().getVenMerchant().getWcsMerchantId() +" )"
-										);						
-									}
-								}
-							}
-					}
-					
-				}
-				}else {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "createOrder::party is null for venmerchant (Merchant Id :"+ temp[0] +" )");
-				}
-					
-			} //EOF for
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::processing merchant");
+		
+		Boolean merchantProcess = merchantService.processMerchant(merchantProduct, orderItems);
+		
+		if (!merchantProcess) {
+			CommonUtil.logAndReturnException(new MerchantPartySynchFailedException("Cannot synchronize VenMerchant and VenParty!"
+					, VeniceExceptionConstants.VEN_EX_130006), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::VenMerchant and VenParty have been successfully synchronized");
 
 		// If the order is RMA do nothing with payments because there are none
 		try {

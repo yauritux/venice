@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.persistence.VenMerchant;
+import com.gdn.venice.persistence.VenOrderItem;
 
 /**
  * 
@@ -12,9 +13,10 @@ import com.gdn.venice.persistence.VenMerchant;
  */
 public interface MerchantService {
 
+	public Boolean processMerchant(List<String> merchantProducts, List<VenOrderItem> orderItems);
 	public List<VenMerchant> findByWcsMerchantId(String wcsMerchantId);
 	public VenMerchant synchronizeVenMerchantData(VenMerchant venMerchant)
-	       throws VeniceInternalException;
+	        throws VeniceInternalException;
 	public List<VenMerchant> synchronizeVenMerchantReferences(
 			List<VenMerchant> merchantRefs) throws VeniceInternalException;
 	public VenMerchant persist(VenMerchant venMerchant)
