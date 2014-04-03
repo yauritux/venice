@@ -84,7 +84,7 @@ public class FraudParameterRule35View extends ViewWithUiHandlers<FraudParameterR
 				refreshFraudParameterRule35Data();
 				if(event.getDsResponse().getStatus()==0){
 					SC.say("Data Added/Edited");
-				}				
+				}
 			}
 		});
 		
@@ -147,13 +147,20 @@ public class FraudParameterRule35View extends ViewWithUiHandlers<FraudParameterR
  		
 		//validation
 		//required
+		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_ORDERID).setRequired(true);
 		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_ORDERDATE).setRequired(true);
+		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_CUSTOMERNAME).setRequired(true);
+		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_EMAIL).setRequired(true);
+		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_CCNUMBER).setRequired(true);
   
 		
 		LengthRangeValidator lengthRangeValidator2 = new LengthRangeValidator();  
 		lengthRangeValidator2.setMax(100);
+		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_NOSURAT).setValidators(lengthRangeValidator2);
+		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_ORDERID).setValidators(lengthRangeValidator2);
 		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_CUSTOMERNAME).setValidators(lengthRangeValidator2);
 		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_EMAIL).setValidators(lengthRangeValidator2);
+		fraudParameterRule35ListGrid.getField(DataNameTokens.FRDPARAMETERRULE35_CCNUMBER).setValidators(lengthRangeValidator2);
 		
 		LengthRangeValidator lengthRangeValidator3 = new LengthRangeValidator();  
 		lengthRangeValidator3.setMax(1000);
