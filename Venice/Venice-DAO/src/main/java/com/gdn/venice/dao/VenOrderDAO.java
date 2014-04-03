@@ -34,7 +34,7 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 		"FROM VenOrder o " +
 		"INNER JOIN FETCH o.venCustomer c " +
 		"INNER JOIN FETCH c.venParty p " +
-		"WHERE o = ?1 ";
+		"WHERE o.orderId = ?1 ";
 	
 	public static final String FIND_OTHER_BY_STATUS_C_AND_ORDERDATERANGE =
 		"SELECT o " +
@@ -59,7 +59,7 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 	public VenOrder findWithWcsPaymentTypeByOrder(VenOrder order);
 	
 	@Query(FIND_WITH_VENCUSTOMER_BY_ORDER)
-	public VenOrder findWithVenCustomerByOrder(VenOrder order);
+	public VenOrder findWithVenCustomerByOrder(Long orderId);
 	
 	@Query(FIND_OTHER_BY_STATUS_C_AND_ORDERDATERANGE)
 	public List<VenOrder> findOtherByStatusCOrderDateRange(VenOrder order, Date startDate, Date endDate);

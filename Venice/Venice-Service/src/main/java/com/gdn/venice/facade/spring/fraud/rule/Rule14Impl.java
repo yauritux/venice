@@ -44,7 +44,7 @@ public class Rule14Impl implements Rule{
 	}
 	
 	public VenOrder getOrderWithCustomer(VenOrder order){
-		return venOrderDAO.findWithVenCustomerByOrder(order);
+		return venOrderDAO.findWithVenCustomerByOrder(order.getOrderId());
 	}
 	
 	public String getEmailAddress(VenCustomer customer){

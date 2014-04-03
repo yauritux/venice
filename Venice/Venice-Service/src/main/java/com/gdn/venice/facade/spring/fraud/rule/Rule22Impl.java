@@ -48,7 +48,7 @@ public class Rule22Impl implements Rule {
 		Date startDate = minusOneMonth(order.getOrderDate());
 		Date endDate = order.getOrderDate();
 		
-		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
+		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order.getOrderId());
 		
 		BigDecimal totalAmount = venOrderDAO.getAmountSumByOrderOrCustomerOrderDateRange(orderWithCustomer, orderWithCustomer.getVenCustomer(), startDate, endDate);
 		

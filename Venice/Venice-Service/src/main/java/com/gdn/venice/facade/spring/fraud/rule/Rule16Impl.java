@@ -52,6 +52,7 @@ public class Rule16Impl implements Rule {
 		List<VenOrder> otherOrderList = getOrdersToInvestigate(order, getStartRangeDate(orderTimestamp), getEndRangeDate(orderTimestamp));
 		
 		for (VenOrder otherOrder : otherOrderList) {
+			CommonUtil.logInfo(CLASS_NAME, "Comparing with Order : " + otherOrder.getWcsOrderId());
 			
 			String customerUsernameOtherOrder = getCustomerUsername(otherOrder);
 			String customerNameOtherOrder = getCustomerName(otherOrder);
@@ -117,15 +118,25 @@ public class Rule16Impl implements Rule {
 	
 	public String getCustomerUsername(VenOrder order){
 		
-		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
-		return orderWithCustomer.getVenCustomer().getVenParty().getFullOrLegalName();
+		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order.getOrderId());
+		
+		try{
+			return orderWithCustomer.getVenCustomer().getVenParty().getFullOrLegalName();	
+		}catch (Exception e) {
+			return "";
+		}
 		
 	}
 	
 	public String getCustomerName(VenOrder order){
 		
-		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
-		return orderWithCustomer.getVenCustomer().getCustomerUserName();
+		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order.getOrderId());
+		
+		try{
+			return orderWithCustomer.getVenCustomer().getCustomerUserName();
+		}catch (Exception e) {
+			return "";
+		}
 		
 	}
 	
@@ -139,8 +150,13 @@ public class Rule16Impl implements Rule {
 	public String getCustomerAddress(VenOrder order){
 		
 		VenOrderAddress orderAddress = venOrderAddressDAO.findWithVenAddressByVenOrder(order);
-		return (orderAddress.getVenAddress().getStreetAddress1()!=null?orderAddress.getVenAddress().getStreetAddress1().trim():"") + 
-		       (orderAddress.getVenAddress().getPostalCode()!=null?orderAddress.getVenAddress().getPostalCode().trim():"");
+		
+		try{
+			return (orderAddress.getVenAddress().getStreetAddress1()!=null?orderAddress.getVenAddress().getStreetAddress1().trim():"") + 
+			       (orderAddress.getVenAddress().getPostalCode()!=null?orderAddress.getVenAddress().getPostalCode().trim():"");
+		}catch (Exception e) {
+			return "";
+		}
 		
 	}
 	

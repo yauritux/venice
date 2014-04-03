@@ -47,7 +47,7 @@ public class Rule35Impl implements Rule{
 		ArrayList<String> greyListReason=new ArrayList<String>(3);
 		int totalRiskPoint = 0;
 		
-		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
+		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order.getOrderId());
 		
 		if(isCustomerNameInGreyList(orderWithCustomer)){
 			greyListReason.add(BLACKLIST_REASON_CUSTOMER_NAME);

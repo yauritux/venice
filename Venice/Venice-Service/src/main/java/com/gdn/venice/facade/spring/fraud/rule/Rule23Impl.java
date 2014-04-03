@@ -49,7 +49,7 @@ public class Rule23Impl implements Rule{
 	}
 	
 	public String getCustomerName(VenOrder order){
-		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
+		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order.getOrderId());
 		return orderWithCustomer.getVenCustomer().getCustomerUserName();
 	}
 	

@@ -31,7 +31,7 @@ public class Rule28Impl implements Rule{
 	public int getRiskPoint(VenOrder order){
 		int totalRiskPoint = 0;
 		
-		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order);
+		VenOrder orderWithCustomer = venOrderDAO.findWithVenCustomerByOrder(order.getOrderId());
 		Date startDate = getStartRangeDate(order.getOrderDate());
 		Date endDate = getEndRangeDate(order.getOrderDate());
 		
