@@ -146,15 +146,32 @@ public class OrderItemServiceImpl implements OrderItemService {
 					orderItem.setLogMerchantPickupInstructions(null);
 
 					// Persist the shipping address
-					VenAddress persistedAddress = addressService.persistAddress(orderItem.getVenAddress());
+					//VenAddress persistedAddress = addressService.persistAddress(orderItem.getVenAddress()); replace with following line as work around solution related to possible non-thread safe access session
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::street address = " + (venOrder.getVenCustomer().getVenParty().getVenPartyAddresses()
+									.get(0).getVenAddress().getStreetAddress1()));
+					VenAddress persistedAddress = venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress();
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::persistedAddress ID = " + persistedAddress.getAddressId());
 					orderItem.setVenAddress(persistedAddress);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::orderItem venAddress has been successfully persisted");
 
-					// Persist the recipient		
-					VenRecipient persistedRecipient = recipientService.persistRecipient(orderItem.getVenRecipient());
+					// Persist the recipient	
+					VenRecipient persistedRecipient = null;
+					//if (venOrder.getVenCustomer().getVenParty().getFullOrLegalName().equalsIgnoreCase(orderItem.getVenRecipient().getVenParty().getFullOrLegalName())) {
+					if (venOrder.getVenCustomer().getVenParty().equals(orderItem.getVenRecipient().getVenParty())) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::Recipient equals with Customer");
+						persistedRecipient = orderItem.getVenRecipient();
+						persistedRecipient.setVenParty(venOrder.getVenCustomer().getVenParty());
+					} else {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::Recipient is different with Customer");
+					}
+					
+				    persistedRecipient = recipientService.persistRecipient(orderItem.getVenRecipient());
+					
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::persistedRecipient ID = " + persistedRecipient.getRecipientId());					
 					orderItem.setVenRecipient(persistedRecipient);

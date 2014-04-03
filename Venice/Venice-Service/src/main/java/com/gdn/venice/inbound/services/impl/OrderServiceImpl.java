@@ -29,6 +29,7 @@ import com.gdn.venice.exception.DuplicateWCSOrderIDException;
 import com.gdn.venice.exception.InvalidOrderException;
 import com.gdn.venice.exception.InvalidOrderItemException;
 import com.gdn.venice.exception.OrderNotFoundException;
+import com.gdn.venice.exception.PaymentProcessorException;
 import com.gdn.venice.exception.VAOrderNotApprovedException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.factory.VeninboundFactory;
@@ -361,21 +362,28 @@ public class OrderServiceImpl implements OrderService {
 			} //EOF for
 
 		// If the order is RMA do nothing with payments because there are none
-		if (!venOrder.getRmaFlag()) {
-			/*
+		try {
+			if (!venOrder.getRmaFlag()) {
+				/*
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "createOrder::rma flag false, remove existing payment");
-			*/
-			// Remove any existing order payment allocations that were allocated at VA stage
-			//orderPaymentAllocationService.removeOrderPaymentAllocationList(venOrder);
-			/*
+				 */
+				// Remove any existing order payment allocations that were allocated at VA stage
+				//orderPaymentAllocationService.removeOrderPaymentAllocationList(venOrder);
+				/*
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "createOrder::done remove existing payment");
-			*/
-			
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "createOrder::processing payment");
-			orderPaymentService.processPayment(order, venOrder);
+				 */
+
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "createOrder::processing payment");
+				orderPaymentService.processPayment(order, venOrder);
+			}
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			e.printStackTrace();
+			CommonUtil.logAndReturnException(new PaymentProcessorException("Cannot process payment!"
+					, VeniceExceptionConstants.VEN_EX_400004), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 		}
 
 		return Boolean.TRUE;
