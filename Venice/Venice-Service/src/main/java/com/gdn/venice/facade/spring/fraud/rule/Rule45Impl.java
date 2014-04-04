@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.djarum.raf.utilities.Locator;
-import com.gdn.venice.dao.FrdParameterRule44DAO;
+import com.gdn.venice.dao.FrdParameterRule45DAO;
 import com.gdn.venice.dao.VenMerchantProductDAO;
 import com.gdn.venice.dao.VenOrderItemDAO;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
@@ -30,7 +30,7 @@ public class Rule45Impl implements Rule  {
 	private static final String CLASS_NAME = Rule45Impl.class.getCanonicalName();
 	
 	@Autowired
-	FrdParameterRule44DAO frdParameterRule45DAO;
+	FrdParameterRule45DAO frdParameterRule45DAO;
 	@Autowired
 	VenOrderItemDAO venOrderItemDAO;
 	@Autowired
