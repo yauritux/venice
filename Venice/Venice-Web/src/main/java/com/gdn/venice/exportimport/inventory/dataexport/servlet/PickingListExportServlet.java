@@ -42,7 +42,7 @@ public class PickingListExportServlet extends HttpServlet {
 	public PickingListExportServlet() {
 		super();
 		Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-		_log = loggerFactory.getLog4JLogger("com.gdn.venice.logistics.inventory.PickingListExportServlet");
+		_log = loggerFactory.getLog4JLogger("com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListExportServlet");
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -142,8 +142,8 @@ public class PickingListExportServlet extends HttpServlet {
 				headerRow.createCell(startCol).setCellValue(new HSSFRichTextString("No"));
 				headerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
 				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Item SKU Name"));
-				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Qty"));
-				headerRow.createCell(startCol+6).setCellValue(new HSSFRichTextString("UoM"));
+				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Qty"));
+				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("UoM"));
 					   
 				//set style for header
 				for(int i=startCol; i<=startCol+4; i++){
