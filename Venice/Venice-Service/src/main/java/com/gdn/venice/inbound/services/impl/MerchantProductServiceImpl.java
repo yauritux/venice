@@ -112,7 +112,9 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
 				}
 				
-				venMerchantProduct.setVenProductCategories(synchronizeVenProductCategories(venMerchantProduct.getVenProductCategories()));
+				venMerchantProduct.setVenProductCategories(synchronizeVenProductCategories(merchantProduct.getVenProductCategories()));
+				
+				venMerchantProduct = synchronizeVenMerchantProductCategories(venMerchantProduct);
 				
 			}
 		} //end of 'for'
@@ -121,6 +123,33 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				, "synchronizeVenMerchantProductRefs::EOM, returning synchronizedMerchantProductRefs = "
 				  + synchronizedMerchantProductRefs.size());
 		return synchronizedMerchantProductRefs;
+	}
+	
+	public VenMerchantProduct synchronizeVenMerchantProductCategories(VenMerchantProduct merchantProductWithCategories){
+		VenMerchantProduct existingProduct = venMerchantProductDAO.findOne(merchantProductWithCategories.getProductId());
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductCategories::BEGIN, Product " + existingProduct.getWcsProductName() + " Category in database = " + existingProduct.getVenProductCategories().size());
+		
+		if(existingProduct.getVenProductCategories().size() == 0){
+		
+			for (VenProductCategory category : merchantProductWithCategories.getVenProductCategories()) {
+	            ArrayList<VenMerchantProduct> venMerchantProductList2 = new ArrayList<VenMerchantProduct>();
+	            if (category.getVenMerchantProducts() == null) {
+	                category.setVenMerchantProducts(venMerchantProductList2);
+	            }
+	            category.getVenMerchantProducts().add(merchantProductWithCategories);
+	        }
+			
+	        for (VenProductCategory category : merchantProductWithCategories.getVenProductCategories()) {
+	            category = venProductCategoryDAO.save(category);
+	        }
+	        
+	        merchantProductWithCategories = venMerchantProductDAO.save(merchantProductWithCategories);
+        
+		}
+        
+		return merchantProductWithCategories;
 	}
 	
 	/**
@@ -155,6 +184,7 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		
 		return syncronizedProductCategoryList;
 	}
+	
 	
 	/**
 	 * Synchronizes the data for the direct VenMerchantProduct references
