@@ -604,6 +604,12 @@
   </servlet>
   <servlet>
     <description></description>
+    <display-name>PutawayExportServlet</display-name>
+    <servlet-name>PutawayExportServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PutawayExportServlet</servlet-class>
+  </servlet>  
+  <servlet>
+    <description></description>
     <display-name>PackingListPresenterServlet</display-name>
     <servlet-name>PackingListPresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.inventory.presenter.PackingListPresenterServlet</servlet-class>
@@ -832,6 +838,14 @@
     <servlet-name>GINPresenterServlet</servlet-name>
     <url-pattern>/GINPresenterServlet</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>PickingListExportServlet</servlet-name>
+    <url-pattern>/PickingListExportServlet</url-pattern>
+  </servlet-mapping>  
+  <servlet-mapping>
+    <servlet-name>PutawayExportServlet</servlet-name>
+    <url-pattern>/PutawayExportServlet</url-pattern>
+  </servlet-mapping>     
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>
