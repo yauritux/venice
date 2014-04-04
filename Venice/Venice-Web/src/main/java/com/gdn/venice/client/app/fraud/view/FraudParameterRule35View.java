@@ -97,6 +97,7 @@ public class FraudParameterRule35View extends ViewWithUiHandlers<FraudParameterR
 							fraudParameterRule35ListGrid.removeSelectedData();
 							refreshFraudParameterRule35Data();
 							SC.say("Data Removed");
+							refreshFraudParameterRule35Data();
 						}
 					}
 				});
