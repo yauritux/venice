@@ -112,9 +112,9 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
 				}
 				
-				venMerchantProduct.setVenProductCategories(synchronizeVenProductCategories(merchantProduct.getVenProductCategories()));
-				
-				venMerchantProduct = synchronizeVenMerchantProductCategories(venMerchantProduct);
+//				venMerchantProduct.setVenProductCategories(synchronizeVenProductCategories(merchantProduct.getVenProductCategories()));
+//				
+//				venMerchantProduct = synchronizeVenMerchantProductCategories(venMerchantProduct);
 				
 			}
 		} //end of 'for'
