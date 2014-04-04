@@ -3,6 +3,7 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -12,12 +13,15 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gdn.venice.dao.VenMerchantProductDAO;
+import com.gdn.venice.dao.VenProductCategoryDAO;
 import com.gdn.venice.exception.VeniceInternalException;
+import com.gdn.venice.facade.VenProductCategorySessionEJBLocal;
 import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.MerchantService;
 import com.gdn.venice.inbound.services.ProductTypeService;
 import com.gdn.venice.persistence.VenMerchant;
 import com.gdn.venice.persistence.VenMerchantProduct;
+import com.gdn.venice.persistence.VenProductCategory;
 import com.gdn.venice.persistence.VenProductType;
 import com.gdn.venice.util.CommonUtil;
 
@@ -32,6 +36,9 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 
 	@Autowired
 	private VenMerchantProductDAO venMerchantProductDAO;
+	
+	@Autowired
+	private VenProductCategoryDAO venProductCategoryDAO;
 	
 	@Autowired
 	private MerchantService merchantService;
@@ -77,10 +84,13 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeVenMerchantProductReferences::merchantProductList = " 
 								+ merchantProductList);
+				
+				VenMerchantProduct venMerchantProduct = null;
+				
 				if (merchantProductList == null || (merchantProductList.isEmpty())) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::VenMerchantProduct is not listed in the database, saving it");
-					VenMerchantProduct venMerchantProduct = null;
+					
 					if (!em.contains(merchantProduct)) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenMerchantProductReferences::explicitly call save for venMerchantProduct");
@@ -96,11 +106,16 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				} else {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::venMerchantProduct is in attached mode, going to detach it");
-					VenMerchantProduct venMerchantProduct = merchantProductList.get(0);
+					venMerchantProduct = merchantProductList.get(0);
 					synchronizedMerchantProductRefs.add(venMerchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductReferences::successfully added venMerchantProduct into synchronizedMerchantProductRefs");
 				}
+				
+//				venMerchantProduct.setVenProductCategories(synchronizeVenProductCategories(merchantProduct.getVenProductCategories()));
+//				
+//				venMerchantProduct = synchronizeVenMerchantProductCategories(venMerchantProduct);
+				
 			}
 		} //end of 'for'
 		
@@ -109,6 +124,67 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 				  + synchronizedMerchantProductRefs.size());
 		return synchronizedMerchantProductRefs;
 	}
+	
+	public VenMerchantProduct synchronizeVenMerchantProductCategories(VenMerchantProduct merchantProductWithCategories){
+		VenMerchantProduct existingProduct = venMerchantProductDAO.findOne(merchantProductWithCategories.getProductId());
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductCategories::BEGIN, Product " + existingProduct.getWcsProductName() + " Category in database = " + existingProduct.getVenProductCategories().size());
+		
+		if(existingProduct.getVenProductCategories().size() == 0){
+		
+			for (VenProductCategory category : merchantProductWithCategories.getVenProductCategories()) {
+	            ArrayList<VenMerchantProduct> venMerchantProductList2 = new ArrayList<VenMerchantProduct>();
+	            if (category.getVenMerchantProducts() == null) {
+	                category.setVenMerchantProducts(venMerchantProductList2);
+	            }
+	            category.getVenMerchantProducts().add(merchantProductWithCategories);
+	        }
+			
+	        for (VenProductCategory category : merchantProductWithCategories.getVenProductCategories()) {
+	            category = venProductCategoryDAO.save(category);
+	        }
+	        
+	        merchantProductWithCategories = venMerchantProductDAO.save(merchantProductWithCategories);
+        
+		}
+        
+		return merchantProductWithCategories;
+	}
+	
+	/**
+	 * 
+	 * @param categoryList
+	 * @return the synchronized data object
+	 */
+	public List<VenProductCategory> synchronizeVenProductCategories(List<VenProductCategory> categoryList){
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenProductCategories::BEGIN, categoryList = " + categoryList);
+		
+		List<VenProductCategory> syncronizedProductCategoryList = new ArrayList<VenProductCategory>(categoryList.size());
+		
+		for (VenProductCategory category : categoryList) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "synchronizeVenProductCategories::find product category = " + category.getProductCategory());
+			
+			List<VenProductCategory> syncronizedProductCategories = venProductCategoryDAO.findByProductCategory(category.getProductCategory());
+			
+			if(syncronizedProductCategories.size() > 0){
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenProductCategories::product category found = " + category.getProductCategory());
+				syncronizedProductCategoryList.add(syncronizedProductCategories.get(0));
+			}else{
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenProductCategories::product category persist = " + category.getProductCategory());
+				
+				VenProductCategory syncronizedProductCategory = venProductCategoryDAO.save(category);
+				syncronizedProductCategoryList.add(syncronizedProductCategory);
+			}
+		}
+		
+		return syncronizedProductCategoryList;
+	}
+	
 	
 	/**
 	 * Synchronizes the data for the direct VenMerchantProduct references
