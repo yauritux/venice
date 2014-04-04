@@ -1,13 +1,15 @@
 package com.gdn.venice.client.app.inventory.view;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.view.handler.GRNListUiHandler;
+import com.gdn.venice.client.data.RafDataSource;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -15,10 +17,10 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
-import com.smartgwt.client.types.SelectionAppearance;
-import com.smartgwt.client.types.SelectionStyle;
+import com.smartgwt.client.types.DSOperationType;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.ImgButton;
 import com.smartgwt.client.widgets.Label;
@@ -137,9 +139,11 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
         final TextItem DestinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
         DestinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
         
-        
+        final TextItem doNumberItem = new TextItem(DataNameTokens.INV_DO_NUMBER, "DO Number");
+        doNumberItem.setValue(record.getAttribute(DataNameTokens.INV_DO_NUMBER));
+                
         asnDetailForm.setFields(grnNumberItem, reffDateItem, asnNumberItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
-        		DestinationItem, supplierNameItem);
+        		DestinationItem, supplierNameItem, doNumberItem);
                 
         itemListGrid = buildItemListGrid(id);
         itemListGrid.setCanEdit(false);
@@ -178,7 +182,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
 		attributeField.setCanEdit(false);
 		attributeField.setWidth(100);
 		attributeField.setAlign(Alignment.CENTER);
-        ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2], listGridField[3], listGridField[4], attributeField};
+        ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2], listGridField[3], listGridField[4], listGridField[5], attributeField};
                		
         itemListGrid = new ListGrid()  {  
 			@Override
@@ -194,8 +198,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
 					attributeImg.setWidth(16);
 					attributeImg.addClickHandler(new ClickHandler() {
 						public void onClick(ClickEvent event) {		
-					        attributeWindow = buildAttributeWindow(record.getAttribute(DataNameTokens.INV_GRN_ITEM_ID));	
-					        attributeWindow.show();
+							getUiHandlers().onFetchAttributeName(record.getAttribute(DataNameTokens.INV_GRN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID));
 						}
 					});
 
@@ -222,64 +225,128 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
     	itemListGrid.setShowRecordComponentsByCell(true); 
 		        
         itemListGrid.getField(DataNameTokens.INV_GRN_ITEM_ID).setHidden(true);  
+        itemListGrid.getField(DataNameTokens.INV_POCFF_ITEMID).setHidden(true); 
 		        
         return itemListGrid;
     }
     
-    private Window buildAttributeWindow(String itemId) {
-		final Window addEditAttributeWindow = new Window();
-		addEditAttributeWindow.setWidth(400);
-		addEditAttributeWindow.setHeight(400);
-		addEditAttributeWindow.setShowMinimizeButton(false);
-		addEditAttributeWindow.setIsModal(true);
-		addEditAttributeWindow.setShowModalMask(true);
-		addEditAttributeWindow.centerInPage();
-		addEditAttributeWindow.setTitle("View Attribute");
+    @Override
+    public Window buildAttributeWindow(final String grnItemId, String itemId, final DataSourceField[] dataSourceFields) {
+        attributeWindow = new Window();
+        attributeWindow.setWidth(600);
+        attributeWindow.setHeight(400);
+        attributeWindow.setTitle("View Attribute Data");
+        attributeWindow.setShowMinimizeButton(false);
+        attributeWindow.setIsModal(true);
+        attributeWindow.setShowModalMask(true);
+        attributeWindow.centerInPage();
 
-		ToolStrip attributeToolStrip = new ToolStrip();
-		attributeToolStrip.setWidth100();
+        VLayout attributeLayout = new VLayout();
+        attributeLayout.setHeight100();
+        attributeLayout.setWidth100();
 
-		final DataSource attributeData = GRNData.getItemAttributeViewData(itemId);
+        dataSourceFields[0].setPrimaryKey(true);
+        RafDataSource ds = new RafDataSource(
+                "/response/data/*",
+                GWT.getHostPageBaseURL() + GRNListPresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeData&type=DataSource",
+                null,
+                null,
+                null,
+                dataSourceFields);
+        
+        HashMap<String, String> params = new HashMap<String, String>();
 		
-		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();  
-		map.put("imei", "IMEI");
-		map.put("serial", "Serial Number");
-		map.put("expired", "Expired Date");
-		attributeData.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setValueMap(map);
+		if(grnItemId != null) {
+			params.put(DataNameTokens.INV_GRN_ITEM_ID, grnItemId);
+		}
 		
-		attributeListGrid = new ListGrid();
-		attributeListGrid.setDataSource(attributeData);
-		attributeListGrid.setAutoFetchData(true);
-		attributeListGrid.setCanEdit(false);
-		attributeListGrid.setShowFilterEditor(false);
-		attributeListGrid.setSelectionType(SelectionStyle.SIMPLE);
-		attributeListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
-		attributeListGrid.setShowRowNumbers(true);
-		attributeListGrid.setSaveLocally(true);
-		
-		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(attributeData);
-		ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2]};        
-		attributeListGrid.setFields(finalListGridField);
-		
-		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID).setHidden(true);
-		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setWidth("30%");
-		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE).setWidth("70%");
-		attributeListGrid.groupBy(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME);
-				 
-		VLayout attributeLayout = new VLayout();
-		attributeLayout.setHeight100();
-		attributeLayout.setWidth100();
-		attributeLayout.setMembers(attributeToolStrip, attributeListGrid);
-		addEditAttributeWindow.addItem(attributeLayout);
-		
-		addEditAttributeWindow.addCloseClickHandler(new CloseClickHandler() {
-			public void onCloseClick(CloseClientEvent event) {
-				addEditAttributeWindow.destroy();
-			}
-		});
+		if(itemId != null) {
+			params.put(DataNameTokens.INV_POCFF_ITEMID, itemId);
+		}
 
-		return addEditAttributeWindow;
-	}
+		ds.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
+              
+        attributeListGrid = new ListGrid();
+        attributeListGrid.setWidth100();
+        attributeListGrid.setHeight100();
+        attributeListGrid.setShowAllRecords(true);
+        attributeListGrid.setSaveLocally(true);
+        attributeListGrid.setSortField(0);
+        attributeListGrid.setShowFilterEditor(false);
+        attributeListGrid.setCanEdit(true);
+        attributeListGrid.setShowRowNumbers(true);
+        attributeListGrid.setAutoFetchData(true); 
+        
+        ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
+        attributeListGrid.setDataSource(ds);
+        attributeListGrid.setFields(listGridField);
+        
+        attributeWindow.addCloseClickHandler(new CloseClickHandler() {
+            public void onCloseClick(CloseClientEvent event) {
+                attributeWindow.destroy();
+            }
+        });
+
+        attributeLayout.setMembers(attributeListGrid);
+        attributeWindow.addItem(attributeLayout);
+
+        return attributeWindow;
+    }
+    
+//    private Window buildAttributeWindow(String itemId) {
+//		final Window addEditAttributeWindow = new Window();
+//		addEditAttributeWindow.setWidth(400);
+//		addEditAttributeWindow.setHeight(400);
+//		addEditAttributeWindow.setShowMinimizeButton(false);
+//		addEditAttributeWindow.setIsModal(true);
+//		addEditAttributeWindow.setShowModalMask(true);
+//		addEditAttributeWindow.centerInPage();
+//		addEditAttributeWindow.setTitle("View Attribute");
+//
+//		ToolStrip attributeToolStrip = new ToolStrip();
+//		attributeToolStrip.setWidth100();
+//
+//		final DataSource attributeData = GRNData.getItemAttributeViewData(itemId);
+//		
+//		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();  
+//		map.put("imei", "IMEI");
+//		map.put("serial", "Serial Number");
+//		map.put("expired", "Expired Date");
+//		attributeData.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setValueMap(map);
+//		
+//		attributeListGrid = new ListGrid();
+//		attributeListGrid.setDataSource(attributeData);
+//		attributeListGrid.setAutoFetchData(true);
+//		attributeListGrid.setCanEdit(false);
+//		attributeListGrid.setShowFilterEditor(false);
+//		attributeListGrid.setSelectionType(SelectionStyle.SIMPLE);
+//		attributeListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
+//		attributeListGrid.setShowRowNumbers(true);
+//		attributeListGrid.setSaveLocally(true);
+//		
+//		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(attributeData);
+//		ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2]};        
+//		attributeListGrid.setFields(finalListGridField);
+//		
+//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID).setHidden(true);
+//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setWidth("30%");
+//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE).setWidth("70%");
+//		attributeListGrid.groupBy(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME);
+//				 
+//		VLayout attributeLayout = new VLayout();
+//		attributeLayout.setHeight100();
+//		attributeLayout.setWidth100();
+//		attributeLayout.setMembers(attributeToolStrip, attributeListGrid);
+//		addEditAttributeWindow.addItem(attributeLayout);
+//		
+//		addEditAttributeWindow.addCloseClickHandler(new CloseClickHandler() {
+//			public void onCloseClick(CloseClientEvent event) {
+//				addEditAttributeWindow.destroy();
+//			}
+//		});
+//
+//		return addEditAttributeWindow;
+//	}
 
     @Override
     public void loadGRNData(DataSource dataSource) {
@@ -309,5 +376,15 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
     @Override
     public Widget asWidget() {
         return layout;
+    }
+    
+    @Override
+    public Window getAttributeWindow() {
+        return attributeWindow;
+    }
+
+    @Override
+    public ListGrid getAttributeGrid() {
+        return attributeListGrid;
     }
 }

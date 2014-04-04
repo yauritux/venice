@@ -8,4 +8,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
  */
 
 public interface GRNListUiHandler extends UiHandlers {
+	public void onFetchAttributeName(String grnItemId, String itemId);
 }

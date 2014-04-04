@@ -89,6 +89,7 @@ public class FetchGRNDataCommand implements RafDsCommand {
 		                map.put(DataNameTokens.INV_ASN_SUPPLIER_NAME, supplierName);
 		                map.put(DataNameTokens.INV_ASN_DESTINATION, asn.getDestinationWarehouse().getName());
 		                map.put(DataNameTokens.INV_ASN_STATUS, asn.getCurrentStatus().toString());
+		                map.put(DataNameTokens.INV_DO_NUMBER, grn.getDoNumber());
 	                    
 	                    dataList.add(map);
 	                }

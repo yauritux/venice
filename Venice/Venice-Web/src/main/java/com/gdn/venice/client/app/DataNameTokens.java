@@ -1227,13 +1227,15 @@ public class DataNameTokens {
     	public static String INV_ASN_SPECIAL_NOTES = "specialNotes";
     	public static String INV_ASN_REFF_TYPE = "referenceType";
     	public static String INV_ASN_REFF_NUMBER = "referenceNumber";
+    	public static String INV_DO_NUMBER = "doNumber";
     	    	
-    	public static String INV_ASN_ITEM_ID = "id";
+    	public static String INV_ASN_ITEM_ID = "asnItemId";
     	public static String INV_ASN_ITEM_QTY = "quantity";
     	
     	public static String INV_PO_NUMBER = "poNumber";
     	public static String INV_CFF_NUMBER = "cffNumber";
 
+    	public static String INV_POCFF_ITEMID = "itemId";
     	public static String INV_POCFF_ITEMCODE = "code";
     	public static String INV_POCFF_ITEMDESC = "description";
     	public static String INV_POCFF_QTY = "quantity";
@@ -1245,15 +1247,15 @@ public class DataNameTokens {
     	public static String INV_POCFF_VOLUME = "volume";
     	public static String INV_POCFF_QTYGRN = "grnQuantity";
     	
-    	public static String INV_GRN_ID = "id";
+    	public static String INV_GRN_ID = "grnId";
     	public static String INV_GRN_NUMBER = "grnNumber";
-    	public static String INV_GRN_ITEM_ID = "id";
+    	public static String INV_GRN_ITEM_ID = "grnItemId";
     	
     	public static String INV_ITEM_ATTRIBUTE_ID = "attributeId";
     	public static String INV_ITEM_ATTRIBUTE_NAME = "name";
     	public static String INV_ITEM_ATTRIBUTE_VALUE = "value";
     	
-    	public static String INV_PICKINGLIST_WAREHOUSEITEMID = "id";
+    	public static String INV_PICKINGLIST_WAREHOUSEITEMID = "warehouseItemId";
     	public static String INV_PICKINGLIST_ITEMID = "itemId";
     	public static String INV_PICKINGLIST_WAREHOUSEITEMSKU = "warehouseItemSKU";
     	public static String INV_PICKINGLIST_ITEMSKUNAME = "warehouseItemSKUName";
