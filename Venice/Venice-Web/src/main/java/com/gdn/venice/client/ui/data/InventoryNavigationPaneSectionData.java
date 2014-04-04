@@ -41,7 +41,10 @@ public class InventoryNavigationPaneSectionData {
                     new NavigationPaneTreeNodeRecord("19", "18", "Create Putaway", NameTokens.putawayCreatePage, "IM18", DataWidgetNameTokens.INV_CREATEPUTAWAYTREENODE),
                     new NavigationPaneTreeNodeRecord("20", "18", "Input Putaway Location", NameTokens.putawayInputPage, "IM19", DataWidgetNameTokens.INV_INPUTPUTAWAYLOCATIONTREENODE),
                     new NavigationPaneTreeNodeRecord("21", "1", "Packing List", NameTokens.packingListPage, "IM20", DataWidgetNameTokens.INV_PACKINGLISTTREENODE),
-                    new NavigationPaneTreeNodeRecord("22", "1", "Good Issued Note", NameTokens.ginPage, "IM21", DataWidgetNameTokens.INV_GINTREENODE)
+                    new NavigationPaneTreeNodeRecord("22", "1", "Good Issued Note", NameTokens.ginPage, "IM21", DataWidgetNameTokens.INV_GINTREENODE),
+                    new NavigationPaneTreeNodeRecord("23", "1", "Stock Opname", null, "IM22", DataWidgetNameTokens.INV_OPNAMETREENODE),
+                    new NavigationPaneTreeNodeRecord("24", "23", "Create Stock Opname List", NameTokens.opnamePage, "IM23", DataWidgetNameTokens.INV_CREATEOPNAMETREENODE),
+                    new NavigationPaneTreeNodeRecord("25", "23", "Adjust Stock", NameTokens.ginPage, "IM24", DataWidgetNameTokens.INV_OPNAMEADJUSTMENTTREENODE)
                 };
     }
 }

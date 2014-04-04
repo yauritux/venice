@@ -1325,6 +1325,23 @@ public class DataNameTokens {
         public static String INV_GIN_LOGISTIC = "ginLogistic";
         public static String INV_GIN_AWB_ID = "ginAwbId";
         public static String INV_GIN_AWB_NO = "ginAwbNo";
+        
+        //Inventory GIN
+        public static String INV_OPNAME_ID = "opnameId";
+        public static String INV_OPNAME_NO = "opnameNo";
+        public static String INV_OPNAME_CREATEDBY = "createdBy";
+        public static String INV_OPNAME_UPDATEDBY = "updatedBy";
+        public static String INV_OPNAME_UPDATEDDATE = "updatedDate";
+        public static String INV_OPNAME_ITEMSTORAGE_ID = "itemStorageId";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMSKU = "itemSku";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMNAME = "itemName";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY = "category";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMUOM = "itemUom";
+        public static String INV_OPNAME_ITEMSTORAGE_SHELFCODE = "itemShelfCode";
+        public static String INV_OPNAME_ITEMSTORAGE_STORAGECODE = "itemStorageCode";
+        public static String INV_OPNAME_ITEMSTORAGE_QTY = "itemStorageQty";
+        public static String INV_OPNAME_SUPPLIERCODE = "supplierCode";
+        public static String INV_OPNAME_SUPPLIERNAME = "supplierName";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type

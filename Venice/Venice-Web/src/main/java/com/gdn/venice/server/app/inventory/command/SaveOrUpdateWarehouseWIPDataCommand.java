@@ -48,7 +48,7 @@ public class SaveOrUpdateWarehouseWIPDataCommand implements RafRpcCommand {
             if (dataMap.get(DataNameTokens.INV_WAREHOUSE_ID) == null) {
                 System.out.println("set common values");
                 warehouse = new WarehouseWIP();
-                warehouse.setCode(dataMap.get(DataNameTokens.INV_WAREHOUSE_CODE) == null? "":dataMap.get(DataNameTokens.INV_WAREHOUSE_CODE));
+                warehouse.setCode(dataMap.get(DataNameTokens.INV_WAREHOUSE_CODE));
                 warehouse.setCreatedBy(username);
                 warehouse.setCreatedDate(new Date());
                 warehouse.setDeleted(false);

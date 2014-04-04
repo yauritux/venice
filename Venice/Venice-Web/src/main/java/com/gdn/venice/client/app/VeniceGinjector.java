@@ -35,6 +35,7 @@ import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
+import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
@@ -219,4 +220,6 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<PutawayInputPresenter> getPutawayInputPresenter();
   
   AsyncProvider<GoodIssuedNotePresenter> getGINPresenter(); 
+  
+  AsyncProvider<OpnamePresenter> getOpnamePresenter(); 
 }
