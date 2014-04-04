@@ -23,6 +23,7 @@ import com.gdn.venice.client.app.fraud.presenter.FraudCaseViewerPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCustomerWhitelistPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudDashboardPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule31Presenter;
+import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule35Presenter;
 import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
@@ -164,8 +165,10 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<InventoryPresenter> getInventoryPresenter();
   
   AsyncProvider<ExportReportPresenter> getExportReportPresenter();
-  
+
   AsyncProvider<FraudParameterRule31Presenter> getFraudParameterRule31Presenter();
+  
+  AsyncProvider<FraudParameterRule35Presenter> getFraudParameterRule35Presenter();
   
   AsyncProvider<FinSalesSettlementReportPresenter> getFinSalesSettlementReportPresenter();
 }

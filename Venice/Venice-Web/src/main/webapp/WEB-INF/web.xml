@@ -208,6 +208,11 @@
     <servlet-class>com.gdn.venice.server.app.fraud.presenter.FraudParameterRulePresenterServlet</servlet-class>
   </servlet>
   <servlet>
+    <display-name>FraudParameterRule35PresenterServlet</display-name>
+    <servlet-name>FraudParameterRule35PresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.fraud.presenter.FraudParameterRule35PresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
     <display-name>ReturDataViewerPresenterServlet</display-name>
     <servlet-name>ReturDataViewerPresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.general.presenter.ReturDataViewerPresenterServlet</servlet-class>
@@ -703,6 +708,10 @@
   <servlet-mapping>
     <servlet-name>FraudParameterRulePresenterServlet</servlet-name>
     <url-pattern>/FraudParameterRulePresenterServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>FraudParameterRule35PresenterServlet</servlet-name>
+    <url-pattern>/FraudParameterRule35PresenterServlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>ReservationOrderManagementPresenterServlet</servlet-name>
