@@ -36,7 +36,7 @@ public class PackingListPresenterServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String type = request.getParameter("type") == null ? "" : request.getParameter("type");
-        String username = request.getParameter("username");
+        String username = Util.getUserName(request);;
         if (username == null || username.trim().equals("")) {
             username = "olive";
         }

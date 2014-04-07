@@ -20,6 +20,7 @@ import org.codehaus.jackson.type.TypeReference;
 
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.gdn.inventory.exchange.entity.Warehouse;
+import com.gdn.inventory.exchange.entity.WarehouseUser;
 import com.gdn.inventory.exchange.entity.WarehouseWIP;
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
@@ -27,6 +28,7 @@ import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
+import java.util.List;
 
 /**
  *
@@ -195,6 +197,30 @@ public class WarehouseManagementService {
             is.close();
             System.out.println(sb.toString());
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<Warehouse>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+
+    public ResultWrapper<List<WarehouseUser>> getWarehouseUserData(String username) throws HttpException, IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "user/getWarehouseList?username=" + username;
+        PostMethod httpPost = new PostMethod(url);
+        HttpClient httpClient = new HttpClient();
+        ObjectMapper mapper = new ObjectMapper();
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<WarehouseUser>>>() {
             });
         } else {
             return null;
