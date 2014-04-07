@@ -152,19 +152,19 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         supplierNameItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_SUPPLIER_NAME));
         supplierNameItem.setDisabled(true);
         
-        final TextItem DestinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
-        DestinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
-        DestinationItem.setDisabled(true);
+        final TextItem destinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
+        destinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
+        destinationItem.setDisabled(true);
         
-        final TextItem DestinationItemCode = new TextItem(DataNameTokens.INV_ASN_DESTINATIONCODE, "Destination Code");
-        DestinationItemCode.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATIONCODE));
-        DestinationItemCode.setDisabled(true);
+        final TextItem destinationItemCode = new TextItem(DataNameTokens.INV_ASN_DESTINATIONCODE, "Destination Code");
+        destinationItemCode.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATIONCODE));
+        destinationItemCode.setDisabled(true);
         
         final TextItem doNumberItem = new TextItem(DataNameTokens.INV_DO_NUMBER, "DO Number");
         doNumberItem.setDisabled(false);
                 
         asnDetailForm.setFields(asnNumberItem, reffDateItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
-        		DestinationItem, supplierNameItem, doNumberItem);   
+        		destinationItem, supplierNameItem, doNumberItem);   
         
         itemListGrid = buildItemListGrid(id);   
                         
@@ -174,7 +174,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 					HashMap<String, String> grnDataMap = new HashMap<String, String>();
 						
 					grnDataMap.put(DataNameTokens.INV_ASN_ID, id);
-					grnDataMap.put(DataNameTokens.INV_ASN_DESTINATIONCODE, DestinationItemCode.getValueAsString());
+					grnDataMap.put(DataNameTokens.INV_ASN_DESTINATIONCODE, destinationItemCode.getValueAsString());
 					grnDataMap.put(DataNameTokens.INV_ASN_REFF_NUMBER, reffNumberItem.getValueAsString());
 					grnDataMap.put(DataNameTokens.INV_ASN_INVENTORY_TYPE, inventoryTypeItem.getValueAsString());
 					grnDataMap.put(DataNameTokens.INV_DO_NUMBER, doNumberItem.getValueAsString());
