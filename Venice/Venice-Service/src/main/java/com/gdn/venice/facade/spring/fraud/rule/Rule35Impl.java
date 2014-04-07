@@ -117,7 +117,14 @@ public class Rule35Impl implements Rule{
 	}
 	
 	public List<FrdParameterRule35> getCustomerEmailGreyList(VenOrderContactDetail orderContactDetail){
-		String customerEmail = orderContactDetail.getVenContactDetail().getContactDetail();
+		String customerEmail = "";
+		
+		try{
+			customerEmail = orderContactDetail.getVenContactDetail().getContactDetail();
+		} catch (Exception e) {
+			
+		}
+		
 		return frdParameterRule35DAO.findByUpperCaseCustomerEmail(customerEmail.toUpperCase());
 	}
 	
