@@ -1,14 +1,17 @@
 package com.gdn.venice.client.app.inventory.view;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.view.handler.GRNCreateUiHandler;
+import com.gdn.venice.client.data.RafDataSource;
+import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -16,14 +19,9 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
-import com.smartgwt.client.rpc.RPCCallback;
-import com.smartgwt.client.rpc.RPCManager;
-import com.smartgwt.client.rpc.RPCRequest;
-import com.smartgwt.client.rpc.RPCResponse;
+import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
-import com.smartgwt.client.types.SelectionAppearance;
-import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
@@ -36,7 +34,6 @@ import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.TextItem;
-import com.smartgwt.client.widgets.form.validator.LengthRangeValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -61,7 +58,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     RafViewLayout layout;
     ListGrid asnListGrid, itemListGrid, attributeListGrid;
     Window createGRNWindow, attributeWindow;
-    Boolean canSave=true;
+    private int records;
 
     ToolStrip toolStrip;
     ToolStripButton addItemButton, removeItemButton;
@@ -97,7 +94,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
 				refreshASNData();
 			}
-		});
+		});       
     }
 
     private Window buildCreateGRNWindow(final ListGridRecord record) {
@@ -133,68 +130,54 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 
         final TextItem asnNumberItem = new TextItem(DataNameTokens.INV_ASN_NUMBER, "ASN No");
         asnNumberItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_NUMBER));
+        asnNumberItem.setDisabled(true);
         
         final TextItem reffNumberItem = new TextItem(DataNameTokens.INV_ASN_REFF_NUMBER, "Reff No");
         reffNumberItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_REFF_NUMBER));
+        reffNumberItem.setDisabled(true);
         
         final TextItem reffDateItem = new TextItem(DataNameTokens.INV_ASN_REFF_DATE, "Reff Date");
         reffDateItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_REFF_DATE));
+        reffDateItem.setDisabled(true);
         
         final TextItem inventoryTypeItem = new TextItem(DataNameTokens.INV_ASN_INVENTORY_TYPE, "Inventory Type");
         inventoryTypeItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_INVENTORY_TYPE));
+        inventoryTypeItem.setDisabled(true);
         
         final TextItem supplierCodeItem = new TextItem(DataNameTokens.INV_ASN_SUPPLIER_CODE, "Supplier Code");
         supplierCodeItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_SUPPLIER_CODE));
+        supplierCodeItem.setDisabled(true);
         
         final TextItem supplierNameItem = new TextItem(DataNameTokens.INV_ASN_SUPPLIER_NAME, "Supplier Name");
         supplierNameItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_SUPPLIER_NAME));
+        supplierNameItem.setDisabled(true);
         
-        final TextItem DestinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
-        DestinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
+        final TextItem destinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
+        destinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
+        destinationItem.setDisabled(true);
         
-        asnDetailForm.setDisabled(true);
+        final TextItem destinationItemCode = new TextItem(DataNameTokens.INV_ASN_DESTINATIONCODE, "Destination Code");
+        destinationItemCode.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATIONCODE));
+        destinationItemCode.setDisabled(true);
+        
+        final TextItem doNumberItem = new TextItem(DataNameTokens.INV_DO_NUMBER, "DO Number");
+        doNumberItem.setDisabled(false);
                 
         asnDetailForm.setFields(asnNumberItem, reffDateItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
-        		DestinationItem, supplierNameItem);   
+        		destinationItem, supplierNameItem, doNumberItem);   
         
         itemListGrid = buildItemListGrid(id);   
-        
-        itemListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
-			@Override
-			public void onEditComplete(EditCompleteEvent event) {
-				final ListGridRecord selectedrecord = itemListGrid.getSelectedRecord();
-				 
-				RPCRequest request = new RPCRequest();
-                request.setActionURL(GWT.getHostPageBaseURL() + "GRNManagementPresenterServlet?method=getMaxGRNItemQuantityAllowed&type=RPC&asnItemId="+selectedrecord.getAttributeAsString(DataNameTokens.INV_ASN_ITEM_ID));
-                request.setHttpMethod("POST");
-                request.setUseSimpleHttp(true);
-               
-                RPCManager.sendRequest(request, new RPCCallback() {
-                    public void execute(RPCResponse response, Object rawData, RPCRequest request) {
-                        String rpcResponse = rawData.toString().trim();
-                        if (rpcResponse!=null) {	
-                    		if(Integer.parseInt(selectedrecord.getAttributeAsString(DataNameTokens.INV_POCFF_QTY))>Integer.parseInt(rpcResponse)){
-                    			SC.say("GRN item max allowed is "+rpcResponse);    
-                    			canSave=false;               			
-                    		}else{
-                    			canSave=true;
-                    		}
-                        }
-                    }
-                });				
-			}
-		});
-                
+                        
         saveButton.addClickHandler(new ClickHandler() {
 	          @Override
 	          public void onClick(ClickEvent event) {   
-	        	  if(canSave==true){
 					HashMap<String, String> grnDataMap = new HashMap<String, String>();
 						
 					grnDataMap.put(DataNameTokens.INV_ASN_ID, id);
-					grnDataMap.put(DataNameTokens.INV_ASN_DESTINATION, DestinationItem.getValueAsString());
+					grnDataMap.put(DataNameTokens.INV_ASN_DESTINATIONCODE, destinationItemCode.getValueAsString());
 					grnDataMap.put(DataNameTokens.INV_ASN_REFF_NUMBER, reffNumberItem.getValueAsString());
 					grnDataMap.put(DataNameTokens.INV_ASN_INVENTORY_TYPE, inventoryTypeItem.getValueAsString());
+					grnDataMap.put(DataNameTokens.INV_DO_NUMBER, doNumberItem.getValueAsString());
 		                
 		            HashMap<String, String> grnItemDataMap = new HashMap<String, String>();
 					ListGridRecord[] itemRecords = itemListGrid.getRecords();
@@ -207,9 +190,6 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 						grnItemDataMap.put("ITEM"+i, itemRowMap.toString());					
 					}
 					getUiHandlers().onSaveClicked(grnDataMap, grnItemDataMap, createGRNWindow);
-	        	  }else{
-	        		  SC.say("Please check the GRN item quantity");
-	        	  }
 	  		}
 	    });
                         
@@ -229,21 +209,6 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		
 		ToolStrip itemToolStrip = new ToolStrip();
 		itemToolStrip.setWidth100();
-		
-//		itemToolStrip.addButton(addItemButton);
-//		itemToolStrip.addButton(removeItemButton);
-//
-//		addItemButton.addClickHandler(new ClickHandler() {
-//			public void onClick(ClickEvent event) {
-//				itemListGrid.startEditingNew();
-//			}
-//		});
-//		
-//		removeItemButton.addClickHandler(new ClickHandler() {
-//			public void onClick(ClickEvent event) {
-//				itemListGrid.removeSelectedData();
-//			}
-//		});
            	
         detailLayout.setMembers(headerLayout, itemLabel, itemToolStrip, itemListGrid);
         createGRNWindow.addItem(detailLayout);
@@ -278,8 +243,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 					attributeImg.setWidth(16);
 					attributeImg.addClickHandler(new ClickHandler() {
 						public void onClick(ClickEvent event) {		
-					        attributeWindow = buildAttributeWindow(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID));	
-					        attributeWindow.show();
+							getUiHandlers().onFetchAttributeName(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY));	
 						}
 					});
 
@@ -311,16 +275,6 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		itemListGrid.getField(DataNameTokens.INV_POCFF_ITEMDESC).setCanEdit(false);
 		itemListGrid.getField(DataNameTokens.INV_POCFF_ITEMUNIT).setCanEdit(false);
 		itemListGrid.getField(DataNameTokens.INV_ASN_ITEM_ID).setHidden(true);	
-		        
-//        addItemButton = new ToolStripButton();
-//        addItemButton.setIcon("[SKIN]/icons/business_users_add.png");  
-//        addItemButton.setTooltip("Add GRN Item");
-//        addItemButton.setTitle("Add");
-//	    
-//	    removeItemButton = new ToolStripButton();
-//	    removeItemButton.setIcon("[SKIN]/icons/business_users_delete.png");  
-//	    removeItemButton.setTooltip("Remove GRN Item");
-//	    removeItemButton.setTitle("Remove");
               				        
         return itemListGrid;
     }
@@ -332,23 +286,25 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         asnListGrid.setDataSource(dataSource);    	
         asnListGrid.setAutoFetchData(true);
         asnListGrid.setFields(listGridField);
-        asnListGrid.setDataSource(dataSource);
         asnListGrid.getField(DataNameTokens.INV_ASN_ID).setHidden(true);
+        asnListGrid.getField(DataNameTokens.INV_ASN_DESTINATIONCODE).setHidden(true);
         asnListGrid.setAutoFitData(Autofit.BOTH);
 
         layout.setMembers(toolStrip, asnListGrid);
     }
     
-    private Window buildAttributeWindow(String itemId) {
-		final Window addEditAttributeWindow = new Window();
-		addEditAttributeWindow.setWidth(400);
-		addEditAttributeWindow.setHeight(200);
-		addEditAttributeWindow.setShowMinimizeButton(false);
-		addEditAttributeWindow.setIsModal(true);
-		addEditAttributeWindow.setShowModalMask(true);
-		addEditAttributeWindow.centerInPage();
-		addEditAttributeWindow.setTitle("Add/Edit Attribute");
-		
+    @Override
+    public Window buildAttributeWindow(final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields) {
+        records = 0;
+        attributeWindow = new Window();
+        attributeWindow.setWidth(600);
+        attributeWindow.setHeight(400);
+        attributeWindow.setTitle("Add Attribute Data");
+        attributeWindow.setShowMinimizeButton(false);
+        attributeWindow.setIsModal(true);
+        attributeWindow.setShowModalMask(true);
+        attributeWindow.centerInPage();
+        
 		ToolStripButton addButton = new ToolStripButton();
 		addButton.setIcon("[SKIN]/icons/business_users_add.png");
 		addButton.setTitle("Add");
@@ -356,70 +312,135 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		ToolStripButton removeButton = new ToolStripButton();
 		removeButton.setIcon("[SKIN]/icons/business_users_delete.png");
 		removeButton.setTitle("Remove");
-
+		
 		ToolStrip attributeToolStrip = new ToolStrip();
 		attributeToolStrip.setWidth100();
 		attributeToolStrip.addButton(addButton);
 		attributeToolStrip.addButton(removeButton);
 
-		final DataSource attributeData = GRNData.getItemAttributeData(itemId);			
-		
-		attributeListGrid = new ListGrid();
-		attributeListGrid.setDataSource(attributeData);
-		attributeListGrid.setUseAllDataSourceFields(true);
-		attributeListGrid.setAutoFetchData(true);
-		attributeListGrid.setCanEdit(true);
-		attributeListGrid.setShowFilterEditor(false);
-		attributeListGrid.setSelectionType(SelectionStyle.SIMPLE);
-		attributeListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
-		attributeListGrid.setShowRowNumbers(true);
+        VLayout attributeLayout = new VLayout();
+        attributeLayout.setHeight100();
+        attributeLayout.setWidth100();
 
-//		attributeListGrid.getField(DataNameTokens.INV_ASN_ITEM_ID).setHidden(true);
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID).setHidden(true);
-						
-//		LengthRangeValidator lengthRangeValidator = new LengthRangeValidator();  
-//		lengthRangeValidator.setMax(255);  
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_IMEI).setValidators(lengthRangeValidator);
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_SERIALNUMBER).setValidators(lengthRangeValidator);
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_EXPIREDDATE).setValidators(lengthRangeValidator);
-		 
-		VLayout attributeLayout = new VLayout();
-		attributeLayout.setHeight100();
-		attributeLayout.setWidth100();
-		attributeLayout.setMembers(attributeToolStrip, attributeListGrid);
-		addEditAttributeWindow.addItem(attributeLayout);
-		
-		attributeListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
+        HLayout buttonSet = new HLayout(5);
+
+        IButton cancelButton = new IButton("Cancel");
+        final IButton saveButton = new IButton("Save");
+        saveButton.setDisabled(true);
+
+        buttonSet.setAlign(Alignment.CENTER);
+        buttonSet.setMembers(saveButton, cancelButton);
+
+        dataSourceFields[0].setPrimaryKey(true);
+        RafDataSource ds = new RafDataSource(
+                "/response/data/*",
+                null,
+                null,
+                null,
+                null,
+                dataSourceFields);
+              
+        attributeListGrid = new ListGrid();
+        attributeListGrid.setWidth100();
+        attributeListGrid.setHeight100();
+        attributeListGrid.setShowAllRecords(true);
+        attributeListGrid.setSaveLocally(true);
+        attributeListGrid.setSortField(0);
+        attributeListGrid.setShowFilterEditor(false);
+        attributeListGrid.setCanEdit(true);
+        attributeListGrid.setShowRowNumbers(true);
+        attributeListGrid.setAutoFetchData(false); 
+        
+        ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
+        attributeListGrid.setDataSource(ds);
+        attributeListGrid.setFields(listGridField);
+        
+        attributeWindow.addCloseClickHandler(new CloseClickHandler() {
+            public void onCloseClick(CloseClientEvent event) {
+                attributeWindow.destroy();
+            }
+        });
+        
+        attributeListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
 			@Override
 			public void onEditComplete(EditCompleteEvent event) {
 				attributeListGrid.saveAllEdits();
-				if(event.getDsResponse().getStatus()==0){
-					SC.say("Attribute Added/Edited");
-				}				
+				if(records>0){
+					saveButton.setDisabled(false);
+				}
 			}
 		});
-
+        
 		addButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				attributeListGrid.startEditingNew();
-			}
-		});
-		
-		removeButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				attributeListGrid.removeSelectedData();
-				SC.say("Attribute Removed");
-			}
-		});
-		
-		addEditAttributeWindow.addCloseClickHandler(new CloseClickHandler() {
-			public void onCloseClick(CloseClientEvent event) {
-				addEditAttributeWindow.destroy();
+                if (records < quantity) {
+                    records++;
+                    attributeListGrid.startEditingNew();
+                }else{
+                	SC.say("Cannot add attribute more than item quantity");
+                	return;
+                }
 			}
 		});
 
-		return addEditAttributeWindow;
-	}
+		removeButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				records--;
+				attributeListGrid.removeSelectedData();
+				
+				if(records==0){
+					saveButton.setDisabled(true);
+				}
+			}
+		});
+
+        cancelButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                attributeWindow.destroy();
+            }
+        });
+
+        saveButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                StringBuilder sb = new StringBuilder();
+                Set<String> attr = new HashSet<String>();
+                String attributeValue;
+                for (int r = 0; r < quantity; r++) {
+                    for (int c = 0; c < dataSourceFields.length; c++) {
+                        if (attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()) == null
+                                || attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()).isEmpty()) {
+                            SC.warn("All attributes must be filled");
+                            return;
+                        } else {
+                            attributeValue = dataSourceFields[c].getName() + ":" + attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName());
+                            if (attr.contains(attributeValue)) {
+                                SC.warn(attributeValue + ", ERROR: duplicate attribute");
+                                return;
+                            } else {
+                                attr.add(attributeValue);
+                            }
+                        }
+                    }
+                }
+
+                for (String string : attr) {
+                    if (!sb.toString().isEmpty()) {
+                        sb.append(";");
+                    }
+                    sb.append(string);
+                }
+
+                getUiHandlers().onSaveAttribute(MainPagePresenter.signedInUser,sb.toString(), asnItemId);
+            }
+        });
+
+        attributeLayout.setMembers(attributeToolStrip, attributeListGrid, buttonSet);
+        attributeWindow.addItem(attributeLayout);
+
+        return attributeWindow;
+    }
 
     @Override
     public void refreshASNData() {
@@ -432,6 +453,18 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 
         asnListGrid.getDataSource().fetchData(asnListGrid.getFilterEditorCriteria(), callBack);
     }
+    
+    @Override
+    public void refreshAttributeData() {
+        DSCallback callBack = new DSCallback() {
+            @Override
+            public void execute(DSResponse response, Object rawData, DSRequest request) {
+            	attributeListGrid.setData(response.getData());
+            }
+        };
+
+        attributeListGrid.getDataSource().fetchData(attributeListGrid.getFilterEditorCriteria(), callBack);
+    }
 
     @Override
     public Widget asWidget() {
@@ -441,5 +474,15 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 	@Override
 	public Window getGrnCreateWindow() {
 		return createGRNWindow;
-	}        
+	}     
+	
+    @Override
+    public Window getAttributeWindow() {
+        return attributeWindow;
+    }
+
+    @Override
+    public ListGrid getAttributeGrid() {
+        return attributeListGrid;
+    }
 }

@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
@@ -17,6 +18,8 @@ import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.facade.LogAirwayBillSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderItemStatusHistorySessionEJBRemote;
+import com.gdn.venice.facade.VenOrderSessionEJBRemote;
+import com.gdn.venice.facade.VenSettlementRecordSessionEJBRemote;
 import com.gdn.venice.integration.outbound.Publisher;
 import com.gdn.venice.persistence.LogAirwayBill;
 import com.gdn.venice.persistence.LogApprovalStatus;
@@ -33,7 +36,18 @@ import com.gdn.venice.persistence.VenOrderItemStatusHistoryPK;
 import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenParty;
 import com.gdn.venice.persistence.VenRecipient;
+import com.gdn.venice.persistence.VenSettlementRecord;
+import com.gdn.venice.util.InventoryUtil;
 import com.gdn.venice.util.VeniceConstants;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * VenOrderItemSessionEJBCallback.java
@@ -187,6 +201,19 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
                         //ketika PF dan status order item diupdate jadi FP, maka publish FP untuk order item tersebut
                         || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP)) {
 
+                    if (existingStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP) {
+                        VenOrderSessionEJBRemote orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
+                        List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o where o.wcsOrderId ='" + venOrderItem.getVenOrder().getWcsOrderId() + "'", 0, 0);
+
+                        _log.debug("get commision type from MTA");
+                        CommissionTypeRequester requester = new CommissionTypeRequester();
+                        List<VenSettlementRecord> result = requester.getCommissionType(venOrderList.get(0));
+                        _log.debug("done get commision type from MTA");
+
+                        VenSettlementRecordSessionEJBRemote settlementHome = (VenSettlementRecordSessionEJBRemote) locator.lookup(VenSettlementRecordSessionEJBRemote.class, "VenSettlementRecordSessionEJBBean");
+                        settlementHome.persistVenSettlementRecordList(result);
+                    }
+
                     _log.debug("condition for publish order item status is true");
 
                     // Fish out all of the South information for the venOrderItem
@@ -278,14 +305,14 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
                     }
 
                     //pengecekan pubish D tidak boleh untuk BigProduct dan BOPIS
-                    if((newStatus == VeniceConstants.VEN_ORDER_STATUS_D  
-                    	&& !existingVenOrderItem.getLogLogisticService().getLogisticsServiceId().equals(VeniceConstants.LOG_LOGISTICS_SERVICE_CODE_BOPIS_ID) 
-	                    && !existingVenOrderItem.getLogLogisticService().getLogisticsServiceId().equals(VeniceConstants.LOG_LOGISTICS_SERVICE_CODE_BIG_PRODUCT_ID))
-	                    || newStatus != VeniceConstants.VEN_ORDER_STATUS_D ){			                    	
-			                    _log.debug("start publish order item status");
-			                    Publisher publisher = new Publisher();
-			                    publisher.publishUpdateOrderItemStatus(venOrderItem, conn);
-			                    _log.debug("done publish order item status");
+                    if ((newStatus == VeniceConstants.VEN_ORDER_STATUS_D
+                            && !existingVenOrderItem.getLogLogisticService().getLogisticsServiceId().equals(VeniceConstants.LOG_LOGISTICS_SERVICE_CODE_BOPIS_ID)
+                            && !existingVenOrderItem.getLogLogisticService().getLogisticsServiceId().equals(VeniceConstants.LOG_LOGISTICS_SERVICE_CODE_BIG_PRODUCT_ID))
+                            || newStatus != VeniceConstants.VEN_ORDER_STATUS_D) {
+                        _log.debug("start publish order item status");
+                        Publisher publisher = new Publisher();
+                        publisher.publishUpdateOrderItemStatus(venOrderItem, conn);
+                        _log.debug("done publish order item status");
                     }
                 }
 
@@ -315,6 +342,15 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
 
                     orderItemHistorySessionHome.persistVenOrderItemStatusHistory(orderItemStatusHistory);
                     _log.debug("done add order item status history");
+
+                    if (newStatus == VeniceConstants.VEN_ORDER_STATUS_X) {
+                        //trigger cancel sales order to stockholm
+                        try {
+                            triggerCancelSalesOrderToStockholm(venOrderItem.getWcsOrderItemId());
+                        } catch (Exception e) {
+                            _log.info("Failed trigger cancel sales order to Stockholm for order item: " + venOrderItem.getWcsOrderItemId());
+                        }
+                    }
                 }
             }
 
@@ -539,5 +575,14 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
     public Boolean onPostRemove(Object businessObject) {
         _log.debug("onPostRemove");
         return Boolean.TRUE;
+    }
+
+    private void triggerCancelSalesOrderToStockholm(String wcsOrderItemId) throws IOException {
+        HttpClient httpClient = new HttpClient();
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "salesOrder/cancelSalesOrder?orderItemId=" + wcsOrderItemId;
+        System.out.println(url);
+        PostMethod httpPost = new PostMethod(url);
+        httpClient.executeMethod(httpPost);
     }
 }

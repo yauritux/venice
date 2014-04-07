@@ -43,7 +43,7 @@ public class FetchASNDataCommand implements RafDsCommand {
         try {
         		asnService = new ASNManagementService();
                 InventoryPagingWrapper<AdvanceShipNotice> asnWrapper = asnService.getASNDataList(request);
-                if(asnWrapper != null){
+                if(asnWrapper.isSuccess()){
 	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	 		        
 	                for(AdvanceShipNotice asn : asnWrapper.getContent()){
@@ -81,6 +81,7 @@ public class FetchASNDataCommand implements RafDsCommand {
 		                map.put(DataNameTokens.INV_ASN_SUPPLIER_CODE, supplierCode);
 		                map.put(DataNameTokens.INV_ASN_SUPPLIER_NAME, supplierName);
 		                map.put(DataNameTokens.INV_ASN_DESTINATION, asn.getDestinationWarehouse().getName());
+		                map.put(DataNameTokens.INV_ASN_DESTINATIONCODE, asn.getDestinationWarehouse().getCode());
 		                map.put(DataNameTokens.INV_ASN_STATUS, asn.getCurrentStatus().toString());
 		                map.put(DataNameTokens.INV_ASN_SPECIAL_NOTES, asn.getSpecialNotes());
 	                    

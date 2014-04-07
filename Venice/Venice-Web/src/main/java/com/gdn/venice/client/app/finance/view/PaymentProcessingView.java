@@ -322,7 +322,7 @@ PaymentProcessingPresenter.MyView {
 	 */
 	@Override
 	public void loadRefundPaymentProcessingData(DataSource dataSource) {
-		refundPaymentDetailListGrid = new ListGrid();
+		refundPaymentDetailListGrid = new ListGrid();		  
 		
 		refundPaymentDetailListGrid.setSelectionType(SelectionStyle.SIMPLE);
 		refundPaymentDetailListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
@@ -339,15 +339,16 @@ PaymentProcessingPresenter.MyView {
 		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_WCSORDERID).setWidth("10%");
 		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_ORDERDATE).setWidth("10%");
 		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_APAMOUNT).setWidth("25%");
-		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_REFUNDTIMESTAMP).setWidth("10%");
+		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_REFUNDTIMESTAMP).setWidth("20%");
 		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_ACTION_TAKEN).setWidth("25%");
-		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE).setWidth("25%");
+		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_BANKFEE).setWidth("25%");
 		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON).setWidth("25%");
+		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_BANKFEE).setCanEdit(true);
 		
 //		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_ORDERDATE).setDateFormatter(DateDisplayFormat.TOEUROPEANSHORTDATETIME);
 		
 		Util.formatListGridFieldAsCurrency(refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_APAMOUNT));
-		Util.formatListGridFieldAsCurrency(refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE));
+		Util.formatListGridFieldAsCurrency(refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_BANKFEE));
 		refundPaymentDetailListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME).setCanFilter(false);
 		
 		refundPaymentDetailListGrid.addSelectionChangedHandler(new SelectionChangedHandler() {
@@ -366,6 +367,15 @@ PaymentProcessingPresenter.MyView {
 				refundPaymentProcessingTab.setButtonProcessDetailPaymentDisabled(refundPaymentDetailListGrid.getSelection().length==0 || sameActionOrNot);
 				refundPaymentProcessingTab.getPaymentLayout().removeMembers(refundPaymentProcessingTab.getPaymentLayout().getMembers());
 			}
+		});
+		
+		refundPaymentDetailListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
+			@Override
+			public void onEditComplete(EditCompleteEvent event) {				
+				refundPaymentDetailListGrid.saveAllEdits();		
+					SC.say("Data Added/Updated");							
+					refreshRefundPaymentProcessingData(); 
+				}
 		});
 
 		refundPaymentProcessingTab.getPaymentDetailLayout().setMembers(refundPaymentDetailListGrid);
@@ -637,7 +647,6 @@ PaymentProcessingPresenter.MyView {
 			refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_PENALTYAMOUNT).setWidth("20%");
 			refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_BALANCE).setWidth("20%");
 			refundPaymentListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FEEAMOUNT).setWidth("20%");
-			refundPaymentListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FEEAMOUNT).setCanEdit(true);
 			refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_FINACCOUNT_ACCOUNTID).setWidth("20%");
 			refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_FINACCOUNT_ACCOUNTID).setCanEdit(true);
 			refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_FINAPMANUALJOURNALTRANSACTIONS).setHidden(true);
@@ -646,8 +655,7 @@ PaymentProcessingPresenter.MyView {
 			Util.formatListGridFieldAsCurrency(refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_AMOUNT));
 			Util.formatListGridFieldAsCurrency(refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_PENALTYAMOUNT));
 			Util.formatListGridFieldAsCurrency(refundPaymentListGrid.getField(DataNameTokens.FINAPPAYMENT_BALANCE));
-			Util.formatListGridFieldAsCurrency(refundPaymentListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FEEAMOUNT));
-			refundPaymentListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FEEAMOUNT).setType(ListGridFieldType.INTEGER);   
+			Util.formatListGridFieldAsCurrency(refundPaymentListGrid.getField(DataNameTokens.FINARFUNDSINREFUND_FEEAMOUNT)); 
 			
 			HLayout makePaymentButtonLayout = new HLayout();
 			makePaymentButtonLayout.setHeight(20);

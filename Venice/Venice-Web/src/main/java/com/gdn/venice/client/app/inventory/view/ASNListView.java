@@ -138,8 +138,6 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
         asnDetailForm.setFields(asnNumberItem, reffDateItem, reffNumberItem, estDateItem, inventoryTypeItem, supplierCodeItem, 
         		DestinationItem, supplierNameItem, notesItem);
         
-        asnDetailForm.setDisabled(true);
-        
         itemListGrid = buildItemListGrid(id);
         itemListGrid.setCanEdit(false);
         

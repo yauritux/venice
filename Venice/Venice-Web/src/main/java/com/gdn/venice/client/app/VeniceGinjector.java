@@ -23,6 +23,7 @@ import com.gdn.venice.client.app.fraud.presenter.FraudCaseViewerPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCustomerWhitelistPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudDashboardPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule31Presenter;
+import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule35Presenter;
 import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
@@ -34,6 +35,11 @@ import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
+import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
+import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -176,8 +182,10 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<InventoryPresenter> getInventoryPresenter();
   
   AsyncProvider<ExportReportPresenter> getExportReportPresenter();
-  
+
   AsyncProvider<FraudParameterRule31Presenter> getFraudParameterRule31Presenter();
+  
+  AsyncProvider<FraudParameterRule35Presenter> getFraudParameterRule35Presenter();
   
   AsyncProvider<FinSalesSettlementReportPresenter> getFinSalesSettlementReportPresenter();
   
@@ -204,4 +212,16 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<GRNListPresenter> getGRNListPresenter();
   
   AsyncProvider<GRNCreatePresenter> getGRNCreatePresenter();
+  
+  AsyncProvider<PackingListPresenter> getPackingListPresenter();
+
+  AsyncProvider<PickingListPresenter> getPickingListPresenter();  
+  
+  AsyncProvider<PutawayCreatePresenter> getPutawayCreatePresenter();
+  
+  AsyncProvider<PutawayInputPresenter> getPutawayInputPresenter();
+  
+  AsyncProvider<GoodIssuedNotePresenter> getGINPresenter(); 
+  
+//  AsyncProvider<OpnamePresenter> getOpnamePresenter(); 
 }

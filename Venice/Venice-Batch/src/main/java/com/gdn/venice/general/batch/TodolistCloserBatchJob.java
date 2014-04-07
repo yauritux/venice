@@ -59,18 +59,29 @@ public class TodolistCloserBatchJob {
 			int taskSize = taskIds.size();
 			for (int i=0;i<taskSize;i++) {
 				Task task = bpmAdapter.getClientRepository().loadTask(taskIds.get(i));
-				
 				//untuk close process
 				if(processOrTask.equals("process")){
 					if(!task.getProcessInstance().getProcess().getName().equals(processOrTaskName)){
+					//	"Finance Staff"
+						System.out.println(task.getParticipantDisplayName());
+						if(!task.getActivityName().equals("Finance Staff")){
+							taskIds.remove(taskIds.get(i));
+							--i;
+							--taskSize;
+							continue;
+						}
+					}
+				}else if(processOrTask.equals("task")){				
+					//untuk close task
+					if(!task.getActivityName().equals(processOrTaskName)){
 						taskIds.remove(taskIds.get(i));
 						--i;
 						--taskSize;
 						continue;
 					}
-				}else if(processOrTask.equals("task")){				
-					//untuk close task
-					if(!task.getActivityName().equals(processOrTaskName)){
+				}else if(processOrTask.equals("assign")){				
+					//untuk close task by assign
+					if(!task.getParticipantDisplayName().equals(processOrTaskName)){
 						taskIds.remove(taskIds.get(i));
 						--i;
 						--taskSize;
@@ -88,7 +99,6 @@ public class TodolistCloserBatchJob {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		
 		System.out.println("TodolistCloserBatchJob completed.");
 		return Boolean.TRUE;		
 	}

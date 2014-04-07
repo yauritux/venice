@@ -1,5 +1,6 @@
 package com.gdn.venice.inbound.receivers;
 
+import com.gdn.integration.jaxb.Order;
 import com.gdn.venice.exception.VeniceInternalException;
 
 
@@ -10,6 +11,7 @@ import com.gdn.venice.exception.VeniceInternalException;
  */
 public interface OrderReceiver {
 	
-	public boolean createOrder() throws VeniceInternalException;
-	public boolean updateOrder();
+	public void setOrder(Order order);
+	public Boolean createOrder() throws VeniceInternalException;
+	public Boolean updateOrder();
 }

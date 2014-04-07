@@ -29,7 +29,7 @@ public class FetchUserPermissionListCommand implements RafRpcCommand {
 		super();
 		this.userName = userName;
 		if(this.userName == null || this.userName.isEmpty()){
-			this.userName = "widy";
+			this.userName = "roland";
 		}
 	}
 

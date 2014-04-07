@@ -2,8 +2,10 @@ package com.gdn.venice.inbound.services;
 
 import java.util.List;
 
+import com.gdn.integration.jaxb.Order;
 import com.gdn.integration.jaxb.Payment;
 import com.gdn.venice.exception.VeniceInternalException;
+import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPayment;
 
 /**
@@ -19,6 +21,7 @@ public interface OrderPaymentService {
 	public boolean isPaymentApproved(Payment payment);
 	public boolean isVirtualAccountPayment(String paymentType);
 	public boolean isCSPayment(String paymentType);
+	public boolean processPayment(Order order, VenOrder venOrder) throws VeniceInternalException;
 	public List<VenOrderPayment> persistOrderPaymentList(List<VenOrderPayment> venOrderPaymentList) 
 			throws VeniceInternalException;
 	public VenOrderPayment synchronizeVenOrderPaymentReferenceData(

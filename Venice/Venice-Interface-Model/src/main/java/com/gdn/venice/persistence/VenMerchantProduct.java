@@ -34,8 +34,8 @@ public class VenMerchantProduct implements Serializable {
 	@Column(name="wcs_product_sku", nullable=false, length=200)
 	private String wcsProductSku;
 	
-	@Column(name="merchant_product_sku", nullable=false, length=200)
-	private String merchantProductSku;	
+	@Column(name="merchant_product_sku", nullable=true, length=200)
+	private String merchantProductSku;
 
 	//bi-directional many-to-one association to VenMerchant
     @ManyToOne
@@ -48,8 +48,10 @@ public class VenMerchantProduct implements Serializable {
 	private VenProductType venProductType;
 
 	//bi-directional many-to-one association to VenOrderItem
+    /*
 	@OneToMany(mappedBy="venMerchantProduct")
 	private List<VenOrderItem> venOrderItems;
+	*/
 
 	//bi-directional many-to-many association to VenProductCategory
 	@ManyToMany(mappedBy="venMerchantProducts")//, fetch=FetchType.EAGER)
@@ -117,6 +119,7 @@ public class VenMerchantProduct implements Serializable {
 		this.venProductType = venProductType;
 	}
 	
+	/*
 	public List<VenOrderItem> getVenOrderItems() {
 		return this.venOrderItems;
 	}
@@ -124,6 +127,7 @@ public class VenMerchantProduct implements Serializable {
 	public void setVenOrderItems(List<VenOrderItem> venOrderItems) {
 		this.venOrderItems = venOrderItems;
 	}
+	*/
 	
 	public List<VenProductCategory> getVenProductCategories() {
 		return this.venProductCategories;

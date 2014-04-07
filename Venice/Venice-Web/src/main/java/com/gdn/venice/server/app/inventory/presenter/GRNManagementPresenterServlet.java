@@ -9,11 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.app.inventory.command.FetchAttributeNameDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNItemDataCommand;
-import com.gdn.venice.server.app.inventory.command.GetMaxGRNItemQuantityAllowedDataCommand;
+import com.gdn.venice.server.app.inventory.command.SaveGrnAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveGrnDataCommand;
-import com.gdn.venice.server.app.inventory.command.FetchItemAttributeDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -42,14 +42,14 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 		
 		String username = Util.getUserName(request);
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("username", username.trim());
+        params.put("username", username.trim());        
 		
 		if (type.equals(RafDsCommand.DataSource)){
-			String requestBody = Util.extractRequestBody(request);
 	        params.put("limit", request.getParameter("limit"));
 	        params.put("page", request.getParameter("page"));
-			
-			RafDsRequest rafDsRequest = null;
+	        
+			String requestBody = Util.extractRequestBody(request);
+	        RafDsRequest rafDsRequest = null;
 			try{
 				rafDsRequest = RafDsRequest.convertXmltoRafDsRequest(requestBody);
 			}catch(Exception e){
@@ -64,6 +64,14 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 				params.put(DataNameTokens.INV_ASN_ITEM_ID, request.getParameter(DataNameTokens.INV_ASN_ITEM_ID));				
 			}
 			
+			if (request.getParameter(DataNameTokens.INV_GRN_ITEM_ID)!=null) {
+				params.put(DataNameTokens.INV_GRN_ITEM_ID, request.getParameter(DataNameTokens.INV_GRN_ITEM_ID));				
+			}
+			
+			if (request.getParameter(DataNameTokens.INV_POCFF_ITEMID)!=null) {
+				params.put(DataNameTokens.INV_POCFF_ITEMID, request.getParameter(DataNameTokens.INV_POCFF_ITEMID));				
+			}
+						
 			rafDsRequest.setParams(params);
 			
 			String method = request.getParameter("method");
@@ -85,26 +93,28 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 					e.printStackTrace();
 				}
 			}else if(method.equals("fetchItemAttributeData")){
-				System.out.println("fetchItemAttributeData di servlet");
-				RafDsCommand fetchItemAttributeDataCommand = new FetchItemAttributeDataCommand(rafDsRequest);
-				RafDsResponse rafDsResponse = fetchItemAttributeDataCommand.execute();
-				try{
-					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}
+//				RafDsCommand fetchItemAttributeDataCommand = new FetchItemAttributeDataCommand(rafDsRequest);
+//				RafDsResponse rafDsResponse = fetchItemAttributeDataCommand.execute();
+//				try{
+//					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+//				}catch(Exception e){
+//					e.printStackTrace();
+//				}
+			}							
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");	
-			String requestBody = Util.extractRequestBody(request);	
-			if(method.equals("saveGrnData")){					
+			String requestBody = Util.extractRequestBody(request);
+			
+			if(method.equals("saveGrnData")){	
 				RafRpcCommand saveGrnDataCommand = new SaveGrnDataCommand(username, requestBody);
 				retVal = saveGrnDataCommand.execute();
-			}else if(method.equals("getMaxGRNItemQuantityAllowed")){
-				String asnItemId = request.getParameter("asnItemId");
-				RafRpcCommand getMaxGRNItemQuantityAllowedDataCommand = new GetMaxGRNItemQuantityAllowedDataCommand(username, asnItemId);
-				retVal = getMaxGRNItemQuantityAllowedDataCommand.execute();
-			}
+			}else if (method.equals("fetchAttributeName")) {
+                RafRpcCommand fetchAttributeNameCommand = new FetchAttributeNameDataCommand(request.getParameter("itemId"), username);
+                retVal = fetchAttributeNameCommand.execute();
+            } else if (method.equals("saveGrnAttributeData")) {
+                RafRpcCommand saveGrnAttributeDataCommand = new SaveGrnAttributeDataCommand(username, request.getParameter("asnItemId"), requestBody);
+                retVal = saveGrnAttributeDataCommand.execute();
+            }  
 		}
 		
 		response.getOutputStream().println(retVal);

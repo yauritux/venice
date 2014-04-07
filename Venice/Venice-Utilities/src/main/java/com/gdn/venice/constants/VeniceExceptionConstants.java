@@ -8,6 +8,7 @@ package com.gdn.venice.constants;
 public enum VeniceExceptionConstants {
 
 	VEN_EX_000001("Invalid Order"),
+	VEN_EX_000111("Cannot create Order"),
 	VEN_EX_000002("No Order Received"),
 	VEN_EX_000003("No Order Amount"),
 	VEN_EX_000004("No Customer Record"),
@@ -38,15 +39,23 @@ public enum VeniceExceptionConstants {
 	VEN_EX_000029("Error occured while persisting VenOrderContactDetail"),
 	VEN_EX_000030("Error occured while persisting VenOrderAddress"),
 	VEN_EX_000031("Error occured while persisting VenOrderPaymentAllocation"),
+	VEN_EX_000032("Error occured while persisting VenPartyAddress"),
 	VEN_EX_100001("Error occured while persisting Customer"),
 	VEN_EX_110001("Error occured while persisting Contact Detail"),
 	VEN_EX_120001("Error occured while persisting VenMerchant"),
+	VEN_EX_130002("Error occured while synchronizing VenCity"),
+	VEN_EX_130003("Error occured while synchronizing VenCountry"),
+	VEN_EX_130004("Error occured while synchronizing VenState"),
+	VEN_EX_130005("Error occured while synchronizing VenContactDetailType"),
+	VEN_EX_130006("Error occured while synchronizing VenMerchant with VenParty"),
 	VEN_EX_200001("Bank does not exist"),
 	VEN_EX_300001("Fraud Check Value does not exist"),
 	VEN_EX_400001("Payment Status does not exist"),
 	VEN_EX_400002("Payment Type does not exist"),
 	VEN_EX_400003("WCS Payment Type does not exist"),
+	VEN_EX_400004("Payment processing failed"),
 	VEN_EX_500001("LogLogisticService does not exist"),
+	VEN_EX_800001("Error occured while persisting FinArFundsInReconRecord"),
 	VEN_EX_999999("Unknown Exception");
 	
 	private String message;

@@ -1,8 +1,10 @@
 package com.gdn.venice.inbound.services.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,6 @@ import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
 import com.gdn.venice.exception.CannotPersistOrderPaymentAllocationException;
-import com.gdn.venice.exception.CannotPersistOrderPaymentException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.OrderPaymentAllocationService;
 import com.gdn.venice.persistence.VenOrder;
@@ -32,6 +33,35 @@ public class OrderPaymentAllocationServiceImpl implements OrderPaymentAllocation
 	@Autowired
 	private VenOrderPaymentAllocationDAO venOrderPaymentAllocationDAO;
 	
+	@PersistenceContext
+	private EntityManager em;
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public VenOrderPaymentAllocation persist(VenOrderPaymentAllocation venOrderPaymentAllocation) throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persist::BEGIN,venOrderPaymentAllocation=" + venOrderPaymentAllocation);
+		VenOrderPaymentAllocation persistedOrderPaymentAllocation = venOrderPaymentAllocation;
+		if (venOrderPaymentAllocation != null) {
+			if (!em.contains(venOrderPaymentAllocation)) {
+				//venOrderPaymentAllocation in detach mode, need to explicitly call save
+				try {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persist::calling venOrderPaymentAllocationDAO save explicitly");
+					persistedOrderPaymentAllocation = venOrderPaymentAllocationDAO.save(venOrderPaymentAllocation);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persist::successfully persisted venOrderPaymentAllocation");
+				} catch (Exception e) {
+					CommonUtil.logAndReturnException(new CannotPersistOrderPaymentAllocationException(
+							"Cannot persist VenOrderPaymentAllocation, " + e, VeniceExceptionConstants.VEN_EX_000031)
+					     , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);					
+				}
+			}
+		}
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persist::returning persistedOrderPaymentAllocation = " + persistedOrderPaymentAllocation);
+		return persistedOrderPaymentAllocation;
+	}
+	
 	/**
 	 * Persists the payment allocation list to the cache
 	 * 
@@ -47,41 +77,16 @@ public class OrderPaymentAllocationServiceImpl implements OrderPaymentAllocation
 				, "persistOrderPaymentAllocationList::BEGIN, venOrderPaymentAllocationList = " + venOrderPaymentAllocationList);
 		List<VenOrderPaymentAllocation> newVenOrderPaymentAllocationList = new ArrayList<VenOrderPaymentAllocation>();
 		if (venOrderPaymentAllocationList != null	&& (!(venOrderPaymentAllocationList.isEmpty()))) {
-			/*
-			try {
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "persistOrderPaymentAllocationList::Persisting VenOrderPaymentAllocation list...:"
-				          + venOrderPaymentAllocationList);
-				Iterator<VenOrderPaymentAllocation> i = venOrderPaymentAllocationList.iterator();
-				while (i.hasNext()) {
-					VenOrderPaymentAllocation next = i.next();
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrderPaymentAllocationList::value of paymentAllocation ......: order_id = "
-					   + next.getVenOrder().getOrderId() +" and wcs_code_payment = "
-					   + next.getVenOrderPayment().getWcsPaymentId());
-					// Persist the object 
-					newVenOrderPaymentAllocationList.add(venOrderPaymentAllocationDAO.save(next));
-				}
-			} catch (Exception e) {
-				throw CommonUtil.logAndReturnException(new CannotPersistOrderPaymentException(
-						"An exception occured when persisting VenOrderPaymentAllocation", VeniceExceptionConstants.VEN_EX_000023)
-				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-			}
-			*/
-			try {
-				newVenOrderPaymentAllocationList = venOrderPaymentAllocationDAO.save(venOrderPaymentAllocationList);
-			} catch (Exception e) {
-				CommonUtil.logAndReturnException(new CannotPersistOrderPaymentAllocationException(
-						"Cannot persist VenOrderPaymentAllocation, " + e, VeniceExceptionConstants.VEN_EX_000031)
-				     , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			for (VenOrderPaymentAllocation orderPaymentAllocation : venOrderPaymentAllocationList) {
+				newVenOrderPaymentAllocationList.add(persist(orderPaymentAllocation));
 			}
 		}else{
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "persistOrderPaymentAllocationList::Persisting VenOrderPaymentAllocation list is null");
+					, "persistOrderPaymentAllocationList::Persisting VenOrderPaymentAllocation list is null or empty");
 		}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistOrderPaymentAllocationList::returning newVenOrderPaymentAllocationList = "
-				  + newVenOrderPaymentAllocationList);
+				, "persistOrderPaymentAllocationList::returning newVenOrderPaymentAllocationList members = "
+				  + (newVenOrderPaymentAllocationList != null ? newVenOrderPaymentAllocationList.size() : 0));
 		return newVenOrderPaymentAllocationList;	
 	}
 

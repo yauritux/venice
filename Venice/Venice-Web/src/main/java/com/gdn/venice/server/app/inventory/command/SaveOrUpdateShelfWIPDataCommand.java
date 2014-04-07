@@ -74,22 +74,18 @@ public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 				System.out.println("Masuk ke command update shelf wip");
 				shelfWrapper = shelfService.findInProcessById(username, shelfMap.get(DataNameTokens.INV_SHELF_ID));
 				
-				if(shelfWrapper != null){
-					if(shelfWrapper.isSuccess()){
-						shelf = shelfWrapper.getContent();
-						if(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION) != null) {
-							System.out.println("update exsisting process");
-							shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));
-							shelf.setApprovalStatus(ApprovalStatus.CREATED);
-						}else{
-							System.out.println(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS));
-							shelf.setApprovalStatus(ApprovalStatus.valueOf(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS)));
-						}						
+				if(shelfWrapper.isSuccess()){
+					shelf = shelfWrapper.getContent();
+					if(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION) != null) {
+						System.out.println("update exsisting process");
+						shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));
+						shelf.setApprovalStatus(ApprovalStatus.CREATED);
 					}else{
-						return "Failed saving shelf, " + shelfWrapper.getError();
-					}
+						System.out.println(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS));
+						shelf.setApprovalStatus(ApprovalStatus.valueOf(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS)));
+					}						
 				}else{
-					return "Failed saving shelf, error connection";
+					return "Failed saving shelf, " + shelfWrapper.getError();
 				}
 			}
 			
@@ -125,13 +121,10 @@ public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 			System.out.println("storage size: "+storageList.size());
 			
 			shelfWrapper = shelfService.saveOrUpdateShelfInProcess(username, shelf, storageList);
-			if(shelfWrapper != null){
-				if(!shelfWrapper.isSuccess()){
-					return shelfWrapper.getError();
-				}
-			} else {
-				return "Failed saving shelf, error connection";
+			if(!shelfWrapper.isSuccess()){
+				return shelfWrapper.getError();
 			}
+
 		} catch (Exception e) {
 			return "Failed saving shelf, try again later. If error persist please contact administrator";
 		}

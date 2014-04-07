@@ -2,7 +2,6 @@ package com.gdn.venice.client.app.inventory.presenter;
 
 import java.util.HashMap;
 
-import com.gdn.venice.client.app.DataMessageTokens;
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
 import com.gdn.venice.client.app.inventory.view.GRNListView;
@@ -23,6 +22,8 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.DataSourceField;
+import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.rpc.RPCCallback;
 import com.smartgwt.client.rpc.RPCManager;
 import com.smartgwt.client.rpc.RPCRequest;
@@ -30,6 +31,7 @@ import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.grid.ListGrid;
 
 /**
  * Presenter for GRN Create
@@ -53,7 +55,11 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
 	public interface MyView extends View, HasUiHandlers<GRNCreateUiHandler> {
 		public void loadASNData(DataSource dataSource);
 		public void refreshASNData();
+		public void refreshAttributeData();
 		public Window getGrnCreateWindow();
+		public ListGrid getAttributeGrid();
+		public Window getAttributeWindow();
+		public Window buildAttributeWindow(String asnItemId, int quantity, DataSourceField[] dataSourceFields);
 	}
 
 	@Inject
@@ -98,14 +104,63 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
                             getView().getGrnCreateWindow().destroy();
 							getView().refreshASNData();
 						} else {
-							String[] split = rpcResponse.split(":");
-							if(split.length>1){
-								SC.warn(split[1]);
-							}else{
-								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
-							}
+							SC.warn(rpcResponse);
 						}
 					}
 		});		
 	}
+		
+    @Override
+    public void onFetchAttributeName(final String asnItemId, final String itemId, final String quantity) {
+        RPCRequest request = new RPCRequest();
+        request.setActionURL(GWT.getHostPageBaseURL() + grnManagementPresenterServlet + "?method=fetchAttributeName&type=RPC&itemId=" + itemId);
+        request.setHttpMethod("POST");
+        request.setUseSimpleHttp(true);
+        RPCManager.sendRequest(request,
+                new RPCCallback() {
+                    @Override
+                    public void execute(RPCResponse response,
+                            Object rawData, RPCRequest request) {
+                        String[] fieldName = rawData.toString().split(";");
+                        DataSourceField[] dataSourceFields = new DataSourceField[fieldName.length];
+                        for (int i = 0; i < fieldName.length; i++) {
+                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
+                        }
+                        getView().buildAttributeWindow(asnItemId, Integer.parseInt(quantity), dataSourceFields).show();
+                    }
+                });
+    }
+    
+    @Override
+    public void onSaveAttribute(String username, String attributes, String asnItemId) {
+        try {
+            RPCRequest request = new RPCRequest();
+            request.setData(attributes);
+            request.setActionURL(GWT.getHostPageBaseURL() + grnManagementPresenterServlet
+                    + "?method=saveGrnAttributeData&type=RPC&username=" + username + "&asnItemId=" + asnItemId);
+            request.setHttpMethod("POST");
+            request.setUseSimpleHttp(true);
+            request.setWillHandleError(true);
+            RPCManager.setPromptStyle(PromptStyle.DIALOG);
+            RPCManager.setDefaultPrompt("Saving records...");
+            RPCManager.setShowPrompt(true);
+
+            RPCManager.sendRequest(request,
+                    new RPCCallback() {
+                        @Override
+                        public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+                            String rpcResponse = rawData.toString();
+
+                            if (rpcResponse.startsWith("0")) {
+                                SC.say("Attributes saved");
+                                getView().getAttributeWindow().destroy();
+                            } else {
+                                SC.warn(rpcResponse);
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            SC.warn("Failed saving attribute, please try again later");
+        }
+    }
 }

@@ -28,13 +28,13 @@ public class VenSettlementRecord implements Serializable {
 	@Column(name="commission_value", nullable=true, precision=20, scale=2)
 	private BigDecimal commissionValue;
 
-	@Column(name="settlement_code", nullable=false, length=100)
+	@Column(name="settlement_code", nullable=true, length=100)
 	private String settlementCode;
 
-	@Column(name="settlement_record_timestamp", nullable=false)
+	@Column(name="settlement_record_timestamp", nullable=true)
 	private Timestamp settlementRecordTimestamp;
 
-	@Column(name="settlement_record_type", nullable=false, length=100)
+	@Column(name="settlement_record_type", nullable=true, length=100)
 	private String settlementRecordType;
 	
 	@Column(name="pph23")

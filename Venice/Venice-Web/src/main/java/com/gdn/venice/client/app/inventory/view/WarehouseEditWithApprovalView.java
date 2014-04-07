@@ -20,6 +20,9 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.fields.DataSourceFloatField;
+import com.smartgwt.client.data.fields.DataSourceIntegerField;
+import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.widgets.IButton;
@@ -29,8 +32,6 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.TextAreaItem;
-import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -47,227 +48,245 @@ import com.smartgwt.client.widgets.toolbar.ToolStrip;
  * @author Maria Olivia
  */
 public class WarehouseEditWithApprovalView extends ViewWithUiHandlers<WarehouseEditWithApprovalUiHandler> implements
-	WarehouseEditWithApprovalPresenter.MyView{
+        WarehouseEditWithApprovalPresenter.MyView {
 
-	RafViewLayout warehouseApprovalAddLayout;
-	ListGrid warehouseListGrid;
-	Window warehouseDetailWindow;
-	/*
-	 * The toolstrip objects for the header
-	 */
-	ToolStrip warehouseListToolStrip;
+    RafViewLayout warehouseApprovalAddLayout;
+    ListGrid warehouseListGrid;
+    Window warehouseDetailWindow;
+    /*
+     * The toolstrip objects for the header
+     */
+    ToolStrip warehouseListToolStrip;
 
-	@Inject
-	public WarehouseEditWithApprovalView() {
-		warehouseListToolStrip = new ToolStrip();
-		warehouseListToolStrip.setWidth100();
-		warehouseListToolStrip.setPadding(2);
+    @Inject
+    public WarehouseEditWithApprovalView() {
+        warehouseListToolStrip = new ToolStrip();
+        warehouseListToolStrip.setWidth100();
+        warehouseListToolStrip.setPadding(2);
 
-		warehouseApprovalAddLayout = new RafViewLayout();
+        warehouseApprovalAddLayout = new RafViewLayout();
 
-		warehouseListGrid = new ListGrid();
-		warehouseListGrid.setWidth100();
-		warehouseListGrid.setHeight100();
-		warehouseListGrid.setShowAllRecords(true);
-		warehouseListGrid.setSortField(0);
+        warehouseListGrid = new ListGrid();
+        warehouseListGrid.setWidth100();
+        warehouseListGrid.setHeight100();
+        warehouseListGrid.setShowAllRecords(true);
+        warehouseListGrid.setSortField(0);
 
-		warehouseListGrid.setShowFilterEditor(true);
-		warehouseListGrid.setCanResizeFields(true);
-		warehouseListGrid.setShowRowNumbers(true);
+        warehouseListGrid.setShowFilterEditor(true);
+        warehouseListGrid.setCanResizeFields(true);
+        warehouseListGrid.setShowRowNumbers(true);
+        warehouseListGrid.setCanSelectText(true);
 
-		bindCustomUiHandlers();
-	}
+        bindCustomUiHandlers();
+    }
 
-	protected void bindCustomUiHandlers() {
-		warehouseListGrid.addCellClickHandler(new CellClickHandler() {
-			@Override
-			public void onCellClick(CellClickEvent event) {
-				ListGridRecord record = warehouseListGrid.getSelectedRecord();
-				buildWarehouseDetailWindow(record).show();
-			}
-		});
+    protected void bindCustomUiHandlers() {
+        warehouseListGrid.addCellClickHandler(new CellClickHandler() {
+            @Override
+            public void onCellClick(CellClickEvent event) {
+                ListGridRecord record = warehouseListGrid.getSelectedRecord();
+                buildWarehouseDetailWindow(record).show();
+            }
+        });
 
-		warehouseListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
+        warehouseListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
+            @Override
+            public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
+                refreshAllWarehouseData();
+            }
+        });
+    }
 
-			@Override
-			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
-				refreshAllWarehouseData();
-			}
-		});
-	}
+    private Window buildWarehouseDetailWindow(final ListGridRecord record) {
+        warehouseDetailWindow = new Window();
+        warehouseDetailWindow.setWidth(600);
+        warehouseDetailWindow.setHeight(450);
+        warehouseDetailWindow.setCanDragResize(true);
+        warehouseDetailWindow.setTitle("Warehouse Detail");
+        warehouseDetailWindow.setShowMinimizeButton(false);
+        warehouseDetailWindow.setIsModal(true);
+        warehouseDetailWindow.setShowModalMask(true);
+        warehouseDetailWindow.centerInPage();
 
-	private Window buildWarehouseDetailWindow(final ListGridRecord record) {
-		warehouseDetailWindow = new Window();
-		warehouseDetailWindow.setWidth(600);
-		warehouseDetailWindow.setHeight(300);
-		warehouseDetailWindow.setTitle("Warehouse Detail");
-		warehouseDetailWindow.setShowMinimizeButton(false);
-		warehouseDetailWindow.setIsModal(true);
-		warehouseDetailWindow.setShowModalMask(true);
-		warehouseDetailWindow.centerInPage();
+        warehouseDetailWindow.addCloseClickHandler(new CloseClickHandler() {
+            public void onCloseClick(CloseClientEvent event) {
+                warehouseDetailWindow.destroy();
+            }
+        });
 
-		warehouseDetailWindow.addCloseClickHandler(new CloseClickHandler() {
-			public void onCloseClick(CloseClientEvent event) {
-				warehouseDetailWindow.destroy();
-			}
-		});
+        VLayout warehouseDetailLayout = new VLayout();
+        warehouseDetailLayout.setHeight100();
+        warehouseDetailLayout.setWidth100();
 
-		VLayout warehouseDetailLayout = new VLayout();
-		warehouseDetailLayout.setHeight100();
-		warehouseDetailLayout.setWidth100();
+        final DynamicForm warehouseDetailForm = new DynamicForm();
+        warehouseDetailForm.setPadding(5);
 
-		DynamicForm warehouseDetailForm = new DynamicForm();
-		warehouseDetailForm.setPadding(5);
+        final Long id = Long.parseLong(record.getAttribute(DataNameTokens.INV_WAREHOUSE_ID));
 
-		final Long id = Long.parseLong(record.getAttribute(DataNameTokens.INV_WAREHOUSE_ID));
+        DataSource ds = new DataSource();
+        DataSourceTextField whCode = new DataSourceTextField("whCode", "Warehouse Code");
+        whCode.setCanEdit(false);
+        DataSourceTextField whName = new DataSourceTextField("whName", "Warehouse Name", 255, true);
+        DataSourceTextField whDescription = new DataSourceTextField("whDescription", "Warehouse Description", 1000);
+        DataSourceTextField whAddress = new DataSourceTextField("whAddress", "Address", 255, true);
+        DataSourceTextField whCity = new DataSourceTextField("whCity", "City", 255, true);
+        DataSourceIntegerField whZipcode = new DataSourceIntegerField("whZipcode", "Zipcode", 5);
+        DataSourceTextField whContactPerson = new DataSourceTextField("whContactPerson", "Contact Person", 255);
+        DataSourceIntegerField whContactPhone = new DataSourceIntegerField("whContactPhone", "Contact Phone", 16);
+        DataSourceFloatField whSpace = new DataSourceFloatField("whSpace", "Space", 10);
+        DataSourceFloatField whAvailSpace = new DataSourceFloatField("whAvailSpace", "Available Space", 10);
 
-		String errMsg = "Required field";
-		final TextItem whCode = new TextItem(DataNameTokens.INV_WAREHOUSE_CODE, "Warehouse Code");
-		whCode.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_CODE));
-		whCode.setDisabled(Boolean.TRUE);
-		final TextItem whName = new TextItem(DataNameTokens.INV_WAREHOUSE_NAME, "Warehouse Name");
-		whName.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_NAME));
-		whName.setRequired(Boolean.TRUE);
-		whName.setRequiredMessage(errMsg);
-		final TextAreaItem whDescription = new TextAreaItem(DataNameTokens.INV_WAREHOUSE_DESCRIPTION, "Warehouse Description");
-		whDescription.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_DESCRIPTION));
-		final TextItem whAddress = new TextItem(DataNameTokens.INV_WAREHOUSE_ADDRESS, "Address");
-		whAddress.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_ADDRESS));
-		whAddress.setRequired(Boolean.TRUE);
-		whAddress.setRequiredMessage(errMsg);
-		final TextItem whCity = new TextItem(DataNameTokens.INV_WAREHOUSE_CITY, "City");
-		whCity.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_CITY));
-		whCity.setRequired(Boolean.TRUE);
-		whCity.setRequiredMessage(errMsg);
-		final TextItem whZipcode = new TextItem(DataNameTokens.INV_WAREHOUSE_ZIPCODE, "Zipcode");
-		whZipcode.setValue(record.getAttribute(DataNameTokens.INV_WAREHOUSE_ZIPCODE));
-		whZipcode.setRequired(Boolean.TRUE);
-		whZipcode.setRequiredMessage(errMsg);
+        ds.setFields(whCode, whName, whDescription, whAddress, whCity, whZipcode, whContactPerson, whContactPhone, whSpace, whAvailSpace);
+        warehouseDetailForm.setDataSource(ds);
+        warehouseDetailForm.setDisabled(true);
 
-		warehouseDetailForm.setFields(whName, whDescription, whAddress, whCity, whZipcode);
+        warehouseDetailForm.setValue("whCode", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CODE));
+        warehouseDetailForm.setValue("whName", record.getAttribute(DataNameTokens.INV_WAREHOUSE_NAME));
+        warehouseDetailForm.setValue("whDescription", record.getAttribute(DataNameTokens.INV_WAREHOUSE_DESCRIPTION));
+        warehouseDetailForm.setValue("whAddress", record.getAttribute(DataNameTokens.INV_WAREHOUSE_ADDRESS));
+        warehouseDetailForm.setValue("whCity", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CITY));
+        warehouseDetailForm.setValue("whZipcode", record.getAttribute(DataNameTokens.INV_WAREHOUSE_ZIPCODE));
+        warehouseDetailForm.setValue("whContactPerson", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CONTACT_PERSON));
+        warehouseDetailForm.setValue("whContactPhone", record.getAttribute(DataNameTokens.INV_WAREHOUSE_CONTACT_PHONE));
+        warehouseDetailForm.setValue("whSpace", record.getAttribute(DataNameTokens.INV_WAREHOUSE_SPACE));
+        warehouseDetailForm.setValue("whAvailSpace", record.getAttribute(DataNameTokens.INV_WAREHOUSE_AVAILABLE_SPACE));
+        
+        HLayout buttonSet = new HLayout(5);
+        IButton closeButton = new IButton("Close");
+        final IButton editButton = new IButton("Edit");
+        IButton correctionButton = new IButton("Need Correction");
+        IButton approveButton = new IButton("Approve");
+        IButton rejectButton = new IButton("Reject");
 
-		HLayout buttonSet = new HLayout(5);
+        closeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                warehouseDetailWindow.destroy();
+            }
+        });
 
-		IButton closeButton = new IButton("Close");
-		IButton editButton = new IButton("Edit");
-		IButton correctionButton = new IButton("Need Correction");
-		IButton approveButton = new IButton("Approve");
-		IButton rejectButton = new IButton("Reject");
+        editButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (editButton.getTitle().equals("Edit")) {
+                    warehouseDetailForm.setDisabled(false);
+                    editButton.setTitle("Save");
+                } else {
+                    if (warehouseDetailForm.validate()) {
+                        HashMap<String, String> data = new HashMap<String, String>();
+                        data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_CODE, warehouseDetailForm.getValue("whCode").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_NAME, warehouseDetailForm.getValue("whName").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_DESCRIPTION, warehouseDetailForm.getValue("whDescription").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_ADDRESS, warehouseDetailForm.getValue("whAddress").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_CITY, warehouseDetailForm.getValue("whCity").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_ZIPCODE, warehouseDetailForm.getValue("whZipcode").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_CONTACT_PERSON, warehouseDetailForm.getValue("whContactPerson").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_CONTACT_PHONE, warehouseDetailForm.getValue("whContactPhone").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_SPACE, warehouseDetailForm.getValue("whSpace").toString());
+                        data.put(DataNameTokens.INV_WAREHOUSE_AVAILABLE_SPACE, warehouseDetailForm.getValue("whAvailSpace").toString());
 
-		closeButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				warehouseDetailWindow.destroy();
-			}
-		});
+                        getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
+                    }
+                }
+            }
+        });
 
-		editButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				HashMap<String, String> data = new HashMap<String, String>();
-				data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
-				data.put(DataNameTokens.INV_WAREHOUSE_NAME, whName.getValueAsString());
-				data.put(DataNameTokens.INV_WAREHOUSE_DESCRIPTION, whDescription.getValueAsString());
-				data.put(DataNameTokens.INV_WAREHOUSE_ADDRESS, whAddress.getValueAsString());
-				data.put(DataNameTokens.INV_WAREHOUSE_CITY, whCity.getValueAsString());
-				data.put(DataNameTokens.INV_WAREHOUSE_ZIPCODE, whZipcode.getValueAsString());
+        approveButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                HashMap<String, String> data = new HashMap<String, String>();
+                data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
+                data.put(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS, "APPROVED");
 
-				getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
-			}
-		});
+                getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
+            }
+        });
 
-		approveButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				HashMap<String, String> data = new HashMap<String, String>();
-				data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
-				data.put(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS, "APPROVED");
+        correctionButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                HashMap<String, String> data = new HashMap<String, String>();
+                data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
+                data.put(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS, "NEED_CORRECTION");
 
-				getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
-			}
-		});
+                getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
+            }
+        });
 
-		correctionButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				HashMap<String, String> data = new HashMap<String, String>();
-				data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
-				data.put(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS, "NEED_CORRECTION");
+        rejectButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                HashMap<String, String> data = new HashMap<String, String>();
+                data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
+                data.put(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS, "REJECTED");
 
-				getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
-			}
-		});
+                getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
+            }
+        });
 
-		rejectButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				HashMap<String, String> data = new HashMap<String, String>();
-				data.put(DataNameTokens.INV_WAREHOUSE_ID, id.toString());
-				data.put(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS, "REJECTED");
+        buttonSet.setAlign(Alignment.CENTER);
 
-				getUiHandlers().updateWarehouseWIPData(MainPagePresenter.signedInUser, data);
-			}
-		});
+        buttonSet.addMember(closeButton);
+        
+        if (!record.getAttribute(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS).equals("Need Correction") 
+                && MainPagePresenter.getSignedInUserRole().toLowerCase().contains("inv_wh_approver")) {
+            buttonSet.addMember(approveButton);
+            buttonSet.addMember(correctionButton);
+            buttonSet.addMember(rejectButton);
+        } else if (record.getAttribute(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS).equals("Need Correction")) {
+            buttonSet.addMember(editButton);
+        }
 
-		buttonSet.setAlign(Alignment.CENTER);
+        warehouseDetailLayout.setMembers(warehouseDetailForm, buttonSet);
+        warehouseDetailWindow.addItem(warehouseDetailLayout);
 
-		//        if (InventoryUtil.isApprover(MainPagePresenter.signedInUser)) {
-		buttonSet.setMembers(closeButton, editButton,
-				approveButton, correctionButton, rejectButton);
-		//        } else {
-		//            buttonSet.setMembers(closeButton, editButton);
-		//        }
+        return warehouseDetailWindow;
+    }
 
-		warehouseDetailLayout.setMembers(warehouseDetailForm, buttonSet);
-		warehouseDetailWindow.addItem(warehouseDetailLayout);
+    @Override
+    public void loadApprovalEditWarehouseData(DataSource dataSource) {
+        Map<String, String> status = new HashMap<String, String>();
+        status.put("CREATED", "New");
+        status.put("APPROVED", "Approved");
+        status.put("NEED_CORRECTION", "Need Correction");
+        status.put("REJECTED", "Rejected");
+        dataSource.getField(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS).setValueMap(status);
 
-		return warehouseDetailWindow;
-	}
+        ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(dataSource);
 
-	@Override
-	public void loadApprovalEditWarehouseData(DataSource dataSource) {
-		Map<String, String> status = new HashMap<String, String>();
-		status.put("CREATED", "New");
-		status.put("APPROVED", "Approved");
-		status.put("NEED_CORRECTION", "Need Correction");
-		status.put("REJECTED", "Rejected");
-		dataSource.getField(DataNameTokens.INV_WAREHOUSE_APPROVALSTATUS).setValueMap(status);
+        warehouseListGrid.setDataSource(dataSource);
+        warehouseListGrid.setAutoFetchData(Boolean.TRUE);
+        warehouseListGrid.setFields(listGridField);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ID).setHidden(Boolean.TRUE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ADDRESS).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CITY).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_DESCRIPTION).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ZIPCODE).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.setAutoFitData(Autofit.BOTH);
 
-		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(dataSource);
+        warehouseApprovalAddLayout.setMembers(warehouseListToolStrip, warehouseListGrid);
+    }
 
-		warehouseListGrid.setDataSource(dataSource);
-		warehouseListGrid.setAutoFetchData(Boolean.TRUE);
-		warehouseListGrid.setFields(listGridField);
-		warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ID).setHidden(Boolean.TRUE);
-		warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CODE).setHidden(Boolean.TRUE);
-		warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ADDRESS).setCanFilter(Boolean.FALSE);
-		warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CITY).setCanFilter(Boolean.FALSE);
-		warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_DESCRIPTION).setCanFilter(Boolean.FALSE);
-		warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ZIPCODE).setCanFilter(Boolean.FALSE);
-		warehouseListGrid.setAutoFitData(Autofit.BOTH);
+    @Override
+    public void refreshAllWarehouseData() {
+        DSCallback callBack = new DSCallback() {
+            @Override
+            public void execute(DSResponse response, Object rawData, DSRequest request) {
+                warehouseListGrid.setData(response.getData());
+            }
+        };
 
-		warehouseApprovalAddLayout.setMembers(warehouseListToolStrip, warehouseListGrid);
-	}
+        warehouseListGrid.getDataSource().fetchData(warehouseListGrid.getFilterEditorCriteria(), callBack);
+    }
 
-	@Override
-	public void refreshAllWarehouseData() {
-		DSCallback callBack = new DSCallback() {
-			@Override
-			public void execute(DSResponse response, Object rawData, DSRequest request) {
-				warehouseListGrid.setData(response.getData());
-			}
-		};
+    @Override
+    public Widget asWidget() {
+        return warehouseApprovalAddLayout;
+    }
 
-		warehouseListGrid.getDataSource().fetchData(warehouseListGrid.getFilterEditorCriteria(), callBack);
-	}
-
-	@Override
-	public Widget asWidget() {
-		return warehouseApprovalAddLayout;
-	}
-
-	@Override
-	public Window getWarehouseDetailWindow() {
-		return warehouseDetailWindow;
-	}
+    @Override
+    public Window getWarehouseDetailWindow() {
+        return warehouseDetailWindow;
+    }
 }

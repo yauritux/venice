@@ -39,9 +39,6 @@ public class FetchRefundPaymentDataCommand implements RafDsCommand {
 			
 			finApManualJournalTransactionLocator = new Locator<FinApManualJournalTransaction>();
 			
-			FinApManualJournalTransactionSessionEJBRemote finApManualJournalTransactionSessionHome = (FinApManualJournalTransactionSessionEJBRemote) finApManualJournalTransactionLocator
-			.lookup(FinApManualJournalTransactionSessionEJBRemote.class, "FinApManualJournalTransactionSessionEJBBean");
-			
 			//Gets the list of selected Refund Record Ids
 			HashMap<String,String> refundRecordIdMap = Util.formHashMapfromXML( request.getParams().get(DataNameTokens.FINARFUNDSINREFUND_REFUNDRECORDID));
 			
@@ -69,26 +66,8 @@ public class FetchRefundPaymentDataCommand implements RafDsCommand {
 				HashMap<String, String> map = new HashMap<String, String>();
 						
 				map.put(DataNameTokens.FINAPPAYMENT_APPAYMENTID, new Integer(i).toString());
-				
-				
-//				double penaltyAmount = 0;
-				String finApManualJournalTransactionsIds = "";
-//				
-//				String selectManualJournalTransaction = "select o from FinApManualJournalTransaction o where o.venParty.partyId = " + partyId + 
-//					" and o.finJournalTransaction.finAccount.accountDesc='PIUTANG USAHA' " +
-//					" and o.finApPayment is null";
-//				
-//				List<FinApManualJournalTransaction> finApManualJournalTransactionList = finApManualJournalTransactionSessionHome.queryByRange(selectManualJournalTransaction, 0, 0);
-//				
-//				for (int j=0;j<finApManualJournalTransactionList.size();j++) {
-//					FinApManualJournalTransaction finApManualJournalTransaction = finApManualJournalTransactionList.get(j);
-//					penaltyAmount += finApManualJournalTransaction.getFinJournalTransaction().getTransactionAmount().doubleValue();
-//					finApManualJournalTransactionsIds += finApManualJournalTransaction.getManualJournalTransactionId();
-//					if (j<finApManualJournalTransactionList.size()-1) {
-//						finApManualJournalTransactionsIds += ",";
-//					}
-//				}
 
+				String finApManualJournalTransactionsIds = "";
 
 				map.put(DataNameTokens.FINAPPAYMENT_AMOUNT, refundRecord.getApAmount().toString());
 				if(refundRecord.getArAmount() != null){
@@ -100,7 +79,7 @@ public class FetchRefundPaymentDataCommand implements RafDsCommand {
 				}
 				map.put(DataNameTokens.FINAPPAYMENT_FINARFUNDSINREFUNDS, refundRecord.getRefundRecordId().toString());
 				map.put(DataNameTokens.FINAPPAYMENT_FINAPMANUALJOURNALTRANSACTIONS, finApManualJournalTransactionsIds);
-				map.put(DataNameTokens.FINARFUNDSINREFUND_FEEAMOUNT, "0");
+				map.put(DataNameTokens.FINARFUNDSINREFUND_FEEAMOUNT, refundRecord.getFeeAmount()!=null?refundRecord.getFeeAmount()+"":"0");
 				
 				dataList.add(map);
 			}

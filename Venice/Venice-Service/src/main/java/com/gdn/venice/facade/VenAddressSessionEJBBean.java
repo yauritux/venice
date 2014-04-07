@@ -243,6 +243,7 @@ public class VenAddressSessionEJBBean implements VenAddressSessionEJBRemote,
 			
 			List<VenPartyAddress> venPartyAddresses = null;
 			
+			/*
 			try{
 				if(venAddress.getVenPartyAddresses() != null && venAddress.getVenPartyAddresses().size() > 0){
 					venPartyAddresses = venAddress.getVenPartyAddresses();
@@ -252,6 +253,7 @@ public class VenAddressSessionEJBBean implements VenAddressSessionEJBRemote,
 			} finally{
 				venAddress.setVenPartyAddresses(null);
 			}
+			*/
 			
 			try {
 				em.persist(venAddress);
@@ -270,7 +272,7 @@ public class VenAddressSessionEJBBean implements VenAddressSessionEJBRemote,
 				throw new EJBException(e);
 			}
 			
-			venAddress.setVenPartyAddresses(venPartyAddresses);
+			//venAddress.setVenPartyAddresses(venPartyAddresses);
 			
 			// Call the onPostPersist() callback and throw an exception if it fails
 			if (this._callback != null) {

@@ -208,6 +208,11 @@
     <servlet-class>com.gdn.venice.server.app.fraud.presenter.FraudParameterRulePresenterServlet</servlet-class>
   </servlet>
   <servlet>
+    <display-name>FraudParameterRule35PresenterServlet</display-name>
+    <servlet-name>FraudParameterRule35PresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.fraud.presenter.FraudParameterRule35PresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
     <display-name>ReturDataViewerPresenterServlet</display-name>
     <servlet-name>ReturDataViewerPresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.general.presenter.ReturDataViewerPresenterServlet</servlet-class>
@@ -590,6 +595,48 @@
     <servlet-name>GRNManagementPresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.inventory.presenter.GRNManagementPresenterServlet</servlet-class>
   </servlet>  
+  <servlet>
+    <description></description>
+    <display-name>PickingListManagementPresenterServlet</display-name>
+    <servlet-name>PickingListManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.PickingListManagementPresenterServlet</servlet-class>
+  </servlet>  
+  <servlet>
+    <description></description>
+    <display-name>PickingListExportServlet</display-name>
+    <servlet-name>PickingListExportServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListExportServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>PutawayExportServlet</display-name>
+    <servlet-name>PutawayExportServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PutawayExportServlet</servlet-class>
+  </servlet>  
+  <servlet>
+    <description></description>
+    <display-name>PackingListPresenterServlet</display-name>
+    <servlet-name>PackingListPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.PackingListPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>GINPresenterServlet</display-name>
+    <servlet-name>GINPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.GINPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>PutawayManagementPresenterServlet</display-name>
+    <servlet-name>PutawayManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.PutawayManagementPresenterServlet</servlet-class>
+  </servlet>
+<!--  <servlet>
+    <description></description>
+    <display-name>OpnamePresenterServlet</display-name>
+    <servlet-name>OpnamePresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.OpnamePresenterServlet</servlet-class>
+  </servlet>-->
   <servlet-mapping>
     <servlet-name>FraudBinCreditLimitPresenterServlet</servlet-name>
     <url-pattern>/FraudBinCreditLimitPresenterServlet</url-pattern>
@@ -735,6 +782,10 @@
     <url-pattern>/FraudParameterRulePresenterServlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
+    <servlet-name>FraudParameterRule35PresenterServlet</servlet-name>
+    <url-pattern>/FraudParameterRule35PresenterServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
     <servlet-name>ReservationOrderManagementPresenterServlet</servlet-name>
     <url-pattern>/ReservationOrderManagementPresenterServlet</url-pattern>
   </servlet-mapping>
@@ -785,7 +836,35 @@
   <servlet-mapping>
     <servlet-name>GRNManagementPresenterServlet</servlet-name>
     <url-pattern>/GRNManagementPresenterServlet</url-pattern>
-  </servlet-mapping>    
+  </servlet-mapping>   
+  <servlet-mapping>
+    <servlet-name>PickingListManagementPresenterServlet</servlet-name>
+    <url-pattern>/PickingListManagementPresenterServlet</url-pattern>
+  </servlet-mapping>  
+  <servlet-mapping>
+    <servlet-name>PutawayManagementPresenterServlet</servlet-name>
+    <url-pattern>/PutawayManagementPresenterServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>PackingListPresenterServlet</servlet-name>
+    <url-pattern>/PackingListPresenterServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GINPresenterServlet</servlet-name>
+    <url-pattern>/GINPresenterServlet</url-pattern>
+  </servlet-mapping>
+<!--  <servlet-mapping>
+    <servlet-name>OpnamePresenterServlet</servlet-name>
+    <url-pattern>/OpnamePresenterServlet</url-pattern>
+  </servlet-mapping>-->
+  <servlet-mapping>
+    <servlet-name>PickingListExportServlet</servlet-name>
+    <url-pattern>/PickingListExportServlet</url-pattern>
+  </servlet-mapping>  
+  <servlet-mapping>
+    <servlet-name>PutawayExportServlet</servlet-name>
+    <url-pattern>/PutawayExportServlet</url-pattern>
+  </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>

@@ -32,6 +32,7 @@ public class DataWidgetNameTokens {
 	public static String  FRD_FRAUDPARAMETERTREENODE = "FrdParameterTreeNode";
 	public static String  FRD_FRAUDPARAMETERRULE31TREENODE = "FrdParameterRule31TreeNode";
 	public static String  FRD_FRAUDINSTALLMENTBCA = "FrdFraudInstallmentBCAPageNode";
+	public static String  FRD_FRAUDPARAMETERRULE35TREENODE = "FrdParameterRule35TreeNode";
 	
 	public static String  LOG_LOGISTICSMODULETREENODE = "LogLogisticsModuleTreeNode";
 	public static String  LOG_LOGISTICSDASHBOARDTREENODE = "LogLogisticsDashboardTreeNode";
@@ -95,5 +96,16 @@ public class DataWidgetNameTokens {
 	
 	public static String  INV_GRNTREENODE = "InvGRNTreeNode";
 	public static String  INV_GRNLISTTREENODE = "InvGRNListTreeNode";
-	public static String  INV_GRNCREATETREENODE = "InvGRNCreateTreeNode";
+	public static String  INV_GRNCREATETREENODE = "InvGRNCreateTreeNode";        
+        public static String  INV_PACKINGLISTTREENODE = "InvPackingListTreeNode";		
+	public static String  INV_PICKINGLISTTREENODE = "InvPickingListTreeNode";
+        public static String  INV_GINTREENODE = "InvGINTreeNode";
+
+	public static String  INV_PUTAWAYTREENODE = "InvPutawayTreeNode";
+	public static String  INV_CREATEPUTAWAYTREENODE = "InvCreatePutawayTreeNode";
+	public static String  INV_INPUTPUTAWAYLOCATIONTREENODE = "InvInputPutawayLocationTreeNode";
+        
+        public static String  INV_OPNAMETREENODE = "InvOpnameTreeNode";
+        public static String  INV_CREATEOPNAMETREENODE = "InvCreateOpnameTreeNode";
+        public static String  INV_OPNAMEADJUSTMENTTREENODE = "InvOpnameAdjustmentTreeNode";
 }

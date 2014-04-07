@@ -13,7 +13,7 @@
                 <dep:artifactId>OpenLdap</dep:artifactId>
                 <dep:version>1.0</dep:version>
                 <dep:type>car</dep:type>
-            </dep:dependency> 
+            </dep:dependency>
             <dep:dependency>
                 <dep:groupId>venice</dep:groupId>
                 <dep:artifactId>server</dep:artifactId>
@@ -36,6 +36,6 @@
                 </realm>
             </role>
         </role-mappings>
-    </security> 
+    </security>
     
 </web:web-app>

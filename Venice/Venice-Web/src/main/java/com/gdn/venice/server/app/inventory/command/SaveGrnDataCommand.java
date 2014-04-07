@@ -50,7 +50,7 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 		ResultWrapper<GoodReceivedNote> grnWrapper;
 		try {
 			grnService = new GRNManagementService();
-			_log.info("SaveGrnDataCommand");
+			System.out.println("SaveGrnDataCommand");
 			grn = new GoodReceivedNote();
 			
 			AdvanceShipNotice asn = new AdvanceShipNotice();
@@ -58,15 +58,18 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 			asn.setReferenceNumber(grnMap.get(DataNameTokens.INV_ASN_REFF_NUMBER));			
 			asn.setReferenceType(ASNReferenceType.valueOf(grnMap.get(DataNameTokens.INV_ASN_REFF_TYPE)));
 			
-			_log.debug("asn reff number: "+asn.getReferenceNumber());
-			_log.debug("asn reff type: "+asn.getReferenceType());
+			System.out.println("asn reff number: "+asn.getReferenceNumber());
+			System.out.println("asn reff type: "+asn.getReferenceType());
 			
 			Warehouse destination = new Warehouse();
-			destination.setName(grnMap.get(DataNameTokens.INV_ASN_DESTINATION));
+			destination.setCode(grnMap.get(DataNameTokens.INV_ASN_DESTINATIONCODE));
 			
 			grn.setAdvanceShipNotice(asn);					
-			grn.setReceivedWarehouse(destination);			
-							
+			grn.setReceivedWarehouse(destination);	
+			String doNumber = grnMap.get(DataNameTokens.INV_DO_NUMBER);
+			System.out.println("do number: "+doNumber);
+			grn.setDoNumber(doNumber);
+			System.out.println("after set do");
 			for(Map.Entry<String, String> entry : itemMap.entrySet()){
 				String value = entry.getValue();
 				
@@ -75,12 +78,13 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 				for(Map.Entry<String, String> e : map.entrySet()){
 					String k = e.getKey();
 					String v = e.getValue();
-					_log.debug("item key: "+k);
-					_log.debug("item value: "+v);
+					System.out.println("item key: "+k);
+					System.out.println("item value: "+v);
 					
 					if(k.equals(DataNameTokens.INV_ASN_ITEM_ID)){				
 						AdvanceShipNoticeItem item = new AdvanceShipNoticeItem();
-						item.setId(new Long(v));						
+						item.setId(new Long(v));
+						item.setAdvanceShipNotice(asn);
 						grnItem.setAdvanceShipNoticeItem(item);
 					}
 					if(k.equals(DataNameTokens.INV_POCFF_QTY)){
@@ -91,17 +95,15 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 				itemList.add(grnItem);
 			}
 			
-			_log.debug("item size: "+itemList.size());			
+			System.out.println("item size: "+itemList.size());			
 			grnWrapper = grnService.saveGrn(username, grn, itemList);
 			
-			if(grnWrapper != null){
-				if(!grnWrapper.isSuccess()){
-					return grnWrapper.getError();
-				}
-			} else {
-				return "Failed saving grn, error connection";
+			if(!grnWrapper.isSuccess()){
+				return grnWrapper.getError();
 			}
+
 		} catch (Exception e) {
+			e.printStackTrace();
 			return "Failed saving grn, try again later. If error persist please contact administrator";
 		}
 		

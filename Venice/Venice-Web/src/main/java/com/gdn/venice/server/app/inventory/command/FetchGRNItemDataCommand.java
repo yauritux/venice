@@ -48,23 +48,27 @@ public class FetchGRNItemDataCommand implements RafDsCommand {
         try {
         	grnService = new GRNManagementService();
         	InventoryPagingWrapper<GoodReceivedNoteItem> grnItemWrapper = grnService.getGRNItemDataList(request, request.getParams().get(DataNameTokens.INV_GRN_ID));
-        	if(grnItemWrapper != null){     
+        	if(grnItemWrapper.isSuccess()){     
             	
 	    		asnService = new ASNManagementService(); 
-            	for(GoodReceivedNoteItem grnItem : grnItemWrapper.getContent()){   
+            	for(GoodReceivedNoteItem grnItem : grnItemWrapper.getContent()){  
+            		
+    				HashMap<String, String> map = new HashMap<String, String>(); 
+    				map.put(DataNameTokens.INV_GRN_ITEM_ID, String.valueOf(grnItem.getId()));
+    				
 	            	AdvanceShipNoticeItem asnItem = grnItem.getAdvanceShipNoticeItem();
 	            	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
                 		_log.info("reff type: purchase order");                		                		
                 		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
-                    	if(poItemWrapper!=null){
+                    	if(poItemWrapper.isSuccess()){
                     		PurchaseRequisitionItem item = poItemWrapper.getContent().getPurchaseRequisitionItem();
                     		_log.debug("PO item found, code:"+item.getItem().getCode());    
-                    		
-            				HashMap<String, String> map = new HashMap<String, String>();                    				             
+                    		                   				             
     	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
     	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
     	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(poItemWrapper.getContent().getQuantity()));
     	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMID, Long.toString(item.getItem().getId()));
     	                        	                    
     	                    dataList.add(map);
                     	}else{
@@ -72,16 +76,16 @@ public class FetchGRNItemDataCommand implements RafDsCommand {
                     	}   
                 	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
                 		_log.info("reff type: consignment");
-                		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber().toString());
-                    	if(cffItemWrapper!=null){
+                		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
+                    	if(cffItemWrapper.isSuccess()){
                     		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
                     		_log.debug("CFF item found, code:"+item.getItem().getCode());    
-                    		
-            				HashMap<String, String> map = new HashMap<String, String>();                    				             
+                    		                   				             
     	                    map.put(DataNameTokens.INV_POCFF_ITEMCODE, item.getItem().getCode());
     	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
     	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(cffItemWrapper.getContent().getQuantity()));
     	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMID, Long.toString(item.getItem().getId()));
     	                        	                    
     	                    dataList.add(map);
                     	}else{

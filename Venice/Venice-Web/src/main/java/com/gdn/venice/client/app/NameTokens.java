@@ -31,6 +31,7 @@ public class NameTokens {
 	public static final String fraudUncalculatedCreditCardOrder = "!fraudUncalculatedCreditCardOrder";
 	public static final String fraudParameterRule31Page = "!fraudParameterRule31Page";
 	public static final String fraudInstallmentBCA = "!fraudInstallmentBCAPage";
+	public static final String fraudParameterRule35Page = "!fraudParameterRule35Page";
 	
 	public static final String logisticDashboardPage = "!logisticDashboardPage";
 	public static final String logisticDeliveryStatusTrackingPage = "!logisticDeliveryStatusTrackingPage";
@@ -66,7 +67,7 @@ public class NameTokens {
 
 	public static final String reservationOrderManagement= "!reservationOrderManagement";
 
-    public static final String warehouseListFilterPage = "!warehouseListFilterPage";
+        public static final String warehouseListFilterPage = "!warehouseListFilterPage";
 	public static final String warehouseAddWithApprovalPage = "!addWithApprovalPage";
 	public static final String warehouseEditWithApprovalPage = "!editWithApprovalPage";
 	public static final String warehouseNonActiveWithApprovalPage = "!nonActiveWithApprovalPage";
@@ -82,6 +83,17 @@ public class NameTokens {
 
 	public static final String grnCreatePage = "!grnCreatePage";
 	public static final String grnListPage = "!grnListPage";
+	
+	public static final String pickingListPage = "!pickingListPage";
+	
+	public static final String putawayCreatePage = "!putawayCreatePage";
+	public static final String putawayInputPage = "!putawayInputPage";
+        
+        public static final String packingListPage = "!packingListPage";
+        
+        public static final String ginPage = "!ginPage";
+        
+        public static final String opnamePage = "!opnamePage";
         
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;

@@ -45,28 +45,21 @@ public class SaveOrUpdateStatusShelfWIPDataCommand implements RafRpcCommand {
 				shelfWrapper = shelfService.findInProcessById(username, shelfMap.get(DataNameTokens.INV_SHELF_ID));
 			}
 			
-			if (shelfWrapper != null){
-				if (shelfWrapper.isSuccess()) {
-					shelf = shelfWrapper.getContent();
-					
-					System.out.println(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS));
-					shelf.setApprovalStatus(ApprovalStatus.valueOf(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS)));
-										
-				} else {
-					return "Failed saving shelf, " + shelfWrapper.getError();
-				}
+			if (shelfWrapper.isSuccess()) {
+				shelf = shelfWrapper.getContent();
+				
+				System.out.println(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS));
+				shelf.setApprovalStatus(ApprovalStatus.valueOf(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS)));
+									
 			} else {
-				return "Failed saving shelf, error connection";
+				return "Failed saving shelf, " + shelfWrapper.getError();
 			}
 						
 			shelfWrapper = shelfService.saveOrUpdateStatusShelfInProcess(username, shelf);
-			if(shelfWrapper != null){
-				if(!shelfWrapper.isSuccess()){
-					return shelfWrapper.getError();
-				}
-			} else {
-				return "Failed saving shelf, error connection";
+			if(!shelfWrapper.isSuccess()){
+				return shelfWrapper.getError();
 			}
+
 		} catch (Exception e) {
 			return "Failed saving shelf, try again later. If error persist please contact administrator";
 		}

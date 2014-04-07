@@ -104,8 +104,8 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 							String[] split = rpcResponse.split(":");
 							if(split.length>1){
 								SC.warn(split[1]);
-							}else{
-								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
+							}else {
+								SC.warn(rpcResponse);
 							}
 						}
 					}

@@ -3,6 +3,7 @@ package com.gdn.venice.client.widgets;
 import com.gdn.venice.client.ui.data.NavigationPaneTreeNodeRecord;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.types.TreeModelType;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.layout.SectionStackSection;
@@ -56,6 +57,8 @@ public class NavigationPaneStackSection extends SectionStackSection {
 	public NavigationPaneTreeNodeRecord getTreeNodeForPageName(String pageName) {
 		for (int i = 0; i < this.sectionData.length; i++) { 
 			NavigationPaneTreeNodeRecord record = this.sectionData[i];
+//                        SC.say("Page Name: " + pageName + "Record Page Name: " + record.getPageName()
+//                                + "length: "+sectionData.length + "index: " + i);
 			if (pageName.equals(record.getPageName())) {
 				return this.sectionData[i];
 			}

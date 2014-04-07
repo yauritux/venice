@@ -24,7 +24,6 @@ import com.gdn.inventory.exchange.entity.AdvanceShipNotice;
 import com.gdn.inventory.exchange.entity.AdvanceShipNoticeItem;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalForm;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalItem;
-import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNote;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrder;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrderItem;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
@@ -47,7 +46,7 @@ public class ASNManagementService{
 		mapper = new ObjectMapper();
 		
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-        _log = loggerFactory.getLog4JLogger("ccom.gdn.venice.server.app.inventory.service.ASNManagementService");
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.inventory.service.ASNManagementService");
 	}
 	
 	public InventoryPagingWrapper<AdvanceShipNotice> getASNDataList(RafDsRequest request) throws HttpException, IOException{
@@ -109,7 +108,7 @@ public class ASNManagementService{
         numberCriteria.setValue(reffNumber);
         numberCriteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.INV_PO_NUMBER));
 				
-        _log.debug("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
+        _log.info("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
         searchMap.put(numberCriteria.getFieldName(), numberCriteria.getValue());
         
         String json = mapper.writeValueAsString(searchMap);
@@ -201,7 +200,7 @@ public class ASNManagementService{
         }
 	}
 	
-	public ResultWrapper<ConsignmentFinalItem> getCFFItemData(RafDsRequest request, String id) throws HttpException, IOException{
+	public ResultWrapper<ConsignmentFinalItem> getCFFItemData(RafDsRequest request, Long id) throws HttpException, IOException{
 		_log.info("getCFFItemData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "consignmentFinal/getDetailItem?username=" + request.getParams().get("username")
@@ -255,12 +254,11 @@ public class ASNManagementService{
 	public ResultWrapper<AdvanceShipNoticeItem> getSingleASNItemData(String asnItemId) throws HttpException, IOException{
 		_log.info("getSingleASNItemData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "advanceShipNotice/getDetail?asnItemId=" + asnItemId;
+                + "advanceShipNotice/findItemByASNItemId?asnItemId=" + asnItemId;
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
                  
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));

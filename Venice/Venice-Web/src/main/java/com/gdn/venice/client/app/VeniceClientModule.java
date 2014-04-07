@@ -37,6 +37,7 @@ import com.gdn.venice.client.app.fraud.presenter.FraudCaseViewerPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCustomerWhitelistPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudDashboardPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule31Presenter;
+import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule35Presenter;
 import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
@@ -50,6 +51,7 @@ import com.gdn.venice.client.app.fraud.view.FraudCaseViewerView;
 import com.gdn.venice.client.app.fraud.view.FraudCustomerWhitelistView;
 import com.gdn.venice.client.app.fraud.view.FraudDashboardView;
 import com.gdn.venice.client.app.fraud.view.FraudParameterRule31View;
+import com.gdn.venice.client.app.fraud.view.FraudParameterRule35View;
 import com.gdn.venice.client.app.fraud.view.InstallmentBCAView;
 import com.gdn.venice.client.app.fraud.view.MigsMasterView;
 import com.gdn.venice.client.app.fraud.view.MigsUploadView;
@@ -64,6 +66,11 @@ import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
+import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
+import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfEditWithApprovalPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfListFilterPresenter;
@@ -76,6 +83,11 @@ import com.gdn.venice.client.app.inventory.view.ASNListView;
 import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
 import com.gdn.venice.client.app.inventory.view.GRNCreateView;
 import com.gdn.venice.client.app.inventory.view.GRNListView;
+import com.gdn.venice.client.app.inventory.view.GoodIssuedNoteView;
+import com.gdn.venice.client.app.inventory.view.PackingListView;
+import com.gdn.venice.client.app.inventory.view.PickingListView;
+import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
+import com.gdn.venice.client.app.inventory.view.PutawayInputView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfEditWithApprovalView;
 import com.gdn.venice.client.app.inventory.view.ShelfListFilterView;
@@ -135,307 +147,341 @@ import com.gwtplatform.mvp.client.proxy.TokenFormatter;
  * This class configures the binding of elements inside the application,
  * including the binding of presenters and views for each of the pages/screens
  * in the application
- * 
+ *
  * @author Henry Chandra
  */
-
 // TODO: Whenever we add a new page/screen on the application, need to add a new
 // entry in this class (bind the presenter and the view here)
 public class VeniceClientModule extends AbstractPresenterModule {
 
-	@Override
-	protected void configure() {
-		bind(EventBus.class).to(DefaultEventBus.class).in(Singleton.class);
-		bind(PlaceManager.class).to(VenicePlaceManager.class).in(Singleton.class);
-		bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(Singleton.class);
-		bind(RootPresenter.class).asEagerSingleton();
-		bind(ProxyFailureHandler.class).to(DefaultProxyFailureHandler.class).in(Singleton.class);
+    @Override
+    protected void configure() {
+        bind(EventBus.class).to(DefaultEventBus.class).in(Singleton.class);
+        bind(PlaceManager.class).to(VenicePlaceManager.class).in(Singleton.class);
+        bind(TokenFormatter.class).to(ParameterTokenFormatter.class).in(Singleton.class);
+        bind(RootPresenter.class).asEagerSingleton();
+        bind(ProxyFailureHandler.class).to(DefaultProxyFailureHandler.class).in(Singleton.class);
 
-		// Constants
-		bindConstant().annotatedWith(DefaultPlace.class).to(NameTokens.taskSummaryPage);
+        // Constants
+        bindConstant().annotatedWith(DefaultPlace.class).to(NameTokens.taskSummaryPage);
 
-		// Presenters
-		bindPresenter(MainPagePresenter.class, MainPagePresenter.MyView.class,
-				MainPageView.class, MainPagePresenter.MyProxy.class);
+        // Presenters
+        bindPresenter(MainPagePresenter.class, MainPagePresenter.MyView.class,
+                MainPageView.class, MainPagePresenter.MyProxy.class);
 
-		bindPresenter(TestRestDataSourcePresenter.class,
-				TestRestDataSourcePresenter.MyView.class,
-				TestRestDataSourceView.class,
-				TestRestDataSourcePresenter.MyProxy.class);
+        bindPresenter(TestRestDataSourcePresenter.class,
+                TestRestDataSourcePresenter.MyView.class,
+                TestRestDataSourceView.class,
+                TestRestDataSourcePresenter.MyProxy.class);
 
-		bindPresenter(LoginPresenter.class, LoginPresenter.MyView.class,
-				LoginView.class, LoginPresenter.MyProxy.class);
+        bindPresenter(LoginPresenter.class, LoginPresenter.MyView.class,
+                LoginView.class, LoginPresenter.MyProxy.class);
 
-		bindPresenter(TaskSummaryPresenter.class,
-				TaskSummaryPresenter.MyView.class, TaskSummaryView.class,
-				TaskSummaryPresenter.MyProxy.class);
+        bindPresenter(TaskSummaryPresenter.class,
+                TaskSummaryPresenter.MyView.class, TaskSummaryView.class,
+                TaskSummaryPresenter.MyProxy.class);
 
-		bindPresenter(ToDoListPresenter.class, ToDoListPresenter.MyView.class,
-				ToDoListView.class, ToDoListPresenter.MyProxy.class);
+        bindPresenter(ToDoListPresenter.class, ToDoListPresenter.MyView.class,
+                ToDoListView.class, ToDoListPresenter.MyProxy.class);
 
-		bindPresenter(AssignedTaskPresenter.class,
-				AssignedTaskPresenter.MyView.class, AssignedTaskView.class,
-				AssignedTaskPresenter.MyProxy.class);
+        bindPresenter(AssignedTaskPresenter.class,
+                AssignedTaskPresenter.MyView.class, AssignedTaskView.class,
+                AssignedTaskPresenter.MyProxy.class);
 
-		bindPresenter(TaskLaunchpadPresenter.class,
-				TaskLaunchpadPresenter.MyView.class, TaskLaunchpadView.class,
-				TaskLaunchpadPresenter.MyProxy.class);
+        bindPresenter(TaskLaunchpadPresenter.class,
+                TaskLaunchpadPresenter.MyView.class, TaskLaunchpadView.class,
+                TaskLaunchpadPresenter.MyProxy.class);
 
-		bindPresenter(FraudDashboardPresenter.class,
-				FraudDashboardPresenter.MyView.class, FraudDashboardView.class,
-				FraudDashboardPresenter.MyProxy.class);
+        bindPresenter(FraudDashboardPresenter.class,
+                FraudDashboardPresenter.MyView.class, FraudDashboardView.class,
+                FraudDashboardPresenter.MyProxy.class);
 
-		bindPresenter(FraudCaseManagementPresenter.class,
-				FraudCaseManagementPresenter.MyView.class,
-				FraudCaseManagementView.class,
-				FraudCaseManagementPresenter.MyProxy.class);
+        bindPresenter(FraudCaseManagementPresenter.class,
+                FraudCaseManagementPresenter.MyView.class,
+                FraudCaseManagementView.class,
+                FraudCaseManagementPresenter.MyProxy.class);
 
-		bindPresenter(FraudCaseViewerPresenter.class,
-				FraudCaseViewerPresenter.MyView.class,
-				FraudCaseViewerView.class,
-				FraudCaseViewerPresenter.MyProxy.class);
+        bindPresenter(FraudCaseViewerPresenter.class,
+                FraudCaseViewerPresenter.MyView.class,
+                FraudCaseViewerView.class,
+                FraudCaseViewerPresenter.MyProxy.class);
 
-		bindPresenter(FraudBinCreditLimitPresenter.class,
-				FraudBinCreditLimitPresenter.MyView.class,
-				FraudBinCreditLimitView.class,
-				FraudBinCreditLimitPresenter.MyProxy.class);
+        bindPresenter(FraudBinCreditLimitPresenter.class,
+                FraudBinCreditLimitPresenter.MyView.class,
+                FraudBinCreditLimitView.class,
+                FraudBinCreditLimitPresenter.MyProxy.class);
 
-		bindPresenter(BlackListMaintenancePresenter.class,
-				BlackListMaintenancePresenter.MyView.class,
-				BlackListMaintenanceView.class,
-				BlackListMaintenancePresenter.MyProxy.class);
+        bindPresenter(BlackListMaintenancePresenter.class,
+                BlackListMaintenancePresenter.MyView.class,
+                BlackListMaintenanceView.class,
+                BlackListMaintenancePresenter.MyProxy.class);
 
-		bindPresenter(CustomerBlackListMaintenancePresenter.class,
-				CustomerBlackListMaintenancePresenter.MyView.class,
-				CustomerBlackListMaintenanceView.class,
-				CustomerBlackListMaintenancePresenter.MyProxy.class);
+        bindPresenter(CustomerBlackListMaintenancePresenter.class,
+                CustomerBlackListMaintenancePresenter.MyView.class,
+                CustomerBlackListMaintenanceView.class,
+                CustomerBlackListMaintenancePresenter.MyProxy.class);
 
-		bindPresenter(FraudCalculatePresenter.class,
-				FraudCalculatePresenter.MyView.class, 
-				FraudCalculateView.class,
-				FraudCalculatePresenter.MyProxy.class);
+        bindPresenter(FraudCalculatePresenter.class,
+                FraudCalculatePresenter.MyView.class,
+                FraudCalculateView.class,
+                FraudCalculatePresenter.MyProxy.class);
 
-		bindPresenter(MigsUploadPresenter.class,
-				MigsUploadPresenter.MyView.class, 
-				MigsUploadView.class,
-				MigsUploadPresenter.MyProxy.class);
+        bindPresenter(MigsUploadPresenter.class,
+                MigsUploadPresenter.MyView.class,
+                MigsUploadView.class,
+                MigsUploadPresenter.MyProxy.class);
 
-		bindPresenter(UncalculatedCreditCardOrderPresenter.class,
-				UncalculatedCreditCardOrderPresenter.MyView.class, 
-				UncalculatedCreditCardOrderView.class,
-				UncalculatedCreditCardOrderPresenter.MyProxy.class);
+        bindPresenter(UncalculatedCreditCardOrderPresenter.class,
+                UncalculatedCreditCardOrderPresenter.MyView.class,
+                UncalculatedCreditCardOrderView.class,
+                UncalculatedCreditCardOrderPresenter.MyProxy.class);
 
-		bindPresenter(InstallmentBCAPresenter.class,
-				InstallmentBCAPresenter.MyView.class, 
-				InstallmentBCAView.class,
-				InstallmentBCAPresenter.MyProxy.class);	
+        bindPresenter(InstallmentBCAPresenter.class,
+                InstallmentBCAPresenter.MyView.class,
+                InstallmentBCAView.class,
+                InstallmentBCAPresenter.MyProxy.class);
 
-		bindPresenter(ReservationOrderManagementPresenter.class,
-				ReservationOrderManagementPresenter.MyView.class, 
-				ReservationOrderManagementView.class,
-				ReservationOrderManagementPresenter.MyProxy.class);
+        bindPresenter(ReservationOrderManagementPresenter.class,
+                ReservationOrderManagementPresenter.MyView.class,
+                ReservationOrderManagementView.class,
+                ReservationOrderManagementPresenter.MyProxy.class);
 
-		bindPresenter(LogisticsDashboardPresenter.class,
-				LogisticsDashboardPresenter.MyView.class,
-				LogisticsDashboardView.class,
-				LogisticsDashboardPresenter.MyProxy.class);
+        bindPresenter(LogisticsDashboardPresenter.class,
+                LogisticsDashboardPresenter.MyView.class,
+                LogisticsDashboardView.class,
+                LogisticsDashboardPresenter.MyProxy.class);
 
-		bindPresenter(DeliveryStatusTrackingPresenter.class,
-				DeliveryStatusTrackingPresenter.MyView.class,
-				DeliveryStatusTrackingView.class,
-				DeliveryStatusTrackingPresenter.MyProxy.class);
+        bindPresenter(DeliveryStatusTrackingPresenter.class,
+                DeliveryStatusTrackingPresenter.MyView.class,
+                DeliveryStatusTrackingView.class,
+                DeliveryStatusTrackingPresenter.MyProxy.class);
 
-		bindPresenter(ActivityReportReconciliationPresenter.class,
-				ActivityReportReconciliationPresenter.MyView.class,
-				ActivityReportReconciliationView.class,
-				ActivityReportReconciliationPresenter.MyProxy.class);
+        bindPresenter(ActivityReportReconciliationPresenter.class,
+                ActivityReportReconciliationPresenter.MyView.class,
+                ActivityReportReconciliationView.class,
+                ActivityReportReconciliationPresenter.MyProxy.class);
 
-		bindPresenter(ProviderManagementPresenter.class,
-				ProviderManagementPresenter.MyView.class,
-				ProviderManagementView.class,
-				ProviderManagementPresenter.MyProxy.class);
+        bindPresenter(ProviderManagementPresenter.class,
+                ProviderManagementPresenter.MyView.class,
+                ProviderManagementView.class,
+                ProviderManagementPresenter.MyProxy.class);
 
-		bindPresenter(InvoiceReconciliationPresenter.class,
-				InvoiceReconciliationPresenter.MyView.class,
-				InvoiceReconciliationView.class,
-				InvoiceReconciliationPresenter.MyProxy.class);
+        bindPresenter(InvoiceReconciliationPresenter.class,
+                InvoiceReconciliationPresenter.MyView.class,
+                InvoiceReconciliationView.class,
+                InvoiceReconciliationPresenter.MyProxy.class);
 
-		bindPresenter(FinanceDashboardPresenter.class,
-				FinanceDashboardPresenter.MyView.class,
-				FinanceDashboardView.class,
-				FinanceDashboardPresenter.MyProxy.class);
+        bindPresenter(FinanceDashboardPresenter.class,
+                FinanceDashboardPresenter.MyView.class,
+                FinanceDashboardView.class,
+                FinanceDashboardPresenter.MyProxy.class);
 
-		bindPresenter(FundInReconciliationPresenter.class,
-				FundInReconciliationPresenter.MyView.class,
-				FundInReconciliationView.class,
-				FundInReconciliationPresenter.MyProxy.class);
+        bindPresenter(FundInReconciliationPresenter.class,
+                FundInReconciliationPresenter.MyView.class,
+                FundInReconciliationView.class,
+                FundInReconciliationPresenter.MyProxy.class);
 
-		bindPresenter(SalesRecordPresenter.class,
-				SalesRecordPresenter.MyView.class, SalesRecordView.class,
-				SalesRecordPresenter.MyProxy.class);
+        bindPresenter(SalesRecordPresenter.class,
+                SalesRecordPresenter.MyView.class, SalesRecordView.class,
+                SalesRecordPresenter.MyProxy.class);
 
-		bindPresenter(PaymentProcessingPresenter.class,
-				PaymentProcessingPresenter.MyView.class,
-				PaymentProcessingView.class,
-				PaymentProcessingPresenter.MyProxy.class);
+        bindPresenter(PaymentProcessingPresenter.class,
+                PaymentProcessingPresenter.MyView.class,
+                PaymentProcessingView.class,
+                PaymentProcessingPresenter.MyProxy.class);
 
-		bindPresenter(JournalPresenter.class, JournalPresenter.MyView.class,
-				JournalView.class, JournalPresenter.MyProxy.class);
+        bindPresenter(JournalPresenter.class, JournalPresenter.MyView.class,
+                JournalView.class, JournalPresenter.MyProxy.class);
 
-		bindPresenter(ManualJournalPresenter.class,
-				ManualJournalPresenter.MyView.class, ManualJournalView.class,
-				ManualJournalPresenter.MyProxy.class);
+        bindPresenter(ManualJournalPresenter.class,
+                ManualJournalPresenter.MyView.class, ManualJournalView.class,
+                ManualJournalPresenter.MyProxy.class);
 
-		bindPresenter(KpiSetupPresenter.class, KpiSetupPresenter.MyView.class,
-				KpiSetupView.class, KpiSetupPresenter.MyProxy.class);
+        bindPresenter(KpiSetupPresenter.class, KpiSetupPresenter.MyView.class,
+                KpiSetupView.class, KpiSetupPresenter.MyProxy.class);
 
-		bindPresenter(KpiDashboardPresenter.class,
-				KpiDashboardPresenter.MyView.class, KpiDashboardView.class,
-				KpiDashboardPresenter.MyProxy.class);
+        bindPresenter(KpiDashboardPresenter.class,
+                KpiDashboardPresenter.MyView.class, KpiDashboardView.class,
+                KpiDashboardPresenter.MyProxy.class);
 
-		bindPresenter(KpiDetailViewerPresenter.class,
-				KpiDetailViewerPresenter.MyView.class,
-				KpiDetailViewerView.class,
-				KpiDetailViewerPresenter.MyProxy.class);
+        bindPresenter(KpiDetailViewerPresenter.class,
+                KpiDetailViewerPresenter.MyView.class,
+                KpiDetailViewerView.class,
+                KpiDetailViewerPresenter.MyProxy.class);
 
-		bindPresenter(RoleProfileUserGroupManagementPresenter.class,
-				RoleProfileUserGroupManagementPresenter.MyView.class,
-				RoleProfileUserGroupManagementView.class,
-				RoleProfileUserGroupManagementPresenter.MyProxy.class);
+        bindPresenter(RoleProfileUserGroupManagementPresenter.class,
+                RoleProfileUserGroupManagementPresenter.MyView.class,
+                RoleProfileUserGroupManagementView.class,
+                RoleProfileUserGroupManagementPresenter.MyProxy.class);
 
-		bindPresenter(ModuleConfigurationPresenter.class,
-				ModuleConfigurationPresenter.MyView.class,
-				ModuleConfigurationView.class,
-				ModuleConfigurationPresenter.MyProxy.class);
+        bindPresenter(ModuleConfigurationPresenter.class,
+                ModuleConfigurationPresenter.MyView.class,
+                ModuleConfigurationView.class,
+                ModuleConfigurationPresenter.MyProxy.class);
 
-		bindPresenter(OrderDataViewerPresenter.class,
-				OrderDataViewerPresenter.MyView.class,
-				OrderDataViewerView.class,
-				OrderDataViewerPresenter.MyProxy.class);
+        bindPresenter(OrderDataViewerPresenter.class,
+                OrderDataViewerPresenter.MyView.class,
+                OrderDataViewerView.class,
+                OrderDataViewerPresenter.MyProxy.class);
 
-		bindPresenter(ReturDataViewerPresenter.class,
-				ReturDataViewerPresenter.MyView.class,
-				ReturDataViewerView.class,
-				ReturDataViewerPresenter.MyProxy.class);
+        bindPresenter(ReturDataViewerPresenter.class,
+                ReturDataViewerPresenter.MyView.class,
+                ReturDataViewerView.class,
+                ReturDataViewerPresenter.MyProxy.class);
 
-		bindPresenter(ReportsLauncherPresenter.class,
-				ReportsLauncherPresenter.MyView.class,
-				ReportsLauncherView.class,
-				ReportsLauncherPresenter.MyProxy.class);
+        bindPresenter(ReportsLauncherPresenter.class,
+                ReportsLauncherPresenter.MyView.class,
+                ReportsLauncherView.class,
+                ReportsLauncherPresenter.MyProxy.class);
 
-		bindPresenter(PromotionPresenter.class,
-				PromotionPresenter.MyView.class,
-				PromotionView.class,
-				PromotionPresenter.MyProxy.class);
+        bindPresenter(PromotionPresenter.class,
+                PromotionPresenter.MyView.class,
+                PromotionView.class,
+                PromotionPresenter.MyProxy.class);
 
-		bindPresenter(PartyMaintenancePresenter.class,
-				PartyMaintenancePresenter.MyView.class,
-				PartyMaintenanceView.class,
-				PartyMaintenancePresenter.MyProxy.class);
+        bindPresenter(PartyMaintenancePresenter.class,
+                PartyMaintenancePresenter.MyView.class,
+                PartyMaintenanceView.class,
+                PartyMaintenancePresenter.MyProxy.class);
 
-		bindPresenter(ExportPresenter.class,
-				ExportPresenter.MyView.class,
-				ExportView.class,
-				ExportPresenter.MyProxy.class);
+        bindPresenter(ExportPresenter.class,
+                ExportPresenter.MyView.class,
+                ExportView.class,
+                ExportPresenter.MyProxy.class);
 
-		bindPresenter(PeriodSetupPresenter.class,
-				PeriodSetupPresenter.MyView.class,
-				PeriodSetupView.class,
-				PeriodSetupPresenter.MyProxy.class);
+        bindPresenter(PeriodSetupPresenter.class,
+                PeriodSetupPresenter.MyView.class,
+                PeriodSetupView.class,
+                PeriodSetupPresenter.MyProxy.class);
 
-		bindPresenter(CoaSetupPresenter.class,
-				CoaSetupPresenter.MyView.class,
-				CoaSetupView.class,
-				CoaSetupPresenter.MyProxy.class);
+        bindPresenter(CoaSetupPresenter.class,
+                CoaSetupPresenter.MyView.class,
+                CoaSetupView.class,
+                CoaSetupPresenter.MyProxy.class);
 
-		bindPresenter(MigsMasterPresenter.class,
-				MigsMasterPresenter.MyView.class,
-				MigsMasterView.class,
-				MigsMasterPresenter.MyProxy.class);
+        bindPresenter(MigsMasterPresenter.class,
+                MigsMasterPresenter.MyView.class,
+                MigsMasterView.class,
+                MigsMasterPresenter.MyProxy.class);
 
-		bindPresenter(FraudCustomerWhitelistPresenter.class,
-				FraudCustomerWhitelistPresenter.MyView.class,
-				FraudCustomerWhitelistView.class,
-				FraudCustomerWhitelistPresenter.MyProxy.class);
+        bindPresenter(FraudCustomerWhitelistPresenter.class,
+                FraudCustomerWhitelistPresenter.MyView.class,
+                FraudCustomerWhitelistView.class,
+                FraudCustomerWhitelistPresenter.MyProxy.class);
 
-		bindPresenter(InventoryPresenter.class, 
-				InventoryPresenter.MyView.class,
-				InventoryView.class,
-				InventoryPresenter.MyProxy.class);
+        bindPresenter(InventoryPresenter.class,
+                InventoryPresenter.MyView.class,
+                InventoryView.class,
+                InventoryPresenter.MyProxy.class);
 
-		bindPresenter(ExportReportPresenter.class, 
-				ExportReportPresenter.MyView.class,
-				ExportReportView.class,
-				ExportReportPresenter.MyProxy.class);	
+        bindPresenter(ExportReportPresenter.class,
+                ExportReportPresenter.MyView.class,
+                ExportReportView.class,
+                ExportReportPresenter.MyProxy.class);
 
-		bindPresenter(FraudParameterRule31Presenter.class, 
-				FraudParameterRule31Presenter.MyView.class,
-				FraudParameterRule31View.class,
-				FraudParameterRule31Presenter.MyProxy.class);	
+        bindPresenter(FraudParameterRule31Presenter.class,
+                FraudParameterRule31Presenter.MyView.class,
+                FraudParameterRule31View.class,
+                FraudParameterRule31Presenter.MyProxy.class);
 
-		bindPresenter(FinSalesSettlementReportPresenter.class, 
-				FinSalesSettlementReportPresenter.MyView.class,
-				FinSalesSettlementReportView.class,
-				FinSalesSettlementReportPresenter.MyProxy.class);
-					
-		bindPresenter(WarehouseListFilterPresenter.class,
-				WarehouseListFilterPresenter.MyView.class,
-				WarehouseListFilterView.class,
-				WarehouseListFilterPresenter.MyProxy.class);
+        bindPresenter(FraudParameterRule35Presenter.class,
+                FraudParameterRule35Presenter.MyView.class,
+                FraudParameterRule35View.class,
+                FraudParameterRule35Presenter.MyProxy.class);
 
-		bindPresenter(WarehouseAddWithApprovalPresenter.class,
-				WarehouseAddWithApprovalPresenter.MyView.class,
-				WarehouseAddWithApprovalView.class,
-				WarehouseAddWithApprovalPresenter.MyProxy.class);
-		
-		bindPresenter(WarehouseEditWithApprovalPresenter.class,
-				WarehouseEditWithApprovalPresenter.MyView.class,
-				WarehouseEditWithApprovalView.class,
-				WarehouseEditWithApprovalPresenter.MyProxy.class);
-		
-		bindPresenter(WarehouseNonActiveWithApprovalPresenter.class,
-				WarehouseNonActiveWithApprovalPresenter.MyView.class,
-				WarehouseNonActiveWithApprovalView.class,
-				WarehouseNonActiveWithApprovalPresenter.MyProxy.class);
-		
-		bindPresenter(ShelfListFilterPresenter.class,
-				ShelfListFilterPresenter.MyView.class,
-				ShelfListFilterView.class,
-				ShelfListFilterPresenter.MyProxy.class);
-		
-		bindPresenter(ShelfAddWithApprovalPresenter.class,
-				ShelfAddWithApprovalPresenter.MyView.class,
-				ShelfAddWithApprovalView.class,
-				ShelfAddWithApprovalPresenter.MyProxy.class);
-		
-		bindPresenter(ShelfEditWithApprovalPresenter.class,
-				ShelfEditWithApprovalPresenter.MyView.class,
-				ShelfEditWithApprovalView.class,
-				ShelfEditWithApprovalPresenter.MyProxy.class);
-		
-		bindPresenter(ShelfNonActiveWithApprovalPresenter.class,
-				ShelfNonActiveWithApprovalPresenter.MyView.class,
-				ShelfNonActiveWithApprovalView.class,
-				ShelfNonActiveWithApprovalPresenter.MyProxy.class);
-		
-		bindPresenter(CurrencyManagementPresenter.class,
-				CurrencyManagementPresenter.MyView.class,
-				CurrencyManagementView.class,
-				CurrencyManagementPresenter.MyProxy.class);
-		
-		bindPresenter(ASNListPresenter.class,
-				ASNListPresenter.MyView.class,
-				ASNListView.class,
-				ASNListPresenter.MyProxy.class);
-		
-		bindPresenter(GRNListPresenter.class,
-				GRNListPresenter.MyView.class,
-				GRNListView.class,
-				GRNListPresenter.MyProxy.class);
-		
-		bindPresenter(GRNCreatePresenter.class,
-				GRNCreatePresenter.MyView.class,
-				GRNCreateView.class,
-				GRNCreatePresenter.MyProxy.class);		
-	}
+        bindPresenter(FinSalesSettlementReportPresenter.class,
+                FinSalesSettlementReportPresenter.MyView.class,
+                FinSalesSettlementReportView.class,
+                FinSalesSettlementReportPresenter.MyProxy.class);
+
+        bindPresenter(WarehouseListFilterPresenter.class,
+                WarehouseListFilterPresenter.MyView.class,
+                WarehouseListFilterView.class,
+                WarehouseListFilterPresenter.MyProxy.class);
+
+        bindPresenter(WarehouseAddWithApprovalPresenter.class,
+                WarehouseAddWithApprovalPresenter.MyView.class,
+                WarehouseAddWithApprovalView.class,
+                WarehouseAddWithApprovalPresenter.MyProxy.class);
+
+        bindPresenter(WarehouseEditWithApprovalPresenter.class,
+                WarehouseEditWithApprovalPresenter.MyView.class,
+                WarehouseEditWithApprovalView.class,
+                WarehouseEditWithApprovalPresenter.MyProxy.class);
+
+        bindPresenter(WarehouseNonActiveWithApprovalPresenter.class,
+                WarehouseNonActiveWithApprovalPresenter.MyView.class,
+                WarehouseNonActiveWithApprovalView.class,
+                WarehouseNonActiveWithApprovalPresenter.MyProxy.class);
+
+        bindPresenter(ShelfListFilterPresenter.class,
+                ShelfListFilterPresenter.MyView.class,
+                ShelfListFilterView.class,
+                ShelfListFilterPresenter.MyProxy.class);
+
+        bindPresenter(ShelfAddWithApprovalPresenter.class,
+                ShelfAddWithApprovalPresenter.MyView.class,
+                ShelfAddWithApprovalView.class,
+                ShelfAddWithApprovalPresenter.MyProxy.class);
+
+        bindPresenter(ShelfEditWithApprovalPresenter.class,
+                ShelfEditWithApprovalPresenter.MyView.class,
+                ShelfEditWithApprovalView.class,
+                ShelfEditWithApprovalPresenter.MyProxy.class);
+
+        bindPresenter(ShelfNonActiveWithApprovalPresenter.class,
+                ShelfNonActiveWithApprovalPresenter.MyView.class,
+                ShelfNonActiveWithApprovalView.class,
+                ShelfNonActiveWithApprovalPresenter.MyProxy.class);
+
+        bindPresenter(CurrencyManagementPresenter.class,
+                CurrencyManagementPresenter.MyView.class,
+                CurrencyManagementView.class,
+                CurrencyManagementPresenter.MyProxy.class);
+
+        bindPresenter(ASNListPresenter.class,
+                ASNListPresenter.MyView.class,
+                ASNListView.class,
+                ASNListPresenter.MyProxy.class);
+
+        bindPresenter(GRNListPresenter.class,
+                GRNListPresenter.MyView.class,
+                GRNListView.class,
+                GRNListPresenter.MyProxy.class);
+
+        bindPresenter(GRNCreatePresenter.class,
+                GRNCreatePresenter.MyView.class,
+                GRNCreateView.class,
+                GRNCreatePresenter.MyProxy.class);
+
+        bindPresenter(PickingListPresenter.class,
+                PickingListPresenter.MyView.class,
+                PickingListView.class,
+                PickingListPresenter.MyProxy.class);
+
+        bindPresenter(PutawayCreatePresenter.class,
+                PutawayCreatePresenter.MyView.class,
+                PutawayCreateView.class,
+                PutawayCreatePresenter.MyProxy.class);
+
+        bindPresenter(PutawayInputPresenter.class,
+                PutawayInputPresenter.MyView.class,
+                PutawayInputView.class,
+                PutawayInputPresenter.MyProxy.class);
+
+        bindPresenter(GoodIssuedNotePresenter.class,
+                GoodIssuedNotePresenter.MyView.class,
+                GoodIssuedNoteView.class,
+                GoodIssuedNotePresenter.MyProxy.class);
+
+        bindPresenter(PackingListPresenter.class,
+                PackingListPresenter.MyView.class,
+                PackingListView.class,
+                PackingListPresenter.MyProxy.class);
+
+//        bindPresenter(OpnamePresenter.class,
+//                OpnamePresenter.MyView.class,
+//                OpnameView.class,
+//                OpnamePresenter.MyProxy.class);
+    }
 }
