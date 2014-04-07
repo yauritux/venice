@@ -147,7 +147,7 @@ public class PickingListExportServlet extends HttpServlet {
 				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Qty"));
 					   
 				//set style for header
-				for(int i=startCol; i<=startCol+54; i++){
+				for(int i=startCol; i<=startCol+5; i++){
 					HSSFCell cell = headerRow.getCell(i);
 					cell.setCellStyle(headerCellstyle);
 				}    
