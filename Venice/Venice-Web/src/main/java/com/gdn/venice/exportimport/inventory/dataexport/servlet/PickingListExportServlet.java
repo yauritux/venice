@@ -167,6 +167,7 @@ public class PickingListExportServlet extends HttpServlet {
 					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
 					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getStockType().name()));	
 					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSupplier().getName()));
+					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(Integer.toString(pl.getWarehouseItem().getStock())));
 					
 					//set style for list
 					for(int l=startCol; l<=startCol+5; l++){
