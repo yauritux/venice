@@ -1,4 +1,4 @@
-package com.gdn.venice.facade.callback;
+package com.gdn.venice.dto;
 
 public class CommissionTypeTemp {
 	String status;

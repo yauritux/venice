@@ -65,7 +65,8 @@ public class FetchASNItemDataCommand implements RafDsCommand {
     	                    map.put(DataNameTokens.INV_POCFF_ITEMHEIGHT, String.valueOf(item.getItem().getHeight()));
     	                    map.put(DataNameTokens.INV_POCFF_VOLUME, String.valueOf(item.getItem().getLength()*item.getItem().getWidth()*item.getItem().getHeight()));
     	                    map.put(DataNameTokens.INV_POCFF_ITEMWEIGHT, String.valueOf(item.getItem().getWeight()));
-    	                    map.put(DataNameTokens.INV_POCFF_QTYGRN, Integer.toString(asnItem.getGrnQuantity()));
+    	                    map.put(DataNameTokens.INV_POCFF_QTYGRN, Integer.toString(asnItem.getGrnQuantity())); 
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMID, item.getItem().getId().toString());
     	                    
     	                    dataList.add(map);
                     	}else{
@@ -90,6 +91,7 @@ public class FetchASNItemDataCommand implements RafDsCommand {
     	                    map.put(DataNameTokens.INV_POCFF_VOLUME, String.valueOf(item.getItem().getLength()*item.getItem().getWidth()*item.getItem().getHeight()));
     	                    map.put(DataNameTokens.INV_POCFF_ITEMWEIGHT, String.valueOf(item.getItem().getWeight()));
     	                    map.put(DataNameTokens.INV_POCFF_QTYGRN, Integer.toString(asnItem.getGrnQuantity()));
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMID, item.getItem().getId().toString());
     	                    
     	                    dataList.add(map);
                     	}else{

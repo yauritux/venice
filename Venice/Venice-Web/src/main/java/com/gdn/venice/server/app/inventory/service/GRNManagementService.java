@@ -7,13 +7,13 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -25,9 +25,11 @@ import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.AdvanceShipNoticeItem;
 import com.gdn.inventory.exchange.entity.Attribute;
 import com.gdn.inventory.exchange.entity.GrnRequest;
+import com.gdn.inventory.exchange.entity.Item;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNote;
 import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNoteItem;
+import com.gdn.inventory.exchange.type.StockType;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -61,14 +63,13 @@ public class GRNManagementService{
         _log.info("url: "+url);
     	
         if (request.getCriteria() != null) {
-        	_log.debug("criteria not null");
             Map<String, Object> searchMap = new HashMap<String, Object>();
             for (JPQLSimpleQueryCriteria criteria:request.getCriteria().getSimpleCriteria()) {
             	_log.debug("adding criteria:"+criteria.getFieldName()+", "+criteria.getValue());
                 searchMap.put(criteria.getFieldName(), criteria.getValue());
             }
             String json = mapper.writeValueAsString(searchMap);
-            _log.debug("json: "+json);
+            _log.info("json: "+json);
             httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
             httpPost.setRequestHeader("Content-Type", "application/json");
         } else{
@@ -146,10 +147,10 @@ public class GRNManagementService{
 	
 	public ResultWrapper<GoodReceivedNote> saveGrn(String username, GoodReceivedNote grn, List<GoodReceivedNoteItem> itemList) 
 			throws JsonGenerationException, JsonMappingException, IOException {
-		System.out.println("saveGrn");
+		_log.info("saveGrn");
 		String url=InventoryUtil.getStockholmProperties().getProperty("address")
 				+ "goodReceivedNote/addGRN?username=" + username;
-		System.out.println("url: "+url);
+		_log.info("url: "+url);
 		PostMethod httpPost = new PostMethod(url);
 		
 		GoodReceivedNoteItem[] item = itemList.toArray(new GoodReceivedNoteItem[0]);
@@ -159,13 +160,13 @@ public class GRNManagementService{
 		grnRequest.setGrnItem(item);
 		
 		String json = mapper.writeValueAsString(grnRequest);
-		System.out.println("json: "+json);
+		_log.info("json: "+json);
 		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
 
 		httpPost.setRequestHeader("Content-Type", "application/json");
 
 		int httpCode = httpClient.executeMethod(httpPost);
-		System.out.println("response code: "+httpCode);
+		_log.info("response code: "+httpCode);
 		if (httpCode == HttpStatus.SC_OK) {
 			InputStream is = httpPost.getResponseBodyAsStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -174,7 +175,7 @@ public class GRNManagementService{
 				sb.append(line);
 			}
 			is.close();
-			System.out.println(sb.toString());
+			_log.debug(sb.toString());
 			return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<GoodReceivedNote>>() {});
 		} else {
 			return null;
@@ -231,11 +232,11 @@ public class GRNManagementService{
         }
 	}
 	
-	public List<Attribute> getAttributeDataList(String itemId) throws HttpException, IOException{
-		_log.info("getAttributeDataList");
+	public List<Attribute> getAttributeDataListByWarehouseItem(String warehouseItemId) throws HttpException, IOException{
+		_log.info("getAttributeDataListByWarehouseItem");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "attribute/getAttributeByItem?itemId=" +itemId;
+                + "attribute/getAttributeByItem?itemId=" +warehouseItemId;
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
     	        
@@ -257,15 +258,15 @@ public class GRNManagementService{
 	}
 	
 	public ResultWrapper<GoodReceivedNoteItem> findItemByGRNItemId(String grnItemId) throws HttpException, IOException{
-		System.out.println("findItemByGRNItemId");
+		_log.info("findItemByGRNItemId");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "goodReceivedNote/findItemByGRNItemId?grnItemId=" +grnItemId;
         PostMethod httpPost = new PostMethod(url);
-        System.out.println("url: "+url);
+        _log.info("url: "+url);
     	        
         int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: "+httpCode);
+        _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -273,7 +274,7 @@ public class GRNManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            System.out.println(sb.toString());
+            _log.debug(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<GoodReceivedNoteItem>>() {});
         } else {
@@ -281,74 +282,86 @@ public class GRNManagementService{
         }
 	}
 	
-	public Boolean addEditItemAttribute(String username, Attribute attribute) throws JsonGenerationException, JsonMappingException, IOException{
-		_log.info("addEditItemAttribute");
-		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "attribute/saveOrUpdate?username=" +username;
-		_log.info("url: "+url);
-		HttpClient client = new HttpClient();
-		PostMethod request = new PostMethod(url);
-		int httpCode = 0;
-		
-		ObjectMapper mapper = new ObjectMapper();
+	public ResultWrapper<List<Attribute>> saveAttributesToCache(String username, String asnItemId, Set<String> attribute) throws JsonGenerationException, JsonMappingException, IOException {
+		_log.info("saveAttributesToCache");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "goodReceivedNote/saveAttributteToCache?username=" + username + "&asnItemId=" + asnItemId;
+        _log.info("url: "+url);
+        PostMethod httpPost = new PostMethod(url);
         String json = mapper.writeValueAsString(attribute);
-        request.setRequestHeader("Content-type", "application/json");
-        request.setRequestEntity(new StringRequestEntity(json, "application/json", "UTF-8"));
+        _log.info("json: "+json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+        httpPost.setRequestHeader("Content-Type", "application/json");
 
-        BufferedReader br = null;
-        
-		try {			
-			httpCode = client.executeMethod(request);
-			_log.info("response code: "+httpCode);
-			 if (httpCode != 0) {
-				if (httpCode == HttpStatus.SC_OK) {
-			
-	                br = new BufferedReader(new InputStreamReader(request.getResponseBodyAsStream()));
-	                
-	                String inputLine;
-	                StringBuffer sb = new StringBuffer();
-	                
-	                while ((inputLine = br.readLine()) != null) {
-	                    sb.append(inputLine);
-	                }	                
-	                _log.debug(sb.toString());	
-				}else {
-					return null;
-				}
-			 }
-		}catch (Exception e) {
-			_log.error("exception when call Stockholm service", e);
-			return false;
-		}finally{
-			request.releaseConnection();
-			try {
-				if (br != null) br.close();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		return true;
-	}
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            _log.debug(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<Attribute>>>() {
+            });
+        } else {
+            return null;
+        }
+    }
 	
-	public Boolean deleteItemAttribute(String username, Attribute attribute) throws JsonGenerationException, JsonMappingException, IOException{
-		_log.info("deleteItemAttribute");
+	public Item findItemByItemId(String itemId) throws HttpException, IOException{
+		_log.info("findItemByItemId");
+		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "attribute/delete?username=" +username;
+                + "item/findById?itemId=" +itemId;
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
-        
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(attribute);
-        httpPost.setRequestHeader("Content-type", "application/json");
-        httpPost.setRequestEntity(new StringRequestEntity(json, "application/json", "UTF-8"));
     	        
         int httpCode = httpClient.executeMethod(httpPost);
         _log.info("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
-            return true;
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<Item>() {});
         } else {
-        	return false;
+        	return null;
+        }
+	}
+	
+	public WarehouseItem findWarehouseItem(String itemId, String warehouseId, String supplierId, StockType stockType) throws HttpException, IOException{
+		_log.info("findWarehouseItem");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "warehouseItem/getWarehouseItemByItemId?itemId=" +itemId+"&warehouseId="+warehouseId+"&supplierId="+supplierId;
+        PostMethod httpPost = new PostMethod(url);
+        _log.info("url: "+url);
+        String json = mapper.writeValueAsString(stockType);
+        _log.info("json: "+json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+        httpPost.setRequestHeader("Content-Type", "application/json");
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        _log.info("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            _log.debug(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<WarehouseItem>() {});
+        } else {
+        	return null;
         }
 	}
 }

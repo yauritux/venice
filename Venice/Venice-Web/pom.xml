@@ -23,7 +23,7 @@
     <properties>
         <lib.dir>${project.basedir}/src/main/webapp/WEB-INF/lib</lib.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <inventory-exchange-model.version>0.1.4</inventory-exchange-model.version>
+        <inventory-exchange-model.version>0.1.5</inventory-exchange-model.version>
     </properties>
 
     <dependencies>

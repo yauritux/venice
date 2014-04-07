@@ -9,13 +9,15 @@ import org.apache.log4j.Logger;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.AdvanceShipNoticeItem;
 import com.gdn.inventory.exchange.entity.Attribute;
+import com.gdn.inventory.exchange.entity.Item;
+import com.gdn.inventory.exchange.entity.Supplier;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
-import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentApprovalItem;
 import com.gdn.inventory.exchange.entity.module.inbound.ConsignmentFinalItem;
 import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNoteItem;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrderItem;
-import com.gdn.inventory.exchange.entity.module.inbound.PurchaseRequisitionItem;
 import com.gdn.inventory.exchange.type.ASNReferenceType;
+import com.gdn.inventory.exchange.type.ConsignmentType;
+import com.gdn.inventory.exchange.type.StockType;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.ASNManagementService;
@@ -34,6 +36,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
     GRNManagementService grnService;
     ASNManagementService asnService;
     protected static Logger _log = null;
+    String grnItemId;
     
     public FetchItemAttributeDataCommand(RafDsRequest request) {
         this.request = request;
@@ -50,63 +53,75 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         	grnService = new GRNManagementService();
         	asnService = new ASNManagementService();
         	
+        	WarehouseItem whi = new WarehouseItem();
+        	
         	String itemIdParam = null;
         	if(request.getParams().get(DataNameTokens.INV_ASN_ITEM_ID)!=null){
-        		_log.info("item id from asn item");
+        		System.out.println("item id from asn item");
         		itemIdParam = request.getParams().get(DataNameTokens.INV_ASN_ITEM_ID);
         	}else if(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID)!=null){    
-        		_log.info("item id from grn item");
+        		System.out.println("item id from grn item");
         		ResultWrapper<GoodReceivedNoteItem> grnItemWrapper = grnService.findItemByGRNItemId(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID));
         		
         		if(grnItemWrapper.isSuccess()){
         			itemIdParam = grnItemWrapper.getContent().getAdvanceShipNoticeItem().getId().toString();
+                    whi.setWarehouse(grnItemWrapper.getContent().getGoodReceivedNote().getReceivedWarehouse());
         		}
         	}
         	
         	ResultWrapper<AdvanceShipNoticeItem> asnItemWrapper = asnService.getSingleASNItemData(itemIdParam);
-        	Long itemId = null;
-        	
+        	String itemId = request.getParams().get(DataNameTokens.INV_POCFF_ITEMID);
+        	System.out.println("itemId: "+itemId);
         	if(asnItemWrapper.isSuccess()){
         		AdvanceShipNoticeItem asnItem = asnItemWrapper.getContent();       		
 		  
+        		Item item = new Item();        
+            	item=grnService.findItemByItemId(itemId);
+            	System.out.println("item found");
+            	
+            	whi.setItem(item);
+            	
+            	Supplier supplier = new Supplier();
             	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
-            		_log.info("reff type: purchase order");                		                		
+            		System.out.println("reff type: purchase order");                		                		
             		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
                 	if(poItemWrapper.isSuccess()){
-                		PurchaseRequisitionItem item = poItemWrapper.getContent().getPurchaseRequisitionItem();
-                		_log.debug("PO item found, id:"+item.getItem().getId());    
-                		itemId=item.getItem().getId();
+                		supplier = poItemWrapper.getContent().getPurchaseOrder().getSupplier();
                 	}else{
-                		_log.error("PO item not found");
+                		System.out.println("Supplier PO not found");
                 	}   
+
+                    whi.setStockType(StockType.TRADING);
             	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
-            		_log.info("reff type: consignment");
+            		System.out.println("reff type: consignment");
             		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
                 	if(cffItemWrapper.isSuccess()){
-                		ConsignmentApprovalItem item = cffItemWrapper.getContent().getConsignmentApprovalItem();
-                		_log.debug("CFF item found, id:"+item.getItem().getId());    
-                		itemId=item.getItem().getId();
+                		supplier = cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier();   
                 	}else{
-                		_log.error("CFF item not found");
+                		System.out.println("Supplier CFF not found");
                 	} 
-            	}
-            	
-            	if(itemId!=null){
-            		_log.debug("item found, id:"+itemId); 
-            		List<WarehouseItem> whItemList = grnService.getWarehouseItemDataList(itemId.toString());
-            		for(WarehouseItem whItem : whItemList){
-            			List<Attribute> attList = grnService.getAttributeDataList(whItem.getId().toString());
-            			
-            			for(Attribute att : attList){            				
-            				_log.debug("attribute found, id:"+att.getId()); 
-            				HashMap<String, String> map = new HashMap<String, String>();
-            				map.put(DataNameTokens.INV_ITEM_ATTRIBUTE_ID, att.getId().toString());            				
-            				map.put(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME, att.getName());
-            				map.put(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE, att.getValue());         			 
-                			dataList.add(map);
-            			}
-            		}
-            	}
+                	
+               		if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.COMMISSION.name())){
+                       	whi.setStockType(StockType.CONSIGMENT_COMMISION);
+               		}else if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.TRADING.name())){
+                       	whi.setStockType(StockType.CONSIGNMENT_TRADING);
+               		}
+            	}            	                
+
+                whi.setSupplier(supplier);
+                
+        		WarehouseItem whItem = grnService.findWarehouseItem(itemId, whi.getWarehouse().getId().toString(), whi.getSupplier().getId().toString(), whi.getStockType());        		
+        		
+        		if(whItem!=null){
+        			System.out.println("warehouseItem found");
+        			List<Attribute> attList = grnService.getAttributeDataListByWarehouseItem(whItem.getId().toString());
+        			System.out.println("attribute found: "+attList.size());
+        			for(Attribute att : attList){    
+        				HashMap<String, String> map = new HashMap<String, String>();
+//        				        				          				        				         				 
+            			dataList.add(map);
+        			}
+        		}            	
         	}     		        		
 
 	        rafDsResponse.setStatus(0);

@@ -42,10 +42,18 @@ public class PickingListExportServlet extends HttpServlet {
 	public PickingListExportServlet() {
 		super();
 		Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-		_log = loggerFactory.getLog4JLogger("com.gdn.venice.logistics.inventory.PickingListExportServlet");
+		_log = loggerFactory.getLog4JLogger("com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListExportServlet");
 	}
 	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		service(request, response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		service(request, response);
+	}
+	
+	protected void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("PickingListExportServlet");
 		
 		PickingListManagementService pickingListService = new PickingListManagementService();
@@ -131,11 +139,11 @@ public class PickingListExportServlet extends HttpServlet {
 				int startCol=0;
 				
 				HSSFRow headerRow = sheet.createRow((short) startRow);
-				headerRow.createCell(startCol).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
-				headerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Item SKU Name"));
-				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Type"));
-				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Merchant")); 
-				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("Qty"));			    
+				headerRow.createCell(startCol).setCellValue(new HSSFRichTextString("No"));
+				headerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
+				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Item SKU Name"));
+				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Qty"));
+				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("UoM"));
 					   
 				//set style for header
 				for(int i=startCol; i<=startCol+4; i++){
@@ -153,11 +161,11 @@ public class PickingListExportServlet extends HttpServlet {
 					row = sheet.createRow(startRow);
 					
 					_log.debug("processing row: "+i+" warehouseItemId: "+pl.getWarehouseItem().getId() +", warehouseItemCode: "+pl.getWarehouseItem().getCode());
-					HSSFCell cell = row.createCell(startCol);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getCode()));
-					cell = row.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
-					cell = row.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getStockType().name()));	 	 
-					cell = row.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSupplier().getName()));
-					cell = row.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSumSO().toString()));	 
+					HSSFCell cell = row.createCell(startCol);cell.setCellValue(new HSSFRichTextString(Integer.toString(i+1)));
+					cell = row.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getCode()));
+					cell = row.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
+					cell = row.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSumSO().toString()));	
+					cell = row.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getItemUnit()));
 					
 					//set style for list
 					for(int l=startCol; l<=startCol+4; l++){

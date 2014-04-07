@@ -274,6 +274,56 @@ public class PutawayManagementService{
 		} else {
 			return null;
 		}
-	}	
+	}
+	
+	public ResultWrapper<GoodReceivedNoteItem> getGRNItemDataListById(String grnItemId) throws HttpException, IOException{
+		System.out.println("getGRNItemDataListById");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "goodReceivedNote/findItemByGRNItemId?grnItemId=" +grnItemId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<GoodReceivedNoteItem>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public Putaway getPutawayByGrnId(String grnId) throws HttpException, IOException{
+		System.out.println("getPutawayByGrnId");
+		
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "putaway/getPutawayByGrnId?grnId=" +grnId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+    	        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<Putaway>() {});
+        } else {
+        	return null;
+        }
+	}
 }
 

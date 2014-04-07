@@ -68,6 +68,7 @@ public class FetchGRNItemDataCommand implements RafDsCommand {
     	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
     	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(poItemWrapper.getContent().getQuantity()));
     	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMID, Long.toString(item.getItem().getId()));
     	                        	                    
     	                    dataList.add(map);
                     	}else{
@@ -84,6 +85,7 @@ public class FetchGRNItemDataCommand implements RafDsCommand {
     	                    map.put(DataNameTokens.INV_POCFF_ITEMDESC, item.getItem().getDescription());
     	                    map.put(DataNameTokens.INV_POCFF_QTY, Integer.toString(cffItemWrapper.getContent().getQuantity()));
     	                    map.put(DataNameTokens.INV_POCFF_ITEMUNIT, item.getItem().getItemUnit());
+    	                    map.put(DataNameTokens.INV_POCFF_ITEMID, Long.toString(item.getItem().getId()));
     	                        	                    
     	                    dataList.add(map);
                     	}else{

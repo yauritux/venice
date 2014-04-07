@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.venice.dto.CommissionTypeTemp;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.persistence.VenSettlementRecord;
