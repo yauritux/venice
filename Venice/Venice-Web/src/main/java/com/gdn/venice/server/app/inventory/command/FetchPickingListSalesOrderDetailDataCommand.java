@@ -41,7 +41,7 @@ public class FetchPickingListSalesOrderDetailDataCommand implements RafDsCommand
         try {
         		pickingListService = new PickingListManagementService();
         		ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);
-                if(detailWrapper.isSuccess()){
+                if(detailWrapper!=null && detailWrapper.isSuccess()){
                 	PickingListDetail detail = detailWrapper.getContent();
                 	if(detail.getSalesOrder()!=null){
                 		List<SalesOrder> list = detail.getSalesOrder();

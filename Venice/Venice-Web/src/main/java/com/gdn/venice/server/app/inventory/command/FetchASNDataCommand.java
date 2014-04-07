@@ -43,7 +43,7 @@ public class FetchASNDataCommand implements RafDsCommand {
         try {
         		asnService = new ASNManagementService();
                 InventoryPagingWrapper<AdvanceShipNotice> asnWrapper = asnService.getASNDataList(request);
-                if(asnWrapper.isSuccess()){
+                if(asnWrapper!=null && asnWrapper.isSuccess()){
 	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	 		        
 	                for(AdvanceShipNotice asn : asnWrapper.getContent()){
@@ -56,7 +56,7 @@ public class FetchASNDataCommand implements RafDsCommand {
 	                    String supplierCode="", supplierName="";
 	                    if(asn.getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
 	                    	InventoryPagingWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber().toString());
-	                    	if(poWrapper!=null){
+	                    	if(poWrapper!=null && poWrapper.isSuccess()){
 	                    		PurchaseOrder po = poWrapper.getContent().get(0);
 	                    		supplierCode = po.getSupplier().getCode();
 	                    		supplierName = po.getSupplier().getName();
@@ -65,7 +65,7 @@ public class FetchASNDataCommand implements RafDsCommand {
 	                    	}                    	
 	                    }else if(asn.getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
 	                    	InventoryPagingWrapper<ConsignmentFinalForm> cffWrapper = asnService.getCFFData(request, asn.getReferenceNumber());
-	                    	if(cffWrapper!=null){
+	                    	if(cffWrapper!=null && cffWrapper.isSuccess()){
 	                    		ConsignmentFinalForm cff = cffWrapper.getContent().get(0);
 	                    		supplierCode = cff.getConsignmentApprovalForm().getSupplier().getCode();
 	                    		supplierName = cff.getConsignmentApprovalForm().getSupplier().getName();

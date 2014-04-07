@@ -98,7 +98,7 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 				if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
             		System.out.println("reff type: purchase order");                		                		
             		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
-                	if(poItemWrapper.isSuccess()){
+                	if(poItemWrapper!=null && poItemWrapper.isSuccess()){
                 		PurchaseRequisitionItem prItem = poItemWrapper.getContent().getPurchaseRequisitionItem();
                 		System.out.println("PO item found, id:"+prItem.getItem().getId());                    		                   				             
                 		itemId = prItem.getItem().getId();      	                    	                    
@@ -108,7 +108,7 @@ public class SavePutawayDataCommand implements RafRpcCommand {
             	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
             		System.out.println("reff type: consignment");
             		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
-                	if(cffItemWrapper.isSuccess()){
+                	if(cffItemWrapper!=null && cffItemWrapper.isSuccess()){
                 		ConsignmentApprovalItem cafItem = cffItemWrapper.getContent().getConsignmentApprovalItem();
                 		System.out.println("CFF item found, id:"+cafItem.getItem().getId());                    		                   				             
                 		itemId = cafItem.getItem().getId();                                   	                        	             
@@ -137,7 +137,7 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 									
 			System.out.println("item size: "+itemList.size());			
 			putawayWrapper = putawayService.savePutaway(username, itemList);
-			if(!putawayWrapper.isSuccess()){
+			if(putawayWrapper==null || !putawayWrapper.isSuccess()){
 				return putawayWrapper.getError();
 			}
 		} catch (Exception e) {

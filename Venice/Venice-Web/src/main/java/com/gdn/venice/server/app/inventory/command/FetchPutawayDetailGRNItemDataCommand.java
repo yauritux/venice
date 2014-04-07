@@ -62,7 +62,7 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
         		System.out.println("fetch grn item for input putaway location");
         		grnItemWrapper = putawayService.getGRNItemDataListByGrnId(request.getParams().get(DataNameTokens.INV_PUTAWAY_GRN_ID));
         	}
-        	if(grnItemWrapper.isSuccess()){                 	
+        	if(grnItemWrapper!=null && grnItemWrapper.isSuccess()){                 	
 	    		asnService = new ASNManagementService(); 
             	for(GoodReceivedNoteItem grnItem : grnItemWrapper.getContent()){  
             		
@@ -74,7 +74,7 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
 	            	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
                 		_log.info("reff type: purchase order");                		                		
                 		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
-                    	if(poItemWrapper.isSuccess()){
+                    	if(poItemWrapper!=null && poItemWrapper.isSuccess()){
                     		PurchaseRequisitionItem prItem = poItemWrapper.getContent().getPurchaseRequisitionItem();
                     		_log.debug("PO item found, code:"+prItem.getItem().getCode());    
                     		                   				             
@@ -109,7 +109,7 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
                 	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
                 		_log.info("reff type: consignment");
                 		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
-                    	if(cffItemWrapper.isSuccess()){
+                    	if(cffItemWrapper!=null && cffItemWrapper.isSuccess()){
                     		ConsignmentApprovalItem cafItem = cffItemWrapper.getContent().getConsignmentApprovalItem();
                     		_log.debug("CFF item found, code:"+cafItem.getItem().getCode());    
                     		                   				             

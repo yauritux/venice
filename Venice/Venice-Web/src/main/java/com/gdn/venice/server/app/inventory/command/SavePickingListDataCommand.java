@@ -182,7 +182,7 @@ public class SavePickingListDataCommand implements RafRpcCommand {
 			
 			pldWrapper = pickingListService.submitPickingList(username, pld);
 			
-			if(!pldWrapper.isSuccess()){
+			if(pldWrapper==null || !pldWrapper.isSuccess()){
 				return pldWrapper.getError();
 			}
 		} catch (Exception e) {

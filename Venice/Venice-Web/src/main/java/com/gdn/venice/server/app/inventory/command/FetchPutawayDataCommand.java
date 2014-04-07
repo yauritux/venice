@@ -45,7 +45,7 @@ public class FetchPutawayDataCommand implements RafDsCommand {
         	putawayService = new PutawayManagementService();
         	
         	InventoryPagingWrapper<Putaway> putawayWrapper = putawayService.getPutawayListByWarehouseId(request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
-        	if(putawayWrapper.isSuccess()){       
+        	if(putawayWrapper!=null && putawayWrapper.isSuccess()){       
         		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         		for(Putaway putaway : putawayWrapper.getContent()){
 					HashMap<String, String> map = new HashMap<String, String>(); 

@@ -40,7 +40,7 @@ public class FetchPickingListItemDetailDataCommand implements RafDsCommand {
         try {
         		pickingListService = new PickingListManagementService();
         		ResultWrapper<PickingListDetail> detailWrapper = pickingListService.getPickingListDetail(request);
-                if(detailWrapper.isSuccess()){
+                if(detailWrapper!=null && detailWrapper.isSuccess()){
                 	PickingListDetail detail = detailWrapper.getContent();
 	                HashMap<String, String> map = new HashMap<String, String>();
 	                map.put(DataNameTokens.INV_PICKINGLIST_ITEMID, detail.getItem().getId().toString());
@@ -50,7 +50,7 @@ public class FetchPickingListItemDetailDataCommand implements RafDsCommand {
 	                ResultWrapper<WarehouseItem> warehouseItemWrapper = pickingListService.getWarehouseItem(request);
 	                
 	                String stockType="", merchant="";
-	                if(warehouseItemWrapper.isSuccess()){
+	                if(warehouseItemWrapper!=null && warehouseItemWrapper.isSuccess()){
 	                	stockType = warehouseItemWrapper.getContent().getStockType().name();
 	                	merchant = warehouseItemWrapper.getContent().getSupplier().getName();
 	                }

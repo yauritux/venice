@@ -18,7 +18,6 @@ public class SaveGrnAttributeDataCommand implements RafRpcCommand {
 
     String asnItemId, username, attributes;
     GRNManagementService grnService;
-    ASNManagementService asnService;
 
     public SaveGrnAttributeDataCommand(String username, String asnItemId, String attributes) {
         this.attributes = attributes;
@@ -32,7 +31,6 @@ public class SaveGrnAttributeDataCommand implements RafRpcCommand {
         ResultWrapper<List<Attribute>> wrapper;
         try {
         	grnService = new GRNManagementService();
-        	asnService = new ASNManagementService();
             String[] attr = attributes.split(";");
 
             for (int i = 0; i < attr.length; i++) {
@@ -41,7 +39,7 @@ public class SaveGrnAttributeDataCommand implements RafRpcCommand {
             System.out.println("start save attribute to cache");
             wrapper = grnService.saveAttributesToCache(username, asnItemId, attribute);
             System.out.println("done save attribute to cache");
-            if (!wrapper.isSuccess()) {                
+            if (wrapper==null || !wrapper.isSuccess()) {                
                 return wrapper.getError();
             }            	
         } catch (Exception e) {

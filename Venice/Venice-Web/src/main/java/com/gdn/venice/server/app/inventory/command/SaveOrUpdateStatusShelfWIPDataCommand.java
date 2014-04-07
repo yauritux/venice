@@ -45,7 +45,7 @@ public class SaveOrUpdateStatusShelfWIPDataCommand implements RafRpcCommand {
 				shelfWrapper = shelfService.findInProcessById(username, shelfMap.get(DataNameTokens.INV_SHELF_ID));
 			}
 			
-			if (shelfWrapper.isSuccess()) {
+			if (shelfWrapper!=null && shelfWrapper.isSuccess()) {
 				shelf = shelfWrapper.getContent();
 				
 				System.out.println(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS));
@@ -56,7 +56,7 @@ public class SaveOrUpdateStatusShelfWIPDataCommand implements RafRpcCommand {
 			}
 						
 			shelfWrapper = shelfService.saveOrUpdateStatusShelfInProcess(username, shelf);
-			if(!shelfWrapper.isSuccess()){
+			if(shelfWrapper==null || !shelfWrapper.isSuccess()){
 				return shelfWrapper.getError();
 			}
 
