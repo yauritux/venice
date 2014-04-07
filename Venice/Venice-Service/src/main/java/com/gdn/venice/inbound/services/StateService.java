@@ -10,7 +10,8 @@ import com.gdn.venice.persistence.VenState;
  *
  */
 public interface StateService {
-	
+
+	public VenState synchronizeVenState(VenState venState);
 	public List<VenState> synchronizeVenStateReferences(
 			List<VenState> stateReferences);
 }

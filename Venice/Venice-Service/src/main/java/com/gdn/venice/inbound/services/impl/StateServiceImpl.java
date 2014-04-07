@@ -3,12 +3,18 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gdn.venice.constants.LoggerLevel;
+import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenStateDAO;
+import com.gdn.venice.exception.VenStateSynchronizingError;
 import com.gdn.venice.inbound.services.StateService;
 import com.gdn.venice.persistence.VenState;
 import com.gdn.venice.util.CommonUtil;
@@ -24,40 +30,68 @@ public class StateServiceImpl implements StateService {
 	
 	@Autowired
 	private VenStateDAO venStateDAO;
-
+	
+	@PersistenceContext
+	private EntityManager em;
+	
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
+	public VenState synchronizeVenState(VenState venState) {
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::BEGIN,venState = " + venState);
+		VenState synchState = new VenState();
+		
+		if (venState != null && venState.getStateCode() != null) {
+			try {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateCode=" + venState.getStateCode());
+				if (venState.getStateId() == null) {
+					List<VenState> stateList = venStateDAO.findByStateCode(venState.getStateCode());
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::stateList found = "
+							+ (stateList != null ? stateList.size() : 0));
+					if (stateList == null || stateList.isEmpty()) {
+						if (!em.contains(venState)) {
+							//venState in detach mode, hence need to explicitly call save
+							synchState = venStateDAO.save(venState);
+						} else {
+							synchState = venState;
+						}
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "synchronizeVenState::new venState is added successfully into DB");
+					} else {
+						synchState = stateList.get(0);
+					}
+				} else {
+					//state already being synchronized
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenState::venState has been synchronized already, no need to perform twice");
+					synchState = venState;
+				}
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName()
+						, e);
+				CommonUtil.logAndReturnException(new VenStateSynchronizingError("Error in synchronyzing VenState"
+						, VeniceExceptionConstants.VEN_EX_130004), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			}
+		} else {
+			synchState = venState;
+		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenState::returning synchState = " + (synchState != null ? synchState.getStateCode() : synchState));
+		return synchState;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public List<VenState> synchronizeVenStateReferences(
 			List<VenState> stateReferences) {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenStateReferences::BEGIN,stateReferences=" + stateReferences);
-		//if (stateReferences == null || stateReferences.size() == 0) return null;
 		
 		List<VenState> synchronizedStateReferences = new ArrayList<VenState>();
 		
 		if (stateReferences != null) {
 			for (VenState state : stateReferences) {
-				if (state.getStateCode() != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenStateReferences::Synchronizing VenState... :" 
-									+ state.getStateCode());
-					/*
-					List<VenState> stateList = venStateDAO.findByStateCode(state.getStateCode());
-					if (stateList == null || stateList.isEmpty()) {
-						VenState venState = venStateDAO.save(state);
-						synchronizedStateReferences.add(venState);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenStateReferences::successfully added venState into synchronizedStateReferences");
-					} else {
-						VenState venState = stateList.get(0);
-						synchronizedStateReferences.add(venState);
-				    */
-					VenState venState = venStateDAO.save(state);
-					synchronizedStateReferences.add(venState);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeReferenceData::successfully added venState into synchronizedStateReferences");
-					//}
-				}		
+				synchronizedStateReferences.add(synchronizeVenState(state));
 			} //end of 'for'
 		}	
 		

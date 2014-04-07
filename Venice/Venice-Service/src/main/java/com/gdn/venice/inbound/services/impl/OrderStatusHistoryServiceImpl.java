@@ -43,7 +43,7 @@ public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService 
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "createOrderStatusHistory::order status: "+venOrder.getVenOrderStatus().getOrderStatusCode());
 			
-			VenOrderStatusHistory venOrderStatusHistory = new VenOrderStatusHistory();
+			VenOrderStatusHistory venOrderStatusHistory = new VenOrderStatusHistory(); // detach mode
 			
 			VenOrderStatusHistoryPK venOrderStatusHistoryPK = new VenOrderStatusHistoryPK();
 			venOrderStatusHistoryPK.setHistoryTimestamp(new Date(System.currentTimeMillis()));
@@ -57,12 +57,12 @@ public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService 
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "createOrderStatusHistory::going to persist venOrderStatusHistory");
 			
-			venOrderStatusHistory = venOrderStatusHistoryDAO.save(venOrderStatusHistory);
+			venOrderStatusHistory = venOrderStatusHistoryDAO.save(venOrderStatusHistory); // need to explicitly call save to bring the object into an attach mode
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrderStatusHistory::done add order status history");
 			if(venOrderStatusHistory != null){
-				return true;
+				return Boolean.TRUE;
 			}
-			return false;
+			return Boolean.FALSE;
 		} catch (Exception e) {
 			throw CommonUtil.logAndReturnException(new CannotPersistOrderStatusHistoryException(
 					"An exception occured when creating order status history"

@@ -31,6 +31,28 @@ public class PaymentTypeServiceImpl implements PaymentTypeService {
 	private VenPaymentTypeDAO venPaymentTypeDAO;
 	
 	@Override
+	public VenPaymentType synchronizeVenPaymentType(VenPaymentType venPaymentType)
+	  throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenPaymentType::BEGIN,venPaymentType= " + venPaymentType);
+		VenPaymentType synchPaymentType = venPaymentType;
+		if (venPaymentType != null && venPaymentType.getPaymentTypeCode() != null) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "synchronizeVenPaymentType::paymentTypeCode = " + venPaymentType.getPaymentTypeCode());
+			List<VenPaymentType> paymentTypeList = venPaymentTypeDAO.findByPaymentTypeCode(venPaymentType.getPaymentTypeCode());
+			if (paymentTypeList == null || paymentTypeList.isEmpty()) {
+				throw CommonUtil.logAndReturnException(new PaymentTypeNotFoundException(
+						"Payment type does not exist!", VeniceExceptionConstants.VEN_EX_400002)
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			} else {
+				synchPaymentType = paymentTypeList.get(0);
+			}
+			return synchPaymentType;
+		}
+		return synchPaymentType;
+	}
+	
+	@Override
 	public List<VenPaymentType> synchronizeVenPaymentTypeReferences(
 			List<VenPaymentType> paymentTypeReferences)
 			throws VeniceInternalException {
@@ -38,33 +60,22 @@ public class PaymentTypeServiceImpl implements PaymentTypeService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenPaymentTypeReferences::BEGIN,paymentTypeReferences="
 				   + paymentTypeReferences);
-		//if (paymentTypeReferences == null || paymentTypeReferences.isEmpty()) return null;
 		
 		List<VenPaymentType> synchronizedPaymentTypeReferences 
 		   = new ArrayList<VenPaymentType>();
 		
 		if (paymentTypeReferences != null) {
-			for (VenPaymentType paymentType : paymentTypeReferences) {
-				if (paymentType.getPaymentTypeCode() != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenPaymentTypeReferences::Restricting VenPaymentType... :" 
-									+ paymentType.getPaymentTypeCode());
-					List<VenPaymentType> paymentTypeList = venPaymentTypeDAO.findByPaymentTypeCode(paymentType.getPaymentTypeCode());
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenPaymentTypeReferences::paymentTypeList = "
-									+ paymentTypeList);
-					if (paymentTypeList == null || (paymentTypeList.isEmpty())) {
-						throw CommonUtil.logAndReturnException(new PaymentTypeNotFoundException(
-								"Payment type does not exist", VeniceExceptionConstants.VEN_EX_400002)
-						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-					} else {
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenPaymentTypeReferences::paymentTypeList not empty");
-						VenPaymentType venPaymentType = paymentTypeList.get(0);
-						synchronizedPaymentTypeReferences.add(venPaymentType);
-					}
-				}			
-			} // end of 'for'
+			try {
+				for (VenPaymentType paymentType : paymentTypeReferences) {
+					synchronizedPaymentTypeReferences.add(synchronizeVenPaymentType(paymentType));
+				} // end of 'for'
+			} catch (VeniceInternalException e) {
+				CommonUtil.logAndReturnException(e, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			} catch (Exception e) {
+				throw CommonUtil.logAndReturnException(new PaymentTypeNotFoundException(
+						"Payment type does not exist!", VeniceExceptionConstants.VEN_EX_400002)
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			}
 		}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()

@@ -159,18 +159,43 @@ public class BCAVAFundInServiceImpl extends AbstractFundInService {
 	private boolean isOldReportType(String reportType) {
 		return reportType.equalsIgnoreCase("old");
 	}
+	
+	
 
 	@Override
 	public FundInData mergeAndSumDuplicate(ArrayList<PojoInterface> fundInList) {
-		CommonUtil.logDebug(CLASS_NAME, "No fund in duplication check for this fund in");
+		CommonUtil.logDebug(CLASS_NAME, "Check for duplicate fund in");
 		FundInData fundInData = new FundInData();
 		
-		BCA_VA_IB_Record rec = null;
+		BCA_VA_IB_Record currentRecord = null;
+		BCA_VA_IB_Record otherRecord = null;
+		String currentAccountNumber = null;
+		String otherAccountNumber = null;
 		
 		for(int i = 0 ; i < fundInList.size(); i++){
-			rec = (BCA_VA_IB_Record) fundInList.get(i);
+			currentRecord = (BCA_VA_IB_Record) fundInList.get(i);
+			
+			fundInList.remove(i);
+			i = -1;
+			
+			currentAccountNumber = currentRecord.getAccountNumber();
+			
+			for(int j = 0 ; j < fundInList.size(); j++){
+				otherRecord = (BCA_VA_IB_Record) fundInList.get(j);
 				
-			fundInData.getFundInList().add(rec);
+				otherAccountNumber = otherRecord.getAccountNumber();
+				
+				if(currentAccountNumber.equals(otherAccountNumber)){
+					CommonUtil.logDebug(CLASS_NAME, "Duplicate Fund In with Account Number" + currentAccountNumber);
+					fundInList.remove(j);
+					j = 0;
+					
+					currentRecord.setPaymentAmount(currentRecord.getPaymentAmount() + otherRecord.getPaymentAmount());
+					currentRecord.setBankFee(currentRecord.getBankFee() + otherRecord.getBankFee());
+				}
+			}
+			
+			fundInData.getFundInList().add(currentRecord);
 		}
 		
 		return fundInData;
@@ -192,9 +217,9 @@ public class BCAVAFundInServiceImpl extends AbstractFundInService {
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(accountNumber, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(accountNumber, paymentAmount, REPORT_TYPE,null);
 		
-		if(order != null && !isOrderPaymentExist(accountNumber, paymentAmount, REPORT_TYPE)){
+		if(order != null && !isOrderPaymentExist(accountNumber, paymentAmount, REPORT_TYPE,null)){
 			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + accountNumber);
 			return null;
 		}
@@ -203,7 +228,7 @@ public class BCAVAFundInServiceImpl extends AbstractFundInService {
 			VenOrderPaymentAllocation orderPaymentAllocation 
 				= getPaymentAllocationByRelatedPayment(accountNumber, 
 						                               paymentAmount, 
-						                               REPORT_TYPE);
+						                               REPORT_TYPE,null);
 			
 			List<FinArFundsInReconRecord> fundInReconList = orderPaymentAllocation.getVenOrderPayment().getFinArFundsInReconRecords();
 			fundInRecon = fundInReconList.get(0);

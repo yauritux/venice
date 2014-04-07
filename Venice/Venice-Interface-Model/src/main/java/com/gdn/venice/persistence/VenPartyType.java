@@ -1,9 +1,14 @@
 package com.gdn.venice.persistence;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 
 /**
@@ -25,8 +30,10 @@ public class VenPartyType implements Serializable {
 	private String partyTypeDesc;
 
 	//bi-directional many-to-one association to VenParty
+	/*
 	@OneToMany(mappedBy="venPartyType")
 	private List<VenParty> venParties;
+	*/
 
     public VenPartyType() {
     }
@@ -47,6 +54,7 @@ public class VenPartyType implements Serializable {
 		this.partyTypeDesc = partyTypeDesc;
 	}
 
+	/*
 	public List<VenParty> getVenParties() {
 		return this.venParties;
 	}
@@ -54,5 +62,6 @@ public class VenPartyType implements Serializable {
 	public void setVenParties(List<VenParty> venParties) {
 		this.venParties = venParties;
 	}
+	*/
 	
 }

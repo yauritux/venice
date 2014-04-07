@@ -113,11 +113,14 @@ public class RefundFundInActionCommand implements RafRpcCommand{
 							}			
 						}								
 					}else{
+				
+						
 						List<FinArFundsInReconRecord> reconRecordListTemp = fundsInReconRecordHome
 						.queryByRange("select o from FinArFundsInReconRecord o where o.reconciliationRecordId = " + reconciliationRecordId+" and o.finArFundsInActionApplied.actionAppliedId<>"+VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED, 0, 0);				
 						if(!reconRecordListTemp.isEmpty() && reconRecordListTemp.size()>0){
-																			
-								FinArFundsInReconRecord item = reconRecordListTemp.get(0);
+							sessionHome.postCancelRefundJournalTransaction(reconciliationRecordId, refundAmount, fee, account,true);
+							
+							FinArFundsInReconRecord item = reconRecordListTemp.get(0);
 								item.setRefundAmount(item.getRefundAmount().subtract(new BigDecimal(refundAmount)));
 								
 								BigDecimal paid = (item.getPaymentAmount()!=null?item.getPaymentAmount():new BigDecimal(0)).subtract(item.getProviderReportPaidAmount().subtract(item.getRefundAmount()));

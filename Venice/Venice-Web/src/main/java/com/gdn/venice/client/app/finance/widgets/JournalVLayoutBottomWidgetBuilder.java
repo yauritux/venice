@@ -73,7 +73,7 @@ public class JournalVLayoutBottomWidgetBuilder {
 		journalDetailList.getField(DataNameTokens.FINJOURNALTRANSACTION_DEBITTRANSACTIONMOUNT).setWidth("10%");
 		journalDetailList.getField(DataNameTokens.FINJOURNALTRANSACTION_CREDITTRANSACTIONMOUNT).setWidth("10%");
 		journalDetailList.getField(DataNameTokens.FINJOURNALTRANSACTION_FINTRANSACTIONSTATUS_TRANSACTIONSTATUSDESC).setWidth("10%");
-		journalDetailList.getField(DataNameTokens.FINJOURNALTRANSACTION_COMMENTS).setWidth("35%");
+		journalDetailList.getField(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS).setWidth("35%");
 		journalDetailList.getField(DataNameTokens.FINJOURNALTRANSACTION_GROUP_JOURNAL).setHidden(true);
 		
 		journalDetailList.getField(DataNameTokens.FINJOURNALTRANSACTION_DEBITTRANSACTIONMOUNT).setSummaryFunction(SummaryFunctionType.SUM);

@@ -1,5 +1,6 @@
 package com.gdn.venice.client.app.finance.presenter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -7,6 +8,7 @@ import com.gdn.venice.client.app.DataMessageTokens;
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.finance.data.FinanceData;
 import com.gdn.venice.client.app.finance.view.handlers.ManualJournalUiHandlers;
+import com.gdn.venice.client.app.task.ProcessNameTokens;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
@@ -69,6 +71,7 @@ public class ManualJournalPresenter
 		void loadJournalData(DataSource dataSource);
 		void loadManualJournalDetail(DataSource dataSource, LinkedHashMap<String, String> accountMap, ListGridRecord record);
 		void refreshManualJournalData();
+		void refreshJournalData();
 	}
 
 	/**
@@ -246,6 +249,67 @@ public class ManualJournalPresenter
 						RPCManager.setShowPrompt(false);
 					}
 		});
+	}
+	
+
+	
+	/* (non-Javadoc)
+	 * @see com.gdn.venice.client.app.finance.view.handlers.PaymentProcessingUiHandlers#onSubmitForApproval(java.util.ArrayList)
+	 */
+	@Override
+	public void onSubmitForApproval(ArrayList<String> journalGroupIdList) {
+		/*
+		 * Use RPC style to make the call to submit the payments for approval
+		 */
+		RPCRequest request=new RPCRequest();
+		
+		/*
+		 * Extract the payment ids from the 
+		 */
+		HashMap<String,String>map = new HashMap<String,String>();
+		for (int i=0;i<journalGroupIdList.size();i++) {
+			map.put(ProcessNameTokens.JOURNALGROUPID+(i+1), journalGroupIdList.get(i));
+		}
+		String apPaymentIds = map.toString();
+		
+		request.setData(apPaymentIds);
+		
+		request.setActionURL(GWT.getHostPageBaseURL() + journalPresenterServlet + "?method=submitJournalForApproval&type=RPC");
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setWillHandleError(true);
+		RPCManager.setPromptStyle(PromptStyle.DIALOG);
+		RPCManager.setDefaultPrompt("Submitting manual journals for approval...");
+		RPCManager.setShowPrompt(true);
+
+		RPCManager.sendRequest(request, 
+				new RPCCallback () {
+					/* (non-Javadoc)
+					 * @see com.smartgwt.client.rpc.RPCCallback#execute(com.smartgwt.client.rpc.RPCResponse, java.lang.Object, com.smartgwt.client.rpc.RPCRequest)
+					 */
+					public void execute(RPCResponse response,
+							Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						if (rpcResponse.startsWith("0")) {
+							getView().refreshJournalData();
+							SC.say(DataMessageTokens.SUBMITTED_FOR_APPROVAL);
+						} else {
+							/*
+							 * Use the 2nd positional split on ":" as the error message
+							 */
+							String[] split = rpcResponse.split(":");
+							if(split.length>1){
+								SC.warn(split[1]);
+							}else{
+								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
+							}
+						}
+						RPCManager.setDefaultPrompt("Retrieving records...");
+						RPCManager.setShowPrompt(false);
+					}
+		}
+		);
+		
 	}
 
 	

@@ -119,8 +119,10 @@ public class VenParty implements Serializable {
 	private List<VenPartyPromotionShare> venPartyPromotionShares;
 
 	//bi-directional many-to-one association to VenRecipient
+	/*
 	@OneToMany(mappedBy="venParty")
 	private List<VenRecipient> venRecipients;
+	*/
 
     public VenParty() {
     }
@@ -317,12 +319,70 @@ public class VenParty implements Serializable {
 		this.venPartyPromotionShares = venPartyPromotionShares;
 	}
 	
+	/*
 	public List<VenRecipient> getVenRecipients() {
 		return this.venRecipients;
 	}
 
 	public void setVenRecipients(List<VenRecipient> venRecipients) {
 		this.venRecipients = venRecipients;
+	}
+	*/
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		
+		if (!(obj instanceof VenParty)) {
+			return false;
+		}
+		
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		VenParty venParty = (VenParty) obj;
+		
+		if (this.fullOrLegalName != null && venParty.getFullOrLegalName() != null && (!(this.fullOrLegalName.equalsIgnoreCase(venParty.getFullOrLegalName())))) {
+			return false;
+		}
+		
+		if (this.partyFirstName != null && venParty.getPartyFirstName() != null && (!(this.partyFirstName.equalsIgnoreCase(venParty.getPartyFirstName())))) {
+			return false;
+		}
+		
+		if (this.partyMiddleName != null && venParty.getPartyMiddleName() != null && (!(this.partyMiddleName.equalsIgnoreCase(venParty.getPartyMiddleName())))) {
+			return false;
+		}
+		
+		if (this.partyLastName != null && venParty.getPartyLastName() != null && (!(this.partyLastName.equalsIgnoreCase(venParty.getPartyLastName())))) {
+			return false;
+		}
+		
+		if (this.partyPosition != null && venParty.getPartyPosition() != null && (!(this.partyPosition.equalsIgnoreCase(venParty.getPartyPosition())))) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		int prime = 31;
+		int result = 1;
+		
+		result = result * prime + (this.partyId != null ? this.partyId.hashCode() : 0);
+		result = result * prime + (this.fullOrLegalName != null ? this.fullOrLegalName.hashCode() : 0);
+		result = result * prime + (this.partyFirstName != null ? this.partyFirstName.hashCode() : 0);
+		result = result * prime + (this.partyMiddleName != null ? this.partyMiddleName.hashCode() : 0);
+		result = result * prime + (this.partyLastName != null ? this.partyLastName.hashCode() : 0);
+		result = result * prime + (this.partyPosition != null ? this.partyPosition.hashCode() : 0);
+		result = result * prime + (this.venParty != null ? this.venParty.hashCode() : 0);
+		result = result * prime + (this.venPartyType != null ? this.venPartyType.hashCode() : 0);
+		
+		return result;
 	}
 	
 }

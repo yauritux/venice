@@ -1,5 +1,7 @@
 package com.gdn.venice.inbound.commands;
 
+import com.gdn.venice.exception.VeniceInternalException;
+
 /**
  * 
  * @author yauritux
@@ -7,5 +9,5 @@ package com.gdn.venice.inbound.commands;
  */
 public interface Command {
 	
-	public void execute();
+	public void execute() throws VeniceInternalException;
 }

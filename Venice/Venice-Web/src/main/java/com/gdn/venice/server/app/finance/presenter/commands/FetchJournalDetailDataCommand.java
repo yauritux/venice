@@ -132,7 +132,22 @@ public class FetchJournalDetailDataCommand implements RafDsCommand {
 						(finJournalTransaction.getFinTransactionStatus()!=null)?
 								finJournalTransaction.getFinTransactionStatus().getTransactionStatusDesc():"");
 				
-				map.put(DataNameTokens.FINJOURNALTRANSACTION_COMMENTS, finJournalTransaction.getComments());
+
+				if(finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Cash Receive Journal")) {
+					if((finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Payment Not Recognized") || finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Refunded"))) {
+						if(i==0) {
+							map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, finArFundsInReconRecordList.get(0).getComment());
+						}
+					}
+					else {
+						map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, finJournalTransaction.getComments());
+					}
+				}
+				else {
+					map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, finJournalTransaction.getComments());
+				}
+				
+				
 				map.put(DataNameTokens.FINJOURNALTRANSACTION_GROUP_JOURNAL, mapGroup.get(finJournalTransaction.getGroupJournal()+""));
 				
 								

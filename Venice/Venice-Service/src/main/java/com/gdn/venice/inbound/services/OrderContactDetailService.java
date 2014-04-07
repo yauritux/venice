@@ -12,6 +12,8 @@ import com.gdn.venice.persistence.VenOrderContactDetail;
  */
 public interface OrderContactDetailService {
 
+	public VenOrderContactDetail persist(VenOrderContactDetail venOrderContactDetail) 
+			throws VeniceInternalException;
 	public List<VenOrderContactDetail> persistVenOrderContactDetails(
 			List<VenOrderContactDetail> orderContactDetails) throws VeniceInternalException;
 }

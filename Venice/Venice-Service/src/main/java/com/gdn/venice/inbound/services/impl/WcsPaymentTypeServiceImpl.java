@@ -30,6 +30,26 @@ public class WcsPaymentTypeServiceImpl implements WcsPaymentTypeService {
 	private VenWcsPaymentTypeDAO venWcsPaymentTypeDAO;
 	
 	@Override
+	public VenWcsPaymentType synchronizeVenWcsPaymentType(VenWcsPaymentType venWcsPaymentType)
+	  throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenWcsPaymentType::BEGIN,venWcsPaymentType = " + venWcsPaymentType);
+		
+		VenWcsPaymentType synchWcsPaymentType = venWcsPaymentType;
+		
+		if (venWcsPaymentType != null && venWcsPaymentType.getWcsPaymentTypeCode() != null) {
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenWcsPaymentType::wcsPaymentTypeCode =  " + venWcsPaymentType.getWcsPaymentTypeCode());
+			synchWcsPaymentType = venWcsPaymentTypeDAO.findByWcsPaymentTypeCode(venWcsPaymentType.getWcsPaymentTypeCode());
+			if (synchWcsPaymentType == null) {
+				throw CommonUtil.logAndReturnException(new WcsPaymentTypeNotFoundException(
+						"WCS Payment type does not exist!", VeniceExceptionConstants.VEN_EX_400003)
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			}
+			return synchWcsPaymentType;
+		}
+		return synchWcsPaymentType;
+	}
+	
+	@Override
 	public List<VenWcsPaymentType> synchronizeVenWcsPaymentTypeReferences(
 			List<VenWcsPaymentType> wcsPaymentTypeReferences)
 			throws VeniceInternalException {
@@ -37,34 +57,22 @@ public class WcsPaymentTypeServiceImpl implements WcsPaymentTypeService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenWcsPaymentTypeReferences::BEGIN,wcsPaymentTypeReferences="
 				  + wcsPaymentTypeReferences);
-		//if (wcsPaymentTypeReferences == null || wcsPaymentTypeReferences.isEmpty()) return null;
 		
 		List<VenWcsPaymentType> synchronizedWcsPaymentTypeReferences
 		   = new ArrayList<VenWcsPaymentType>();
 		
 		if (wcsPaymentTypeReferences != null) {
-			for (VenWcsPaymentType wcsPaymentType : wcsPaymentTypeReferences) {
-				if (wcsPaymentType.getWcsPaymentTypeCode() != null) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenWcsPaymentTypeReferences::Restricting VenWcsPaymentType... :" 
-									+ wcsPaymentType.getWcsPaymentTypeCode());
-					VenWcsPaymentType venWcsPaymentType = venWcsPaymentTypeDAO.findByWcsPaymentTypeCode(wcsPaymentType.getWcsPaymentTypeCode()); 
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenWcsPaymentTypeReferences::venWcsPaymentType = " + venWcsPaymentType);
-					if (venWcsPaymentType == null) {
-						throw CommonUtil.logAndReturnException(new WcsPaymentTypeNotFoundException(
-								"WCS Payment type does not exist", VeniceExceptionConstants.VEN_EX_400003)
-						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-					} else {
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenWcsPaymentTypeReferences::adding venWcsPaymentType "
-										+ venWcsPaymentType + " into synchronizedWcsPaymentTypeReferences");
-						synchronizedWcsPaymentTypeReferences.add(venWcsPaymentType);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenWcsPaymentTypeReferences::venWcsPaymentType added into synchronizedWcsPaymentTypeReferences");
-					}
-				}			
-			} // end of 'for'
+			try {
+				for (VenWcsPaymentType wcsPaymentType : wcsPaymentTypeReferences) {
+					synchronizedWcsPaymentTypeReferences.add(synchronizeVenWcsPaymentType(wcsPaymentType));
+				} // end of 'for'
+			} catch (VeniceInternalException e) {
+				CommonUtil.logAndReturnException(e, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			} catch (Exception e) {
+				throw CommonUtil.logAndReturnException(new WcsPaymentTypeNotFoundException(
+						"WCS Payment type does not exist!", VeniceExceptionConstants.VEN_EX_400003)
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			}
 		}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()

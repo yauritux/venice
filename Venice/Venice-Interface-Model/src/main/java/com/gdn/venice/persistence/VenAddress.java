@@ -1,13 +1,25 @@
 package com.gdn.venice.persistence;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 
 /**
  * The persistent class for the ven_address database table.
+ * 
+ * Change History:
+ * March 27, 2014 (1:19PM) : 
+ *   - override equals and hashCode logic to compare two addresses (yauritux)
+ *   - removes bidirectional association (one-to-many)
  * 
  */
 @Entity
@@ -37,8 +49,10 @@ public class VenAddress implements Serializable {
 	private String streetAddress2;
 
 	//bi-directional many-to-one association to LogMerchantPickupInstruction
+	/*
 	@OneToMany(mappedBy="venAddress")
 	private List<LogMerchantPickupInstruction> logMerchantPickupInstructions;
+	*/
 
 	//bi-directional many-to-one association to VenCity
     @ManyToOne
@@ -56,16 +70,22 @@ public class VenAddress implements Serializable {
 	private VenState venState;
 
 	//bi-directional many-to-one association to VenOrderItem
+    /*
 	@OneToMany(mappedBy="venAddress")
 	private List<VenOrderItem> venOrderItems;
+	*/
 
 	//bi-directional many-to-one association to VenOrderPayment
+    /*
 	@OneToMany(mappedBy="venAddress")
 	private List<VenOrderPayment> venOrderPayments;
+	*/
 
 	//bi-directional many-to-one association to VenPartyAddress
+	/*
 	@OneToMany(mappedBy="venAddress")
 	private List<VenPartyAddress> venPartyAddresses;
+	*/
 
     public VenAddress() {
     }
@@ -118,6 +138,7 @@ public class VenAddress implements Serializable {
 		this.streetAddress2 = streetAddress2;
 	}
 
+	/*
 	public List<LogMerchantPickupInstruction> getLogMerchantPickupInstructions() {
 		return this.logMerchantPickupInstructions;
 	}
@@ -125,6 +146,7 @@ public class VenAddress implements Serializable {
 	public void setLogMerchantPickupInstructions(List<LogMerchantPickupInstruction> logMerchantPickupInstructions) {
 		this.logMerchantPickupInstructions = logMerchantPickupInstructions;
 	}
+	*/
 	
 	public VenCity getVenCity() {
 		return this.venCity;
@@ -150,6 +172,7 @@ public class VenAddress implements Serializable {
 		this.venState = venState;
 	}
 	
+	/*
 	public List<VenOrderItem> getVenOrderItems() {
 		return this.venOrderItems;
 	}
@@ -157,7 +180,9 @@ public class VenAddress implements Serializable {
 	public void setVenOrderItems(List<VenOrderItem> venOrderItems) {
 		this.venOrderItems = venOrderItems;
 	}
+	*/
 	
+	/*
 	public List<VenOrderPayment> getVenOrderPayments() {
 		return this.venOrderPayments;
 	}
@@ -165,7 +190,9 @@ public class VenAddress implements Serializable {
 	public void setVenOrderPayments(List<VenOrderPayment> venOrderPayments) {
 		this.venOrderPayments = venOrderPayments;
 	}
+	*/
 	
+	/*
 	public List<VenPartyAddress> getVenPartyAddresses() {
 		return this.venPartyAddresses;
 	}
@@ -173,5 +200,72 @@ public class VenAddress implements Serializable {
 	public void setVenPartyAddresses(List<VenPartyAddress> venPartyAddresses) {
 		this.venPartyAddresses = venPartyAddresses;
 	}
+	*/
 	
+	@Override
+	/**
+	 * This method will be comparing 2 provided addresses whether equal or not
+	 * based on their particular values such as : city, country, state, etc.
+	 * 
+	 * @param obj
+	 * @return true if both objects are equal, otherwise is false will be returned
+	 */
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		
+		if (!(obj instanceof VenAddress)) {
+			return false;
+		}
+		
+		if (obj == null || obj.getClass() != this.getClass()) {
+			return false;
+		}
+		
+		VenAddress venAddress = (VenAddress) obj;
+		
+		if ((this.kecamatan != null) && (venAddress.getKecamatan() != null) && (!this.kecamatan.equalsIgnoreCase(venAddress.getKecamatan()))) {
+			return false;
+		}
+		if ((this.kelurahan != null) && (venAddress.getKelurahan() != null) && (!this.kelurahan.equalsIgnoreCase(venAddress.getKelurahan()))) {
+			return false;
+		}
+		if ((this.postalCode != null) && (venAddress.getPostalCode() != null) && (!this.postalCode.equalsIgnoreCase(venAddress.getPostalCode()))) {
+			return false;
+		}
+		if ((this.streetAddress1 != null) && (venAddress.getStreetAddress1() != null) && (!this.streetAddress1.equalsIgnoreCase(venAddress.getStreetAddress1()))) {
+			return false;
+		}
+		if ((this.streetAddress2 != null) && (venAddress.getStreetAddress2() != null) && (!this.streetAddress2.equalsIgnoreCase(venAddress.getStreetAddress2()))) {
+			return false;
+		}
+		if ((this.venCity != null) && (venAddress.getVenCity() != null) && (!this.venCity.equals(venAddress.getVenCity()))) {
+			return false;
+		}
+		if ((this.venCountry != null) && (venAddress.getVenCountry() != null) && (!this.venCountry.equals(venAddress.getVenCountry()))) {
+			return false;
+		}
+		if ((this.venState != null) && (venAddress.getVenState() != null) && (!this.venState.equals(venAddress.getVenState()))) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		int prime = 31;
+		int result = 1;
+		result = prime * result + (addressId != null ? addressId.hashCode() : 0);
+		result = prime * result + (kelurahan != null ? kelurahan.hashCode() : 0);
+		result = prime * result + (kecamatan != null ? kecamatan.hashCode() : 0);
+		result = prime * result + (postalCode != null ? postalCode.hashCode() : 0);
+		result = prime * result + (streetAddress1 != null ? streetAddress1.hashCode() : 0);
+		result = prime * result + (streetAddress2 != null ? streetAddress2.hashCode() : 0);
+		result = prime * result + (venCity != null ? venCity.hashCode() : 0);
+		result = prime * result + (venCountry != null ? venCountry.hashCode() : 0);
+		result = prime * result + (venState != null ? venState.hashCode() : 0);
+		return result;
+	}			
 }

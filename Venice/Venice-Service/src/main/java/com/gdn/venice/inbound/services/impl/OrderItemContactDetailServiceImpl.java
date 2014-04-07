@@ -1,6 +1,10 @@
 package com.gdn.venice.inbound.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,9 @@ public class OrderItemContactDetailServiceImpl implements OrderItemContactDetail
 	@Autowired
 	private VenOrderItemContactDetailDAO venOrderItemContactDetailDAO;
 	
+	@PersistenceContext
+	private EntityManager em;
+	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenOrderItemContactDetail persist(
@@ -36,14 +43,25 @@ public class OrderItemContactDetailServiceImpl implements OrderItemContactDetail
 		
 		VenOrderItemContactDetail persistedOrderItemContactDetail = null;
 		
-		try {
-			persistedOrderItemContactDetail = venOrderItemContactDetailDAO.save(venOrderItemContactDetail);
-		} catch (Exception e) {
-			CommonUtil.logAndReturnException(new CannotPersistOrderItemContactDetailException(
-					"Cannot persist VenOrderItemContactDetail, " + e
-					, VeniceExceptionConstants.VEN_EX_000028)
-			     , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+		/*
+		if (!em.contains(venOrderItemContactDetail)) {
+			// venOrderItemContactDetail is in detach mode, hence should call save explicitly to make it attached
+			try {
+				persistedOrderItemContactDetail = venOrderItemContactDetailDAO.save(venOrderItemContactDetail);
+			} catch (Exception e) {
+				CommonUtil.logAndReturnException(new CannotPersistOrderItemContactDetailException(
+						"Cannot persist VenOrderItemContactDetail, " + e
+						, VeniceExceptionConstants.VEN_EX_000028)
+				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			}
+		} else {
+			persistedOrderItemContactDetail = venOrderItemContactDetail;
 		}
+		*/
+		if (em.contains(venOrderItemContactDetail)) {
+			em.detach(venOrderItemContactDetail);
+		}
+		persistedOrderItemContactDetail = venOrderItemContactDetail;
 		
 		return persistedOrderItemContactDetail;
 	}
@@ -53,8 +71,9 @@ public class OrderItemContactDetailServiceImpl implements OrderItemContactDetail
 	public List<VenOrderItemContactDetail> persist(
 		List<VenOrderItemContactDetail> venOrderItemContactDetails)
 			throws VeniceInternalException {
-		List<VenOrderItemContactDetail> persistedOrderItemContactDetails = null;
-		
+		List<VenOrderItemContactDetail> persistedOrderItemContactDetails = new ArrayList<VenOrderItemContactDetail>();
+				
+		/*
 		try {
 			persistedOrderItemContactDetails = venOrderItemContactDetailDAO.save(venOrderItemContactDetails);
 		} catch (Exception e) {
@@ -62,6 +81,10 @@ public class OrderItemContactDetailServiceImpl implements OrderItemContactDetail
 					("Cannot persist VenOrderItemContactDetail, " + e
 					, VeniceExceptionConstants.VEN_EX_000028)
 			     , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+		}
+		*/
+		for (VenOrderItemContactDetail itemContactDetail : venOrderItemContactDetails) {
+			persistedOrderItemContactDetails.add(persist(itemContactDetail));
 		}
 		
 		return persistedOrderItemContactDetails;

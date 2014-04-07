@@ -29,6 +29,7 @@ import com.gdn.venice.client.app.finance.view.PromotionView;
 import com.gdn.venice.client.app.finance.view.ReportsLauncherView;
 import com.gdn.venice.client.app.finance.view.SalesRecordView;
 import com.gdn.venice.client.app.fraud.presenter.BlackListMaintenancePresenter;
+import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule35Presenter;
 import com.gdn.venice.client.app.fraud.presenter.CustomerBlackListMaintenancePresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudBinCreditLimitPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCalculatePresenter;
@@ -42,6 +43,7 @@ import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
 import com.gdn.venice.client.app.fraud.presenter.UncalculatedCreditCardOrderPresenter;
 import com.gdn.venice.client.app.fraud.view.BlackListMaintenanceView;
+import com.gdn.venice.client.app.fraud.view.FraudParameterRule35View;
 import com.gdn.venice.client.app.fraud.view.CustomerBlackListMaintenanceView;
 import com.gdn.venice.client.app.fraud.view.FraudBinCreditLimitView;
 import com.gdn.venice.client.app.fraud.view.FraudCalculateView;
@@ -458,9 +460,9 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 PutawayCreatePresenter.MyView.class,
                 PutawayCreateView.class,
                 PutawayCreatePresenter.MyProxy.class);
-        
+
         bindPresenter(PutawayInputPresenter.class,
-        		PutawayInputPresenter.MyView.class,
+                PutawayInputPresenter.MyView.class,
                 PutawayInputView.class,
                 PutawayInputPresenter.MyProxy.class);
 
@@ -468,15 +470,25 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 GoodIssuedNotePresenter.MyView.class,
                 GoodIssuedNoteView.class,
                 GoodIssuedNotePresenter.MyProxy.class);
-        
+
         bindPresenter(PackingListPresenter.class,
                 PackingListPresenter.MyView.class,
                 PackingListView.class,
                 PackingListPresenter.MyProxy.class);
-        
+
         bindPresenter(OpnamePresenter.class,
                 OpnamePresenter.MyView.class,
                 OpnameView.class,
                 OpnamePresenter.MyProxy.class);
+
+        bindPresenter(FraudParameterRule35Presenter.class,
+                FraudParameterRule35Presenter.MyView.class,
+                FraudParameterRule35View.class,
+                FraudParameterRule35Presenter.MyProxy.class);
+
+        bindPresenter(FinSalesSettlementReportPresenter.class,
+                FinSalesSettlementReportPresenter.MyView.class,
+                FinSalesSettlementReportView.class,
+                FinSalesSettlementReportPresenter.MyProxy.class);
     }
 }
