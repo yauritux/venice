@@ -569,7 +569,7 @@ public class MSGActivityReportProcessor extends ActivityReportProcessor {
 	private void addFailedRecordCausedByDifferentProviderForGdnReffException(DailyReportMSG dailyReportMSG, ActivityReportData activityReportData, String logisticProvider){
 
 		activityReportData.getFailedProviderForGdnReff()
-			.put("No : " + dailyReportMSG.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportMSG.getRefNo(), "logistic provider that should : "+logisticProvider);
+			.put("No : " + dailyReportMSG.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportMSG.getRefNo(), logisticProvider);
 	}	
 	
 	private void addFailedRecordCausedByReceivedDateException(DailyReportMSG dailyReportMSG, ActivityReportData activityReportData, Exception e){

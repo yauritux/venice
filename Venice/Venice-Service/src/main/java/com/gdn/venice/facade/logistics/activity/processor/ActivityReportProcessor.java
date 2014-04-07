@@ -201,7 +201,7 @@ public abstract class ActivityReportProcessor {
             getLogger().debug("Airway Bill Engine : " + airwayBillNoFromEngine);
             getLogger().debug("Airway Bill Logistics : " + airwayBillNoFromLogistic);
             
-            if (logAirwayBill.getActivityResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
+            if (logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
 
                 getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
 

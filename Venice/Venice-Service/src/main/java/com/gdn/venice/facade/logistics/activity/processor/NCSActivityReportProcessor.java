@@ -569,7 +569,7 @@ public class NCSActivityReportProcessor extends ActivityReportProcessor {
 	private void addFailedRecordCausedByDifferentProviderForGdnReffException(DailyReportNCS dailyReportNCS, ActivityReportData activityReportData, String logisticProvider){
 
 		activityReportData.getFailedProviderForGdnReff()
-			.put("No : " + dailyReportNCS.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportNCS.getRefNo(), "logistic provider that should : "+logisticProvider);
+			.put("No : " + dailyReportNCS.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportNCS.getRefNo(), logisticProvider);
 	}	
 
 	private void addFailedRecordCausedByReceivedDateException(DailyReportNCS dailyReportNCS, ActivityReportData activityReportData, Exception e){

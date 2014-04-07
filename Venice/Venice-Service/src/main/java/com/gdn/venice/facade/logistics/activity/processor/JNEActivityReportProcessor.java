@@ -564,7 +564,7 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 	private void addFailedRecordCausedByDifferentProviderForGdnReffException(DailyReportJNE dailyReportJNE, ActivityReportData activityReportData, String logisticProvider){
 
 		activityReportData.getFailedProviderForGdnReff()
-			.put("No : " + dailyReportJNE.getNumber().replace(".0", "") + ", GDN Ref : " + dailyReportJNE.getGdnRefNumber(), "logistic provider that should : "+logisticProvider);
+			.put("No : " + dailyReportJNE.getNumber().replace(".0", "") + ", GDN Ref : " + dailyReportJNE.getGdnRefNumber(), logisticProvider);
 	}	
 
 	private void addFailedRecordCausedByReceivedDateException(DailyReportJNE dailyReportJNE, ActivityReportData activityReportData, Exception e){
