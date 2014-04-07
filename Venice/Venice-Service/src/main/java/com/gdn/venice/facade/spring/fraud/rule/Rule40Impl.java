@@ -61,7 +61,11 @@ public class Rule40Impl implements Rule {
 	}
 	
 	public String getMobilePhoneNo(VenOrderContactDetail orderContactDetail){
-		return orderContactDetail.getVenContactDetail().getContactDetail();
+		try{
+			return orderContactDetail.getVenContactDetail().getContactDetail();
+		} catch (Exception e) {
+			return "";
+		}
 	}
 	
 	public String getMobilePhonePrefix(String mobilePhoneNo){

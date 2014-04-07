@@ -45,7 +45,11 @@ public class Rule23Impl implements Rule{
 	
 	public String getCustomerEmail(VenOrder order){
 		VenOrderContactDetail contact = venOrderContactDetailDAO.findByContactEmailVenOrder(order.getOrderId());
-		return contact.getVenContactDetail().getContactDetail();
+		try{
+			return contact.getVenContactDetail().getContactDetail();
+		}catch (Exception e) {
+			return "";
+		}
 	}
 	
 	public String getCustomerName(VenOrder order){
