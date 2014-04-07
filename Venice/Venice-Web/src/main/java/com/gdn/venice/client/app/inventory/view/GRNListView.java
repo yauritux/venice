@@ -136,14 +136,14 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
         final TextItem supplierNameItem = new TextItem(DataNameTokens.INV_ASN_SUPPLIER_NAME, "Supplier Name");
         supplierNameItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_SUPPLIER_NAME));
         
-        final TextItem DestinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
-        DestinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
+        final TextItem destinationItem = new TextItem(DataNameTokens.INV_ASN_DESTINATION, "Destination");
+        destinationItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_DESTINATION));
         
         final TextItem doNumberItem = new TextItem(DataNameTokens.INV_DO_NUMBER, "DO Number");
         doNumberItem.setValue(record.getAttribute(DataNameTokens.INV_DO_NUMBER));
                 
         asnDetailForm.setFields(grnNumberItem, reffDateItem, asnNumberItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
-        		DestinationItem, supplierNameItem, doNumberItem);
+        		destinationItem, supplierNameItem, doNumberItem);
                 
         itemListGrid = buildItemListGrid(id);
         itemListGrid.setCanEdit(false);
