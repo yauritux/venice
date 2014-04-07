@@ -201,15 +201,13 @@ public abstract class ActivityReportProcessor {
             getLogger().debug("Airway Bill Engine : " + airwayBillNoFromEngine);
             getLogger().debug("Airway Bill Logistics : " + airwayBillNoFromLogistic);
             
-            if (existingAirwayBillTransactionStatus.equals(AirwayBillTransaction.STATUS_SETTLED)
-                    || existingAirwayBillTransactionStatus.equals(AirwayBillTransaction.STATUS_CLOSED)) {
+            if (logAirwayBill.getActivityResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
 
-                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " status is CX or D, not allowed to override");
+                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
 
                 isOverrideSuccess = false;
             } else {
                 isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, uploadUsername, logProviderCode);
-
                 getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
             }
 
@@ -568,7 +566,7 @@ public abstract class ActivityReportProcessor {
             HSSFSheet sheet = wb.createSheet("ActivityReportFailedToUpload");
 
             ActivityInvoiceFailedToUploadExport activityInvoiceFailedToUploadExport = new ActivityInvoiceFailedToUploadExport(wb);
-            wb = activityInvoiceFailedToUploadExport.ExportExcel(activityReportData.getGdnRefNotFoundList(), activityReportData.getFailedItemList(), activityReportData.getFailedStatusUpdateList(), sheet, "activity");
+            wb = activityInvoiceFailedToUploadExport.ExportExcel(activityReportData.getGdnRefNotFoundList(), activityReportData.getFailedItemList(), activityReportData.getFailedStatusUpdateList(), activityReportData.getFailedProviderForGdnReff(),sheet, "activity");
             wb.write(fos);
             
             getLogger().debug("done export excel");
