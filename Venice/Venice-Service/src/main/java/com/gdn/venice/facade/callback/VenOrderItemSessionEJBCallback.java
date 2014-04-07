@@ -1,5 +1,6 @@
 package com.gdn.venice.facade.callback;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +12,8 @@ import java.util.List;
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
 import org.hibernate.ejb.EntityManagerImpl;
 
@@ -39,15 +42,6 @@ import com.gdn.venice.persistence.VenRecipient;
 import com.gdn.venice.persistence.VenSettlementRecord;
 import com.gdn.venice.util.InventoryUtil;
 import com.gdn.venice.util.VeniceConstants;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 /**
  * VenOrderItemSessionEJBCallback.java
@@ -203,7 +197,7 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
 
                     if (existingStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP) {
                         VenOrderSessionEJBRemote orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
-                        List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o where o.wcsOrderId ='" + venOrderItem.getVenOrder().getWcsOrderId() + "'", 0, 0);
+                        List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o join fetch o.venOrderItems oi where o.wcsOrderId ='" + venOrderItem.getVenOrder().getWcsOrderId() + "'", 0, 0);
 
                         _log.debug("get commision type from MTA");
                         CommissionTypeRequester requester = new CommissionTypeRequester();
