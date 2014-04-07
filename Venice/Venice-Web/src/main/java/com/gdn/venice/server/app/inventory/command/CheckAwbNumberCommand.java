@@ -4,7 +4,6 @@ import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
 import com.gdn.inventory.exchange.type.AWBInfoStatus;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.server.app.inventory.service.GINService;
-import com.gdn.venice.server.app.inventory.service.PackingListService;
 import com.gdn.venice.server.command.RafRpcCommand;
 
 /**

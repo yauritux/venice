@@ -34,7 +34,7 @@ public class FetchAttributeNameDataCommand implements RafRpcCommand {
         } catch (Exception e) {
             e.printStackTrace();
         }
-System.out.println("attribute name: "+sb.toString());
+        System.out.println("attribute name: " + sb.toString());
         return sb.toString();
     }
 }

@@ -36,30 +36,32 @@ public class FetchSalesOrderAWBInfoDetailDataCommand implements RafDsCommand {
         try {
             packingService = new PackingListService();
             HeaderAndDetailWrapper<String, SalesOrderAWBInfo> wrapper = packingService.getDetailPackingData(awbInfoId, username);
-            if (wrapper.getSuccess()) {
-                //Put result
-                for (SalesOrderAWBInfo awbInfo : wrapper.getDetail()) {
-                    HashMap<String, String> map = new HashMap<String, String>();
-                    map.put(DataNameTokens.INV_SO_ID, awbInfo.getSalesOrder().getId() + "");
-                    map.put(DataNameTokens.INV_SO_ORDERID, awbInfo.getSalesOrder().getOrderId());
-                    map.put(DataNameTokens.INV_SO_ORDERITEMID, awbInfo.getSalesOrder().getOrderItemId());
-                    map.put(DataNameTokens.INV_SO_MERCHANTSKU, awbInfo.getSalesOrder().getMerchantSKU());
-                    map.put(DataNameTokens.INV_SO_ITEMID, awbInfo.getSalesOrder().getAssignedItem().getId() + "");
-                    map.put(DataNameTokens.INV_SO_ITEMDESC, awbInfo.getSalesOrder().getAssignedItem().getDescription());
-                    map.put(DataNameTokens.INV_SO_QUANTITY, awbInfo.getSalesOrder().getQuantity() + "");
-                    map.put(DataNameTokens.INV_SO_ITEMUOM, awbInfo.getSalesOrder().getAssignedItem().getItemUnit());
-                    map.put(DataNameTokens.INV_SO_ITEMPHOTO, awbInfo.getSalesOrder().getAssignedItem().getItemUnit());
-                    map.put(DataNameTokens.INV_SO_ITEMHASATTRIBUTE, awbInfo.getSalesOrder().getAssignedItem().isHasAttribute() + "");
-                    map.put(DataNameTokens.INV_SO_ATTRIBUTE, "");
-                    map.put(DataNameTokens.INV_AWB_CLAIMEDBY, wrapper.getHeader());
-                    dataList.add(map);
-                }
+            if (wrapper != null) {
+                if (wrapper.getSuccess()) {
+                    //Put result
+                    for (SalesOrderAWBInfo awbInfo : wrapper.getDetail()) {
+                        HashMap<String, String> map = new HashMap<String, String>();
+                        map.put(DataNameTokens.INV_SO_ID, awbInfo.getSalesOrder().getId() + "");
+                        map.put(DataNameTokens.INV_SO_ORDERID, awbInfo.getSalesOrder().getOrderId());
+                        map.put(DataNameTokens.INV_SO_ORDERITEMID, awbInfo.getSalesOrder().getOrderItemId());
+                        map.put(DataNameTokens.INV_SO_MERCHANTSKU, awbInfo.getSalesOrder().getMerchantSKU());
+                        map.put(DataNameTokens.INV_SO_ITEMID, awbInfo.getSalesOrder().getAssignedItem().getId() + "");
+                        map.put(DataNameTokens.INV_SO_ITEMDESC, awbInfo.getSalesOrder().getAssignedItem().getDescription());
+                        map.put(DataNameTokens.INV_SO_QUANTITY, awbInfo.getSalesOrder().getQuantity() + "");
+                        map.put(DataNameTokens.INV_SO_ITEMUOM, awbInfo.getSalesOrder().getAssignedItem().getItemUnit());
+                        map.put(DataNameTokens.INV_SO_ITEMPHOTO, awbInfo.getSalesOrder().getAssignedItem().getItemUnit());
+                        map.put(DataNameTokens.INV_SO_ITEMHASATTRIBUTE, awbInfo.getSalesOrder().getAssignedItem().isHasAttribute() + "");
+                        map.put(DataNameTokens.INV_SO_ATTRIBUTE, "");
+                        map.put(DataNameTokens.INV_AWB_CLAIMEDBY, wrapper.getHeader());
+                        dataList.add(map);
+                    }
 
-                //Set DSResponse's properties
-                rafDsResponse.setStatus(0);
-                rafDsResponse.setStartRow(0);
-                rafDsResponse.setTotalRows(Integer.parseInt(wrapper.getDetail().size() + ""));
-                rafDsResponse.setEndRow(0 + dataList.size());
+                    //Set DSResponse's properties
+                    rafDsResponse.setStatus(0);
+                    rafDsResponse.setStartRow(0);
+                    rafDsResponse.setTotalRows(Integer.parseInt(wrapper.getDetail().size() + ""));
+                    rafDsResponse.setEndRow(0 + dataList.size());
+                }
             }
         } catch (Throwable e) {
             e.printStackTrace();

@@ -37,25 +37,27 @@ public class FetchCurrencyDataCommand implements RafDsCommand {
         try {
             currencyService = new CurrencyManagementService();
             InventoryPagingWrapper<Currency> currencysWrapper = currencyService.getCurrencyData(request);
-            if (currencysWrapper.isSuccess()) {
-                //Put result
-                System.out.println(currencysWrapper.getContent().size());
-                for (Currency currency : currencysWrapper.getContent()) {
-                    HashMap<String, String> map = new HashMap<String, String>();
-                    map.put(DataNameTokens.INV_CURRENCY_ID, currency.getId()+"");
-                    map.put(DataNameTokens.INV_CURRENCY_CURRENCY, currency.getCurrency());
-                    map.put(DataNameTokens.INV_CURRENCY_RATE, currency.getRate() + "");
-                    map.put(DataNameTokens.INV_CURRENCY_UPDATE_DATE, currency.getUpdatedDate()+"");
-                    map.put(DataNameTokens.INV_CURRENCY_UPDATED_BY, currency.getUpdatedBy());
+            if (currencysWrapper != null) {
+                if (currencysWrapper.isSuccess()) {
+                    //Put result
+                    System.out.println(currencysWrapper.getContent().size());
+                    for (Currency currency : currencysWrapper.getContent()) {
+                        HashMap<String, String> map = new HashMap<String, String>();
+                        map.put(DataNameTokens.INV_CURRENCY_ID, currency.getId() + "");
+                        map.put(DataNameTokens.INV_CURRENCY_CURRENCY, currency.getCurrency());
+                        map.put(DataNameTokens.INV_CURRENCY_RATE, currency.getRate() + "");
+                        map.put(DataNameTokens.INV_CURRENCY_UPDATE_DATE, currency.getUpdatedDate() + "");
+                        map.put(DataNameTokens.INV_CURRENCY_UPDATED_BY, currency.getUpdatedBy());
 
-                    dataList.add(map);
+                        dataList.add(map);
+                    }
+
+                    //Set DSResponse's properties
+                    rafDsResponse.setStatus(0);
+                    rafDsResponse.setStartRow(request.getStartRow());
+                    rafDsResponse.setTotalRows(Integer.parseInt(currencysWrapper.getTotalElements() + ""));
+                    rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
                 }
-
-                //Set DSResponse's properties
-                rafDsResponse.setStatus(0);
-                rafDsResponse.setStartRow(request.getStartRow());
-                rafDsResponse.setTotalRows(Integer.parseInt(currencysWrapper.getTotalElements() + ""));
-                rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
             }
         } catch (Throwable e) {
             e.printStackTrace();
