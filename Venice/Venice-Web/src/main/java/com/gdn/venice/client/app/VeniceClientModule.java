@@ -384,6 +384,11 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 FraudParameterRule31View.class,
                 FraudParameterRule31Presenter.MyProxy.class);
 
+        bindPresenter(FraudParameterRule35Presenter.class,
+                FraudParameterRule35Presenter.MyView.class,
+                FraudParameterRule35View.class,
+                FraudParameterRule35Presenter.MyProxy.class);
+
         bindPresenter(FinSalesSettlementReportPresenter.class,
                 FinSalesSettlementReportPresenter.MyView.class,
                 FinSalesSettlementReportView.class,
@@ -478,15 +483,5 @@ public class VeniceClientModule extends AbstractPresenterModule {
 //                OpnamePresenter.MyView.class,
 //                OpnameView.class,
 //                OpnamePresenter.MyProxy.class);
-
-        bindPresenter(FraudParameterRule35Presenter.class,
-                FraudParameterRule35Presenter.MyView.class,
-                FraudParameterRule35View.class,
-                FraudParameterRule35Presenter.MyProxy.class);
-
-        bindPresenter(FinSalesSettlementReportPresenter.class,
-                FinSalesSettlementReportPresenter.MyView.class,
-                FinSalesSettlementReportView.class,
-                FinSalesSettlementReportPresenter.MyProxy.class);
     }
 }
