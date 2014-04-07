@@ -1189,7 +1189,7 @@ public class DataNameTokens {
 	
         
         //Inventory Warehouse
-        public static String INV_WAREHOUSE_ID="id";
+        public static String INV_WAREHOUSE_ID="warehouseId";
         public static String INV_WAREHOUSE_CODE="code";
         public static String INV_WAREHOUSE_NAME="name";
         public static String INV_WAREHOUSE_DESCRIPTION="description";
@@ -1206,7 +1206,7 @@ public class DataNameTokens {
         public static String INV_WAREHOUSE_SPACE="space";
         public static String INV_WAREHOUSE_AVAILABLE_SPACE="availableSpace";
         
-        public static String INV_SHELF_ID="id";
+        public static String INV_SHELF_ID="shelfId";
         public static String INV_SHELF_CODE="code";
         public static String INV_SHELF_DESCRIPTION="description";
         public static String INV_SHELF_ACTIVESTATUS="activeStatus";
@@ -1215,19 +1215,19 @@ public class DataNameTokens {
         public static String INV_SHELF_APPROVAL_IN_PROCESS="approvalInProcess";
         public static String INV_SHELF_ORIGINID="originId";
         
-        public static String INV_STORAGE_ID="id";
+        public static String INV_STORAGE_ID="storageId";
         public static String INV_STORAGE_CODE="code";
         public static String INV_STORAGE_DESCRIPTION="description";
         public static String INV_STORAGE_TYPE="type";
                 
         //Inventory Currency
-        public static String INV_CURRENCY_ID="id";
+        public static String INV_CURRENCY_ID="currencyId";
         public static String INV_CURRENCY_CURRENCY="currency";
         public static String INV_CURRENCY_RATE="rate";
         public static String INV_CURRENCY_UPDATE_DATE="updateDate";
         public static String INV_CURRENCY_UPDATED_BY="updatedBy";
         
-    	public static String INV_ASN_ID = "id";
+    	public static String INV_ASN_ID = "asnId";
     	public static String INV_ASN_NUMBER = "asnNumber";
     	public static String INV_ASN_CREATED_DATE = "createdDate";
     	public static String INV_ASN_REFF_DATE = "referenceDate";

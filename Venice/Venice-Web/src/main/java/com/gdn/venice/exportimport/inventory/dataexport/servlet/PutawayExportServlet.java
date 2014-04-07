@@ -75,8 +75,8 @@ public class PutawayExportServlet extends HttpServlet {
 		String username = Util.getUserName(request);
 		
 		String putawayType = request.getParameter("putawayType");
-		String warehouseId = request.getParameter("warehouseId");	
-		String grnItemIds = request.getParameter("grnItemIds");		
+		String grnItemIds = request.getParameter("grnItemIds");	
+		String putawayDate = "";
 		
 		String[] split = grnItemIds.split(";");
 		List<String> grnItemIdList = new ArrayList<String>(); 
@@ -98,8 +98,9 @@ public class PutawayExportServlet extends HttpServlet {
 	        	GoodReceivedNoteItem grnItem = grnItemWrapper.getContent();
 	        	
 	        	Putaway putaway = putawayService.getPutawayByGrnId(Long.toString(grnItem.getGoodReceivedNote().getId()));
-	        	String putawayDate = putaway.getCreatedDate().toString();
+	        	putawayDate = putaway.getCreatedDate().toString();
 	        	putawayPrint.setReffNo(String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+	        	putawayPrint.setWarehouseCode(grnItem.getGoodReceivedNote().getReceivedWarehouse().getCode());
 	        	
 	        	RafDsRequest rafDsRequest = new RafDsRequest();
 	            HashMap<String, String> params = new HashMap<String, String>();
@@ -224,11 +225,24 @@ public class PutawayExportServlet extends HttpServlet {
 				detailCellstyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
 				detailCellstyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
 				detailCellstyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-				detailCellstyle.setAlignment(CellStyle.ALIGN_CENTER);	 
-				 
+				detailCellstyle.setAlignment(CellStyle.ALIGN_CENTER);	
+								 
 				int startRow = 0;
 				int startCol=0;
 				
+				HSSFRow titleRow = sheet.createRow((short) startRow);
+				titleRow.createCell(startCol).setCellValue(new HSSFRichTextString("PT Global Digital Niaga"));				
+				titleRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("warehouse Code"));
+				
+				titleRow = sheet.createRow(startRow+1);
+				titleRow.createCell(startCol).setCellValue(new HSSFRichTextString("PUTAWAY"));
+				titleRow.createCell(startCol+5).setCellValue(new HSSFRichTextString(putawayPrintList.get(0).getWarehouseCode()));	
+				
+				titleRow = sheet.createRow(startRow+2);
+				titleRow.createCell(startCol).setCellValue(new HSSFRichTextString("Putaway Type"));
+				titleRow.createCell(startCol+1).setCellValue(new HSSFRichTextString(putawayType));				
+				
+				startRow = 5;
 				HSSFRow headerRow = sheet.createRow((short) startRow);
 				headerRow.createCell(startCol).setCellValue(new HSSFRichTextString("No"));
 				headerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Putaway No"));
@@ -245,29 +259,49 @@ public class PutawayExportServlet extends HttpServlet {
 				}    
 										
 				//Looping for generating excel rows
-				HSSFRow row = null;
+				HSSFRow detailRow = null;
 				for (int i = 0; i < putawayPrintList.size(); i++) {
 					System.out.println("looping data");					
 					PutawayPrint pl = putawayPrintList.get(i);	
 					
 					startRow=startRow+1;
-					row = sheet.createRow(startRow);
+					detailRow = sheet.createRow(startRow);
 					
 					_log.debug("processing row: "+i+" warehouseItemId: "+pl.getPutawayNo() +", sku id: "+pl.getWarehouseSkuId());
-					HSSFCell cell = row.createCell(startCol);cell.setCellValue(new HSSFRichTextString(Integer.toString(i+1)));
-					cell = row.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getPutawayNo()));
-					cell = row.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getReffNo()));
-					cell = row.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseSkuId()));	
-					cell = row.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getItemName()));
-					cell = row.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(pl.getStorageCode()));
-					cell = row.createCell(startCol+6);cell.setCellValue(new HSSFRichTextString(pl.getQty()));
+					HSSFCell cell = detailRow.createCell(startCol);cell.setCellValue(new HSSFRichTextString(Integer.toString(i+1)));
+					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getPutawayNo()));
+					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getReffNo()));
+					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseSkuId()));	
+					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getItemName()));
+					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(pl.getStorageCode()));
+					cell = detailRow.createCell(startCol+6);cell.setCellValue(new HSSFRichTextString(pl.getQty()));
 					
 					//set style for list
 					for(int l=startCol; l<=startCol+6; l++){
-						HSSFCell cell2 = row.getCell(l);
+						HSSFCell cell2 = detailRow.getCell(l);
 						cell2.setCellStyle(detailCellstyle);
 					}	
-				}		
+				}	
+				
+				HSSFRow footerRow = sheet.createRow((short) startRow);
+				footerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Date"));
+				footerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Name"));
+				footerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Signature"));
+				
+				for(int l=startCol+1; l<=startCol+3; l++){
+					HSSFCell cell2 = footerRow.getCell(l);
+					cell2.setCellStyle(headerCellstyle);
+				}
+				
+				footerRow = sheet.createRow((short) startRow+1);
+				footerRow.createCell(startCol).setCellValue(new HSSFRichTextString("Prepared By"));
+				footerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString(putawayDate));
+				footerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString(username));
+				
+				for(int l=startCol; l<=startCol+2; l++){
+					HSSFCell cell2 = footerRow.getCell(l);
+					cell2.setCellStyle(detailCellstyle);
+				}
 				
 				//set style for list
 				for(int l=startCol; l<=startCol+6; l++){
