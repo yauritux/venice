@@ -21,5 +21,5 @@ public interface FrdParameterRule17DAO extends JpaRepository<FrdParameterRule17,
 		 " )";
 	
 	@Query(SUM_BLACKEDLISTEDCITY_RISK_POINT_BY_VENORDER)
-	public int sumBlacklistedCityRiskPointByVenOrder(VenOrder order);
+	public Integer sumBlacklistedCityRiskPointByVenOrder(VenOrder order);
 }
