@@ -155,8 +155,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
  				}
  												
  				com.google.gwt.user.client.Window.open(host + "Venice/PutawayExportServlet?grnItemIds="+sbSelectedRecords.toString()
- 						+"&putawayType="+putawayTypeComboBox.getValue().toString()
- 						+"&warehouseId="+warehouseComboBox.getValue().toString(), "_blank", null); 							
+ 						+"&putawayType="+putawayTypeComboBox.getValue().toString(), "_blank", null); 							
  			}
  		});
     }
