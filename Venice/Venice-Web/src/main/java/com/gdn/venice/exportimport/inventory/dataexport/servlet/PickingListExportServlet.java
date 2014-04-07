@@ -84,7 +84,7 @@ public class PickingListExportServlet extends HttpServlet {
 	        					
 	        ResultWrapper<WarehouseItem> whiWrapper = pickingListService.getWarehouseItem(req);
 	        ResultWrapper<PickingListDetail> plWrapper = pickingListService.getPickingListDetail(req);	
-	        if(whiWrapper!=null && plWrapper!=null){
+	        if(whiWrapper!=null && whiWrapper.isSuccess() && plWrapper!=null && plWrapper.isSuccess()){
 	        	System.out.println("set warehouse item");
 	        	plPrint.setWarehouseItem(whiWrapper.getContent());
 

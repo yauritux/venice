@@ -123,7 +123,7 @@ public class VenOrderSessionEJBCallback implements SessionCallback {
 			}
 			
 			VenOrderSessionEJBRemote orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
-			List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o where o.wcsOrderId ='" + venOrder.getWcsOrderId() +"'", 0, 0);							
+			List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o join fetch o.venOrderItems oi where o.wcsOrderId ='" + venOrder.getWcsOrderId() +"'", 0, 0);							
 			
 			Long existingStatus = venOrderList.get(0).getVenOrderStatus().getOrderStatusId();
 			if ((existingStatus == VeniceConstants.VEN_ORDER_STATUS_C && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP) 
