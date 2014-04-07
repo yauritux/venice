@@ -12,6 +12,7 @@ public class PutawayPrint {
 	String itemName;
 	String storageCode;
 	String qty;
+	String warehouseCode;
 	
 	public String getPutawayNo() {
 		return putawayNo;
@@ -49,4 +50,11 @@ public class PutawayPrint {
 	public void setQty(String qty) {
 		this.qty = qty;
 	}
+	public String getWarehouseCode() {
+		return warehouseCode;
+	}
+	public void setWarehouseCode(String warehouseCode) {
+		this.warehouseCode = warehouseCode;
+	}
+	
 }

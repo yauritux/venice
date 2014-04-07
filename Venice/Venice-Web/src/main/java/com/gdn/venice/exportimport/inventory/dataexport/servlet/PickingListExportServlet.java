@@ -142,40 +142,41 @@ public class PickingListExportServlet extends HttpServlet {
 				headerRow.createCell(startCol).setCellValue(new HSSFRichTextString("No"));
 				headerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
 				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Item SKU Name"));
-				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Qty"));
-				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("UoM"));
+				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Tipe Inventory"));
+				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("Merchant"));
+				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Qty"));
 					   
 				//set style for header
-				for(int i=startCol; i<=startCol+4; i++){
+				for(int i=startCol; i<=startCol+54; i++){
 					HSSFCell cell = headerRow.getCell(i);
 					cell.setCellStyle(headerCellstyle);
 				}    
 										
 				//Looping for generating excel rows
-				HSSFRow row = null;
+				HSSFRow detailRow = null;
 				for (int i = 0; i < plPrintList.size(); i++) {
 					System.out.println("looping data");					
 					PickingListPrint pl = plPrintList.get(i);	
 					
 					startRow=startRow+1;
-					row = sheet.createRow(startRow);
+					detailRow = sheet.createRow(startRow);
 					
 					_log.debug("processing row: "+i+" warehouseItemId: "+pl.getWarehouseItem().getId() +", warehouseItemCode: "+pl.getWarehouseItem().getCode());
-					HSSFCell cell = row.createCell(startCol);cell.setCellValue(new HSSFRichTextString(Integer.toString(i+1)));
-					cell = row.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getCode()));
-					cell = row.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
-					cell = row.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSumSO().toString()));	
-					cell = row.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getItemUnit()));
+					HSSFCell cell = detailRow.createCell(startCol);cell.setCellValue(new HSSFRichTextString(Integer.toString(i+1)));
+					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getCode()));
+					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
+					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getStockType().name()));	
+					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSupplier().getName()));
 					
 					//set style for list
-					for(int l=startCol; l<=startCol+4; l++){
-						HSSFCell cell2 = row.getCell(l);
+					for(int l=startCol; l<=startCol+5; l++){
+						HSSFCell cell2 = detailRow.getCell(l);
 						cell2.setCellStyle(detailCellstyle);
 					}	
 				}		
 				
 				//set style for list
-				for(int l=startCol; l<=startCol+4; l++){
+				for(int l=startCol; l<=startCol+5; l++){
 					sheet.autoSizeColumn(l);
 				}	
 				
