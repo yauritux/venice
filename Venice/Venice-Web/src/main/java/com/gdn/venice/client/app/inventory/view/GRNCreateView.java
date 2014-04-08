@@ -1,8 +1,8 @@
 package com.gdn.venice.client.app.inventory.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
@@ -12,6 +12,7 @@ import com.gdn.venice.client.data.RafDataSource;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -20,6 +21,11 @@ import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
+import com.smartgwt.client.data.fields.DataSourceTextField;
+import com.smartgwt.client.rpc.RPCCallback;
+import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.util.SC;
@@ -242,8 +248,22 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 					attributeImg.setHeight(16);
 					attributeImg.setWidth(16);
 					attributeImg.addClickHandler(new ClickHandler() {
-						public void onClick(ClickEvent event) {		
-							getUiHandlers().onFetchAttributeName(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY));	
+						public void onClick(ClickEvent event) {									
+					        RPCRequest request = new RPCRequest();
+					        request.setActionURL(GWT.getHostPageBaseURL() + "GRNManagementPresenterServlet?method=fetchAttributeName&type=RPC&itemId=" + record.getAttribute(DataNameTokens.INV_POCFF_ITEMID));
+					        request.setHttpMethod("POST");
+					        request.setUseSimpleHttp(true);
+					        RPCManager.sendRequest(request, new RPCCallback() {
+					                    @Override
+					                    public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+					                        String[] fieldName = rawData.toString().split(";");
+					                        DataSourceField[] dataSourceFields = new DataSourceField[fieldName.length];
+					                        for (int i = 0; i < fieldName.length; i++) {
+					                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
+					                        }
+					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields).show();
+					                    }
+					                });
 						}
 					});
 
@@ -405,23 +425,12 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
             @Override
             public void onClick(ClickEvent event) {
                 StringBuilder sb = new StringBuilder();
-                Set<String> attr = new HashSet<String>();
-                String attributeValue;
+                List<String> attr = new ArrayList<String>();
+                int counter = 1;
                 for (int r = 0; r < quantity; r++) {
                     for (int c = 0; c < dataSourceFields.length; c++) {
-                        if (attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()) == null
-                                || attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()).isEmpty()) {
-                            SC.warn("All attributes must be filled");
-                            return;
-                        } else {
-                            attributeValue = dataSourceFields[c].getName() + ":" + attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName());
-                            if (attr.contains(attributeValue)) {
-                                SC.warn(attributeValue + ", ERROR: duplicate attribute");
-                                return;
-                            } else {
-                                attr.add(attributeValue);
-                            }
-                        }
+                        attr.add(dataSourceFields[c].getName() + ":" + attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()) + ":" + counter);
+                        counter++;
                     }
                 }
 

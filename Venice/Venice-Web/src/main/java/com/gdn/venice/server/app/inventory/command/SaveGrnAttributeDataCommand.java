@@ -1,12 +1,10 @@
 package com.gdn.venice.server.app.inventory.command;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import com.gdn.inventory.exchange.entity.Attribute;
 import com.gdn.inventory.wrapper.ResultWrapper;
-import com.gdn.venice.server.app.inventory.service.ASNManagementService;
 import com.gdn.venice.server.app.inventory.service.GRNManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
 
@@ -27,7 +25,7 @@ public class SaveGrnAttributeDataCommand implements RafRpcCommand {
 
     @Override
     public String execute() {
-        Set<String> attribute = new HashSet<String>();
+        List<String> attribute = new ArrayList<String>();
         ResultWrapper<List<Attribute>> wrapper;
         try {
         	grnService = new GRNManagementService();
@@ -35,6 +33,7 @@ public class SaveGrnAttributeDataCommand implements RafRpcCommand {
 
             for (int i = 0; i < attr.length; i++) {
                 attribute.add(attr[i]);
+                System.out.println("attribute k "+i+": " +attr[i]);
             }            
             System.out.println("start save attribute to cache");
             wrapper = grnService.saveAttributesToCache(username, asnItemId, attribute);
