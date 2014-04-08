@@ -501,6 +501,9 @@ public class OrderServiceImpl implements OrderService {
 						venOrderContactDetail.setVenContactDetail(venContactDetail);
 						
 						venOrderContactDetailList.add(venOrderContactDetail);
+						
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrder::venContactDetail => " + venContactDetail.getContactDetail());
 					}
 					
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
