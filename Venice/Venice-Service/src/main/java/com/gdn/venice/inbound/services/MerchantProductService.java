@@ -12,8 +12,8 @@ import com.gdn.venice.persistence.VenMerchantProduct;
  */
 public interface MerchantProductService {
 	
-	public List<VenMerchantProduct> synchronizeVenMerchantProductRefs(
-			List<VenMerchantProduct> merchantProductRefs) throws VeniceInternalException;
+	public VenMerchantProduct synchronizeVenMerchantProductData(
+			VenMerchantProduct venMerchantProduct) throws VeniceInternalException;
 	public VenMerchantProduct synchronizeVenMerchantProductReferenceData(
 			VenMerchantProduct venMerchantProduct) throws VeniceInternalException;	
 	public List<VenMerchantProduct> findByWcsProductSku(String wcsProductSku);

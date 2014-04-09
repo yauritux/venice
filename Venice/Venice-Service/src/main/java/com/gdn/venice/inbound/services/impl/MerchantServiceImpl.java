@@ -45,6 +45,7 @@ public class MerchantServiceImpl implements MerchantService {
 	private EntityManager em;
 
 	@Override
+	@Transactional(readOnly = true, propagation = Propagation.NOT_SUPPORTED)
 	public List<VenMerchant> findByWcsMerchantId(String wcsMerchantId) {
 		return venMerchantDAO.findByWcsMerchantId(wcsMerchantId);
 	}
@@ -142,10 +143,19 @@ public class MerchantServiceImpl implements MerchantService {
 	}
 	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public VenMerchant synchronizeVenMerchantData(VenMerchant venMerchant)
 	   throws VeniceInternalException {
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantData::BEGIN, venMerchant = " + venMerchant);
+		
 		VenMerchant merchant = venMerchant;
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantData::assigned venMerchant into merchant, merchant ID now is : "
+				+ merchant.getMerchantId());
+		
 		if (venMerchant != null) {
 			List<VenMerchant> merchantList = findByWcsMerchantId(venMerchant.getWcsMerchantId());
 			if (merchantList != null && (!merchantList.isEmpty())) {
@@ -164,10 +174,14 @@ public class MerchantServiceImpl implements MerchantService {
 						, "synchronizeVenMerchantData::new venMerchant ID = " + merchant.getMerchantId());				
 			}
 		} 
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantData::END, returning merchant = " + merchant);
 		return merchant;
 	}
 
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public List<VenMerchant> synchronizeVenMerchantReferences(
 			List<VenMerchant> merchantRefs) throws VeniceInternalException {
 
@@ -188,14 +202,14 @@ public class MerchantServiceImpl implements MerchantService {
 	}
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public VenMerchant persist(VenMerchant venMerchant)
 			throws VeniceInternalException {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "persist::BEGIN, venMerchant = " + venMerchant);
 		
-		VenMerchant persistedVenMerchant = null;
+		VenMerchant persistedVenMerchant = venMerchant;
 		
 		if (venMerchant != null) {
 			if (!em.contains(venMerchant)) {
@@ -209,8 +223,6 @@ public class MerchantServiceImpl implements MerchantService {
 				}
 			}
 		}
-		
-		persistedVenMerchant  = venMerchant;
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "persist::EOM, returning persistedVenMerchant = " + persistedVenMerchant);
