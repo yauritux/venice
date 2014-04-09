@@ -161,13 +161,13 @@ public class BCAIBFundInServiceImpl extends AbstractFundInService{
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(accountNumber, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(accountNumber, paymentAmount, REPORT_TYPE,null);
 		
 		if(isInternetBankingFundInAlreadyExist(accountNumber, REPORT_TYPE.id())){
 			order = null;
 		}
 		
-		if(order != null && !isOrderPaymentExist(accountNumber, paymentAmount, REPORT_TYPE)){
+		if(order != null && !isOrderPaymentExist(accountNumber, paymentAmount, REPORT_TYPE,null)){
 			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + accountNumber);
 			return null;
 		}
@@ -176,7 +176,7 @@ public class BCAIBFundInServiceImpl extends AbstractFundInService{
 			VenOrderPaymentAllocation orderPaymentAllocation 
 				= getPaymentAllocationByRelatedPayment(accountNumber, 
 						                               paymentAmount, 
-						                               REPORT_TYPE);
+						                               REPORT_TYPE,null);
 			
 			List<FinArFundsInReconRecord> fundInReconList = orderPaymentAllocation.getVenOrderPayment().getFinArFundsInReconRecords();
 			fundInRecon = fundInReconList.get(0);

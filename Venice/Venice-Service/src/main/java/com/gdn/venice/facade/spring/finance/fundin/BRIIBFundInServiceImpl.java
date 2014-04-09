@@ -160,13 +160,13 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 			return null;
 		}
 		
-		VenOrder order = getOrderByRelatedPayment(billReferenceNo, paymentAmount, REPORT_TYPE);
+		VenOrder order = getOrderByRelatedPayment(billReferenceNo, paymentAmount, REPORT_TYPE,null);
 		
 		if(isInternetBankingFundInAlreadyExist(billReferenceNo, REPORT_TYPE.id())){
 			order = null;
 		}
 		
-		if(order != null && !isOrderPaymentExist(billReferenceNo, paymentAmount, REPORT_TYPE)){
+		if(order != null && !isOrderPaymentExist(billReferenceNo, paymentAmount, REPORT_TYPE,null)){
 			CommonUtil.logDebug(CLASS_NAME, "Payments were found in the import file that do not exist in the payment schedule in VENICE:" + billReferenceNo);
 			return null;
 		}
@@ -175,7 +175,7 @@ public class BRIIBFundInServiceImpl extends AbstractFundInService{
 			VenOrderPaymentAllocation orderPaymentAllocation 
 				= getPaymentAllocationByRelatedPayment(billReferenceNo, 
 						                               paymentAmount, 
-						                               REPORT_TYPE);
+						                               REPORT_TYPE,null);
 			
 			List<FinArFundsInReconRecord> fundInReconList = orderPaymentAllocation.getVenOrderPayment().getFinArFundsInReconRecords();
 			fundInRecon = fundInReconList.get(0);
