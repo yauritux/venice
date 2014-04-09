@@ -43,12 +43,13 @@ public class OrderItemContactDetailServiceImpl implements OrderItemContactDetail
 		
 		VenOrderItemContactDetail persistedOrderItemContactDetail = null;
 		
-		/*
-		if (!em.contains(venOrderItemContactDetail)) {
+		if ((venOrderItemContactDetail.getOrderItemContactDetailId() == null) && (!em.contains(venOrderItemContactDetail))) {
 			// venOrderItemContactDetail is in detach mode, hence should call save explicitly to make it attached
 			try {
 				persistedOrderItemContactDetail = venOrderItemContactDetailDAO.save(venOrderItemContactDetail);
 			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), e);
+				e.printStackTrace();
 				CommonUtil.logAndReturnException(new CannotPersistOrderItemContactDetailException(
 						"Cannot persist VenOrderItemContactDetail, " + e
 						, VeniceExceptionConstants.VEN_EX_000028)
@@ -57,11 +58,6 @@ public class OrderItemContactDetailServiceImpl implements OrderItemContactDetail
 		} else {
 			persistedOrderItemContactDetail = venOrderItemContactDetail;
 		}
-		*/
-		if (em.contains(venOrderItemContactDetail)) {
-			em.detach(venOrderItemContactDetail);
-		}
-		persistedOrderItemContactDetail = venOrderItemContactDetail;
 		
 		return persistedOrderItemContactDetail;
 	}
@@ -73,16 +69,6 @@ public class OrderItemContactDetailServiceImpl implements OrderItemContactDetail
 			throws VeniceInternalException {
 		List<VenOrderItemContactDetail> persistedOrderItemContactDetails = new ArrayList<VenOrderItemContactDetail>();
 				
-		/*
-		try {
-			persistedOrderItemContactDetails = venOrderItemContactDetailDAO.save(venOrderItemContactDetails);
-		} catch (Exception e) {
-			CommonUtil.logAndReturnException(new CannotPersistOrderItemContactDetailException
-					("Cannot persist VenOrderItemContactDetail, " + e
-					, VeniceExceptionConstants.VEN_EX_000028)
-			     , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-		}
-		*/
 		for (VenOrderItemContactDetail itemContactDetail : venOrderItemContactDetails) {
 			persistedOrderItemContactDetails.add(persist(itemContactDetail));
 		}
