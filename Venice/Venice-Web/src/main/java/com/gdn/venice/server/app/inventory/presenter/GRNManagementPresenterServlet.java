@@ -12,6 +12,7 @@ import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.command.FetchAttributeNameDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNItemDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchItemAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveGrnAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveGrnDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
@@ -71,6 +72,10 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 			if (request.getParameter(DataNameTokens.INV_POCFF_ITEMID)!=null) {
 				params.put(DataNameTokens.INV_POCFF_ITEMID, request.getParameter(DataNameTokens.INV_POCFF_ITEMID));				
 			}
+			
+			if (request.getParameter("fieldName")!=null) {
+				params.put("fieldName", request.getParameter("fieldName"));				
+			}
 						
 			rafDsRequest.setParams(params);
 			
@@ -93,13 +98,13 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 					e.printStackTrace();
 				}
 			}else if(method.equals("fetchItemAttributeData")){
-//				RafDsCommand fetchItemAttributeDataCommand = new FetchItemAttributeDataCommand(rafDsRequest);
-//				RafDsResponse rafDsResponse = fetchItemAttributeDataCommand.execute();
-//				try{
-//					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
-//				}catch(Exception e){
-//					e.printStackTrace();
-//				}
+				RafDsCommand fetchItemAttributeDataCommand = new FetchItemAttributeDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchItemAttributeDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 			}							
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");	

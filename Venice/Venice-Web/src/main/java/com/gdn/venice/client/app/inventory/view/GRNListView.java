@@ -216,7 +216,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
 					                        for (int i = 0; i < fieldName.length; i++) {
 					                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
 					                        }
-					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_GRN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), dataSourceFields).show();
+					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_GRN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), dataSourceFields, rawData.toString()).show();
 					                    }
 					                });
 						}
@@ -251,7 +251,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
     }
     
     @Override
-    public Window buildAttributeWindow(final String grnItemId, String itemId, final DataSourceField[] dataSourceFields) {
+    public Window buildAttributeWindow(final String grnItemId, String itemId, final DataSourceField[] dataSourceFields, String fieldName) {
         attributeWindow = new Window();
         attributeWindow.setWidth(600);
         attributeWindow.setHeight(400);
@@ -268,7 +268,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
         dataSourceFields[0].setPrimaryKey(true);
         RafDataSource ds = new RafDataSource(
                 "/response/data/*",
-                GWT.getHostPageBaseURL() + GRNListPresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeData&type=DataSource",
+                GWT.getHostPageBaseURL() + GRNListPresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeData&type=DataSource&fieldName="+fieldName,
                 null,
                 null,
                 null,
@@ -312,61 +312,6 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
 
         return attributeWindow;
     }
-    
-//    private Window buildAttributeWindow(String itemId) {
-//		final Window addEditAttributeWindow = new Window();
-//		addEditAttributeWindow.setWidth(400);
-//		addEditAttributeWindow.setHeight(400);
-//		addEditAttributeWindow.setShowMinimizeButton(false);
-//		addEditAttributeWindow.setIsModal(true);
-//		addEditAttributeWindow.setShowModalMask(true);
-//		addEditAttributeWindow.centerInPage();
-//		addEditAttributeWindow.setTitle("View Attribute");
-//
-//		ToolStrip attributeToolStrip = new ToolStrip();
-//		attributeToolStrip.setWidth100();
-//
-//		final DataSource attributeData = GRNData.getItemAttributeViewData(itemId);
-//		
-//		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();  
-//		map.put("imei", "IMEI");
-//		map.put("serial", "Serial Number");
-//		map.put("expired", "Expired Date");
-//		attributeData.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setValueMap(map);
-//		
-//		attributeListGrid = new ListGrid();
-//		attributeListGrid.setDataSource(attributeData);
-//		attributeListGrid.setAutoFetchData(true);
-//		attributeListGrid.setCanEdit(false);
-//		attributeListGrid.setShowFilterEditor(false);
-//		attributeListGrid.setSelectionType(SelectionStyle.SIMPLE);
-//		attributeListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
-//		attributeListGrid.setShowRowNumbers(true);
-//		attributeListGrid.setSaveLocally(true);
-//		
-//		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(attributeData);
-//		ListGridField finalListGridField[] = {listGridField[0], listGridField[1], listGridField[2]};        
-//		attributeListGrid.setFields(finalListGridField);
-//		
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_ID).setHidden(true);
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME).setWidth("30%");
-//		attributeListGrid.getField(DataNameTokens.INV_ITEM_ATTRIBUTE_VALUE).setWidth("70%");
-//		attributeListGrid.groupBy(DataNameTokens.INV_ITEM_ATTRIBUTE_NAME);
-//				 
-//		VLayout attributeLayout = new VLayout();
-//		attributeLayout.setHeight100();
-//		attributeLayout.setWidth100();
-//		attributeLayout.setMembers(attributeToolStrip, attributeListGrid);
-//		addEditAttributeWindow.addItem(attributeLayout);
-//		
-//		addEditAttributeWindow.addCloseClickHandler(new CloseClickHandler() {
-//			public void onCloseClick(CloseClientEvent event) {
-//				addEditAttributeWindow.destroy();
-//			}
-//		});
-//
-//		return addEditAttributeWindow;
-//	}
 
     @Override
     public void loadGRNData(DataSource dataSource) {

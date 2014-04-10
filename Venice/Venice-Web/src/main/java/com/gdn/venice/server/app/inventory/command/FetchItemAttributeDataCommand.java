@@ -52,7 +52,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         try {
         	grnService = new GRNManagementService();
         	asnService = new ASNManagementService();
-        	
+
         	WarehouseItem whi = new WarehouseItem();
         	
         	String itemIdParam = null;
@@ -116,13 +116,31 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         			System.out.println("warehouseItem found");
         			List<Attribute> attList = grnService.getAttributeDataListByWarehouseItem(whItem.getId().toString());
         			System.out.println("attribute found: "+attList.size());
-        			for(Attribute att : attList){    
-        				HashMap<String, String> map = new HashMap<String, String>();
-//        				        				          				        				         				 
-            			dataList.add(map);
+        			
+        			String[] fieldName = request.getParams().get("fieldName").split(";");
+    				int counter = 0;
+    				HashMap<String, String> map = new HashMap<String, String>();
+        			for(int i=0;i<attList.size();i++){   
+            			for(int j=0;j<fieldName.length;j++){  
+        					if(fieldName[j].equalsIgnoreCase(attList.get(i).getName())){
+                				System.out.println("put fieldName: "+fieldName[j]+", value: "+attList.get(i).getValue());
+        						map.put(fieldName[j], attList.get(i).getValue());
+        						counter++;
+        						break;
+        					}
+        				}
+        				
+            			if(counter==fieldName.length){
+            	        	System.out.println("add map to list: "+map.toString());
+            				counter = 0;
+            				dataList.add(map);
+            	        	map = new HashMap<String, String>();
+            			}
         			}
         		}            	
-        	}     		        		
+        	}    
+        	
+        	System.out.println("dataList size: "+dataList.size());
 
 	        rafDsResponse.setStatus(0);
 	        rafDsResponse.setTotalRows(dataList.size());

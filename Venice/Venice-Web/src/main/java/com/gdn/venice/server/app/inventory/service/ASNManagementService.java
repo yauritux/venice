@@ -92,13 +92,13 @@ public class ASNManagementService{
 	}
 	
 	public InventoryPagingWrapper<PurchaseOrder> getPOData(RafDsRequest request, String reffNumber) throws HttpException, IOException{
-		_log.info("getPOData");
+		System.out.println("getPOData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "purchaseOrder/getAllCreated?username=" + request.getParams().get("username")
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
     	
         Map<String, Object> searchMap = new HashMap<String, Object>();
         
@@ -108,7 +108,7 @@ public class ASNManagementService{
         numberCriteria.setValue(reffNumber);
         numberCriteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.INV_PO_NUMBER));
 				
-        _log.info("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
+        System.out.println("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
         searchMap.put(numberCriteria.getFieldName(), numberCriteria.getValue());
         
         String json = mapper.writeValueAsString(searchMap);
@@ -117,7 +117,7 @@ public class ASNManagementService{
             httpPost.setRequestHeader("Content-Type", "application/json");
                
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -125,7 +125,7 @@ public class ASNManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug("return value: "+sb.toString());
+            System.out.println("return value: "+sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PurchaseOrder>>() {});
         } else {
