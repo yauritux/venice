@@ -210,16 +210,20 @@ public abstract class ActivityReportProcessor {
     			e.printStackTrace();
     		}
             
-            if (logAirwayBillGetStatus.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
-
-                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
-
-                isOverrideSuccess = false;
-            } else {
-                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, uploadUsername, logProviderCode);
-                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
-            }
-
+    		if(logAirwayBillGetStatus!=null){
+	            if (logAirwayBillGetStatus.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
+	
+	                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
+	
+	                isOverrideSuccess = false;
+	            	}else {
+		                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, uploadUsername, logProviderCode);
+		                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
+		            } 
+	           	}else {
+	                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, uploadUsername, logProviderCode);
+	                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
+	            }
             airwayBillTransaction.setAirwayBillNo(airwayBillNoFromLogistic);
 
             try {
