@@ -20,6 +20,7 @@ import com.gdn.venice.constants.VenOrderStatusConstants;
 import com.gdn.venice.dao.FinSalesRecordDAO;
 import com.gdn.venice.dao.LogActivityReportUploadDAO;
 import com.gdn.venice.dao.LogAirwayBillDAO;
+import com.gdn.venice.dao.LogInvoiceAirwaybillRecordDAO;
 import com.gdn.venice.dao.LogFileUploadLogDAO;
 import com.gdn.venice.dao.VenOrderItemStatusHistoryDAO;
 import com.gdn.venice.facade.LogActivityReconRecordSessionEJBRemote;
@@ -38,6 +39,7 @@ import com.gdn.venice.persistence.LogActivityReportUpload;
 import com.gdn.venice.persistence.LogAirwayBill;
 import com.gdn.venice.persistence.LogApprovalStatus;
 import com.gdn.venice.persistence.LogFileUploadLog;
+import com.gdn.venice.persistence.LogInvoiceAirwaybillRecord;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.LogReconActivityRecordResult;
 import com.gdn.venice.persistence.LogReportStatus;
@@ -201,7 +203,15 @@ public abstract class ActivityReportProcessor {
             getLogger().debug("Airway Bill Engine : " + airwayBillNoFromEngine);
             getLogger().debug("Airway Bill Logistics : " + airwayBillNoFromLogistic);
             
-            if (logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
+            LogAirwayBill logAirwayBillGetStatus = new LogAirwayBill();
+            
+            try {
+            	logAirwayBillGetStatus = logAirwayBillDAO.findByAirwayBillId(logAirwayBill.getAirwayBillId());
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+            
+            if (logAirwayBillGetStatus.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
 
                 getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
 
