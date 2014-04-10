@@ -252,6 +252,106 @@
                             </target>
                         </configuration>
                     </execution>
+                     <execution>
+                        <id>generate_CIMB_Niaga_installment</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>    
+                                <jar destfile="${project.build.directory}/batch-jars/CIMBNiagaInstallmentReportBatchJob.jar">
+                                    <fileset dir="${project.build.directory}/classes">
+                                        <include name="**/CIMBNiagaInstallmentReportBatchJob.class"/>
+                                    </fileset>
+                                    <manifest>
+                                        <attribute name="Class-Path" value="${classpath}" />
+                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.CIMBNiagaInstallmentReportBatchJob" />
+                                    </manifest>
+                                </jar>
+                            </target>
+                        </configuration>
+                    </execution>
+                     <execution>
+                        <id>generate_Danamon_Credit_Card</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>    
+                                <jar destfile="${project.build.directory}/batch-jars/DanamonCreditCardReportBatchJob.jar">
+                                    <fileset dir="${project.build.directory}/classes">
+                                        <include name="**/DanamonCreditCardReportBatchJob.class"/>
+                                    </fileset>
+                                    <manifest>
+                                        <attribute name="Class-Path" value="${classpath}" />
+                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.DanamonCreditCardReportBatchJob" />
+                                    </manifest>
+                                </jar>
+                            </target>
+                        </configuration>
+                    </execution>
+                     <execution>
+                        <id>generate_Bank_Mega_Installment</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>    
+                                <jar destfile="${project.build.directory}/batch-jars/BankMegaInstallmentReportBatchJob.jar">
+                                    <fileset dir="${project.build.directory}/classes">
+                                        <include name="**/BankMegaInstallmentReportBatchJob.class"/>
+                                    </fileset>
+                                    <manifest>
+                                        <attribute name="Class-Path" value="${classpath}" />
+                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.BankMegaInstallmentReportBatchJob" />
+                                    </manifest>
+                                </jar>
+                            </target>
+                        </configuration>
+                    </execution>
+                     <execution>
+                        <id>generate_BII_Installment</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>    
+                                <jar destfile="${project.build.directory}/batch-jars/BIIInstalmentReportBatchJob.jar">
+                                    <fileset dir="${project.build.directory}/classes">
+                                        <include name="**/BIIInstalmentReportBatchJob.class"/>
+                                    </fileset>
+                                    <manifest>
+                                        <attribute name="Class-Path" value="${classpath}" />
+                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.BIIInstalmentReportBatchJob" />
+                                    </manifest>
+                                </jar>
+                            </target>
+                        </configuration>
+                    </execution>
+                     <execution>
+                        <id>generate_ANZ_Installment</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>    
+                                <jar destfile="${project.build.directory}/batch-jars/ANZInstallmentReportBatchJob.jar">
+                                    <fileset dir="${project.build.directory}/classes">
+                                        <include name="**/ANZInstallmentReportBatchJob.class"/>
+                                    </fileset>
+                                    <manifest>
+                                        <attribute name="Class-Path" value="${classpath}" />
+                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.ANZInstallmentReportBatchJob" />
+                                    </manifest>
+                                </jar>
+                            </target>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
