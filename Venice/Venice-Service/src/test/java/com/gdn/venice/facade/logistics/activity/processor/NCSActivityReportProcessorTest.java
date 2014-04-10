@@ -6,7 +6,6 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -94,9 +93,6 @@ public class NCSActivityReportProcessorTest {
 		VenOrderItem orderItemES = new VenOrderItem();
 		orderItemES.setVenOrderStatus(VenOrderStatusES.createVenOrderStatus());
 		
-		AirwayBillTransaction awbTransaction = new AirwayBillTransaction();
-		awbTransaction.setKodeLogistik(""+VeniceConstants.VEN_LOGISTICS_PROVIDER_MSG);
-		
 		when(venOrderItemDAOMock.findWithVenOrderStatusByWcsOrderItemId(anyString()))
 			.thenReturn(orderItemES);
 		
@@ -104,9 +100,6 @@ public class NCSActivityReportProcessorTest {
 		
 		when(logAirwayBillDAOMock.countByGdnReference(anyString()))
 			.thenReturn(1);
-		
-		when(awbConnMock.getAirwayBillTransaction(anyString()))
-			.thenReturn(awbTransaction);
 		
 		when(awbConnMock.getAirwayBillTransaction(anyString()))
 			.thenReturn(null);
@@ -142,38 +135,10 @@ public class NCSActivityReportProcessorTest {
 			.thenReturn(awbTransaction);
 		
 		doNothing().when(sutSpy).processOrderItemAfterAWBEngine(orderItemES, getDailyReportNCSWithCXStatus(), activityReportData, fileUploadLog, awbTransaction);
-		doReturn(false).when(sutSpy).differentLogisticProvider(getDailyReportNCSWithCXStatus(),activityReportData,null);
 		
 		sutSpy.processEachOrderItem(getDailyReportNCSWithCXStatus(), activityReportData, fileUploadLog);
 		
 		verify(sutSpy, times(1)).processOrderItemAfterAWBEngine(orderItemES, getDailyReportNCSWithCXStatus(), activityReportData, fileUploadLog, awbTransaction);
-	}
-	
-	@Test
-	public void differentLogisticProvider_sameGdnReffDifferentLogisticProvider_executeDifferentLogisticProvider() throws Exception{
-		ActivityReportData activityReportData = new ActivityReportData();
-		
-		LogFileUploadLog fileUploadLog = new LogFileUploadLog();
-		VenOrderItem orderItemES = new VenOrderItem();
-		orderItemES.setVenOrderStatus(VenOrderStatusES.createVenOrderStatus());
-		
-		AirwayBillTransaction awbTransaction = new AirwayBillTransaction();
-		awbTransaction.setKodeLogistik(""+VeniceConstants.VEN_LOGISTICS_PROVIDER_MSG);
-		
-		when(venOrderItemDAOMock.findWithVenOrderStatusByWcsOrderItemId(anyString()))
-			.thenReturn(orderItemES);
-		
-		when(filterMock.getWcsOrderItemId(anyString())).thenReturn("12345");
-		
-		when(logAirwayBillDAOMock.countByGdnReference(anyString()))
-			.thenReturn(1);
-		
-		when(awbConnMock.getAirwayBillTransaction(anyString()))
-			.thenReturn(awbTransaction);
-
-		sutSpy.differentLogisticProvider(getDailyReportNCSWithCXStatus(),activityReportData,""+VeniceConstants.VEN_LOGISTICS_PROVIDER_MSG);
-		
-		assertEquals(1, activityReportData.getFailedProviderForGdnReff().size());
 	}
 	
 	@Test

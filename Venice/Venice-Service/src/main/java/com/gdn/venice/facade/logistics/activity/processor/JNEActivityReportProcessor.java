@@ -153,14 +153,10 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 		
 		boolean isOrderItemAfterAWBEngine = (totalAirwayBillByGDNRef == 0) && (airwayBillTransaction != null) && (airwayBillTransaction.getStatus() != null);
 		
-		if(isOrderItemAfterAWBEngine){
-			if(differentLogisticProvider(dailyReportOrderItem,activityReportData,airwayBillTransaction.getKodeLogistik()))
-				return;
-			
+		if(isOrderItemAfterAWBEngine)
 			processOrderItemAfterAWBEngine(existingVenOrderItem, dailyReportOrderItem, activityReportData, fileUploadLog, airwayBillTransaction);
-		}else {
+		else
 			processOrderItemBeforeAWBEngine(existingVenOrderItem, dailyReportOrderItem, activityReportData, fileUploadLog);
-		}
 		
 	}
 	
@@ -481,15 +477,6 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 		return true;
 	}
 	
-	public boolean differentLogisticProvider(DailyReportJNE dailyReportOrderItem, ActivityReportData activityReportData, String kodeLogisticPorvider){	
-		if(!kodeLogisticPorvider.equalsIgnoreCase("JNE")){
-			addFailedRecordCausedByDifferentProviderForGdnReffException(dailyReportOrderItem,activityReportData,kodeLogisticPorvider);
-			return true;
-		}else{
-			return false;
-		}
-	};
-	
 	private String getReceiverRelation(DailyReportJNE dailyReportOrderItem){
 		if ((dailyReportOrderItem.getReceiver().equalsIgnoreCase(dailyReportOrderItem.getRecipient())) || (dailyReportOrderItem.getReceiver().contains(dailyReportOrderItem.getRecipient()))) {
 		    return "Yang bersangkutan";
@@ -560,12 +547,6 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 		activityReportData.getFailedItemList()
 			.put("No : " + dailyReportJNE.getNumber().replace(".0", "") + ", GDN Ref : " + dailyReportJNE.getGdnRefNumber(), "System/connection problem");
 	}
-	
-	private void addFailedRecordCausedByDifferentProviderForGdnReffException(DailyReportJNE dailyReportJNE, ActivityReportData activityReportData, String logisticProvider){
-
-		activityReportData.getFailedProviderForGdnReff()
-			.put("No : " + dailyReportJNE.getNumber().replace(".0", "") + ", GDN Ref : " + dailyReportJNE.getGdnRefNumber(), logisticProvider);
-	}	
 
 	private void addFailedRecordCausedByReceivedDateException(DailyReportJNE dailyReportJNE, ActivityReportData activityReportData, Exception e){
 		_log.error("Received Date Problem", e);
