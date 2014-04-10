@@ -82,7 +82,7 @@ public class InvoiceReportImportNCSServlet extends HttpServlet {
 		boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 		_log.info("InvoiceReportImportNCSServlet:hello");
 
-		String invoiceNumber = request.getParameter("invoiceNumber");
+		String invoiceNumber = (String)request.getParameter("invoiceNumber");
 		Locator<Object> locator = null;
 		notificationText = LogisticsServletConstants.JAVASCRIPT_ALERT_NOTIFICATION_TEXT_DEFAULT;
 		
@@ -92,7 +92,7 @@ public class InvoiceReportImportNCSServlet extends HttpServlet {
 			String filePath = System.getenv("VENICE_HOME") + LogisticsServletConstants.INVOICE_REPORT_FOLDER;
 			SimpleDateFormat sdf = new SimpleDateFormat(LogisticsServletConstants.DATE_TIME_FORMAT_STRING);
 			String fileName = "";
-			if (invoiceNumber == null || invoiceNumber.isEmpty()) {
+			if (invoiceNumber == null || invoiceNumber.isEmpty() || invoiceNumber.equals("null")) {
 				String errMsg = LogisticsServletConstants.EXCEPTION_TEXT_INVOICE_NUMBER_NULL;
 				_log.error(errMsg);
 				notificationText = notificationText.replaceFirst("REPLACE", errMsg);
@@ -135,6 +135,14 @@ public class InvoiceReportImportNCSServlet extends HttpServlet {
 
 			try {
 				fileItemsList = servletFileUpload.parseRequest(request);
+				
+				if(fileItemsList.get(0).getName()==null || fileItemsList.get(0).getName().equals("") || fileItemsList.get(0).getSize()<=0){
+					String errMsg = LogisticsServletConstants.EXCEPTION_TEXT_INVOICE_FILE_NULL;
+					_log.error(errMsg);
+					notificationText = notificationText.replaceFirst("REPLACE", errMsg);
+					response.getOutputStream().println(notificationText);
+					return;
+				}
 			} catch (FileUploadException e) {
 				String errMsg = LogisticsServletConstants.EXCEPTION_TEXT_FILE_PARSE + e.getMessage();
 				e.printStackTrace();
