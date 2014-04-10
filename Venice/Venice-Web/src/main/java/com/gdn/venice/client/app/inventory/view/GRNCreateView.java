@@ -354,7 +354,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         dataSourceFields[0].setPrimaryKey(true);
         RafDataSource ds = new RafDataSource(
                 "/response/data/*",
-                null,
+                GWT.getHostPageBaseURL() + GRNCreatePresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeData&type=DataSource",
                 null,
                 null,
                 null,

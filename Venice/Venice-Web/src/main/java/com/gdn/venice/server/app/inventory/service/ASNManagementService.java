@@ -112,7 +112,7 @@ public class ASNManagementService{
         searchMap.put(numberCriteria.getFieldName(), numberCriteria.getValue());
         
         String json = mapper.writeValueAsString(searchMap);
-        _log.debug(json);
+        System.out.println("json: "+json);
         httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
             httpPost.setRequestHeader("Content-Type", "application/json");
                

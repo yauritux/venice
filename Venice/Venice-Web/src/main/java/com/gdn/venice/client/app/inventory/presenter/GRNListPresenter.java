@@ -6,7 +6,6 @@ import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.handler.GRNListUiHandler;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.widgets.RafViewLayout;
-import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.gwtplatform.dispatch.client.DispatchAsync;
 import com.gwtplatform.mvp.client.EventBus;
@@ -20,11 +19,6 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
-import com.smartgwt.client.data.fields.DataSourceTextField;
-import com.smartgwt.client.rpc.RPCCallback;
-import com.smartgwt.client.rpc.RPCManager;
-import com.smartgwt.client.rpc.RPCRequest;
-import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.grid.ListGrid;
 
@@ -69,25 +63,4 @@ public class GRNListPresenter extends Presenter<GRNListPresenter.MyView, GRNList
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetContextArea, this);
 	}
-	
-    @Override
-    public void onFetchAttributeName(final String grnItemId, final String itemId) {
-        RPCRequest request = new RPCRequest();
-        request.setActionURL(GWT.getHostPageBaseURL() + grnManagementPresenterServlet + "?method=fetchAttributeName&type=RPC&itemId=" + itemId);
-        request.setHttpMethod("POST");
-        request.setUseSimpleHttp(true);
-        RPCManager.sendRequest(request,
-                new RPCCallback() {
-                    @Override
-                    public void execute(RPCResponse response,
-                            Object rawData, RPCRequest request) {
-                        String[] fieldName = rawData.toString().split(";");
-                        DataSourceField[] dataSourceFields = new DataSourceField[fieldName.length];
-                        for (int i = 0; i < fieldName.length; i++) {
-                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
-                        }
-                        getView().buildAttributeWindow(grnItemId, itemId, dataSourceFields).show();
-                    }
-                });
-    }
 }

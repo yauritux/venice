@@ -133,10 +133,11 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
         
         final TextAreaItem notesItem = new TextAreaItem(DataNameTokens.INV_ASN_SPECIAL_NOTES, "Special Notes");
         notesItem.setValue(record.getAttribute(DataNameTokens.INV_ASN_SPECIAL_NOTES));
-        
-        
+                
         asnDetailForm.setFields(asnNumberItem, reffDateItem, reffNumberItem, estDateItem, inventoryTypeItem, supplierCodeItem, 
         		DestinationItem, supplierNameItem, notesItem);
+        
+        asnDetailForm.setDisabled(true);
         
         itemListGrid = buildItemListGrid(id);
         itemListGrid.setCanEdit(false);

@@ -18,6 +18,11 @@ import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
+import com.smartgwt.client.data.fields.DataSourceTextField;
+import com.smartgwt.client.rpc.RPCCallback;
+import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.types.DSOperationType;
@@ -144,7 +149,8 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
                 
         asnDetailForm.setFields(grnNumberItem, reffDateItem, asnNumberItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
         		destinationItem, supplierNameItem, doNumberItem);
-                
+        asnDetailForm.setDisabled(true);
+        
         itemListGrid = buildItemListGrid(id);
         itemListGrid.setCanEdit(false);
         
@@ -198,7 +204,21 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
 					attributeImg.setWidth(16);
 					attributeImg.addClickHandler(new ClickHandler() {
 						public void onClick(ClickEvent event) {		
-							getUiHandlers().onFetchAttributeName(record.getAttribute(DataNameTokens.INV_GRN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID));
+					        RPCRequest request = new RPCRequest();
+					        request.setActionURL(GWT.getHostPageBaseURL() + "GRNManagementPresenterServlet?method=fetchAttributeName&type=RPC&itemId=" + record.getAttribute(DataNameTokens.INV_POCFF_ITEMID));
+					        request.setHttpMethod("POST");
+					        request.setUseSimpleHttp(true);
+					        RPCManager.sendRequest(request, new RPCCallback() {
+					                    @Override
+					                    public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+					                        String[] fieldName = rawData.toString().split(";");
+					                        DataSourceField[] dataSourceFields = new DataSourceField[fieldName.length];
+					                        for (int i = 0; i < fieldName.length; i++) {
+					                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
+					                        }
+					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_GRN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), dataSourceFields).show();
+					                    }
+					                });
 						}
 					});
 
