@@ -77,6 +77,7 @@ public abstract class ActivityReportProcessor {
 	
 	AirwayBillEngineConnector awbConn;
 	
+	
 	private String activityReportFailFilePath;
 	
 	public abstract Logger getLogger();
