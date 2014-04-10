@@ -15,6 +15,7 @@ public class ActivityReportData {
     private HashMap<String, String> failedItemList = new HashMap<String, String>();
     private List<FailedStatusUpdate> failedStatusUpdateList = new ArrayList<FailedStatusUpdate>();
     private LogActivityReportUpload activityReportUpload = new LogActivityReportUpload();
+    private HashMap<String, String> failedProviderForGdnReff = new HashMap<String, String>();
     
 	public ArrayList<PojoInterface> getOrderItemList() {
 		return orderItemList;
@@ -46,6 +47,12 @@ public class ActivityReportData {
 	public void setFailedStatusUpdateList(
 			List<FailedStatusUpdate> failedStatusUpdateList) {
 		this.failedStatusUpdateList = failedStatusUpdateList;
+	}
+	public HashMap<String, String> getFailedProviderForGdnReff() {
+		return failedProviderForGdnReff;
+	}
+	public void setFailedProviderForGdnReff(HashMap<String, String> failedProviderForGdnReff) {
+		this.failedProviderForGdnReff = failedProviderForGdnReff;
 	}
     
 }
