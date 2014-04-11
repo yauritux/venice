@@ -131,31 +131,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
         printButton.addClickHandler(new ClickHandler() {
  			@Override
  			public void onClick(ClickEvent event) {
- 				ListGridRecord[] selectedRecords = grnListGrid.getSelection();
- 				
- 				StringBuilder sbSelectedRecords = new StringBuilder();
- 				
- 				for (int i = 0; i < selectedRecords.length; i++) {
- 					ListGridRecord selectedRecord = selectedRecords[i];
- 					
- 					sbSelectedRecords.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMID));
- 					
- 					if(i != selectedRecords.length -1)
- 						sbSelectedRecords.append(";");
- 				}
- 				
- 				String host = GWT.getHostPageBaseURL();
-
- 				if(host.contains("8889")){
- 					host = "http://localhost:8090/";
- 				}
-
- 				if(host.contains("Venice/")){
- 					host = host.substring(0, host.indexOf("Venice/"));
- 				}
- 												
- 				com.google.gwt.user.client.Window.open(host + "Venice/PutawayExportServlet?grnItemIds="+sbSelectedRecords.toString()
- 						+"&putawayType="+putawayTypeComboBox.getValue().toString(), "_blank", null); 							
+ 				printPutawayData();						
  			}
  		});
     }
@@ -233,6 +209,35 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
         };
 
         grnListGrid.getDataSource().fetchData(grnListGrid.getFilterEditorCriteria(), callBack);
+    }
+    
+    @Override
+    public void printPutawayData(){
+			ListGridRecord[] selectedRecords = grnListGrid.getSelection();
+				
+			StringBuilder sbSelectedRecords = new StringBuilder();
+			
+			for (int i = 0; i < selectedRecords.length; i++) {
+				ListGridRecord selectedRecord = selectedRecords[i];
+				
+				sbSelectedRecords.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMID));
+				
+				if(i != selectedRecords.length -1)
+					sbSelectedRecords.append(";");
+			}
+			
+			String host = GWT.getHostPageBaseURL();
+
+			if(host.contains("8889")){
+				host = "http://localhost:8090/";
+			}
+
+			if(host.contains("Venice/")){
+				host = host.substring(0, host.indexOf("Venice/"));
+			}
+											
+			com.google.gwt.user.client.Window.open(host + "Venice/PutawayExportServlet?grnItemIds="+sbSelectedRecords.toString()
+					+"&putawayType="+putawayTypeComboBox.getValue().toString(), "_blank", null);     	
     }
     
     @Override

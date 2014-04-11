@@ -38,9 +38,9 @@ public class FetchPickingListDataCommand implements RafDsCommand {
         _log.info("FetchPickingListDataCommand");
         try {
         		pickingListService = new PickingListManagementService();
-                InventoryPagingWrapper<WarehouseItem> warehouseItemwrapper = pickingListService.getPickingList(request);
-                if(warehouseItemwrapper.isSuccess()){	 		        
-	                for(WarehouseItem whi : warehouseItemwrapper.getContent()){
+                InventoryPagingWrapper<WarehouseItem> warehouseItemWrapper = pickingListService.getPickingList(request);
+                if(warehouseItemWrapper!=null && warehouseItemWrapper.isSuccess()){	 		        
+	                for(WarehouseItem whi : warehouseItemWrapper.getContent()){
 	                    HashMap<String, String> map = new HashMap<String, String>();
 	                    map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMID, Long.toString(whi.getId()));                    	                    
 	                    map.put(DataNameTokens.INV_PICKINGLIST_WAREHOUSEITEMSKU, whi.getItem().getCode());
@@ -57,7 +57,7 @@ public class FetchPickingListDataCommand implements RafDsCommand {
 	
 	                rafDsResponse.setStatus(0);
 	                rafDsResponse.setStartRow(request.getStartRow());
-	                rafDsResponse.setTotalRows((int) warehouseItemwrapper.getTotalElements());
+	                rafDsResponse.setTotalRows((int) warehouseItemWrapper.getTotalElements());
 	                rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
             }
         } catch (Throwable e) {

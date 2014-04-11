@@ -1,8 +1,8 @@
 package com.gdn.venice.client.app.inventory.view;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
@@ -12,6 +12,7 @@ import com.gdn.venice.client.data.RafDataSource;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
@@ -20,8 +21,14 @@ import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
+import com.smartgwt.client.data.fields.DataSourceTextField;
+import com.smartgwt.client.rpc.RPCCallback;
+import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.DSOperationType;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
@@ -43,6 +50,8 @@ import com.smartgwt.client.widgets.grid.events.EditCompleteEvent;
 import com.smartgwt.client.widgets.grid.events.EditCompleteHandler;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitEvent;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitHandler;
+import com.smartgwt.client.widgets.grid.events.RowOverEvent;
+import com.smartgwt.client.widgets.grid.events.RowOverHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
@@ -242,8 +251,22 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 					attributeImg.setHeight(16);
 					attributeImg.setWidth(16);
 					attributeImg.addClickHandler(new ClickHandler() {
-						public void onClick(ClickEvent event) {		
-							getUiHandlers().onFetchAttributeName(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY));	
+						public void onClick(ClickEvent event) {									
+					        RPCRequest request = new RPCRequest();
+					        request.setActionURL(GWT.getHostPageBaseURL() + "GRNManagementPresenterServlet?method=fetchAttributeName&type=RPC&itemId=" + record.getAttribute(DataNameTokens.INV_POCFF_ITEMID));
+					        request.setHttpMethod("POST");
+					        request.setUseSimpleHttp(true);
+					        RPCManager.sendRequest(request, new RPCCallback() {
+					                    @Override
+					                    public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+					                        String[] fieldName = rawData.toString().split(";");
+					                        DataSourceField[] dataSourceFields = new DataSourceField[fieldName.length];
+					                        for (int i = 0; i < fieldName.length; i++) {
+					                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
+					                        }
+					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields, rawData.toString()).show();
+					                    }
+					                });
 						}
 					});
 
@@ -294,7 +317,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     }
     
     @Override
-    public Window buildAttributeWindow(final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields) {
+    public Window buildAttributeWindow(final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields, String fieldName) {
         records = 0;
         attributeWindow = new Window();
         attributeWindow.setWidth(600);
@@ -334,11 +357,19 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         dataSourceFields[0].setPrimaryKey(true);
         RafDataSource ds = new RafDataSource(
                 "/response/data/*",
-                null,
+                GWT.getHostPageBaseURL() + GRNCreatePresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeDataFromCache&type=DataSource&fieldName="+fieldName,
                 null,
                 null,
                 null,
                 dataSourceFields);
+                
+        HashMap<String, String> params = new HashMap<String, String>();
+		
+		if(asnItemId != null) {
+			params.put(DataNameTokens.INV_ASN_ITEM_ID, asnItemId);
+		}
+
+		ds.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
               
         attributeListGrid = new ListGrid();
         attributeListGrid.setWidth100();
@@ -354,17 +385,29 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
         attributeListGrid.setDataSource(ds);
         attributeListGrid.setFields(listGridField);
-        
+		refreshAttributeData();
+                  
         attributeWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {
                 attributeWindow.destroy();
             }
         });
         
+        attributeListGrid.addRowOverHandler(new RowOverHandler() {			
+			@Override
+			public void onRowOver(RowOverEvent event) {
+				records = attributeListGrid.getTotalRows();
+				if(records>0){
+					saveButton.setDisabled(false);
+				}
+			}
+		});
+        
         attributeListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
 			@Override
 			public void onEditComplete(EditCompleteEvent event) {
 				attributeListGrid.saveAllEdits();
+				records = attributeListGrid.getTotalRows();
 				if(records>0){
 					saveButton.setDisabled(false);
 				}
@@ -372,7 +415,8 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		});
         
 		addButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
+			public void onClick(ClickEvent event) {    
+				records = attributeListGrid.getTotalRows();
                 if (records < quantity) {
                     records++;
                     attributeListGrid.startEditingNew();
@@ -385,8 +429,9 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 
 		removeButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				records--;
+				records = attributeListGrid.getTotalRows();
 				attributeListGrid.removeSelectedData();
+				records--;
 				
 				if(records==0){
 					saveButton.setDisabled(true);
@@ -405,23 +450,12 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
             @Override
             public void onClick(ClickEvent event) {
                 StringBuilder sb = new StringBuilder();
-                Set<String> attr = new HashSet<String>();
-                String attributeValue;
+                List<String> attr = new ArrayList<String>();
+                int counter = 1;
                 for (int r = 0; r < quantity; r++) {
                     for (int c = 0; c < dataSourceFields.length; c++) {
-                        if (attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()) == null
-                                || attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()).isEmpty()) {
-                            SC.warn("All attributes must be filled");
-                            return;
-                        } else {
-                            attributeValue = dataSourceFields[c].getName() + ":" + attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName());
-                            if (attr.contains(attributeValue)) {
-                                SC.warn(attributeValue + ", ERROR: duplicate attribute");
-                                return;
-                            } else {
-                                attr.add(attributeValue);
-                            }
-                        }
+                        attr.add(dataSourceFields[c].getName() + ":" + attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()) + ":" + counter);
+                        counter++;
                     }
                 }
 

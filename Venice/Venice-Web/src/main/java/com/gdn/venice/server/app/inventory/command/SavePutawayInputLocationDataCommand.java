@@ -78,7 +78,7 @@ public class SavePutawayInputLocationDataCommand implements RafRpcCommand {
 						
 			System.out.println("putaway detail size: "+putawayDetailList.size());			
 			putawayDetailWrapper = putawayService.savePutawayInputLocation(username, putawayDetailList);
-			if(!putawayDetailWrapper.isSuccess()){
+			if(putawayDetailWrapper==null || !putawayDetailWrapper.isSuccess()){
 				return putawayDetailWrapper.getError();
 			}
 		} catch (Exception e) {

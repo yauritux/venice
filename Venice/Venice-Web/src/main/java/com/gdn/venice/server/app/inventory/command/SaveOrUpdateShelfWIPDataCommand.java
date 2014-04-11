@@ -39,7 +39,7 @@ public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 	public String execute() {
 		ShelfWIP shelf;
 		List<Storage> storageList = new ArrayList<Storage>();
-		ResultWrapper<ShelfWIP> shelfWrapper;
+		ResultWrapper<ShelfWIP> shelfWrapper = new ResultWrapper<ShelfWIP>();
 		try {
 			shelfService = new ShelfManagementService();
 			System.out.println("Masuk ke command save shelf wip");
@@ -74,7 +74,7 @@ public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 				System.out.println("Masuk ke command update shelf wip");
 				shelfWrapper = shelfService.findInProcessById(username, shelfMap.get(DataNameTokens.INV_SHELF_ID));
 				
-				if(shelfWrapper.isSuccess()){
+				if(shelfWrapper!=null && shelfWrapper.isSuccess()){
 					shelf = shelfWrapper.getContent();
 					if(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION) != null) {
 						System.out.println("update exsisting process");
@@ -121,7 +121,7 @@ public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 			System.out.println("storage size: "+storageList.size());
 			
 			shelfWrapper = shelfService.saveOrUpdateShelfInProcess(username, shelf, storageList);
-			if(!shelfWrapper.isSuccess()){
+			if(shelfWrapper==null || !shelfWrapper.isSuccess()){
 				return shelfWrapper.getError();
 			}
 

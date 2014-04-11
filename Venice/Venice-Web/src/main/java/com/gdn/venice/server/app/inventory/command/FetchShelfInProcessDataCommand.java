@@ -34,7 +34,7 @@ public class FetchShelfInProcessDataCommand implements RafDsCommand {
 		try {
 			shelfService = new ShelfManagementService();
 			InventoryPagingWrapper<ShelfWIP> shelfsWrapper = shelfService.getShelfInProcessData(request);
-			if(shelfsWrapper.isSuccess()){
+			if(shelfsWrapper!=null && shelfsWrapper.isSuccess()){
 				for(ShelfWIP shelf:shelfsWrapper.getContent()){
 					HashMap<String, String> map = new HashMap<String, String>();
 					map.put(DataNameTokens.INV_SHELF_ID, shelf.getId().toString());

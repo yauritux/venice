@@ -14,5 +14,4 @@ public interface GRNCreateUiHandler extends UiHandlers {
 
 	void onSaveClicked(HashMap<String, String> grnDataMap, HashMap<String, String> itemDataMap, Window window);
 	void onSaveAttribute(String username, String attributes, String asnItemId);
-	void onFetchAttributeName(String asnItemId, String itemId, String quantity);
 }

@@ -80,15 +80,15 @@ public class PutawayManagementService{
 	}	
 	
 	public InventoryPagingWrapper<GoodReceivedNoteItem> getGRNItemDataListByWarehouseId(String warehouseId) throws HttpException, IOException{
-		_log.info("getGRNItemDataListByWarehouseId");
+		System.out.println("getGRNItemDataListByWarehouseId");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "goodReceivedNote/findItemByWarehouseId?warehouseId=" +warehouseId;
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
     	        
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -96,7 +96,7 @@ public class PutawayManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug(sb.toString());
+            System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<GoodReceivedNoteItem>>() {});
         } else {
@@ -105,15 +105,15 @@ public class PutawayManagementService{
 	}
 	
 	public List<WarehouseItemStorageStock> getWarehouseItemStorageList(Long warehouseItemId) throws HttpException, IOException{
-		_log.info("getWarehouseItemStorageList");
+		System.out.println("getWarehouseItemStorageList");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "putaway/getWarehouseItemStorageList?warehouseItemId=" +warehouseItemId;
+                + "shelf/getWarehouseItemStorageList?warehouseItemId=" +warehouseItemId;
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
     	        
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -121,7 +121,7 @@ public class PutawayManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug(sb.toString());
+            System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<List<WarehouseItemStorageStock>>() {});
         } else {

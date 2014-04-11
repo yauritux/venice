@@ -98,7 +98,7 @@ public class SaveGrnDataCommand implements RafRpcCommand {
 			System.out.println("item size: "+itemList.size());			
 			grnWrapper = grnService.saveGrn(username, grn, itemList);
 			
-			if(!grnWrapper.isSuccess()){
+			if(grnWrapper==null || !grnWrapper.isSuccess()){
 				return grnWrapper.getError();
 			}
 

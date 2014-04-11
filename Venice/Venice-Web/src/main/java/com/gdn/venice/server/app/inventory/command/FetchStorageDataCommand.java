@@ -35,7 +35,7 @@ public class FetchStorageDataCommand implements RafDsCommand {
         try {
         		shelfService = new ShelfManagementService();
                 InventoryPagingWrapper<StorageWIP> storageWrapper = shelfService.getStorageData(request, new Long(request.getParams().get(DataNameTokens.INV_SHELF_ID)));
-                if(storageWrapper.isSuccess()){
+                if(storageWrapper!=null && storageWrapper.isSuccess()){
 
                 System.out.println("storageWrapper size: "+storageWrapper.getContent().size());
                 for(StorageWIP storage : storageWrapper.getContent()){

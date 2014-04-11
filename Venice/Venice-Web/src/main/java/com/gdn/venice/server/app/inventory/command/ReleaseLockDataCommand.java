@@ -30,7 +30,7 @@ public class ReleaseLockDataCommand implements RafRpcCommand {
 			pickingListService = new PickingListManagementService();			
 			plWrapper = pickingListService.releasePickingLock(username, warehouseId);
 			
-			if(!plWrapper.isSuccess()){
+			if(plWrapper==null || !plWrapper.isSuccess()){
 				return plWrapper.getError();
 			}
 			

@@ -50,6 +50,7 @@ public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyV
 	public interface MyView extends View, HasUiHandlers<PutawayCreateUiHandler> {
 		public void loadPutawayData(LinkedHashMap<String, String> warehouseMap);
 		public void refreshPutawayData();
+		public void printPutawayData();
 	}
 
 	@Inject
@@ -108,6 +109,7 @@ public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyV
 						if (rpcResponse.startsWith("0")) {
                             SC.say("Data submitted");
 							getView().refreshPutawayData();
+							getView().printPutawayData();
 						} else {
 							SC.warn(rpcResponse);
 						}

@@ -110,7 +110,7 @@ public class PutawayExportServlet extends HttpServlet {
             	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
             		System.out.println("reff type: purchase order");                		                		
             		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(rafDsRequest, asnItem.getReferenceNumber().toString());
-                	if(poItemWrapper.isSuccess()){
+                	if(poItemWrapper!=null && poItemWrapper.isSuccess()){
                 		PurchaseRequisitionItem prItem = poItemWrapper.getContent().getPurchaseRequisitionItem();
                 		System.out.println("PO item found, code:"+prItem.getItem().getCode());    
                 		                   				             
@@ -145,7 +145,7 @@ public class PutawayExportServlet extends HttpServlet {
             	}else if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
             		System.out.println("reff type: consignment");
             		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(rafDsRequest, asnItem.getReferenceNumber());
-                	if(cffItemWrapper.isSuccess()){
+                	if(cffItemWrapper!=null && cffItemWrapper.isSuccess()){
                 		ConsignmentApprovalItem cafItem = cffItemWrapper.getContent().getConsignmentApprovalItem();
                 		System.out.println("CFF item found, code:"+cafItem.getItem().getCode());    
                 		                   				             

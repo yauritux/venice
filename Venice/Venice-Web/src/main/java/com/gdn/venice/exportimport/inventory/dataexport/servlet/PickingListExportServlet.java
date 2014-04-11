@@ -84,7 +84,7 @@ public class PickingListExportServlet extends HttpServlet {
 	        					
 	        ResultWrapper<WarehouseItem> whiWrapper = pickingListService.getWarehouseItem(req);
 	        ResultWrapper<PickingListDetail> plWrapper = pickingListService.getPickingListDetail(req);	
-	        if(whiWrapper!=null && plWrapper!=null){
+	        if(whiWrapper!=null && whiWrapper.isSuccess() && plWrapper!=null && plWrapper.isSuccess()){
 	        	System.out.println("set warehouse item");
 	        	plPrint.setWarehouseItem(whiWrapper.getContent());
 
@@ -147,7 +147,7 @@ public class PickingListExportServlet extends HttpServlet {
 				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Qty"));
 					   
 				//set style for header
-				for(int i=startCol; i<=startCol+54; i++){
+				for(int i=startCol; i<=startCol+5; i++){
 					HSSFCell cell = headerRow.getCell(i);
 					cell.setCellStyle(headerCellstyle);
 				}    
@@ -167,6 +167,7 @@ public class PickingListExportServlet extends HttpServlet {
 					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
 					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getStockType().name()));	
 					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSupplier().getName()));
+					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(Integer.toString(pl.getWarehouseItem().getStock())));
 					
 					//set style for list
 					for(int l=startCol; l<=startCol+5; l++){
