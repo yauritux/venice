@@ -66,14 +66,14 @@ public class PickingListManagementService{
 	}	
 	
 	public ResultWrapper<PickingListDetail> getPickingListDetail(RafDsRequest request) throws HttpException, IOException{
-		_log.info("getPickingListDetail");
+		System.out.println("getPickingListDetail");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "pickingList/getDetail?username="+request.getParams().get("username")
                 + "&warehouseItemId="+ request.getParams().get("warehouseItemId");
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -81,7 +81,7 @@ public class PickingListManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug(sb.toString());
+            System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PickingListDetail>>() {});
         } else {
@@ -90,13 +90,13 @@ public class PickingListManagementService{
 	}
 	
 	public ResultWrapper<WarehouseItem> getWarehouseItem(RafDsRequest request) throws HttpException, IOException{
-		_log.info("getWarehouseItem");
+		System.out.println("getWarehouseItem");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "warehouseItem/getWarehouseItemById?&warehouseItemId="+ request.getParams().get("warehouseItemId");
         PostMethod httpPost = new PostMethod(url);
-        _log.info("url: "+url);
+        System.out.println("url: "+url);
         int httpCode = httpClient.executeMethod(httpPost);
-        _log.info("response code: "+httpCode);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -104,7 +104,7 @@ public class PickingListManagementService{
             for (String line = br.readLine(); line != null; line = br.readLine()) {
                 sb.append(line);
             }
-            _log.debug(sb.toString());
+            System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<WarehouseItem>>() {});
         } else {

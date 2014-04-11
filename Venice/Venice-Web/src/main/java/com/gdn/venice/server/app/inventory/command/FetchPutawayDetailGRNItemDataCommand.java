@@ -123,7 +123,7 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    	st = StockType.CONSIGNMENT_TRADING;
     	                    }
     	                    
-    	                    System.out.println("item id "+cafItem.getItem().getId());
+    	                    System.out.println("item id: "+cafItem.getItem().getId());
     	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
     	                    System.out.println("supplier: "+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId());
     	                    WarehouseItem whItem = putawayService.getWarehouseItemData(cafItem.getItem().getId(), 
