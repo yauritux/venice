@@ -36,7 +36,7 @@ public class SaveGrnAttributeDataCommand implements RafRpcCommand {
                 System.out.println("attribute k "+i+": " +attr[i]);
             }            
             System.out.println("start save attribute to cache");
-            wrapper = grnService.saveAttributesToCache(username, asnItemId, attribute);
+            wrapper = grnService.saveAttributeToCache(username, asnItemId, attribute);
             System.out.println("done save attribute to cache");
             if (wrapper==null || !wrapper.isSuccess()) {                
                 return wrapper.getError();

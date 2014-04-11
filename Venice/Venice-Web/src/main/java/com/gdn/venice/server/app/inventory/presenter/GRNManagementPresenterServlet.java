@@ -13,6 +13,7 @@ import com.gdn.venice.server.app.inventory.command.FetchAttributeNameDataCommand
 import com.gdn.venice.server.app.inventory.command.FetchGRNDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchGRNItemDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemAttributeDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchItemAttributeDataFromCacheCommand;
 import com.gdn.venice.server.app.inventory.command.SaveGrnAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveGrnDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
@@ -105,7 +106,15 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-			}							
+			}else if(method.equals("fetchItemAttributeDataFromCache")){
+				RafDsCommand fetchItemAttributeDataFromCacheCommand = new FetchItemAttributeDataFromCacheCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchItemAttributeDataFromCacheCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}						
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");	
 			String requestBody = Util.extractRequestBody(request);

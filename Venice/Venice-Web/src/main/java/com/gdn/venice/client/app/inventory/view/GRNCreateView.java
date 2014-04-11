@@ -28,6 +28,7 @@ import com.smartgwt.client.rpc.RPCRequest;
 import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.DSOperationType;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
@@ -38,6 +39,8 @@ import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
+import com.smartgwt.client.widgets.events.HoverEvent;
+import com.smartgwt.client.widgets.events.HoverHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.grid.ListGrid;
@@ -49,6 +52,8 @@ import com.smartgwt.client.widgets.grid.events.EditCompleteEvent;
 import com.smartgwt.client.widgets.grid.events.EditCompleteHandler;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitEvent;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitHandler;
+import com.smartgwt.client.widgets.grid.events.RowOverEvent;
+import com.smartgwt.client.widgets.grid.events.RowOverHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
@@ -261,7 +266,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 					                        for (int i = 0; i < fieldName.length; i++) {
 					                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
 					                        }
-					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields).show();
+					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields, rawData.toString()).show();
 					                    }
 					                });
 						}
@@ -314,7 +319,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     }
     
     @Override
-    public Window buildAttributeWindow(final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields) {
+    public Window buildAttributeWindow(final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields, String fieldName) {
         records = 0;
         attributeWindow = new Window();
         attributeWindow.setWidth(600);
@@ -354,11 +359,19 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         dataSourceFields[0].setPrimaryKey(true);
         RafDataSource ds = new RafDataSource(
                 "/response/data/*",
-                GWT.getHostPageBaseURL() + GRNCreatePresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeData&type=DataSource",
+                GWT.getHostPageBaseURL() + GRNCreatePresenter.grnManagementPresenterServlet + "?method=fetchItemAttributeDataFromCache&type=DataSource&fieldName="+fieldName,
                 null,
                 null,
                 null,
                 dataSourceFields);
+                
+        HashMap<String, String> params = new HashMap<String, String>();
+		
+		if(asnItemId != null) {
+			params.put(DataNameTokens.INV_ASN_ITEM_ID, asnItemId);
+		}
+
+		ds.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
               
         attributeListGrid = new ListGrid();
         attributeListGrid.setWidth100();
@@ -374,17 +387,29 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
         attributeListGrid.setDataSource(ds);
         attributeListGrid.setFields(listGridField);
-        
+		refreshAttributeData();
+                  
         attributeWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {
                 attributeWindow.destroy();
             }
         });
         
+        attributeListGrid.addRowOverHandler(new RowOverHandler() {			
+			@Override
+			public void onRowOver(RowOverEvent event) {
+				records = attributeListGrid.getTotalRows();
+				if(records>0){
+					saveButton.setDisabled(false);
+				}
+			}
+		});
+        
         attributeListGrid.addEditCompleteHandler(new EditCompleteHandler() {			
 			@Override
 			public void onEditComplete(EditCompleteEvent event) {
 				attributeListGrid.saveAllEdits();
+				records = attributeListGrid.getTotalRows();
 				if(records>0){
 					saveButton.setDisabled(false);
 				}
@@ -392,7 +417,8 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		});
         
 		addButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
+			public void onClick(ClickEvent event) {    
+				records = attributeListGrid.getTotalRows();
                 if (records < quantity) {
                     records++;
                     attributeListGrid.startEditingNew();
@@ -405,8 +431,9 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 
 		removeButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				records--;
+				records = attributeListGrid.getTotalRows();
 				attributeListGrid.removeSelectedData();
+				records--;
 				
 				if(records==0){
 					saveButton.setDisabled(true);

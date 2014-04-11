@@ -293,7 +293,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
         attributeListGrid.setSaveLocally(true);
         attributeListGrid.setSortField(0);
         attributeListGrid.setShowFilterEditor(false);
-        attributeListGrid.setCanEdit(true);
+        attributeListGrid.setCanEdit(false);
         attributeListGrid.setShowRowNumbers(true);
         attributeListGrid.setAutoFetchData(true); 
         

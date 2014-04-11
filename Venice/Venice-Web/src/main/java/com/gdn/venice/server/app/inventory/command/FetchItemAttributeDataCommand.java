@@ -46,7 +46,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
 
     @Override
     public RafDsResponse execute() {
-    	_log.info("FetchItemAttributeDataCommand");
+    	System.out.println("FetchItemAttributeDataCommand");
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         try {
@@ -56,10 +56,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         	WarehouseItem whi = new WarehouseItem();
         	
         	String itemIdParam = null;
-        	if(request.getParams().get(DataNameTokens.INV_ASN_ITEM_ID)!=null){
-        		System.out.println("item id from asn item");
-        		itemIdParam = request.getParams().get(DataNameTokens.INV_ASN_ITEM_ID);
-        	}else if(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID)!=null){    
+        	if(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID)!=null){    
         		System.out.println("item id from grn item");
         		ResultWrapper<GoodReceivedNoteItem> grnItemWrapper = grnService.findItemByGRNItemId(request.getParams().get(DataNameTokens.INV_GRN_ITEM_ID));
         		
@@ -114,17 +111,17 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
         		
         		if(whItem!=null){
         			System.out.println("warehouseItem found");
-        			List<Attribute> attList = grnService.getAttributeDataListByWarehouseItem(whItem.getId().toString());
-        			System.out.println("attribute found: "+attList.size());
+        			List<Attribute> attributeList = grnService.getAttributeDataListByWarehouseItem(whItem.getId().toString());
+        			System.out.println("attribute found: "+attributeList.size());
         			
         			String[] fieldName = request.getParams().get("fieldName").split(";");
     				int counter = 0;
     				HashMap<String, String> map = new HashMap<String, String>();
-        			for(int i=0;i<attList.size();i++){   
+        			for(int i=0;i<attributeList.size();i++){   
             			for(int j=0;j<fieldName.length;j++){  
-        					if(fieldName[j].equalsIgnoreCase(attList.get(i).getName())){
-                				System.out.println("put fieldName: "+fieldName[j]+", value: "+attList.get(i).getValue());
-        						map.put(fieldName[j], attList.get(i).getValue());
+        					if(fieldName[j].equalsIgnoreCase(attributeList.get(i).getName())){
+                				System.out.println("put fieldName: "+fieldName[j]+", value: "+attributeList.get(i).getValue());
+        						map.put(fieldName[j], attributeList.get(i).getValue());
         						counter++;
         						break;
         					}

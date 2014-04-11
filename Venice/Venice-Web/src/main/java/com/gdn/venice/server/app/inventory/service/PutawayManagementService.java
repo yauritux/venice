@@ -108,7 +108,7 @@ public class PutawayManagementService{
 		_log.info("getWarehouseItemStorageList");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "putaway/getWarehouseItemStorageList?warehouseItemId=" +warehouseItemId;
+                + "shelf/getWarehouseItemStorageList?warehouseItemId=" +warehouseItemId;
         PostMethod httpPost = new PostMethod(url);
         _log.info("url: "+url);
     	        

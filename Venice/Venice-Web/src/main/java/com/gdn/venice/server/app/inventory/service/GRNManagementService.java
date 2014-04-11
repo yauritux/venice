@@ -281,10 +281,35 @@ public class GRNManagementService{
         }
 	}
 	
-	public ResultWrapper<List<Attribute>> saveAttributesToCache(String username, String asnItemId, List<String> attribute) throws JsonGenerationException, JsonMappingException, IOException {
-		System.out.println("saveAttributesToCache");
+	public ResultWrapper<List<Attribute>> getAttributeFromCache(String asnItemId) throws JsonGenerationException, JsonMappingException, IOException {
+		System.out.println("getAttributesFromCache");
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "goodReceivedNote/saveAttributteToCache?username=" + username + "&asnItemId=" + asnItemId;
+                + "goodReceivedNote/getAttributeFromCache?asnItemId=" + asnItemId;
+        System.out.println("url: "+url);
+        PostMethod httpPost = new PostMethod(url);
+        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<Attribute>>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+	
+	public ResultWrapper<List<Attribute>> saveAttributeToCache(String username, String asnItemId, List<String> attribute) throws JsonGenerationException, JsonMappingException, IOException {
+		System.out.println("saveAttributeToCache");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "goodReceivedNote/saveAttributeToCache?username=" + username + "&asnItemId=" + asnItemId;
         System.out.println("url: "+url);
         PostMethod httpPost = new PostMethod(url);
         String json = mapper.writeValueAsString(attribute);
