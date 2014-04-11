@@ -73,10 +73,16 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 				+ (newVenContactDetailList != null ? newVenContactDetailList.size() : 0));
 		for(VenContactDetail newVenContactDetail:newVenContactDetailList){
 			Boolean bFound = false;
+			
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "updateContactDetailList::newVenContactDetail => " + newVenContactDetail.getContactDetail());
+			
 			if(existingVenContactDetailList != null && existingVenContactDetailList.size() > 0){
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "updateContactDetailList::existingVenContactDetailList not empty");
 				for(VenContactDetail existingVenContactDetail:existingVenContactDetailList){
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "updateContactDetailList::existingVenContactDetail => " + existingVenContactDetail.getContactDetail());
+					
 					/*
 					 * If the contact detail and type are not null and they are equal to each other (new and existing) 
 					 * then the contact is existing and is added to the return list only.
@@ -263,5 +269,60 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 				, "synchronizeVenContactDetailReferences::EOM, returning synchronizedContactDetailReferences="
 				+ synchronizedContactDetailReferences.size());
 		return synchronizedContactDetailReferences;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public List<VenContactDetail> persistContactDetails(List<VenContactDetail> venContactDetails, VenParty venParty) 
+	        throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persistContactDetails::start method persist contact detail");
+		List<VenContactDetail> newVenContactDetailList = new ArrayList<VenContactDetail>();
+		if (venContactDetails != null && (!venContactDetails.isEmpty())) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "persistContactDetails::Persisting VenContactDetail list...:" + venContactDetails.size());
+				Iterator<VenContactDetail> i = venContactDetails.iterator();
+				while (i.hasNext()) {
+					VenContactDetail next = i.next();
+					// Synchronize the references
+					synchronizeVenContactDetailReferenceData(next);
+					// Persist the object
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistContactDetails::start persisting contact detail");
+					VenContactDetail venContactDetail = null;
+					
+					if (!em.contains(next)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistContactDetails::find existing contact detail");
+						List<VenContactDetail> existingContactDetail = venContactDetailDAO.findByContactDetail(next.getContactDetail());
+						
+						if(existingContactDetail.size() > 0){
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "persistContactDetails::existing contact detail found, total member = " + existingContactDetail.size());
+							venContactDetail = existingContactDetail.get(0);
+						}else{
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "persistContactDetails::calling save on venContactDetailDAO explicitly");
+							next.setVenParty(venParty);
+							venContactDetail = venContactDetailDAO.save(next);
+						}
+						
+						
+					} else {
+						venContactDetail = next;
+					}
+
+					/*
+					venContactDetail = next;
+					if (em.contains(venContactDetail)) {
+						em.detach(venContactDetail);
+					}
+					*/
+					newVenContactDetailList.add(venContactDetail);
+				}
+		}
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persistContactDetails::EOM, returning newVenContactDetailList = " + newVenContactDetailList);
+		return newVenContactDetailList;
 	}
 }

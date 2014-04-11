@@ -36,6 +36,7 @@ import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.factory.VeninboundFactory;
 import com.gdn.venice.finance.services.FinArFundsInReconRecordService;
 import com.gdn.venice.inbound.services.AddressService;
+import com.gdn.venice.inbound.services.ContactDetailService;
 import com.gdn.venice.inbound.services.CustomerService;
 import com.gdn.venice.inbound.services.MerchantService;
 import com.gdn.venice.inbound.services.OrderAddressService;
@@ -118,6 +119,9 @@ public class OrderServiceImpl implements OrderService {
     
     @Autowired
     private CustomerService customerService;
+    
+    @Autowired
+    private ContactDetailService contactDetailService;
 	
 	private Mapper mapper = DozerBeanMapperSingletonWrapper.getInstance();	
 	
@@ -277,7 +281,7 @@ public class OrderServiceImpl implements OrderService {
 		//This method call will persist the order if there has been no VA payment else it will merge
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::persisting order");
 		
-		venOrder = persistOrder(vaPaymentExists, csPaymentExists, venOrder);
+		venOrder = persistOrder(vaPaymentExists, csPaymentExists, venOrder, order);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::Persisted VenOrder = " + venOrder);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "createOrder::done persist order");
 		
@@ -328,7 +332,7 @@ public class OrderServiceImpl implements OrderService {
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public VenOrder persistOrder(Boolean vaPaymentExists, Boolean csPaymentExists, VenOrder venOrder) throws VeniceInternalException {
+	public VenOrder persistOrder(Boolean vaPaymentExists, Boolean csPaymentExists, VenOrder venOrder, Order order) throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrder::vaPaymentExists: "+vaPaymentExists);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrder::csPaymentExists: "+csPaymentExists);
 		if (venOrder != null) {
@@ -355,7 +359,10 @@ public class OrderServiceImpl implements OrderService {
 				VenCustomer customer = venOrder.getVenCustomer();
 				//em.detach(customer);
 				venOrder.setVenCustomer(null);
-
+				
+				// this code works for non VA order
+//				List<VenContactDetail> contactDetailList = customer.getVenParty().getVenContactDetails(); 
+				
 				if(venOrder.getVenOrderBlockingSource().getBlockingSourceId()== null 
 						&& venOrder.getVenOrderBlockingSource().getBlockingSourceDesc()==null) {
 					venOrder.setVenOrderBlockingSource(null);
@@ -493,9 +500,12 @@ public class OrderServiceImpl implements OrderService {
 				
 				List<VenOrderContactDetail> venOrderContactDetailList = new ArrayList<VenOrderContactDetail>();
 				
-				List<VenContactDetail> venContactDetailList = venOrder.getVenCustomer().getVenParty().getVenContactDetails();
-				if(venContactDetailList != null){				
-					for (VenContactDetail venContactDetail:venContactDetailList){
+				List<VenContactDetail> contactDetailList = getCustomerContactDetail(order);
+				
+				contactDetailList = contactDetailService.persistContactDetails(contactDetailList, customer.getVenParty());
+				
+				if(contactDetailList != null){				
+					for (VenContactDetail venContactDetail:contactDetailList){
 						VenOrderContactDetail venOrderContactDetail = new VenOrderContactDetail();
 						venOrderContactDetail.setVenOrder(venOrder);
 						venOrderContactDetail.setVenContactDetail(venContactDetail);
@@ -519,6 +529,21 @@ public class OrderServiceImpl implements OrderService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "persistOrder::EOF, returning venOrder = " + venOrder);
 		return venOrder;
+	}
+
+	public List<VenContactDetail> getCustomerContactDetail(Order order) {
+		VenCustomer customerContact = new VenCustomer();
+		
+		mapper.map(order.getCustomer(), customerContact);
+		
+		List<VenContactDetail> contactDetailList = customerContact.getVenParty().getVenContactDetails();
+		
+		for (VenContactDetail venContactDetail:customerContact.getVenParty().getVenContactDetails()){
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "persistOrder::venContactDetail => " + venContactDetail.getContactDetail());
+		}
+		
+		return contactDetailList;
 	}	
 	
 	/**
