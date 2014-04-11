@@ -67,6 +67,7 @@ import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
+import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
@@ -84,6 +85,7 @@ import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
 import com.gdn.venice.client.app.inventory.view.GRNCreateView;
 import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.GoodIssuedNoteView;
+import com.gdn.venice.client.app.inventory.view.OpnameView;
 import com.gdn.venice.client.app.inventory.view.PackingListView;
 import com.gdn.venice.client.app.inventory.view.PickingListView;
 import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
@@ -479,9 +481,9 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 PackingListView.class,
                 PackingListPresenter.MyProxy.class);
 
-//        bindPresenter(OpnamePresenter.class,
-//                OpnamePresenter.MyView.class,
-//                OpnameView.class,
-//                OpnamePresenter.MyProxy.class);
+        bindPresenter(OpnamePresenter.class,
+                OpnamePresenter.MyView.class,
+                OpnameView.class,
+                OpnamePresenter.MyProxy.class);
     }
 }

@@ -631,12 +631,12 @@
     <servlet-name>PutawayManagementPresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.inventory.presenter.PutawayManagementPresenterServlet</servlet-class>
   </servlet>
-<!--  <servlet>
+  <servlet>
     <description></description>
     <display-name>OpnamePresenterServlet</display-name>
     <servlet-name>OpnamePresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.inventory.presenter.OpnamePresenterServlet</servlet-class>
-  </servlet>-->
+  </servlet>
   <servlet-mapping>
     <servlet-name>FraudBinCreditLimitPresenterServlet</servlet-name>
     <url-pattern>/FraudBinCreditLimitPresenterServlet</url-pattern>
@@ -853,10 +853,10 @@
     <servlet-name>GINPresenterServlet</servlet-name>
     <url-pattern>/GINPresenterServlet</url-pattern>
   </servlet-mapping>
-<!--  <servlet-mapping>
+  <servlet-mapping>
     <servlet-name>OpnamePresenterServlet</servlet-name>
     <url-pattern>/OpnamePresenterServlet</url-pattern>
-  </servlet-mapping>-->
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>PickingListExportServlet</servlet-name>
     <url-pattern>/PickingListExportServlet</url-pattern>

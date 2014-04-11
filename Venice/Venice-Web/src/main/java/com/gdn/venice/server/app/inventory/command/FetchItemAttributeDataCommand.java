@@ -102,7 +102,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
                 	} 
                 	
                		if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.COMMISSION.name())){
-                       	whi.setStockType(StockType.CONSIGMENT_COMMISION);
+                       	whi.setStockType(StockType.CONSIGNMENT_COMMISION);
                		}else if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.TRADING.name())){
                        	whi.setStockType(StockType.CONSIGNMENT_TRADING);
                		}
