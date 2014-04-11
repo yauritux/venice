@@ -52,8 +52,8 @@ public class DanamonCreditCardReportBatchJob {
 																											"left join ven_bin_credit_limit_estimate b on b.bin_number=substr(op.masked_credit_card_number,0,7) " +
 																											"where op.amount>500000 and o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
 																											" and op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_DanamonCreditCard +
-																											" and b.bank_name="+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_DANAMON+
-																											" and op.installment_sent_flag=false and o.order_date>=?";
+																											" and b.bank_name='"+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_DANAMON+
+																											"' and op.installment_sent_flag=false and o.order_date>=?";
 	
 	private static final String UPDATE_INSTALLMENT_LIST_SQL = "update ven_order_payment set installment_sent_flag = true, installment_sent_date=? where wcs_payment_id=?";
 	
@@ -184,7 +184,7 @@ public class DanamonCreditCardReportBatchJob {
         		
         		_log.info("send email");
     			EmailSender es = new EmailSender();
-    			Boolean sendFiles = es.sendInstallmentFiles();
+    			Boolean sendFiles = es.sendInstallmentFiles(VeniceConstants.FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_DANAMON);
     			if (!sendFiles) {
     				_log.error("send files failed");
     			}else{

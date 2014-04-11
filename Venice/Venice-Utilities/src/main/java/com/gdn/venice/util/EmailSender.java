@@ -147,7 +147,7 @@ public class EmailSender {
 		return Boolean.TRUE;
 	}
 	
-	public Boolean sendInstallmentFiles() throws IOException {
+	public Boolean sendInstallmentFiles(String indexBank) throws IOException {
 		try {			
 			// Read XML configuration file
 			XMLConfiguration config = new XMLConfiguration(System.getenv("VENICE_HOME") + "/conf/venice-mail-config.xml");
@@ -158,7 +158,7 @@ public class EmailSender {
 			String smtpUser = config.getString("smtp.user");
 			String smtpPassword = config.getString("smtp.password");
 
-			HierarchicalConfiguration subConfig = config.configurationAt("banks.bank(0)");
+			HierarchicalConfiguration subConfig = config.configurationAt("banks.bank("+indexBank+")");
 
 			// Find files with given pattern
 			String filePath = subConfig.getString("mail-attachment-pattern");				

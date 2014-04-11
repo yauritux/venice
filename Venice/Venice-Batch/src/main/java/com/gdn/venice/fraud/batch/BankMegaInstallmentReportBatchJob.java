@@ -43,7 +43,7 @@ public class BankMegaInstallmentReportBatchJob {
 	private String dbName = "";
 	private static Connection conn;
 	
-	private static final String CONVERT_INSTALLMENT_LIST_SQL = "select op.order_payment_id, op.wcs_payment_id, o.wcs_order_id, o.order_date, op.reference_id, op.amount, op.tenor, op.installment, op.interest, op.interest_installment, op.installment_sent_flag, op.installment_sent_date, c.customer_user_name, p.full_or_legal_name " +
+	private static final String CONVERT_INSTALLMENT_LIST_SQL = "select distinct op.order_payment_id, op.wcs_payment_id, o.wcs_order_id, o.order_date, op.reference_id, op.amount, op.tenor, op.installment, op.interest, op.interest_installment, op.installment_sent_flag, op.installment_sent_date, c.customer_user_name, p.full_or_legal_name " +
 																											"from ven_order o " +
 																											"left join ven_order_payment_allocation opa on o.order_id=opa.order_id " +
 																											"left join ven_order_payment op on opa.order_payment_id=op.order_payment_id " +
@@ -52,8 +52,8 @@ public class BankMegaInstallmentReportBatchJob {
 																											"left join ven_bin_credit_limit_estimate b on b.bin_number=substr(op.masked_credit_card_number,0,7) " +
 																											"where op.amount>500000 and o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
 																											//" and op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSBCAInstallment +
-																											" and (b.bank_name="+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_BANK_MEGA+
-																											" or b.bank_name="+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_MEGA+" ) " +
+																											" and (b.bank_name='"+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_BANK_MEGA+
+																											"' or b.bank_name='"+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_MEGA+"') " +
 																											" and op.installment_sent_flag=false and op.tenor is not null and op.tenor>0 and o.order_date>=?";
 	
 	private static final String UPDATE_INSTALLMENT_LIST_SQL = "update ven_order_payment set installment_sent_flag = true, installment_sent_date=? where wcs_payment_id=?";
@@ -185,7 +185,7 @@ public class BankMegaInstallmentReportBatchJob {
         		
         		_log.info("send email");
     			EmailSender es = new EmailSender();
-    			Boolean sendFiles = es.sendInstallmentFiles();
+    			Boolean sendFiles = es.sendInstallmentFiles(VeniceConstants.FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BANK_MEGA);
     			if (!sendFiles) {
     				_log.error("send files failed");
     			}else{

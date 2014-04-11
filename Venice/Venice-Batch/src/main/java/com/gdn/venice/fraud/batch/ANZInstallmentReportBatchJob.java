@@ -183,7 +183,7 @@ public class ANZInstallmentReportBatchJob {
         		
         		_log.info("send email");
     			EmailSender es = new EmailSender();
-    			Boolean sendFiles = es.sendInstallmentFiles();
+    			Boolean sendFiles = es.sendInstallmentFiles(VeniceConstants.FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_ANZ);
     			if (!sendFiles) {
     				_log.error("send files failed");
     			}else{

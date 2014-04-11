@@ -494,4 +494,11 @@ public interface VeniceConstants {
 	public static final String VEN_PRODUCT_CATEGORY_LEVEL_ONE= "1";
 	
 	public static final String FRD_PARAMETER_RULE_44_RISK_POINT = "Risk Point";
+
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BCA="0";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_ANZ="1";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_CIMBNIAGA="2";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BII="3";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_DANAMON="4";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BANK_MEGA="5";
 }
