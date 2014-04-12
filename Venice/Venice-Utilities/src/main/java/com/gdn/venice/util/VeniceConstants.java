@@ -213,6 +213,7 @@ public interface VeniceConstants {
 	public static final int LOG_ACTIVITY_RECON_RESULT_RECIPIENT_MISMATCH = 4;
 	public static final int LOG_ACTIVITY_RECON_RESULT_WEIGHT_MISMATCH = 5;
 	
+	public static final String LOG_AIRWAYBILL_ACTIVITY_RESULT_OK="Ok";
 	
 	public static final long LOG_REPORT_STATUS_NEW = 0;
 	public static final long LOG_REPORT_STATUS_PROCESSING = 1;
