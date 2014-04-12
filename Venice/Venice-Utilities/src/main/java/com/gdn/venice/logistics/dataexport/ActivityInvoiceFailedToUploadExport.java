@@ -104,7 +104,7 @@ public class ActivityInvoiceFailedToUploadExport {
         return wb;
     }
 
-    public HSSFWorkbook ExportExcel(HashMap<String, String> gdnRefNotFoundList, HashMap<String, String> failedRecord, List<FailedStatusUpdate> failedStatusUpdateList, HSSFSheet sheet, String source) throws Exception {
+    public HSSFWorkbook ExportExcel(HashMap<String, String> gdnRefNotFoundList, HashMap<String, String> failedRecord, List<FailedStatusUpdate> failedStatusUpdateList, HashMap<String,String>  failedProviderForGdnReffList, HSSFSheet sheet, String source) throws Exception {
         _log.info("start ActivityInvoiceFailedToUploadExport");
         int startRow = 0;
         int startCol = 0;
@@ -172,6 +172,7 @@ public class ActivityInvoiceFailedToUploadExport {
         }
 
         HSSFRow headerRecordProblem;
+        
         if (source.equals("invoice")) {
             startRow = 0;
             headerRecordProblem = sheet.createRow((short) startRow);
@@ -208,7 +209,40 @@ public class ActivityInvoiceFailedToUploadExport {
             }
         }
 
+        startRow = startRow + 4;
+        headerRecordProblem = sheet.createRow((short) startRow);
+        headerRecordProblem.createCell(startCol).setCellValue(new HSSFRichTextString("GDN Ref"));
+        
+
+        headerRecordProblem.createCell(startCol + 1).setCellValue(new HSSFRichTextString("Logistic Provider"));
+
+        for (int i = startCol; i <= startCol + 1; i++) {
+            HSSFCell cell = headerRecordProblem.getCell(i);
+            cell.setCellStyle(headerCellstyle);
+        }
+
+        Iterator itfailedProvider = failedProviderForGdnReffList.entrySet().iterator();
+
+        while (itfailedProvider.hasNext()) {
+            startRow++;
+
+            Map.Entry pair = (Map.Entry) itfailedProvider.next();
+            HSSFRow row = sheet.createRow(startRow);
+            HSSFCell nameCell = row.createCell(startCol);
+            nameCell.setCellValue(new HSSFRichTextString(pair.getKey().toString().replace(".0", "")));
+            HSSFCell problemDescCell = row.createCell(startCol + 1);
+            problemDescCell.setCellValue(new HSSFRichTextString(pair.getValue().toString()));
+
+            //set style
+            for (int l = startCol; l <= startCol + 1; l++) {
+                HSSFCell cell2 = row.getCell(l);
+                cell2.setCellStyle(detailCellstyle);
+            }
+        }
+
         startRow = startRow + 2;
+        
+        
         if (!source.equals("invoice")) {
             HSSFRow headerStatusUpdateProblem = sheet.createRow((short) startRow);
             headerStatusUpdateProblem.createCell(startCol).setCellValue(new HSSFRichTextString("GDN Ref"));

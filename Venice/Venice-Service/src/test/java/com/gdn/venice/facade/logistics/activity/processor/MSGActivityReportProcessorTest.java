@@ -6,6 +6,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -135,10 +136,38 @@ public class MSGActivityReportProcessorTest {
 			.thenReturn(awbTransaction);
 		
 		doNothing().when(sutSpy).processOrderItemAfterAWBEngine(orderItemES, getDailyReportMSGWithCXStatus(), activityReportData, fileUploadLog, awbTransaction);
+		doReturn(false).when(sutSpy).differentLogisticProvider(getDailyReportMSGWithCXStatus(),activityReportData,null);
 		
 		sutSpy.processEachOrderItem(getDailyReportMSGWithCXStatus(), activityReportData, fileUploadLog);
 		
 		verify(sutSpy, times(1)).processOrderItemAfterAWBEngine(orderItemES, getDailyReportMSGWithCXStatus(), activityReportData, fileUploadLog, awbTransaction);
+	}
+
+	@Test
+	public void differentLogisticProvider_sameGdnReffDifferentLogisticProvider_executeDifferentLogisticProvider() throws Exception{
+		ActivityReportData activityReportData = new ActivityReportData();
+		
+		LogFileUploadLog fileUploadLog = new LogFileUploadLog();
+		VenOrderItem orderItemES = new VenOrderItem();
+		orderItemES.setVenOrderStatus(VenOrderStatusES.createVenOrderStatus());
+		
+		AirwayBillTransaction awbTransaction = new AirwayBillTransaction();
+		awbTransaction.setKodeLogistik(""+VeniceConstants.VEN_LOGISTICS_PROVIDER_JNE);
+		
+		when(venOrderItemDAOMock.findWithVenOrderStatusByWcsOrderItemId(anyString()))
+			.thenReturn(orderItemES);
+		
+		when(filterMock.getWcsOrderItemId(anyString())).thenReturn("12345");
+		
+		when(logAirwayBillDAOMock.countByGdnReference(anyString()))
+			.thenReturn(1);
+		
+		when(awbConnMock.getAirwayBillTransaction(anyString()))
+			.thenReturn(awbTransaction);
+
+		sutSpy.differentLogisticProvider(getDailyReportMSGWithCXStatus(),activityReportData,""+VeniceConstants.VEN_LOGISTICS_PROVIDER_JNE);
+		
+		assertEquals(1, activityReportData.getFailedProviderForGdnReff().size());
 	}
 	
 	@Test

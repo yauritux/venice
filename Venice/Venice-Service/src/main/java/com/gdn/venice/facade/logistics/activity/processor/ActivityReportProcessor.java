@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.djarum.raf.utilities.Locator;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.djarum.raf.utilities.SQLDateUtility;
 import com.gdn.awb.exchange.model.AirwayBillTransactionResource;
 import com.gdn.venice.constants.VenOrderStatusConstants;
@@ -57,6 +59,8 @@ import com.gdn.venice.util.VeniceConstants;
 public abstract class ActivityReportProcessor {
 	public static final SimpleDateFormat formatDate = new SimpleDateFormat(LogisticsConstants.DATE_FORMAT_STRING);
 	public static final SimpleDateFormat fileDateTimeFormat = new SimpleDateFormat(LogisticsConstants.FILE_DATE_TIME_FORMAT);
+
+    protected static Logger _log = null;
 	
 	@Autowired
 	LogFileUploadLogDAO logFileUploadLogDAO;
@@ -182,10 +186,13 @@ public abstract class ActivityReportProcessor {
 													            String logProviderCode,
 													            LogAirwayBill logAirwayBill, 
 													            ActivityReportData activityReportData) {
+	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.facade.logistics.activity.processor.ActivityReportProcessor");
 
         boolean isOverrideSuccess = true;
         String errorMessage = "";
         if (airwayBillNoFromEngine.equals(airwayBillNoFromLogistic)) {
+        	_log.debug("Airway Bill Engine & Logistic are matched");
             getLogger().debug("Airway Bill Engine & Logistic are matched");
             try {
                 errorMessage = updateOrderItemAndAirwayBillTransactionStatus(uploadUsername, venOrderItem, airwayBillTransaction, existingOrderItemStatus , newOrderItemStatus, existingAirwayBillTransactionStatus, newAirwayBillTransactionStatus, true);
@@ -201,8 +208,8 @@ public abstract class ActivityReportProcessor {
             getLogger().debug("Airway Bill Engine & Logistic are NOT matched");
             getLogger().debug("Airway Bill Engine : " + airwayBillNoFromEngine);
             getLogger().debug("Airway Bill Logistics : " + airwayBillNoFromLogistic);
-            getLogger().debug(logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceAirwaybillRecordId());
-            getLogger().debug(logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus());
+           _log.debug("invoice "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceAirwaybillRecordId());
+            _log.debug("result status "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus());
     		if(logAirwayBill.getLogInvoiceAirwaybillRecord()!=null || !logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().isEmpty()){
 	            if (logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
 	
@@ -572,7 +579,7 @@ public abstract class ActivityReportProcessor {
             HSSFSheet sheet = wb.createSheet("ActivityReportFailedToUpload");
 
             ActivityInvoiceFailedToUploadExport activityInvoiceFailedToUploadExport = new ActivityInvoiceFailedToUploadExport(wb);
-            wb = activityInvoiceFailedToUploadExport.ExportExcel(activityReportData.getGdnRefNotFoundList(), activityReportData.getFailedItemList(), activityReportData.getFailedStatusUpdateList(),sheet, "activity");
+            wb = activityInvoiceFailedToUploadExport.ExportExcel(activityReportData.getGdnRefNotFoundList(), activityReportData.getFailedItemList(), activityReportData.getFailedStatusUpdateList(),activityReportData.getFailedProviderForGdnReff(),sheet, "activity");
             wb.write(fos);
             
             getLogger().debug("done export excel");

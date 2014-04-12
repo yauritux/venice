@@ -31,6 +31,7 @@ import com.gdn.venice.facade.logistics.activity.parser.RPXActivityReportFilePars
 import com.gdn.venice.facade.spring.LogAirwayBillService;
 import com.gdn.venice.facade.spring.VenOrderItemService;
 import com.gdn.venice.hssf.PojoInterface;
+import com.gdn.venice.logistics.dataimport.DailyReportMSG;
 import com.gdn.venice.logistics.dataimport.DailyReportNCS;
 import com.gdn.venice.logistics.dataimport.LogisticsConstants;
 import com.gdn.venice.logistics.integration.AirwayBillEngineClientConnector;
@@ -174,11 +175,17 @@ public class RPXActivityReportProcessor  extends ActivityReportProcessor {
 		}
 		
 		boolean isOrderItemAfterAWBEngine = (totalAirwayBillByGDNRef == 0) && (airwayBillTransaction != null) && (airwayBillTransaction.getStatus() != null);
+		_log.debug(isOrderItemAfterAWBEngine);
 		
-		if(isOrderItemAfterAWBEngine)
+		if(isOrderItemAfterAWBEngine){
+			_log.debug("existing logistic provider " +airwayBillTransaction.getKodeLogistik());
+			if(differentLogisticProvider(dailyReportOrderItem,activityReportData,airwayBillTransaction.getKodeLogistik()))
+				return;
+			
 			processOrderItemAfterAWBEngine(existingVenOrderItem, dailyReportOrderItem, activityReportData, fileUploadLog, airwayBillTransaction);
-		else
+		}else {
 			processOrderItemBeforeAWBEngine(existingVenOrderItem, dailyReportOrderItem, activityReportData, fileUploadLog);
+		}
 		
 	}
 	
@@ -480,6 +487,15 @@ public class RPXActivityReportProcessor  extends ActivityReportProcessor {
 		return true;
 	}
 	
+	public boolean differentLogisticProvider(DailyReportNCS dailyReportOrderItem, ActivityReportData activityReportData, String kodeLogisticPorvider){	
+		if(!kodeLogisticPorvider.equalsIgnoreCase("RPX")){
+			addFailedRecordCausedByDifferentProviderForGdnReffException(dailyReportOrderItem,activityReportData,kodeLogisticPorvider);
+			return true;
+		}else{
+			return false;
+		}
+	};
+	
 	private String getReceiverRelation(DailyReportNCS dailyReportOrderItem){
 		if ((dailyReportOrderItem.getConsignee().equalsIgnoreCase(dailyReportOrderItem.getRecipient())) || (dailyReportOrderItem.getConsignee().contains(dailyReportOrderItem.getRecipient()))) {
 		    return "Yang bersangkutan";
@@ -550,6 +566,12 @@ public class RPXActivityReportProcessor  extends ActivityReportProcessor {
 		activityReportData.getFailedItemList()
 			.put("No : " + dailyReportNCS.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportNCS.getRefNo(), "System/connection problem");
 	}
+
+	private void addFailedRecordCausedByDifferentProviderForGdnReffException(DailyReportNCS dailyReportNCS, ActivityReportData activityReportData, String logisticProvider){
+
+		activityReportData.getFailedProviderForGdnReff()
+			.put("No : " + dailyReportNCS.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportNCS.getRefNo(), logisticProvider);
+	}	
 
 	private void addFailedRecordCausedByReceivedDateException(DailyReportNCS dailyReportNCS, ActivityReportData activityReportData, Exception e){
 		_log.error("Received Date Problem", e);

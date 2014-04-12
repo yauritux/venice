@@ -502,4 +502,5 @@ public interface VeniceConstants {
 	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BII="3";
 	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_DANAMON="4";
 	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BANK_MEGA="5";
+	public static final String FRAUD_CANCEL_INSTALLMENT_BANK_REPORT_BATCH_JOB_BCA="6";
 }
