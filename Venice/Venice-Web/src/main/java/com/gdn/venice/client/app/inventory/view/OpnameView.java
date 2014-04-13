@@ -17,8 +17,6 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
-import com.smartgwt.client.data.DataSourceField;
-import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.types.SelectionAppearance;
 import com.smartgwt.client.types.SelectionStyle;
@@ -43,7 +41,6 @@ import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -54,7 +51,7 @@ import java.util.LinkedHashMap;
 public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
         OpnamePresenter.MyView {
 
-    RafViewLayout packingListLayout;
+    RafViewLayout opnameLayout;
     ListGrid opnameGrid, newOpnameGrid, supplierGrid;
     Window createOpnameWindow;
     DynamicForm warehouseSelectionForm;
@@ -65,7 +62,7 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
 
     @Inject
     public OpnameView() {
-        packingListLayout = new RafViewLayout();
+        opnameLayout = new RafViewLayout();
         toolstrip = new ToolStrip();
         toolstrip.setWidth100();
 
@@ -81,7 +78,6 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
         opnameGrid.setSortField(0);
         opnameGrid.setShowFilterEditor(true);
         opnameGrid.setShowRowNumbers(true);
-        opnameGrid.setAutoFetchData(true);
         opnameGrid.setAutoFitData(Autofit.BOTH);
         opnameGrid.setCanSelectText(true);
         opnameGrid.setSelectionType(SelectionStyle.SIMPLE);
@@ -115,7 +111,7 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
             }
         });
 
-        opnameGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
+        supplierGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
             @Override
             public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
                 refreshAllSupplierData();
@@ -299,7 +295,7 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
             }
         });
 
-        packingListLayout.setMembers(warehouseSelectionForm, toolstrip);
+        opnameLayout.setMembers(warehouseSelectionForm, toolstrip);
     }
 
     public void loadItemStorageData(String warehouseCode, String stockType, String supplierCode) {
@@ -311,7 +307,7 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
         opnameGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ID).setHidden(true);
         opnameGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_QTY).setCanFilter(false);
         refreshAllItemStorageData();
-        packingListLayout.setMembers(warehouseSelectionForm, toolstrip, opnameGrid);
+        opnameLayout.setMembers(warehouseSelectionForm, toolstrip, opnameGrid);
     }
 
     @Override
@@ -328,7 +324,7 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
 
     @Override
     public Widget asWidget() {
-        return packingListLayout;
+        return opnameLayout;
     }
 
     @Override

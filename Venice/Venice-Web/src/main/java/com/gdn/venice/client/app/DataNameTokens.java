@@ -1361,6 +1361,8 @@ public class DataNameTokens {
         public static String INV_OPNAME_ITEMSTORAGE_NOTE = "itemStorageNote";
         public static String INV_OPNAME_SUPPLIERCODE = "supplierCode";
         public static String INV_OPNAME_SUPPLIERNAME = "supplierName";
+        public static String INV_OPNAME_WAREHOUSECODE = "warehouseCode";
+        public static String INV_OPNAME_STOCKTYPE = "stockType";
                 
 	/**
 	 * This constructor adds all of the name token and the wrapper type

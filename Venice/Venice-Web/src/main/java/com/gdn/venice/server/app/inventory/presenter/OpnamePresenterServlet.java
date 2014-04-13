@@ -5,10 +5,16 @@
 package com.gdn.venice.server.app.inventory.presenter;
 
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.app.inventory.command.AddOpnameDetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemStorageDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchOpnameDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchOpnameDetailDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchStorageByItemDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchSupplierDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveOpnameListDataCommand;
+import com.gdn.venice.server.app.inventory.command.UpdateOpnameDetailDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
+import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
 import com.gdn.venice.server.util.Util;
@@ -79,6 +85,14 @@ public class OpnamePresenterServlet extends HttpServlet {
                         request.getParameter("stockType"));
             } else if (method.equals("fetchItemStorageDataById")) {
                 rafDsCommand = new FetchItemStorageDataCommand(request.getParameter(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ID));
+            } else if (method.equals("fetchAllOpnameData")) {
+                rafDsCommand = new FetchOpnameDataCommand(rafDsRequest);
+            } else if (method.equals("fetchOpnameDetailByOpnameId")) {
+                rafDsCommand = new FetchOpnameDetailDataCommand(request.getParameter("opnameId"));
+            } else if (method.equals("updateOpnameDetail")) {
+                rafDsCommand = new UpdateOpnameDetailDataCommand(username, rafDsRequest);
+            } else if (method.equals("addOpnameDetail")) {
+                rafDsCommand = new AddOpnameDetailDataCommand(username, rafDsRequest);
             }
 
             if (rafDsCommand != null) {
@@ -94,10 +108,10 @@ public class OpnamePresenterServlet extends HttpServlet {
         } else {
             if (method.equals("saveOpnameList")) {
                 String data = request.getParameter("data"),
-                        stockType = request.getParameter("stockType"), 
+                        stockType = request.getParameter("stockType"),
                         supplierCode = request.getParameter("supplierCode"),
                         warehouseCode = request.getParameter("warehouseCode");
-                
+
                 SaveOpnameListDataCommand saveOpnameCommand = new SaveOpnameListDataCommand(username,
                         data, warehouseCode, stockType, supplierCode);
 
@@ -106,6 +120,9 @@ public class OpnamePresenterServlet extends HttpServlet {
                         + "_" + new SimpleDateFormat("yyyyMMdd").format(new Date());
                 response.setHeader("Content-Disposition", "attachment; filename=" + filename);
                 saveOpnameCommand.execute().write(response.getOutputStream());
+            } else if (method.equals("getStorageByItem")) {
+                RafRpcCommand getStorageByItemCommand = new FetchStorageByItemDataCommand(request.getParameter("itemSKU"));
+                response.getOutputStream().println(getStorageByItemCommand.execute());
             }
         }
     }

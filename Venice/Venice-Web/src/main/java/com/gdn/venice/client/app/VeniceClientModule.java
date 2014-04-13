@@ -67,6 +67,7 @@ import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
+import com.gdn.venice.client.app.inventory.presenter.OpnameAdjustStockPresenter;
 import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
@@ -85,6 +86,7 @@ import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
 import com.gdn.venice.client.app.inventory.view.GRNCreateView;
 import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.GoodIssuedNoteView;
+import com.gdn.venice.client.app.inventory.view.OpnameAdjustStockView;
 import com.gdn.venice.client.app.inventory.view.OpnameView;
 import com.gdn.venice.client.app.inventory.view.PackingListView;
 import com.gdn.venice.client.app.inventory.view.PickingListView;
@@ -485,5 +487,10 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 OpnamePresenter.MyView.class,
                 OpnameView.class,
                 OpnamePresenter.MyProxy.class);
+        
+        bindPresenter(OpnameAdjustStockPresenter.class,
+                OpnameAdjustStockPresenter.MyView.class,
+                OpnameAdjustStockView.class,
+                OpnameAdjustStockPresenter.MyProxy.class);
     }
 }
