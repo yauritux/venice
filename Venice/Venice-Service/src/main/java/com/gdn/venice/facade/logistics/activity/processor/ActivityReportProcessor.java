@@ -568,7 +568,6 @@ public abstract class ActivityReportProcessor {
 	
 	public void generateUploadFailData(ActivityReportData activityReportData, LogFileUploadLog fileUploadLog) throws Exception{
 		if(isFailReportAvailable(activityReportData)){
-			
 			if(activityReportFailFilePath == null)
 				activityReportFailFilePath = System.getenv("VENICE_HOME") + LogisticsConstants.ACTIVITY_REPORT_FOLDER;
 			
@@ -577,7 +576,6 @@ public abstract class ActivityReportProcessor {
 
             HSSFWorkbook wb = new HSSFWorkbook();
             HSSFSheet sheet = wb.createSheet("ActivityReportFailedToUpload");
-
             ActivityInvoiceFailedToUploadExport activityInvoiceFailedToUploadExport = new ActivityInvoiceFailedToUploadExport(wb);
             wb = activityInvoiceFailedToUploadExport.ExportExcel(activityReportData.getGdnRefNotFoundList(), activityReportData.getFailedItemList(), activityReportData.getFailedStatusUpdateList(),activityReportData.getFailedProviderForGdnReff(),sheet, "activity");
             wb.write(fos);
@@ -595,10 +593,12 @@ public abstract class ActivityReportProcessor {
 	}
 	
 	public boolean isFailReportAvailable(ActivityReportData activityReportData){
-		if (activityReportData.getGdnRefNotFoundList().size() > 0 || activityReportData.getFailedItemList().size() > 0 || activityReportData.getFailedStatusUpdateList().size() > 0) {
+		if (activityReportData.getGdnRefNotFoundList().size() > 0 || activityReportData.getFailedItemList().size() > 0 || activityReportData.getFailedStatusUpdateList().size() > 0
+				|| activityReportData.getFailedProviderForGdnReff().size() > 0) {
             getLogger().info(activityReportData.getGdnRefNotFoundList().size() + " row(s) was not uploaded");
             getLogger().info(activityReportData.getFailedItemList().size() + " row(s) has problem when being processed");
             getLogger().info(activityReportData.getFailedStatusUpdateList().size() + " row(s) has fail status update");
+            getLogger().info(activityReportData.getFailedProviderForGdnReff().size() + " row(s) has different logistic provider");
           
             return true;
 		}else{
