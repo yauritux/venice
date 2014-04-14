@@ -483,11 +483,9 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 	
 	public boolean differentLogisticProvider(DailyReportJNE dailyReportOrderItem, ActivityReportData activityReportData, String kodeLogisticPorvider){	
 		if(!kodeLogisticPorvider.equalsIgnoreCase("JNE")){
-			_log.debug("differentLogisticProvider JNE and "+kodeLogisticPorvider);
 			addFailedRecordCausedByDifferentProviderForGdnReffException(dailyReportOrderItem,activityReportData,kodeLogisticPorvider);
 			return true;
 		}else{
-			_log.debug("same logistic provider JNE and "+kodeLogisticPorvider);
 			return false;
 		}
 	};
