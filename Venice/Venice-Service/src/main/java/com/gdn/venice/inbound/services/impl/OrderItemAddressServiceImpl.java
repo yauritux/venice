@@ -39,6 +39,8 @@ public class OrderItemAddressServiceImpl implements OrderItemAddressService {
 		VenOrderItemAddress persistedOrderItemAddress = venOrderItemAddress;
 		if (!em.contains(venOrderItemAddress)) {
 			// venOrderItemAddress is not in attach mode, hence should be attached by calling save explicitly
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "persist::calling venOrderItemAddressDAO.save explicitly");
 			try {
 				persistedOrderItemAddress = venOrderItemAddressDAO.save(venOrderItemAddress);
 			} catch (Exception e) {
@@ -48,6 +50,7 @@ public class OrderItemAddressServiceImpl implements OrderItemAddressService {
 			}
 		}
 	
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persist::returning persistedOrderItemAddress = " + persistedOrderItemAddress);
 		return persistedOrderItemAddress;
 	}
 

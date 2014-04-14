@@ -119,15 +119,6 @@ public class OrderItemServiceImpl implements OrderItemService {
 		List<VenOrderItem> newVenOrderItemList = new ArrayList<VenOrderItem>();
 		if (venOrderItemList != null && (!(venOrderItemList.isEmpty()))) {
 			try {
-				/*
-				Iterator<VenOrderItem> i = venOrderItemList.iterator();
-				
-				// Synchronize the references before persisting anything
-				while(i.hasNext()){
-					VenOrderItem venOrderItem = i.next();
-					venOrderItem = synchronizeVenOrderItemReferenceData(venOrderItem);
-				}
-				*/
 				for (VenOrderItem venOrderItem : venOrderItemList) {
 					VenOrderItem synchOrderItem = synchronizeVenOrderItemReferenceData(venOrderItem);
 					
@@ -136,8 +127,12 @@ public class OrderItemServiceImpl implements OrderItemService {
 					synchOrderItem.setVenOrder(venOrder);
 					
 					// Detach the marginPromo before persisting
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::venOrderItemAdjustments = " 
-							+ synchOrderItem.getVenOrderItemAdjustments());
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::venOrderItem.venOrderItemAdjustments = "
+							+ venOrderItem.getVenOrderItemAdjustments() + ",  members=" + (venOrderItem.getVenOrderItemAdjustments() != null
+							? venOrderItem.getVenOrderItemAdjustments().size() : 0));
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::synchOrderItem.venOrderItemAdjustments = " 
+							+ synchOrderItem.getVenOrderItemAdjustments() + ", members=" + (synchOrderItem.getVenOrderItemAdjustments() != null
+							? synchOrderItem.getVenOrderItemAdjustments().size() : 0));
 					List<VenOrderItemAdjustment> venOrderItemAdjustments = new ArrayList<VenOrderItemAdjustment>(synchOrderItem.getVenOrderItemAdjustments());
 					synchOrderItem.setVenOrderItemAdjustments(null);
 					
@@ -148,15 +143,29 @@ public class OrderItemServiceImpl implements OrderItemService {
 					synchOrderItem.setLogMerchantPickupInstructions(null);
 					
 					// Persist the shipping Address
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::venOrder.venCustomer.venParty.venPartyAddresses[0].venAddress=" 
+					        + (venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress()));
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::street address = " + (venOrder.getVenCustomer().getVenParty().getVenPartyAddresses()
 									.get(0).getVenAddress().getStreetAddress1()));
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::addressId = " + (venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0)
+									.getVenAddress().getAddressId()));
 					VenAddress persistedAddress = venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress();
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::persistedAddress ID = " + persistedAddress.getAddressId());
-					synchOrderItem.setVenAddress(persistedAddress);
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrderItemList::orderItem venAddress has been successfully persisted");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::persistedAddress=" + persistedAddress
+							+ ",hashCode = " + persistedAddress.hashCode());
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::synchOrderItem.venAddress=" + synchOrderItem.getVenAddress()
+							+ ",hashCode = " + synchOrderItem.getVenAddress().hashCode());
+					if (synchOrderItem.getVenAddress() == null || synchOrderItem.getVenAddress().getAddressId() == null) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::orderItem.venAddress is NULL, persisting it");
+						synchOrderItem.setVenAddress(persistedAddress);
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::orderItem venAddress has been successfully persisted");						
+					}
+					
 
 					// Persist the recipient	
 					VenRecipient persistedRecipient = null;

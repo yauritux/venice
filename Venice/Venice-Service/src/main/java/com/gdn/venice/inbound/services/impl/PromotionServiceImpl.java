@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenPromotionDAO;
+import com.gdn.venice.exception.VenPromotionQueryException;
 import com.gdn.venice.exception.VenPromotionSynchronizingError;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.PromotionService;
@@ -37,16 +38,25 @@ public class PromotionServiceImpl implements PromotionService {
 	private EntityManager em;
 	
 	@Override
-	@Transactional(readOnly = true, propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public List<VenPromotion> findByPromotionAndMargin(VenPromotion venPromotion) throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "findByPromotionAndMargin::BEGIN,venPromotion = " + venPromotion);
 		
-		List<VenPromotion> promotionExactList = venPromotionDAO
-				.findByPromotionAndMargin(venPromotion.getPromotionCode(),
-						venPromotion.getPromotionName(),
-						venPromotion.getGdnMargin(),
-						venPromotion.getMerchantMargin(),
-						venPromotion.getOthersMargin());
+		List<VenPromotion> promotionExactList = null;
+		
+		try {
+			promotionExactList = venPromotionDAO
+					.findByPromotionAndMargin(venPromotion.getPromotionCode(),
+							venPromotion.getPromotionName(),
+							venPromotion.getGdnMargin(),
+							venPromotion.getMerchantMargin(),
+							venPromotion.getOthersMargin());
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			e.printStackTrace();
+		    throw CommonUtil.logAndReturnException(new VenPromotionQueryException("Cannot perform query on VenPromotion"
+		    		, VeniceExceptionConstants.VEN_EX_140001), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+		}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "findByPromotionAndMargin::END,returning promotionExactList="
 				+ (promotionExactList != null ? promotionExactList.size() : 0));
