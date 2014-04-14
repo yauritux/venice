@@ -154,7 +154,7 @@ public class PutawayExportServlet extends HttpServlet {
 	                        
 	                    StockType st = null;
 	                    if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.COMMISSION.name())){
-	                    	st = StockType.CONSIGMENT_COMMISION;
+	                    	st = StockType.CONSIGNMENT_COMMISION;
 	                    }else if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.TRADING.name())){
 	                    	st = StockType.CONSIGNMENT_TRADING;
 	                    }
