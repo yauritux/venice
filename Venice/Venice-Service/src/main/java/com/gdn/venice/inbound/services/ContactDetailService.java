@@ -26,4 +26,6 @@ public interface ContactDetailService {
 	        throws VeniceInternalException;
 	
 	public List<VenContactDetail> synchronizeVenContactDetailReferences(List<VenContactDetail> contactDetailReferences);
+	
+	public List<VenContactDetail> persistContactDetails(List<VenContactDetail> venContactDetails, VenParty venParty) throws VeniceInternalException;
  }
