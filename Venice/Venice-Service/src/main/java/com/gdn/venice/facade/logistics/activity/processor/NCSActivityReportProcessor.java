@@ -176,7 +176,6 @@ public class NCSActivityReportProcessor extends ActivityReportProcessor {
 		}
 		
 		boolean isOrderItemAfterAWBEngine = (totalAirwayBillByGDNRef == 0) && (airwayBillTransaction != null) && (airwayBillTransaction.getStatus() != null);
-		_log.debug(isOrderItemAfterAWBEngine);
 		if(isOrderItemAfterAWBEngine){
 			_log.debug("existing logistic provider " +airwayBillTransaction.getKodeLogistik());
 			if(differentLogisticProvider(dailyReportOrderItem,activityReportData,airwayBillTransaction.getKodeLogistik()))

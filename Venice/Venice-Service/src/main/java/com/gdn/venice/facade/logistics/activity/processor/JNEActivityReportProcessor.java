@@ -101,7 +101,6 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 		    		processEachOrderItem(dailyReportOrderItem, activityReportData, fileUploadLog);
 		    	}
 		    }
-		    
 		    generateUploadFailData(activityReportData, fileUploadLog);
 		    fileUploadLog.setUploadStatus("Success");
 		    updateUploadStatus(fileUploadLog);
@@ -152,7 +151,6 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 		}
 		
 		boolean isOrderItemAfterAWBEngine = (totalAirwayBillByGDNRef == 0) && (airwayBillTransaction != null) && (airwayBillTransaction.getStatus() != null);
-		_log.debug(isOrderItemAfterAWBEngine);
 		
 		if(isOrderItemAfterAWBEngine){
 			_log.debug("existing logistic provider " +airwayBillTransaction.getKodeLogistik());
@@ -485,9 +483,11 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 	
 	public boolean differentLogisticProvider(DailyReportJNE dailyReportOrderItem, ActivityReportData activityReportData, String kodeLogisticPorvider){	
 		if(!kodeLogisticPorvider.equalsIgnoreCase("JNE")){
+			_log.debug("differentLogisticProvider JNE and "+kodeLogisticPorvider);
 			addFailedRecordCausedByDifferentProviderForGdnReffException(dailyReportOrderItem,activityReportData,kodeLogisticPorvider);
 			return true;
 		}else{
+			_log.debug("same logistic provider JNE and "+kodeLogisticPorvider);
 			return false;
 		}
 	};
@@ -564,9 +564,10 @@ public class JNEActivityReportProcessor extends ActivityReportProcessor{
 	}
 	
 	private void addFailedRecordCausedByDifferentProviderForGdnReffException(DailyReportJNE dailyReportJNE, ActivityReportData activityReportData, String logisticProvider){
-
+		_log.error("Different logistic provider");
 		activityReportData.getFailedProviderForGdnReff()
 			.put("No : " + dailyReportJNE.getNumber().replace(".0", "") + ", GDN Ref : " + dailyReportJNE.getGdnRefNumber(), logisticProvider);
+		_log.debug(activityReportData.getFailedProviderForGdnReff());
 	}	
 
 	private void addFailedRecordCausedByReceivedDateException(DailyReportJNE dailyReportJNE, ActivityReportData activityReportData, Exception e){
