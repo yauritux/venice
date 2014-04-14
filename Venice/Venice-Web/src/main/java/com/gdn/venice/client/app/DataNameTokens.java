@@ -1346,6 +1346,7 @@ public class DataNameTokens {
         public static String INV_OPNAME_ID = "opnameId";
         public static String INV_OPNAME_NO = "opnameNo";
         public static String INV_OPNAME_CREATEDBY = "createdBy";
+        public static String INV_OPNAME_CREATEDDATE = "createdDate";
         public static String INV_OPNAME_UPDATEDBY = "updatedBy";
         public static String INV_OPNAME_UPDATEDDATE = "updatedDate";
         public static String INV_OPNAME_ITEMSTORAGE_ID = "itemStorageId";
@@ -1356,6 +1357,8 @@ public class DataNameTokens {
         public static String INV_OPNAME_ITEMSTORAGE_SHELFCODE = "itemShelfCode";
         public static String INV_OPNAME_ITEMSTORAGE_STORAGECODE = "itemStorageCode";
         public static String INV_OPNAME_ITEMSTORAGE_QTY = "itemStorageQty";
+        public static String INV_OPNAME_ITEMSTORAGE_NEWQTY = "itemStorageNewQty";
+        public static String INV_OPNAME_ITEMSTORAGE_NOTE = "itemStorageNote";
         public static String INV_OPNAME_SUPPLIERCODE = "supplierCode";
         public static String INV_OPNAME_SUPPLIERNAME = "supplierName";
                 
