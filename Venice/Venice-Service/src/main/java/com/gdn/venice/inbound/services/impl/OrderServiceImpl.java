@@ -573,6 +573,7 @@ public class OrderServiceImpl implements OrderService {
 		}
 		
 		if (venOrder.getVenOrderStatus() != null) {
+			/*
 			List<VenOrderStatus> orderStatusReferences = new ArrayList<VenOrderStatus>();
 			orderStatusReferences.add(venOrder.getVenOrderStatus());
 
@@ -585,7 +586,11 @@ public class OrderServiceImpl implements OrderService {
 				orderStatusVenOrders.add(venOrder);
 				orderStatus.setVenOrders(orderStatusVenOrders);
 				venOrder.setVenOrderStatus(orderStatus);
-			}			
+			}
+			*/
+			VenOrderStatus venOrderStatus = venOrder.getVenOrderStatus();
+			VenOrderStatus synchOrderStatus = orderStatusService.synchronizeVenOrderStatusReferences(venOrderStatus);
+			venOrder.setVenOrderStatus(synchOrderStatus);
 		}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderReferenceData::EOF, returning venOrder = " + venOrder);

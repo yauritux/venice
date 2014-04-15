@@ -257,6 +257,7 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenContactDetailReferences::successfully added synchronizedVenContactDetail into synchronizedContactDetailReferences");
 					} catch (Exception e) {
+						CommonUtil.logError(this.getClass().getCanonicalName(), e);
 						CommonUtil.logAndReturnException(new CannotPersistVenContactDetailException("cannot persisting VenContactDetail", 
 								VeniceExceptionConstants.VEN_EX_110001)
 						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);

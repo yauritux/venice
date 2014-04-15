@@ -25,7 +25,7 @@ import com.gdn.venice.util.CommonUtil;
  *
  */
 @Service
-@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+@Transactional(readOnly = true, propagation = Propagation.NOT_SUPPORTED)
 public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.LogLogisticService {
 
 	@Autowired
@@ -46,8 +46,9 @@ public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.L
 		   = new ArrayList<LogLogisticService>();
 		
 		for (LogLogisticService logLogisticService : logLogisticServiceRefs) {
-			//em.detach(logLogisticService);
 			if (logLogisticService.getServiceCode() != null) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeLogLogisticServiceReferences::logLogisticService.serviceId = " + logLogisticService.getLogisticsServiceId());
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "synchronizeLogLogisticServiceReferences::Restricting LogLogisticService... :" 
 				          + logLogisticService.getServiceCode());
@@ -57,7 +58,6 @@ public class LogLogisticServiceImpl implements com.gdn.venice.inbound.services.L
 							"Logistics service does not exist", VeniceExceptionConstants.VEN_EX_500001)
 					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 				} else {
-					em.detach(logisticService);
 					synchronizedLogLogisticServiceRefs.add(logisticService);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeLogLogisticServiceReferences::successfully added logisticService into synchronizedLogLogisticServiceRefs");

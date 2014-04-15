@@ -2,7 +2,6 @@ package com.gdn.venice.inbound.services.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -15,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
+import com.gdn.venice.dao.VenContactDetailDAO;
 import com.gdn.venice.dao.VenOrderItemDAO;
 import com.gdn.venice.exception.CannotPersistOrderItemException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.AddressService;
+import com.gdn.venice.inbound.services.ContactDetailService;
 import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.OrderItemAddressService;
 import com.gdn.venice.inbound.services.OrderItemAdjustmentService;
@@ -83,6 +84,12 @@ public class OrderItemServiceImpl implements OrderItemService {
 	@Autowired
 	private RecipientService recipientService;
 	
+	@Autowired
+	private ContactDetailService contactDetailService;
+	
+	@Autowired
+	private VenContactDetailDAO venContactDetailDAO;
+	
 	@PersistenceContext
 	private EntityManager em;
 
@@ -120,17 +127,163 @@ public class OrderItemServiceImpl implements OrderItemService {
 		List<VenOrderItem> newVenOrderItemList = new ArrayList<VenOrderItem>();
 		if (venOrderItemList != null && (!(venOrderItemList.isEmpty()))) {
 			try {
-				Iterator<VenOrderItem> i = venOrderItemList.iterator();
-				
-				// Synchronize the references before persisting anything
-				while(i.hasNext()){
-					VenOrderItem venOrderItem = i.next();
-					venOrderItem = synchronizeVenOrderItemReferenceData(venOrderItem); //venOrderItem is in detach mode
+				for (VenOrderItem venOrderItem : venOrderItemList) {
+					VenOrderItem synchOrderItem = synchronizeVenOrderItemReferenceData(venOrderItem);
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemlist::venOrder = " + venOrder);
+					// Attach the order
+					synchOrderItem.setVenOrder(venOrder);
+					
+					// Detach the marginPromo before persisting
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::venOrderItem.venOrderItemAdjustments = "
+							+ venOrderItem.getVenOrderItemAdjustments() + ",  members=" + (venOrderItem.getVenOrderItemAdjustments() != null
+							? venOrderItem.getVenOrderItemAdjustments().size() : 0));
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::synchOrderItem.venOrderItemAdjustments = " 
+							+ synchOrderItem.getVenOrderItemAdjustments() + ", members=" + (synchOrderItem.getVenOrderItemAdjustments() != null
+							? synchOrderItem.getVenOrderItemAdjustments().size() : 0));
+					List<VenOrderItemAdjustment> venOrderItemAdjustments = new ArrayList<VenOrderItemAdjustment>(synchOrderItem.getVenOrderItemAdjustments());
+					synchOrderItem.setVenOrderItemAdjustments(null);
+					
+					// Detach the pickup instructions before persisting
+					//CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::logMerchantPickupInstructions = "
+							//+ synchOrderItem.getLogMerchantPickupInstructions());
+					//List<LogMerchantPickupInstruction> logMerchantPickupInstructions = new ArrayList<LogMerchantPickupInstruction>(synchOrderItem.getLogMerchantPickupInstructions());
+					synchOrderItem.setLogMerchantPickupInstructions(null);
+					
+					// Persist the shipping Address
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::venOrder.venCustomer.venParty.venPartyAddresses[0].venAddress=" 
+					        + (venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress()));
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::street address = " + (venOrder.getVenCustomer().getVenParty().getVenPartyAddresses()
+									.get(0).getVenAddress().getStreetAddress1()));
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::addressId = " + (venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0)
+									.getVenAddress().getAddressId()));
+					VenAddress persistedAddress = venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress();
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::persistedAddress ID = " + persistedAddress.getAddressId());
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::persistedAddress=" + persistedAddress
+							+ ",hashCode = " + persistedAddress.hashCode());
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::synchOrderItem.venAddress=" + synchOrderItem.getVenAddress()
+							+ ",hashCode = " + synchOrderItem.getVenAddress().hashCode());
+					if (synchOrderItem.getVenAddress() == null || synchOrderItem.getVenAddress().getAddressId() == null) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::orderItem.venAddress is NULL, persisting it");
+						synchOrderItem.setVenAddress(persistedAddress);
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::orderItem venAddress has been successfully persisted");						
+					}
+					
+
+					// Persist the recipient	
+					VenRecipient persistedRecipient = null;
+					if (venOrder.getVenCustomer().getVenParty().equals(synchOrderItem.getVenRecipient().getVenParty())) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::Recipient equals with Customer");
+						persistedRecipient = synchOrderItem.getVenRecipient();
+						persistedRecipient.setVenParty(venOrder.getVenCustomer().getVenParty());
+					} else {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::Recipient is different with Customer");
+					}
+					
+				    persistedRecipient = recipientService.persistRecipient(synchOrderItem.getVenRecipient());
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::persistedRecipient ID = " + persistedRecipient.getRecipientId());					
+					synchOrderItem.setVenRecipient(persistedRecipient);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::successfully persist the recipient in main processing loop");					
+					
+					// Adjust the shipping weight because it comes across as the
+					// product shipping weight
+					synchOrderItem.setShippingWeight(new BigDecimal(synchOrderItem.getShippingWeight().doubleValue() * synchOrderItem.getQuantity()));
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::successfully set shipping weight in main processing loop");
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::check venMerchantProduct (SKU = "
+							+ synchOrderItem.getVenMerchantProduct().getWcsProductSku() + ") before persisting into DB");
+
+					// Persist the object						
+					if (!em.contains(synchOrderItem)) {
+						//orderItem is in detach mode, hence should call save explicitly as shown below
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::calling save on VenOrderItem explicitly");
+						synchOrderItem = venOrderItemDAO.save(synchOrderItem);
+					}					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::successfully persisted orderItem into DB");						
+					
+					/*
+					 * Tally Order Item with recipient address and contact details
+					 * defined in the ref tables VenOrderItemAddress and VenOrderItemContactDetail
+					 */
+										
+					List<VenOrderItemContactDetail> venOrderItemContactDetailList = new ArrayList<VenOrderItemContactDetail>();
+					
+					VenOrderItemAddress venOrderItemAddress = new VenOrderItemAddress();
+					
+					venOrderItemAddress.setVenOrderItem(synchOrderItem);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistOrderItemList::setting orderItemAddress = "  + synchOrderItem.getVenAddress());
+					venOrderItemAddress.setVenAddress(synchOrderItem.getVenAddress());
+
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::persisting  VenOrderItemAddress = " + venOrderItemAddress);
+					// persist VenOrderItemAddress
+					orderItemAddressService.persist(venOrderItemAddress);
+					
+					List<VenContactDetail> venContactDetailList = synchOrderItem.getVenRecipient().getVenParty().getVenContactDetails();
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::venContactDetailList = " + venContactDetailList);
+					
+					for (VenContactDetail venContactDetail : venContactDetailList){
+						List<VenContactDetail> contactDetailList = venContactDetailDAO.findByContactDetail(venContactDetail.getContactDetail());
+						
+						venContactDetail = syncContactDetail(venContactDetail);
+						
+						VenOrderItemContactDetail venOrderItemContactDetail = new VenOrderItemContactDetail();
+						venOrderItemContactDetail.setVenOrderItem(synchOrderItem);
+						venOrderItemContactDetail.setVenContactDetail(venContactDetail);
+						
+						venOrderItemContactDetailList.add(venOrderItemContactDetail);
+						
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::venContactDetail = " + venContactDetail.getContactDetailId());
+						
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::venContactDetail = " + venContactDetail.getContactDetail());
+						
+					}
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::Total VenOrderItemContactDetail to be persisted => " 
+					        + venOrderItemContactDetailList.size());
+					orderItemContactDetailService.persist(venOrderItemContactDetailList);
+					
+					//add order item history
+					orderItemStatusHistoryService.createOrderItemStatusHistory(synchOrderItem, venOrder.getVenOrderStatus());
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::successfully created OrderItemStatusHistory");
+
+					// Persist the marginPromo
+					synchOrderItem.setVenOrderItemAdjustments(orderItemAdjustmentService.persistOrderItemAdjustmentList(synchOrderItem, venOrderItemAdjustments));
+					
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::adding orderItem into newVenOrderItemList");
+					newVenOrderItemList.add(synchOrderItem);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistOrderItemList::orderItem added into newVenOrderItemList");					
+					
 				}
 				
 				//Main processing loop
+				/*
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrderItemList::Main processing loop");
+			
 				i = venOrderItemList.iterator();
 				while (i.hasNext()) {
 					VenOrderItem orderItem = i.next();
@@ -198,10 +351,10 @@ public class OrderItemServiceImpl implements OrderItemService {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::successfully persisted orderItem into DB");						
 					
-					/*
-					 * Tally Order Item with recipient address and contact details
-					 * defined in the ref tables VenOrderItemAddress and VenOrderItemContactDetail
-					 */
+					
+					//Tally Order Item with recipient address and contact details
+					//defined in the ref tables VenOrderItemAddress and VenOrderItemContactDetail
+					 
 										
 					List<VenOrderItemContactDetail> venOrderItemContactDetailList = new ArrayList<VenOrderItemContactDetail>();
 					
@@ -243,7 +396,8 @@ public class OrderItemServiceImpl implements OrderItemService {
 					newVenOrderItemList.add(orderItem);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::orderItem added into newVenOrderItemList");					
-				}
+				}//end of while
+				*/ 
 			} catch (Exception e) {
 				CommonUtil.logError(this.getClass().getCanonicalName(), e);
 				throw CommonUtil.logAndReturnException(new CannotPersistOrderItemException(
@@ -257,6 +411,24 @@ public class OrderItemServiceImpl implements OrderItemService {
 		return newVenOrderItemList;
 	}
 
+	public VenContactDetail syncContactDetail(VenContactDetail contactDetail){
+		List<VenContactDetail> existingContactDetail = venContactDetailDAO.findByContactDetail(contactDetail.getContactDetail());
+		
+		VenContactDetail venContactDetail = new VenContactDetail();
+		
+		if(existingContactDetail.size() > 0){
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "persistContactDetails::existing contact detail found, total member = " + existingContactDetail.size());
+			venContactDetail = existingContactDetail.get(0);
+		}else{
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "persistContactDetails::calling save on venContactDetailDAO explicitly");
+			venContactDetail = venContactDetailDAO.save(contactDetail);
+		}
+		
+		return venContactDetail;
+	}
+	
 	/**
 	 * Synchronizes the reference data for the direct VenOrderItem references
 	 * 
@@ -264,6 +436,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 	 * @return the synchronized data object
 	 */	
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenOrderItem synchronizeVenOrderItemReferenceData(
 			VenOrderItem venOrderItem) throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -279,35 +452,29 @@ public class OrderItemServiceImpl implements OrderItemService {
 		//}
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenOrderItemReferenceData::VenOrderItem merchantProduct = "
+				, "synchronizeVenOrderItemReferenceData::synchronizing VenMerchantProduct = "
 				+ venOrderItem.getVenMerchantProduct());
 		//if (venOrderItem.getVenMerchantProduct() != null) {
-			List<VenMerchantProduct> merchantProductRefs = new ArrayList<VenMerchantProduct>();
-			merchantProductRefs.add(venOrderItem.getVenMerchantProduct());
-			merchantProductRefs = merchantProductService.synchronizeVenMerchantProductRefs(merchantProductRefs);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "synchronizeVenOrderItemReferenceData::merchantProductRefs = "
-					+ (merchantProductRefs != null ? merchantProductRefs.size() : 0));
-			for (VenMerchantProduct merchantProduct : merchantProductRefs) {
-				venOrderItem.setVenMerchantProduct(merchantProduct);
-			}
+		    VenMerchantProduct venMerchantProduct = venOrderItem.getVenMerchantProduct();
+		    VenMerchantProduct synchVenMerchantProduct = merchantProductService.synchronizeVenMerchantProductData(venMerchantProduct);
+		    venOrderItem.setVenMerchantProduct(synchVenMerchantProduct);
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenOrderItemReferenceData::VenMerchantProduct has been successfully synchronized");
+		    
+		    
 		//}
 		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenOrderItemReferenceData::VenOrderItem venOrderStatus = " + venOrderItem.getVenOrderStatus());
 		//if (venOrderItem.getVenOrderStatus() != null) {
 						
-			List<VenOrderStatus> orderStatusRefs = new ArrayList<VenOrderStatus>();
-			orderStatusRefs.add(venOrderItem.getVenOrderStatus());
-			orderStatusRefs = orderStatusService.synchronizeVenOrderStatusReferences(orderStatusRefs);
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "synchronizeVenOrderItemReferenceData::orderStatusRefs is synchronized");
-			for (VenOrderStatus orderStatus : orderStatusRefs) {				
-				List<VenOrderItem> orderStatusVenOrderItems = orderStatus.getVenOrderItems();
-				CommonUtil.logDebug(this.getClass().getCanonicalName()
-						, "synchronizeVenOrderItemReferenceData::orderStatusVenOrderItems = " + orderStatusVenOrderItems);
-				orderStatusVenOrderItems.add(venOrderItem);
-				orderStatus.setVenOrderItems(orderStatusVenOrderItems);
-				venOrderItem.setVenOrderStatus(orderStatus);
-			}			
+		    VenOrderStatus venOrderStatus = venOrderItem.getVenOrderStatus();
+		    VenOrderStatus synchOrderStatus = orderStatusService.synchronizeVenOrderStatusReferences(venOrderStatus);
+		    venOrderItem.setVenOrderStatus(synchOrderStatus);
+		    CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenorderItemReferenceData::synchronized venOrderStatus.statusId = " 
+		    		+ venOrderItem.getVenOrderStatus().getOrderStatusId());		    
+		    CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenorderItemReferenceData::synchronized venOrderStatus.statusCode = " 
+		    		+ venOrderItem.getVenOrderStatus().getOrderStatusCode());
 		//}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenOrderItemReferenceData::EOM, returning venOrderItem = " + venOrderItem
