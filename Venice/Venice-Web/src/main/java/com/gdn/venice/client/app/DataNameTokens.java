@@ -1355,7 +1355,7 @@ public class DataNameTokens {
         public static String INV_GIN_AWB_ID = "ginAwbId";
         public static String INV_GIN_AWB_NO = "ginAwbNo";
         
-        //Inventory GIN
+        //Inventory Opname
         public static String INV_OPNAME_ID = "opnameId";
         public static String INV_OPNAME_NO = "opnameNo";
         public static String INV_OPNAME_CREATEDBY = "createdBy";
@@ -1374,7 +1374,17 @@ public class DataNameTokens {
         public static String INV_OPNAME_ITEMSTORAGE_NOTE = "itemStorageNote";
         public static String INV_OPNAME_SUPPLIERCODE = "supplierCode";
         public static String INV_OPNAME_SUPPLIERNAME = "supplierName";
-                
+        public static String INV_OPNAME_WAREHOUSECODE = "warehouseCode";
+        public static String INV_OPNAME_STOCKTYPE = "stockType";
+            
+        //Inventory Picker
+        public static String INV_PICKER_ID = "pickerId";
+        public static String INV_PICKER_CODE = "pickerCode";
+        public static String INV_PICKER_NAME = "pickerName";
+        public static String INV_PICKER_WAREHOUSECODE = "pickerWarehouseCode";
+        public static String INV_PICKER_WAREHOUSENAME = "pickerWarehouseName";
+        public static String INV_PICKER_STATUS = "pickerStatus";
+        
 	/**
 	 * This constructor adds all of the name token and the wrapper type
 	 * definitions into the Map. This should really be removed so that the 

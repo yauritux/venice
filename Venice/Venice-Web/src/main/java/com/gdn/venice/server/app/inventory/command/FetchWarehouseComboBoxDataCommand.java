@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Fetch Command for warehouse combo box
  *
- * @author Roland
+ * @author Maria Oliva
  */
 public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand {
 
@@ -24,9 +24,6 @@ public class FetchWarehouseComboBoxDataCommand implements RafRpcCommand {
         this.isCode = isCode;
     }
 
-    /*
-     * Edited by Maria Olivia 20140320
-     */
     public String execute() {
         HashMap<String, String> map = new HashMap<String, String>();
         try {

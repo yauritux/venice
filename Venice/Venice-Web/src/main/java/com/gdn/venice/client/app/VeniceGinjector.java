@@ -36,9 +36,15 @@ import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
+import com.gdn.venice.client.app.inventory.presenter.OpnameAdjustStockPresenter;
 import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
+<<<<<<< HEAD
 import com.gdn.venice.client.app.inventory.presenter.PickingListIRPresenter;
+=======
+import com.gdn.venice.client.app.inventory.presenter.PickerManagementPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+>>>>>>> refs/remotes/origin/stockholm/development_r1s9
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
@@ -225,4 +231,8 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<OpnamePresenter> getOpnamePresenter(); 
   
   AsyncProvider<PickingListIRPresenter> getPickingListIRPresenter(); 
+  
+  AsyncProvider<PickerManagementPresenter> getPickerManagementPresenter(); 
+
+  AsyncProvider<OpnameAdjustStockPresenter> getOpnameAdjustStockPresenter(); 
 }

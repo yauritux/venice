@@ -183,6 +183,7 @@ public class WarehouseManagementService {
     public ResultWrapper<Warehouse> findByCode(String warehouseCode) throws HttpException, IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "warehouse/findByCode?warehouseCode=" + warehouseCode;
+        System.out.println(url);
         GetMethod httpGet = new GetMethod(url);
         int httpCode = httpClient.executeMethod(httpGet);
 

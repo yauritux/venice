@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.app.inventory.command.FetchAllWarehouseComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchWarehouseComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchWarehouseDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchWarehouseInProcessDataCommand;
@@ -113,6 +114,9 @@ public class WarehouseManagementPresenterServlet extends HttpServlet {
             if (method.equals("fetchWarehouseComboBoxData")) {
                 RafRpcCommand fetchWarehouseComboBoxDataCommand = new FetchWarehouseComboBoxDataCommand(username, 
                         Boolean.parseBoolean(request.getParameter("isCode")));
+                retVal = fetchWarehouseComboBoxDataCommand.execute();
+            } else if (method.equals("fetchAllWarehouseComboBoxData")) {
+                RafRpcCommand fetchWarehouseComboBoxDataCommand = new FetchAllWarehouseComboBoxDataCommand();
                 retVal = fetchWarehouseComboBoxDataCommand.execute();
             } else {
                 String requestBody = Util.extractRequestBody(request);

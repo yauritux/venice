@@ -67,9 +67,15 @@ import com.gdn.venice.client.app.inventory.presenter.CurrencyManagementPresenter
 import com.gdn.venice.client.app.inventory.presenter.GRNCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
+import com.gdn.venice.client.app.inventory.presenter.OpnameAdjustStockPresenter;
 import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
+<<<<<<< HEAD
 import com.gdn.venice.client.app.inventory.presenter.PickingListIRPresenter;
+=======
+import com.gdn.venice.client.app.inventory.presenter.PickerManagementPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+>>>>>>> refs/remotes/origin/stockholm/development_r1s9
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
@@ -85,9 +91,15 @@ import com.gdn.venice.client.app.inventory.view.CurrencyManagementView;
 import com.gdn.venice.client.app.inventory.view.GRNCreateView;
 import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.GoodIssuedNoteView;
+import com.gdn.venice.client.app.inventory.view.OpnameAdjustStockView;
 import com.gdn.venice.client.app.inventory.view.OpnameView;
 import com.gdn.venice.client.app.inventory.view.PackingListView;
+<<<<<<< HEAD
 import com.gdn.venice.client.app.inventory.view.PickingListIRView;
+=======
+import com.gdn.venice.client.app.inventory.view.PickerManagementView;
+import com.gdn.venice.client.app.inventory.view.PickingListView;
+>>>>>>> refs/remotes/origin/stockholm/development_r1s9
 import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
 import com.gdn.venice.client.app.inventory.view.PutawayInputView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
@@ -485,5 +497,15 @@ public class VeniceClientModule extends AbstractPresenterModule {
         		PickingListIRPresenter.MyView.class,
                 PickingListIRView.class,
                 PickingListIRPresenter.MyProxy.class);
+                
+        bindPresenter(PickerManagementPresenter.class,
+                PickerManagementPresenter.MyView.class,
+                PickerManagementView.class,
+                PickerManagementPresenter.MyProxy.class);
+
+        bindPresenter(OpnameAdjustStockPresenter.class,
+                OpnameAdjustStockPresenter.MyView.class,
+                OpnameAdjustStockView.class,
+                OpnameAdjustStockPresenter.MyProxy.class);        
     }
 }
