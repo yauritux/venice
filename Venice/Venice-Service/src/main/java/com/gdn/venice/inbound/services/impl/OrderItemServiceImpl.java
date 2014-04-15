@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
+import com.gdn.venice.dao.VenContactDetailDAO;
 import com.gdn.venice.dao.VenOrderItemDAO;
 import com.gdn.venice.exception.CannotPersistOrderItemException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.AddressService;
+import com.gdn.venice.inbound.services.ContactDetailService;
 import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.OrderItemAddressService;
 import com.gdn.venice.inbound.services.OrderItemAdjustmentService;
@@ -81,6 +83,12 @@ public class OrderItemServiceImpl implements OrderItemService {
 	
 	@Autowired
 	private RecipientService recipientService;
+	
+	@Autowired
+	private ContactDetailService contactDetailService;
+	
+	@Autowired
+	private VenContactDetailDAO venContactDetailDAO;
 	
 	@PersistenceContext
 	private EntityManager em;
@@ -226,15 +234,27 @@ public class OrderItemServiceImpl implements OrderItemService {
 					orderItemAddressService.persist(venOrderItemAddress);
 					
 					List<VenContactDetail> venContactDetailList = synchOrderItem.getVenRecipient().getVenParty().getVenContactDetails();
+					
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemList::venContactDetailList = " + venContactDetailList);
 					
 					for (VenContactDetail venContactDetail : venContactDetailList){
+						List<VenContactDetail> contactDetailList = venContactDetailDAO.findByContactDetail(venContactDetail.getContactDetail());
+						
+						venContactDetail = syncContactDetail(venContactDetail);
+						
 						VenOrderItemContactDetail venOrderItemContactDetail = new VenOrderItemContactDetail();
 						venOrderItemContactDetail.setVenOrderItem(synchOrderItem);
 						venOrderItemContactDetail.setVenContactDetail(venContactDetail);
 						
 						venOrderItemContactDetailList.add(venOrderItemContactDetail);
+						
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::venContactDetail = " + venContactDetail.getContactDetailId());
+						
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistOrderItemList::venContactDetail = " + venContactDetail.getContactDetail());
+						
 					}
 					
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -391,6 +411,24 @@ public class OrderItemServiceImpl implements OrderItemService {
 		return newVenOrderItemList;
 	}
 
+	public VenContactDetail syncContactDetail(VenContactDetail contactDetail){
+		List<VenContactDetail> existingContactDetail = venContactDetailDAO.findByContactDetail(contactDetail.getContactDetail());
+		
+		VenContactDetail venContactDetail = new VenContactDetail();
+		
+		if(existingContactDetail.size() > 0){
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "persistContactDetails::existing contact detail found, total member = " + existingContactDetail.size());
+			venContactDetail = existingContactDetail.get(0);
+		}else{
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "persistContactDetails::calling save on venContactDetailDAO explicitly");
+			venContactDetail = venContactDetailDAO.save(contactDetail);
+		}
+		
+		return venContactDetail;
+	}
+	
 	/**
 	 * Synchronizes the reference data for the direct VenOrderItem references
 	 * 
