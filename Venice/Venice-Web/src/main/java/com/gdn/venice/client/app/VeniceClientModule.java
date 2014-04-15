@@ -69,7 +69,7 @@ import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.GoodIssuedNotePresenter;
 import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
-import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListIRPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
@@ -87,7 +87,7 @@ import com.gdn.venice.client.app.inventory.view.GRNListView;
 import com.gdn.venice.client.app.inventory.view.GoodIssuedNoteView;
 import com.gdn.venice.client.app.inventory.view.OpnameView;
 import com.gdn.venice.client.app.inventory.view.PackingListView;
-import com.gdn.venice.client.app.inventory.view.PickingListView;
+import com.gdn.venice.client.app.inventory.view.PickingListIRView;
 import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
 import com.gdn.venice.client.app.inventory.view.PutawayInputView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
@@ -456,11 +456,6 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 GRNCreateView.class,
                 GRNCreatePresenter.MyProxy.class);
 
-        bindPresenter(PickingListPresenter.class,
-                PickingListPresenter.MyView.class,
-                PickingListView.class,
-                PickingListPresenter.MyProxy.class);
-
         bindPresenter(PutawayCreatePresenter.class,
                 PutawayCreatePresenter.MyView.class,
                 PutawayCreateView.class,
@@ -485,5 +480,10 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 OpnamePresenter.MyView.class,
                 OpnameView.class,
                 OpnamePresenter.MyProxy.class);
+        
+        bindPresenter(PickingListIRPresenter.class,
+        		PickingListIRPresenter.MyView.class,
+                PickingListIRView.class,
+                PickingListIRPresenter.MyProxy.class);
     }
 }

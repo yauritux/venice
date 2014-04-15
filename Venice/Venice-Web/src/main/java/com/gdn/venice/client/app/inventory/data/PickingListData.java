@@ -91,4 +91,47 @@ public class PickingListData {
 
 		return dataSource;		 
 	}
+	
+	public static DataSource getPickingListIRData(int page, int limit) {
+		DataSourceField[] dataSourceFields = {
+				new DataSourceIntegerField(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID, "Package ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_DETAIL, "Detail"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_PACKAGECODE, "Package Code"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_INVENTORYTYPE, "Inventory Type"),				
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_IRTYPE, "IR Type"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_PICKERID, "Picker ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME, "Picker Name")};
+		dataSourceFields[0].setPrimaryKey(true);
+
+		RafDataSource dataSource = new RafDataSource("/response/data/*",
+				GWT.getHostPageBaseURL() + PickingListPresenter.pickingListManagementPresenterServlet + 
+				"?method=fetchPickingListIRData&type=DataSource&limit="+limit+"&page="+page,
+				null,
+				null,
+				null, 
+				dataSourceFields);
+
+		return dataSource;		  
+	}
+	
+	public static DataSource getPickingListIRDetailData(String packageId) {
+		System.out.println("packageId: "+packageId);
+		DataSourceField[] dataSourceFields = {				
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_INVENTORYREQUESTCODE, "Inventory Request ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUID, "Warehouse SKU ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUNAME, "Item Name"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_QTY, "Qty"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, "Shelf Code/Storage Code/Qty")};
+		dataSourceFields[0].setPrimaryKey(true);
+
+		RafDataSource dataSource = new RafDataSource("/response/data/*",
+				GWT.getHostPageBaseURL() + PickingListPresenter.pickingListManagementPresenterServlet + 
+				"?method=fetchPickingListIRDetailData&type=DataSource&packageId="+packageId,
+				null,
+				null,
+				null, 
+				dataSourceFields);
+
+		return dataSource;		  
+	}
 }

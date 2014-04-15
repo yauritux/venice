@@ -1,10 +1,9 @@
 package com.gdn.venice.client.app.inventory.presenter;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.NameTokens;
-import com.gdn.venice.client.app.inventory.view.handler.PickingListUiHandler;
+import com.gdn.venice.client.app.inventory.view.handler.PickingListIRUiHandler;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
@@ -29,36 +28,36 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
 
 /**
- * Presenter for Picking List
+ * Presenter for Picking List IR
  * 
  * @author Roland
  */
-public class PickingListPresenter extends Presenter<PickingListPresenter.MyView, PickingListPresenter.MyProxy>
-		implements PickingListUiHandler {
-		
+public class PickingListIRPresenter extends Presenter<PickingListIRPresenter.MyView, PickingListIRPresenter.MyProxy>
+		implements PickingListIRUiHandler {
+	
 	public static final String pickingListManagementPresenterServlet = "PickingListManagementPresenterServlet";
 	
 	protected final DispatchAsync dispatcher;
 
 	@ProxyCodeSplit
-	@NameToken(NameTokens.pickingListPage)
-	public interface MyProxy extends Proxy<PickingListPresenter>, Place {
+	@NameToken(NameTokens.pickingListIRPage)
+	public interface MyProxy extends Proxy<PickingListIRPresenter>, Place {
 	}
 
-	public interface MyView extends View, HasUiHandlers<PickingListUiHandler> {
-		public void loadPickingListData(LinkedHashMap<String, String> warehouseMap);
-		public void refreshPickingListData();
+	public interface MyView extends View, HasUiHandlers<PickingListIRUiHandler> {
+		public void loadPickingListData(LinkedHashMap<String, String> pickerMap);
+		public void refreshPickingListIRData();
 		public Window getPickingListDetailWindow();
-		public int resetTotalQtyPicked();
+		public Window getAssignPickerWindow();
 	}
 
 	@Inject
-	public PickingListPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+	public PickingListIRPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 		
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		onFetchWarehouseComboBoxData();
+		onFetchPickerComboBoxData();
 		this.dispatcher = dispatcher;
 	}
 
@@ -68,57 +67,30 @@ public class PickingListPresenter extends Presenter<PickingListPresenter.MyView,
 	}
 	
 	@Override
-	public void onFetchWarehouseComboBoxData() {	
+	public void onFetchPickerComboBoxData() {	
 		RPCRequest request=new RPCRequest();
 		request = new RPCRequest();
-		request.setActionURL(GWT.getHostPageBaseURL() + "WarehouseManagementPresenterServlet?method=fetchWarehouseComboBoxData&type=RPC&username="+MainPagePresenter.signedInUser);
+		request.setActionURL(GWT.getHostPageBaseURL() + pickingListManagementPresenterServlet + "?method=fetchPickerComboBoxData&type=RPC");
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setShowPrompt(false);
 		RPCManager.sendRequest(request, 
 				new RPCCallback () {
-					public void execute(RPCResponse response,
-							Object rawData, RPCRequest request) {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						String xmlData = rpcResponse;
-						final LinkedHashMap<String, String> warehouseMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlData));
-						getView().loadPickingListData(warehouseMap);
+						final LinkedHashMap<String, String> pickerMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlData));
+						getView().loadPickingListData(pickerMap);
 				}
 		});
 	}
 	
 	@Override
-	public void releaseLock(String warehouseId) {	
-		RPCRequest request=new RPCRequest();
-		request = new RPCRequest();
-		request.setActionURL(GWT.getHostPageBaseURL() + "PickingListManagementPresenterServlet?method=releaseLock&type=RPC&username="+MainPagePresenter.signedInUser+"&warehouseId="+warehouseId);
-		request.setHttpMethod("POST");
-		request.setUseSimpleHttp(true);
-		request.setShowPrompt(false);
-		RPCManager.sendRequest(request, 
-				new RPCCallback () {
-					public void execute(RPCResponse response,
-							Object rawData, RPCRequest request) {
-						String rpcResponse = rawData.toString();
-						if (!rpcResponse.startsWith("0")) {
-                            SC.warn(rpcResponse);
-                        }
-				}
-		});
-	}
-	
-	@Override
-	public void onSaveClicked(HashMap<String, String> itemDataMap, HashMap<String, String> salesDataMap, HashMap<String, String> storageDataMap
-			, int totalQtyPicked) {
-		RPCRequest request=new RPCRequest();
+	public void onSubmitClicked(String packageIds, String pickerId) {
+		RPCRequest request=new RPCRequest();			
+		request.setData(packageIds);
 		
-		String itemMap = Util.formXMLfromHashMap(itemDataMap);
-		String salesMap = Util.formXMLfromHashMap(salesDataMap);
-		String storageMap = Util.formXMLfromHashMap(storageDataMap);
-		
-		request.setData(itemMap+"#"+salesMap+"#"+storageMap+"#"+totalQtyPicked);
-		
-		request.setActionURL(GWT.getHostPageBaseURL() + pickingListManagementPresenterServlet + "?method=savePickingListData&type=RPC");
+		request.setActionURL(GWT.getHostPageBaseURL() + pickingListManagementPresenterServlet + "?method=submitPickerData&type=RPC&pickerId="+pickerId);
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setWillHandleError(true);
@@ -132,9 +104,8 @@ public class PickingListPresenter extends Presenter<PickingListPresenter.MyView,
 						
 						if (rpcResponse.startsWith("0")) {
                             SC.say("Data submitted");
-							getView().refreshPickingListData();
-							getView().getPickingListDetailWindow().destroy();
-							getView().resetTotalQtyPicked();
+							getView().refreshPickingListIRData();
+							getView().getAssignPickerWindow().destroy();
 						} else {
 							SC.warn(rpcResponse);
 						}

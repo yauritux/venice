@@ -81,7 +81,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
         grnListGrid.setHeight100();
         grnListGrid.setShowAllRecords(true);
         grnListGrid.setSortField(0);
-        grnListGrid.setSelectionType(SelectionStyle.SINGLE);
+        grnListGrid.setSelectionType(SelectionStyle.SIMPLE);
         grnListGrid.setShowFilterEditor(true);
         grnListGrid.setCanResizeFields(true);
         grnListGrid.setShowRowNumbers(true);

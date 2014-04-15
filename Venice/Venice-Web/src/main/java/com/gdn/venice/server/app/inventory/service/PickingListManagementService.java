@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -15,9 +16,13 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.inventory.exchange.entity.Picker;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
+import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
+import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
 import com.gdn.inventory.exchange.entity.module.outbound.PickingListDetail;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
+import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
@@ -149,7 +154,6 @@ public class PickingListManagementService{
 		String json = mapper.writeValueAsString(pickingListDetail);
 		System.out.println("json: "+json);
 		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-
 		httpPost.setRequestHeader("Content-Type", "application/json");
         
         int httpCode = httpClient.executeMethod(httpPost);
@@ -164,6 +168,133 @@ public class PickingListManagementService{
             System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PickingListDetail>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public InventoryPagingWrapper<PickPackage> getPickingListIR(RafDsRequest request) throws HttpException, IOException{
+		System.out.println("getPickingListIR");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "pickingList/getPickingListIR?page=" + request.getParams().get("page")
+                + "&limit=" + request.getParams().get("limit");
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PickPackage>>() {});
+        } else {
+        	return null;
+        }
+	}	
+	
+	public PickPackage getSinglePickingListIR(String packageId) throws HttpException, IOException{
+		System.out.println("getSinglePickingListIR");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "pickingList/getSinglePickingListIR?packageId=" + packageId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<PickPackage>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+	public ResultListWrapper<InventoryRequestItem> getIRItemByIRId(String iRId) throws HttpException, IOException{
+		System.out.println("getPickingListItemIR");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "inventoryRequest/findInventoryRequestItemByInventoryRequestId?username=roland&id=" + iRId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultListWrapper<InventoryRequestItem>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+    public ResultWrapper<List<Picker>> getPickerData() throws HttpException, IOException {
+    	System.out.println("getPickerData");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "picker/getPickerList";
+        System.out.println("url: "+url);
+        PostMethod httpPost = new PostMethod(url);
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<Picker>>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<PickPackage> submitPicker(List<String> packageIdList, String pickerId) throws HttpException, IOException{
+		System.out.println("submitPicker");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "pickingList/submitPicker?pickerId="+ pickerId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        
+		String json = mapper.writeValueAsString(packageIdList);
+		System.out.println("json: "+json);
+		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+		httpPost.setRequestHeader("Content-Type", "application/json");
+        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PickPackage>>() {});
         } else {
         	return null;
         }
