@@ -4,9 +4,8 @@
  */
 package com.gdn.venice.server.app.inventory.command;
 
-import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
 import com.gdn.inventory.exchange.entity.module.outbound.Opname;
-import com.gdn.inventory.wrapper.ResultWrapper;
+import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.OpnameService;
 import com.gdn.venice.server.command.RafDsCommand;
@@ -37,7 +36,7 @@ public class FetchOpnameDataCommand implements RafDsCommand {
 
         try {
             opnameService = new OpnameService();
-            ResultWrapper<List<Opname>> wrapper = opnameService.getOpnameData(request);
+            InventoryPagingWrapper<Opname> wrapper = opnameService.getOpnameData(request);
             if (wrapper != null) {
                 if (wrapper.isSuccess()) {
                     //Put result
@@ -49,9 +48,9 @@ public class FetchOpnameDataCommand implements RafDsCommand {
                         map.put(DataNameTokens.INV_OPNAME_CREATEDBY, opname.getCreatedBy());
                         map.put(DataNameTokens.INV_OPNAME_CREATEDDATE, sdf.format(opname.getCreatedDate()));
                         map.put(DataNameTokens.INV_OPNAME_STOCKTYPE, opname.getStockType().name());
-                        map.put(DataNameTokens.INV_OPNAME_SUPPLIERCODE, opname.getSupplierCode());
+                        map.put(DataNameTokens.INV_OPNAME_SUPPLIERCODE, opname.getSupplierCode() == null ? "" : opname.getSupplierCode());
                         map.put(DataNameTokens.INV_OPNAME_UPDATEDBY, opname.getUpdatedBy());
-                        map.put(DataNameTokens.INV_OPNAME_UPDATEDDATE, sdf.format(opname.getUpdatedDate()));
+                        map.put(DataNameTokens.INV_OPNAME_UPDATEDDATE, opname.getUpdatedDate() != null ? sdf.format(opname.getUpdatedDate()) : "");
                         map.put(DataNameTokens.INV_OPNAME_WAREHOUSECODE, opname.getWarehouseCode());
                         dataList.add(map);
                     }

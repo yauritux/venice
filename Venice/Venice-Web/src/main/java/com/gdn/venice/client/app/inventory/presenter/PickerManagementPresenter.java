@@ -4,10 +4,11 @@
  */
 package com.gdn.venice.client.app.inventory.presenter;
 
-import com.gdn.venice.client.app.DataNameTokens;
+import java.util.HashMap;
+
 import com.gdn.venice.client.app.NameTokens;
-import com.gdn.venice.client.app.inventory.data.OpnameData;
-import com.gdn.venice.client.app.inventory.view.handler.OpnameAdjustStockUiHandler;
+import com.gdn.venice.client.app.inventory.data.PickerData;
+import com.gdn.venice.client.app.inventory.view.handler.PickerManagementUiHandler;
 import com.gdn.venice.client.app.logistic.presenter.DeliveryStatusTrackingPresenter;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
@@ -32,20 +33,19 @@ import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
-import com.smartgwt.client.widgets.grid.ListGrid;
+import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  *
  * @author Maria Olivia
  */
-public class OpnameAdjustStockPresenter extends Presenter<OpnameAdjustStockPresenter.MyView, OpnameAdjustStockPresenter.MyProxy>
-        implements OpnameAdjustStockUiHandler {
+public class PickerManagementPresenter extends Presenter<PickerManagementPresenter.MyView, PickerManagementPresenter.MyProxy>
+        implements PickerManagementUiHandler {
 
     @SuppressWarnings("unused")
     private final DispatchAsync dispatcher;
-    public final static String opnamePresenterServlet = "OpnamePresenterServlet";
+    public final static String pickerManagementPresenterServlet = "PickerManagementPresenterServlet";
 
     @Override
     protected void revealInParent() {
@@ -56,25 +56,23 @@ public class OpnameAdjustStockPresenter extends Presenter<OpnameAdjustStockPrese
      * {@link DeliveryStatusTrackingPresenter}'s proxy.
      */
     @ProxyCodeSplit
-    @NameToken(NameTokens.opnameAdjustStockPage)
-    public interface MyProxy extends Proxy<OpnameAdjustStockPresenter>, Place {
+    @NameToken(NameTokens.pickerManagementPage)
+    public interface MyProxy extends Proxy<PickerManagementPresenter>, Place {
     }
 
     /**
-     * {@link PackingListPresenter}'s view.
+     * {@link PickerManagementPresenter}'s view.
      */
     public interface MyView extends View,
-            HasUiHandlers<OpnameAdjustStockUiHandler> {
+            HasUiHandlers<PickerManagementUiHandler> {
 
-        public void loadOpnameData(DataSource ds);
+        public void loadAllPickerData(DataSource dataSource);
 
-        public void refreshAllOpnameData();
+        public void refreshAllPickerData();
 
-        public void refreshAllOpnameDetailData();
+        public Window getDetailWindow();
 
-        public Window getAdjustOpnameWindow();
-
-        public ListGrid getOpnameDetailGrid();
+        public void setPickerWarehouseData(LinkedHashMap<String, String> data);
     }
 
     /**
@@ -86,28 +84,30 @@ public class OpnameAdjustStockPresenter extends Presenter<OpnameAdjustStockPrese
      * @param dispatcher
      */
     @Inject
-    public OpnameAdjustStockPresenter(EventBus eventBus, MyView view,
+    public PickerManagementPresenter(EventBus eventBus, MyView view,
             MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy);
         getView().setUiHandlers(this);
         ((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-        getView().loadOpnameData(OpnameData.getAllOpnameData(1, 20));
+        getView().loadAllPickerData(PickerData.getAllPickerData(1, 20));
+        loadWarehouseComboboxData();
         this.dispatcher = dispatcher;
     }
 
     @Override
-    public void onSubmitButton(String opnameId) {
+    public void saveOrUpdatePickerData(HashMap<String, String> data) {
         try {
             RPCRequest request = new RPCRequest();
 
-            request.setActionURL(GWT.getHostPageBaseURL() + opnamePresenterServlet
-                    + "?method=saveOpnameAdjustment&type=RPC&username=" + MainPagePresenter.signedInUser
-                    + "&opnameId=" + opnameId);
+            request.setData(Util.formXMLfromHashMap(data));
+
+            request.setActionURL(GWT.getHostPageBaseURL() + pickerManagementPresenterServlet
+                    + "?method=saveUpdatePicker&type=RPC&username=" + MainPagePresenter.signedInUser);
             request.setHttpMethod("POST");
             request.setUseSimpleHttp(true);
             request.setWillHandleError(true);
             RPCManager.setPromptStyle(PromptStyle.DIALOG);
-            RPCManager.setDefaultPrompt("Sumbit opname...");
+            RPCManager.setDefaultPrompt("Saving records...");
             RPCManager.setShowPrompt(true);
 
             RPCManager.sendRequest(request,
@@ -117,25 +117,61 @@ public class OpnameAdjustStockPresenter extends Presenter<OpnameAdjustStockPrese
                                 Object rawData, RPCRequest request) {
                             String rpcResponse = rawData.toString();
                             if (rpcResponse.startsWith("0")) {
-                                SC.say("Opname saved");
-                                getView().getAdjustOpnameWindow().destroy();
+                                SC.say("Picker added/updated");
+                                getView().getDetailWindow().destroy();
+                                getView().refreshAllPickerData();
                             } else {
                                 SC.warn(rpcResponse);
                             }
+
                         }
                     });
         } catch (Exception e) {
-            SC.warn("Failed saving opname, please try again later");
+            e.printStackTrace();
+            SC.warn("Failed saving Picker, please try again later");
         }
     }
 
     @Override
-    public void onSkuSelected(String itemSKU, String warehouseCode,
-            String stockType, String supplierCode) {
+    public void nonActivePicker(String id) {
+        try {
+            RPCRequest request = new RPCRequest();
+
+            request.setActionURL(GWT.getHostPageBaseURL() + pickerManagementPresenterServlet
+                    + "?method=nonActivePicker&type=RPC&username=" + MainPagePresenter.signedInUser + "&id=" + id);
+            request.setHttpMethod("POST");
+            request.setUseSimpleHttp(true);
+            request.setWillHandleError(true);
+            RPCManager.setPromptStyle(PromptStyle.DIALOG);
+            RPCManager.setDefaultPrompt("Saving records...");
+            RPCManager.setShowPrompt(true);
+
+            RPCManager.sendRequest(request,
+                    new RPCCallback() {
+                        @Override
+                        public void execute(RPCResponse response,
+                                Object rawData, RPCRequest request) {
+                            String rpcResponse = rawData.toString();
+
+                            if (rpcResponse.startsWith("0")) {
+                                SC.say("Picker added/updated");
+                                getView().getDetailWindow().destroy();
+                                getView().refreshAllPickerData();
+                            } else {
+                                SC.warn(rpcResponse);
+                            }
+
+                        }
+                    });
+        } catch (Exception e) {
+            SC.warn("Failed deleting Picker, please try again later");
+        }
+    }
+
+    private void loadWarehouseComboboxData() {
         RPCRequest request = new RPCRequest();
-        request.setActionURL(GWT.getHostPageBaseURL() + opnamePresenterServlet
-                + "?method=getStorageByItem&type=RPC" + "&itemSKU=" + itemSKU
-                + "&warehouseCode=" + warehouseCode + "&stockType=" + stockType + "&supplierCode=" + supplierCode);
+        request.setActionURL(GWT.getHostPageBaseURL() + "WarehouseManagementPresenterServlet"
+                + "?method=fetchAllWarehouseComboBoxData&type=RPC");
         request.setHttpMethod("POST");
         request.setUseSimpleHttp(true);
         RPCManager.sendRequest(request,
@@ -144,8 +180,7 @@ public class OpnameAdjustStockPresenter extends Presenter<OpnameAdjustStockPrese
                     public void execute(RPCResponse response,
                             Object rawData, RPCRequest request) {
                         String rpcResponse = rawData.toString();
-                        SC.say(rpcResponse);
-                        getView().getOpnameDetailGrid().getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).setValueMap(Util.formComboBoxMap(Util.formHashMapfromXML(rpcResponse)));
+                        getView().setPickerWarehouseData(Util.formComboBoxMap(Util.formHashMapfromXML(rpcResponse)));
                     }
                 });
     }

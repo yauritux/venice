@@ -44,7 +44,8 @@ public class InventoryNavigationPaneSectionData {
                     new NavigationPaneTreeNodeRecord("22", "1", "Good Issued Note", NameTokens.ginPage, "IM21", DataWidgetNameTokens.INV_GINTREENODE),
                     new NavigationPaneTreeNodeRecord("23", "1", "Stock Opname", null, "IM22", DataWidgetNameTokens.INV_OPNAMETREENODE),
                     new NavigationPaneTreeNodeRecord("24", "23", "Create Stock Opname List", NameTokens.opnamePage, "IM23", DataWidgetNameTokens.INV_CREATEOPNAMETREENODE),
-                    new NavigationPaneTreeNodeRecord("25", "23", "Adjust Stock", NameTokens.opnameAdjustStockPage, "IM24", DataWidgetNameTokens.INV_OPNAMEADJUSTMENTTREENODE)
+                    new NavigationPaneTreeNodeRecord("25", "23", "Adjust Stock", NameTokens.opnameAdjustStockPage, "IM24", DataWidgetNameTokens.INV_OPNAMEADJUSTMENTTREENODE),
+                    new NavigationPaneTreeNodeRecord("26", "1", "Master Picker", NameTokens.pickerManagementPage, "IM25", DataWidgetNameTokens.INV_PICKERMANAGEMENTTREENODE)
                 };
     }
 }

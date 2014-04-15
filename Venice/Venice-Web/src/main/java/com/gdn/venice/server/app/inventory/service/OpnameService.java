@@ -7,8 +7,9 @@ package com.gdn.venice.server.app.inventory.service;
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.gdn.inventory.exchange.entity.Supplier;
 import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
-import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
+import com.gdn.inventory.exchange.entity.module.outbound.Opname;
 import com.gdn.inventory.exchange.entity.module.outbound.OpnameDetail;
+import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
@@ -135,7 +136,7 @@ public class OpnameService {
         }
     }
 
-    public ResultWrapper<List<OpnameDetail>> saveOpnameList(String username, List<Long> itemStorageId, 
+    public ResultWrapper<List<OpnameDetail>> saveOpnameList(String username, List<Long> itemStorageId,
             String warehouseCode, String stockType, String supplierCode) throws Exception {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "opname/createOpnameList?username=" + username + "&warehouseCode=" + warehouseCode
@@ -165,9 +166,49 @@ public class OpnameService {
         }
     }
 
-    public ResultWrapper<List<AWBInfo>> getAwbList(String ginId) throws IOException {
+    public InventoryPagingWrapper<Opname> getOpnameData(RafDsRequest request) throws IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "gin/getAwbList?ginId=" + ginId;
+                + "opname/getOpnameList?page=" + request.getParams().get("page")
+                + "&limit=" + request.getParams().get("limit");
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println(url);
+
+        if (request.getCriteria() != null) {
+            System.out.println("criteria not null");
+            Map<String, Object> searchMap = new HashMap<String, Object>();
+            for (JPQLSimpleQueryCriteria criteria : request.getCriteria().getSimpleCriteria()) {
+                System.out.println("adding criteria:" + criteria.getFieldName() + ", " + criteria.getValue());
+                searchMap.put(criteria.getFieldName(), criteria.getValue());
+            }
+            String json = mapper.writeValueAsString(searchMap);
+            System.out.println(json);
+            httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+            httpPost.setRequestHeader("Content-Type", "application/json");
+        } else {
+            System.out.println("No criteria");
+        }
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println(httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<Opname>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+
+    public ResultWrapper<List<OpnameDetail>> getOpnameDetailData(String opnameId) throws IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "opname/getDetailByOpnameId?opnameId=" + opnameId;
         System.out.println(url);
         PostMethod httpPost = new PostMethod(url);
 
@@ -181,7 +222,65 @@ public class OpnameService {
             }
             is.close();
             System.out.println(sb.toString());
-            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<AWBInfo>>>() {
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<OpnameDetail>>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+
+    public ResultWrapper<String> saveOrUpdateOpnameDetail(String opnameId, OpnameDetail newOpnameDetail, String username) throws IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "opname/saveOrUpdateOpnameDetail?username=" + username;
+        if (opnameId != null && !opnameId.trim().isEmpty()) {
+            url += "&opnameId=" + opnameId;
+        }
+
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println(url);
+
+        String json = mapper.writeValueAsString(newOpnameDetail);
+        System.out.println(json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+        httpPost.setRequestHeader("Content-Type", "application/json");
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println(httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<String>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+
+    public ResultWrapper<String> submitOpnameAdjustment(String username, String opnameId) throws IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "opname/submitOpname?username=" + username + "&opnameId=" + opnameId;
+
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println(url);
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println(httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<String>>() {
             });
         } else {
             return null;

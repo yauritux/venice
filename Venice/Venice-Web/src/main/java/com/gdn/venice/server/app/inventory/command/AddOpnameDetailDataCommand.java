@@ -14,9 +14,7 @@ import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
 
 /**
- * Add Command for Blacklist Maintenance
- *
- * @author Anto
+ * @author Mria Olivia
  */
 public class AddOpnameDetailDataCommand implements RafDsCommand {
 
@@ -37,6 +35,7 @@ public class AddOpnameDetailDataCommand implements RafDsCommand {
             opnameService = new OpnameService();
             OpnameDetail opnameDetail = new OpnameDetail();
             Map<String, String> data = request.getData().get(0);
+            System.out.println("data: " + data);
             opnameDetail.setCategory(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY));
             opnameDetail.setItemCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
             opnameDetail.setItemName(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME));

@@ -95,7 +95,7 @@ public class NameTokens {
         
         public static final String opnamePage = "!opnamePage";
         public static final String opnameAdjustStockPage = "!opnameAdjustStockPage";
-        
+        public static final String pickerManagementPage = "!pickerManagementPage";
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;
 	}

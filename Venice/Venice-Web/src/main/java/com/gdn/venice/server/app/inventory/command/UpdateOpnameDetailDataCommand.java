@@ -14,9 +14,7 @@ import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
 
 /**
- * Add Command for Blacklist Maintenance
- *
- * @author Anto
+ * @author Maria Olivia
  */
 public class UpdateOpnameDetailDataCommand implements RafDsCommand {
 
@@ -37,16 +35,10 @@ public class UpdateOpnameDetailDataCommand implements RafDsCommand {
             opnameService = new OpnameService();
             OpnameDetail opnameDetail = new OpnameDetail();
             Map<String, String> data = request.getData().get(0);
-            opnameDetail.setCategory(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY));
+            System.out.println("data: " + request.getData());
             opnameDetail.setId(Long.parseLong(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ID)));
-            opnameDetail.setItemCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
-            opnameDetail.setItemName(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME));
             opnameDetail.setNewQuantity(Integer.parseInt(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY)));
             opnameDetail.setNote(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NOTE));
-            opnameDetail.setQuantity(Integer.parseInt(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_QTY)));
-            opnameDetail.setShelfCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE));
-            opnameDetail.setStorageCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE));
-            opnameDetail.setUom(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMUOM));
 
             ResultWrapper<String> wrapper = opnameService.saveOrUpdateOpnameDetail(null, opnameDetail, username);
             if (wrapper != null && wrapper.isSuccess()) {

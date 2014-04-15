@@ -48,8 +48,8 @@ public class FetchOpnameDetailDataCommand implements RafDsCommand {
                         map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_QTY, opnameDetail.getQuantity() + "");
                         map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE, opnameDetail.getShelfCode());
                         map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE, opnameDetail.getStorageCode());
-                        map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY, "");
-                        map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NOTE, "");
+                        map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY, opnameDetail.getNewQuantity() + "");
+                        map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NOTE, opnameDetail.getNote());
                         dataList.add(map);
                     }
 

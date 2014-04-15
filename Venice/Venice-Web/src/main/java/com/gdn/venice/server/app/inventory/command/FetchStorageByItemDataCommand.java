@@ -1,10 +1,8 @@
 package com.gdn.venice.server.app.inventory.command;
 
 import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
-import com.gdn.inventory.exchange.entity.WarehouseUser;
 import com.gdn.inventory.wrapper.ResultWrapper;
-import com.gdn.venice.server.app.inventory.service.OpnameService;
-import com.gdn.venice.server.app.inventory.service.WarehouseManagementService;
+import com.gdn.venice.server.app.inventory.service.ShelfManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.util.Util;
 import java.util.HashMap;
@@ -17,11 +15,15 @@ import java.util.List;
  */
 public class FetchStorageByItemDataCommand implements RafRpcCommand {
 
-    String itemSku;
-    OpnameService opnameService;
+    String warehouseCode, stockType, supplierCode, itemCode;
+    ShelfManagementService shelfManagementService;
 
-    public FetchStorageByItemDataCommand(String itemSku) {
-        this.itemSku = itemSku;
+    public FetchStorageByItemDataCommand(String warehouseCode,
+            String stockType, String supplierCode, String itemCode) {
+        this.itemCode = itemCode;
+        this.warehouseCode = warehouseCode;
+        this.stockType = stockType;
+        this.supplierCode = supplierCode;
     }
 
     /*
@@ -30,12 +32,13 @@ public class FetchStorageByItemDataCommand implements RafRpcCommand {
     public String execute() {
         HashMap<String, String> map = new HashMap<String, String>();
         try {
-            opnameService = new OpnameService();
-            ResultWrapper<List<WarehouseItemStorageStock>> wrapper = opnameService.getStorageByItemData(itemSku);
+            shelfManagementService = new ShelfManagementService();
+            ResultWrapper<List<WarehouseItemStorageStock>> wrapper = shelfManagementService.getStorageByItemData(warehouseCode,
+                    stockType, supplierCode, itemCode);
             if (wrapper != null) {
                 if (wrapper.isSuccess()) {
                     for (WarehouseItemStorageStock itemStock : wrapper.getContent()) {
-                        map.put(itemStock.getStorage().getCode(), itemStock.getStorage().getCode());
+                        map.put(itemStock.getQuantity() + "", itemStock.getStorage().getCode());
                     }
                 }
             }

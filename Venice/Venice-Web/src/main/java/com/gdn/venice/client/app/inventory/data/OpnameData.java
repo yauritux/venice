@@ -92,7 +92,7 @@ public class OpnameData {
         return retVal;
     }
 
-    public static RafDataSource getAllOpnameData(int limit, int page) {
+    public static RafDataSource getAllOpnameData(int page, int limit) {
         String fetchUrl = GWT.getHostPageBaseURL() + OpnamePresenter.opnamePresenterServlet
                 + "?method=fetchAllOpnameData&type=DataSource&page=" + page + "&limit=" + limit;
         DataSourceField[] dataSourceFields = {
