@@ -110,10 +110,6 @@ public class DataWidgetNameTokens {
     public static String  INV_OPNAMETREENODE = "InvOpnameTreeNode";
     public static String  INV_CREATEOPNAMETREENODE = "InvCreateOpnameTreeNode";
     public static String  INV_OPNAMEADJUSTMENTTREENODE = "InvOpnameAdjustmentTreeNode";
-
-    public static String  INV_OPNAMETREENODE = "InvOpnameTreeNode";
-    public static String  INV_CREATEOPNAMETREENODE = "InvCreateOpnameTreeNode";
-    public static String  INV_OPNAMEADJUSTMENTTREENODE = "InvOpnameAdjustmentTreeNode";
         
     public static String  INV_PICKERMANAGEMENTTREENODE = "InvPickerManagementTreeNode";
 }

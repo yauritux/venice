@@ -96,12 +96,6 @@ public class NameTokens {
     public static final String ginPage = "!ginPage";
     
     public static final String opnamePage = "!opnamePage";
-        
-    public static final String packingListPage = "!packingListPage";
-        
-    public static final String ginPage = "!ginPage";
-       
-    public static final String opnamePage = "!opnamePage";
     public static final String opnameAdjustStockPage = "!opnameAdjustStockPage";
     public static final String pickerManagementPage = "!pickerManagementPage";
 
