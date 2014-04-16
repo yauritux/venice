@@ -1,7 +1,6 @@
 package com.gdn.venice.inbound.services.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -19,6 +18,7 @@ import com.gdn.venice.exception.CannotPersistVenContactDetailException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.ContactDetailService;
 import com.gdn.venice.inbound.services.ContactDetailTypeService;
+import com.gdn.venice.inbound.services.PartyService;
 import com.gdn.venice.persistence.VenContactDetail;
 import com.gdn.venice.persistence.VenContactDetailType;
 import com.gdn.venice.persistence.VenParty;
@@ -38,6 +38,9 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 	
 	@Autowired
 	private ContactDetailTypeService contactDetailTypeService;
+	
+	@Autowired
+	private PartyService partyService;
 	
 	@PersistenceContext
 	private EntityManager em;
@@ -149,6 +152,39 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 		return updatedVenContactDetailList;		
 	}
 	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public VenContactDetail persistContactDetail(VenContactDetail venContactDetail) throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persistContactDetail::starting method persistContactDetail,venContactDetail=" + venContactDetail);
+		
+		VenContactDetail persistedContactDetail = venContactDetail;
+		
+		if (venContactDetail != null && venContactDetail.getContactDetailId() == null) {
+			try {
+				VenContactDetail synchContactDetail = synchronizeVenContactDetailReferenceData(venContactDetail);
+				//persist contact detail
+				if (!em.contains(synchContactDetail)) {
+					// contactDetail instance is in detach mode, hence need to call save explicitly as shown below
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistContactDetails::calling save on venContactDetailDAO explicitly");
+					persistedContactDetail = venContactDetailDAO.save(synchContactDetail);
+				} else {
+					persistedContactDetail = synchContactDetail;
+				}	
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), e);
+				throw CommonUtil.logAndReturnException(new CannotPersistVenContactDetailException(
+						"Cannot persist VenContactDetail!", VeniceExceptionConstants.VEN_EX_110001)
+				        , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
+			}
+		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persistContactDetail::END, returning persistedContactDetail = " + persistedContactDetail);
+		return persistedContactDetail;
+	}
+	
 	/**
 	 * Persists a list of contact details using the session tier.
 	 * 
@@ -165,32 +201,15 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 		if (venContactDetails != null && (!venContactDetails.isEmpty())) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistContactDetails::Persisting VenContactDetail list...:" + venContactDetails.size());
-				Iterator<VenContactDetail> i = venContactDetails.iterator();
-				while (i.hasNext()) {
-					VenContactDetail next = i.next();
-					// Synchronize the references
-					synchronizeVenContactDetailReferenceData(next);
-					// Persist the object
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistContactDetails::start persisting contact detail");
-					VenContactDetail venContactDetail = null;
-					
-					if (!em.contains(next)) {
-						// next (venContactDetail instance) is in detach mode, hence need to call save explicitly as shown below
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistContactDetails::calling save on venContactDetailDAO explicitly");
-						venContactDetail = venContactDetailDAO.save(next);
-					} else {
-						venContactDetail = next;
-					}
-
-					/*
-					venContactDetail = next;
-					if (em.contains(venContactDetail)) {
-						em.detach(venContactDetail);
-					}
-					*/
-					newVenContactDetailList.add(venContactDetail);
+				try {
+					for (VenContactDetail contactDetail : venContactDetails) {
+						newVenContactDetailList.add(persistContactDetail(contactDetail));
+					} //end of for
+				} catch (Exception e) {
+					CommonUtil.logError(this.getClass().getCanonicalName(), e);
+					throw CommonUtil.logAndReturnException(new CannotPersistVenContactDetailException(
+							"Cannot persist VenContactDetail!", VeniceExceptionConstants.VEN_EX_110001)
+					        , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 				}
 		}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -207,17 +226,14 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 	@Override
 	public VenContactDetail synchronizeVenContactDetailReferenceData(VenContactDetail venContactDetail) 
 	  throws VeniceInternalException {
-		List<VenContactDetailType> references = new ArrayList<VenContactDetailType>();
-		references.add(venContactDetail.getVenContactDetailType());
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenContactDetailReferenceData::start sync contact detail method");
-		// Synchronize the data references
-		references = contactDetailTypeService.synchronizeVenContactDetailTypeReferences(references);
-
-		// Push the keys back into the record
-		for (VenContactDetailType contactDetailType : references) {
-			venContactDetail.setVenContactDetailType(contactDetailType);
-		}
+		
+	    VenContactDetailType synchContactDetailType 
+	       = contactDetailTypeService.synchronizeVenContactDetailType(venContactDetail.getVenContactDetailType());
+		// Synchronize the data references		
+	    venContactDetail.setVenContactDetailType(synchContactDetailType);
+	    
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenContactDetailReferenceData::EOM, returning venContactDetail = " + venContactDetail);
 		return venContactDetail;		
@@ -247,12 +263,6 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 						VenContactDetail synchronizedVenContactDetail = venContactDetailDAO.save(venContactDetail);					
 						synchronizedContactDetailReferences.add(synchronizedVenContactDetail);
 						
-						/*
-						if (em.contains(venContactDetail)) {
-							em.detach(venContactDetail);
-						}
-						*/
-						
 						synchronizedContactDetailReferences.add(venContactDetail);						
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "synchronizeVenContactDetailReferences::successfully added synchronizedVenContactDetail into synchronizedContactDetailReferences");
@@ -274,52 +284,68 @@ public class ContactDetailServiceImpl implements ContactDetailService {
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public VenContactDetail persistContactDetail(VenContactDetail venContactDetail, VenParty venParty) throws VeniceInternalException {
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persistContactDetail::starting method persistContactDetail,venContactDetail=" + venContactDetail
+				+ ",venParty=" + venParty.getFullOrLegalName());
+		
+		VenContactDetail persistedContactDetail = venContactDetail;
+		
+		if (venContactDetail != null && venContactDetail.getContactDetailId() == null) {
+			try {
+				VenContactDetail synchContactDetail = synchronizeVenContactDetailReferenceData(venContactDetail);
+
+				//persist contact detail
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistContactDetail::find existing contact detail");			
+				List<VenContactDetail> existingContactDetail = venContactDetailDAO.findByContactDetail(synchContactDetail.getContactDetail());
+				if (existingContactDetail != null && (!existingContactDetail.isEmpty())) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistContactDetail::existing contact detail found, total member = " + existingContactDetail.size());
+					persistedContactDetail = existingContactDetail.get(0);					
+				} else {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistContactDetail::existing contact detail not found, going to persist it");
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistContactDetail::venParty=" + venParty);
+					synchContactDetail.setVenParty(venParty);
+					if (!em.contains(synchContactDetail)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistContactDetail::calling save on venContactDetailDAO explicitly");
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "persistContactDetail::venParty =  "+ synchContactDetail.getVenParty().getPartyId());
+						persistedContactDetail = venContactDetailDAO.save(synchContactDetail);					
+					} else {
+						persistedContactDetail = synchContactDetail;
+					}
+				}
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), e);
+				e.printStackTrace();
+				throw CommonUtil.logAndReturnException(new CannotPersistVenContactDetailException(
+						"Cannot persist VenContactDetail!", VeniceExceptionConstants.VEN_EX_110001)
+				        , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+			}
+		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "persistContactDetail::END, returning persistedContactDetail = " + persistedContactDetail);
+		
+		return persistedContactDetail;
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public List<VenContactDetail> persistContactDetails(List<VenContactDetail> venContactDetails, VenParty venParty) 
 	        throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "persistContactDetails::start method persist contact detail");
+				, "persistContactDetails::starting method persist contact detail");
 		List<VenContactDetail> newVenContactDetailList = new ArrayList<VenContactDetail>();
 		if (venContactDetails != null && (!venContactDetails.isEmpty())) {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistContactDetails::Persisting VenContactDetail list...:" + venContactDetails.size());
-				Iterator<VenContactDetail> i = venContactDetails.iterator();
-				while (i.hasNext()) {
-					VenContactDetail next = i.next();
-					// Synchronize the references
-					synchronizeVenContactDetailReferenceData(next);
-					// Persist the object
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistContactDetails::start persisting contact detail");
-					VenContactDetail venContactDetail = null;
-					
-					if (!em.contains(next)) {
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "persistContactDetails::find existing contact detail");
-						List<VenContactDetail> existingContactDetail = venContactDetailDAO.findByContactDetail(next.getContactDetail());
-						
-						if(existingContactDetail.size() > 0){
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "persistContactDetails::existing contact detail found, total member = " + existingContactDetail.size());
-							venContactDetail = existingContactDetail.get(0);
-						}else{
-							CommonUtil.logDebug(this.getClass().getCanonicalName()
-									, "persistContactDetails::calling save on venContactDetailDAO explicitly");
-							next.setVenParty(venParty);
-							venContactDetail = venContactDetailDAO.save(next);
-						}
-						
-						
-					} else {
-						venContactDetail = next;
-					}
-
-					/*
-					venContactDetail = next;
-					if (em.contains(venContactDetail)) {
-						em.detach(venContactDetail);
-					}
-					*/
-					newVenContactDetailList.add(venContactDetail);
+				
+				for (VenContactDetail contactDetail : venContactDetails) {
+					newVenContactDetailList.add(persistContactDetail(contactDetail, venParty));
 				}
 		}
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
