@@ -50,7 +50,9 @@ public class BIIInstalmentReportBatchJob {
 																											"left join ven_customer c on c.customer_id=o.customer_id " +
 																											"left join ven_party p on p.party_id=c.party_id " +
 																											"left join ven_bin_credit_limit_estimate b on b.bin_number=substr(op.masked_credit_card_number,0,7) " +
-																											"where op.amount>500000 and o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
+																											"where o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
+																											" and (op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_BIIngkisan +
+																											"or (op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSCreditCard + ")"+
 																											" and b.bank_name='"+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_BII+
 																											"' and op.installment_sent_flag=false and o.order_date>=?";
 	

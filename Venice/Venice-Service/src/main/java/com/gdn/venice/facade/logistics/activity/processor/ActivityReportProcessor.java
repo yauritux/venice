@@ -208,20 +208,20 @@ public abstract class ActivityReportProcessor {
             getLogger().debug("Airway Bill Engine & Logistic are NOT matched");
             getLogger().debug("Airway Bill Engine : " + airwayBillNoFromEngine);
             getLogger().debug("Airway Bill Logistics : " + airwayBillNoFromLogistic);
-           _log.debug("invoice "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceAirwaybillRecordId());
-            _log.debug("result status "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus());
-    		if(logAirwayBill.getLogInvoiceAirwaybillRecord()!=null || !logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().isEmpty()){
+/*           _log.debug("invoice "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceAirwaybillRecordId());
+            _log.debug("result status "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus());*/
+    		if(logAirwayBill.getLogInvoiceAirwaybillRecord()!=null){
 	            if (logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
 	
 	                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
 	
 	                isOverrideSuccess = false;
 	            	}else {
-		                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, uploadUsername, logProviderCode);
+		                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, logProviderCode,uploadUsername);
 		                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
 		            } 
 	           	}else {
-	                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, uploadUsername, logProviderCode);
+	                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, logProviderCode,uploadUsername);
 	                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
 	            }
             airwayBillTransaction.setAirwayBillNo(airwayBillNoFromLogistic);
@@ -510,11 +510,11 @@ public abstract class ActivityReportProcessor {
         }
     }
 	
-	public Boolean overrideAirwayBillNumber(String gdnRefNo, String newAirwayBillNo, String uploadUsername, String logProviderCode) {
+	public Boolean overrideAirwayBillNumber(String gdnRefNo, String newAirwayBillNo, String logProviderCode,String uploadUsername) {
         getLogger().debug("GDN Ref No : " + gdnRefNo);
         getLogger().debug("New Airway Bill No : " + newAirwayBillNo);
 
-        return awbConn.overrideAirwayBillNumber(gdnRefNo, newAirwayBillNo, uploadUsername, logProviderCode);
+        return awbConn.overrideAirwayBillNumber(gdnRefNo, newAirwayBillNo, logProviderCode,uploadUsername );
     }
 	
 	public void saveCXFinanceHistory(LogAirwayBill logAirwayBill) {    
