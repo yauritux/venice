@@ -28,7 +28,6 @@ import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrder;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrderItem;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
-import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
 
@@ -91,30 +90,13 @@ public class ASNManagementService{
         }
 	}
 	
-	public InventoryPagingWrapper<PurchaseOrder> getPOData(RafDsRequest request, String reffNumber) throws HttpException, IOException{
+	public ResultWrapper<PurchaseOrder> getPOData(RafDsRequest request, String reffNumber) throws HttpException, IOException{
 		System.out.println("getPOData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "purchaseOrder/getAllCreated?username=" + request.getParams().get("username")
-                + "&page=" + request.getParams().get("page")
-                + "&limit=" + request.getParams().get("limit");
+                + "purchaseOrder/getDetailByCode?username=" + request.getParams().get("username")
+                + "&code=" + reffNumber;
         PostMethod httpPost = new PostMethod(url);
-        System.out.println("url: "+url);
-    	
-        Map<String, Object> searchMap = new HashMap<String, Object>();
-        
-        JPQLSimpleQueryCriteria numberCriteria = new JPQLSimpleQueryCriteria();
-        numberCriteria.setFieldName("keyword");
-        numberCriteria.setOperator("equals");
-        numberCriteria.setValue(reffNumber);
-        numberCriteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.INV_PO_NUMBER));
-				
-        System.out.println("adding criteria:"+numberCriteria.getFieldName()+", "+numberCriteria.getValue());
-        searchMap.put(numberCriteria.getFieldName(), numberCriteria.getValue());
-        
-        String json = mapper.writeValueAsString(searchMap);
-        System.out.println("json: "+json);
-        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-            httpPost.setRequestHeader("Content-Type", "application/json");
+        System.out.println("url: "+url);    	        
                
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println("response code: "+httpCode);
@@ -127,37 +109,20 @@ public class ASNManagementService{
             }
             System.out.println("return value: "+sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PurchaseOrder>>() {});
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<PurchaseOrder>>() {});
         } else {
         	return null;
         }
 	}
 	
-	public InventoryPagingWrapper<ConsignmentFinalForm> getCFFData(RafDsRequest request, String reffNumber) throws HttpException, IOException{
+	public ResultWrapper<ConsignmentFinalForm> getCFFData(RafDsRequest request, String reffNumber) throws HttpException, IOException{
 		System.out.println("getCFFData");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "consignmentFinal/findByFilter?username=" + request.getParams().get("username")
-                + "&page=" + request.getParams().get("page")
-                + "&limit=" + request.getParams().get("limit");
+                + "consignmentFinal/getDetailByCode?username=" + request.getParams().get("username")
+                + "&code=" + reffNumber;
         PostMethod httpPost = new PostMethod(url);
         System.out.println("url: "+url);
-    	
-        Map<String, Object> searchMap = new HashMap<String, Object>();
-        
-        JPQLSimpleQueryCriteria criteria = new JPQLSimpleQueryCriteria();
-        criteria.setFieldName("cffNumber");
-        criteria.setOperator("equals");
-        criteria.setValue(reffNumber);
-        criteria.setFieldClass(DataNameTokens.getDataNameToken().getFieldClass(DataNameTokens.INV_CFF_NUMBER));
-        
-        System.out.println("adding criteria:"+criteria.getFieldName()+", "+criteria.getValue());
-        searchMap.put(criteria.getFieldName(), criteria.getValue());
-        
-        String json = mapper.writeValueAsString(searchMap);
-        System.out.println(json);
-        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-        httpPost.setRequestHeader("Content-Type", "application/json");
-                
+    	                
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
@@ -169,7 +134,7 @@ public class ASNManagementService{
             }
             System.out.println("return value: "+sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<ConsignmentFinalForm>>() {});
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ConsignmentFinalForm>>() {});
         } else {
         	return null;
         }
