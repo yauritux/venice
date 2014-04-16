@@ -121,7 +121,7 @@ public class PickingListData {
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUID, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUNAME, "Item Name"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_QTY, "Qty"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, "Shelf Code/Storage Code/Qty")};
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, "Shelf Code/Qty")};
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",

@@ -137,20 +137,38 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         asignPickerButton.addClickHandler(new ClickHandler() {			
 			@Override
 			public void onClick(ClickEvent event) {
-				buildAssignPickerWindow().show();
+				ListGridRecord[] selectedRecords = packageListGrid.getSelection(); 				 				
+				StringBuilder sb = new StringBuilder();
+				
+ 				for (int i = 0; i < selectedRecords.length; i++) {
+ 					ListGridRecord selectedRecord = selectedRecords[i];
+ 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){
+ 	 					sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGECODE));
+ 	 					if(i != selectedRecords.length -1) sb.append(", ");
+ 					}
+ 				}
+ 				
+ 				if(sb.length()>0){
+ 					SC.ask("Package "+sb+" has already been assigned, are you sure you want to reassign the picker?", new BooleanCallback() {
+						@Override
+						public void execute(Boolean value) {
+						    if (value != null && value == true) {	 
+						    		buildAssignPickerWindow().show();
+						        }	                      
+						    }	
+						});	
+ 				}
 			}
 		});
         
         exportButton.addClickHandler(new ClickHandler() {
      			@Override
      			public void onClick(ClickEvent event) {
-     				ListGridRecord[] selectedRecords = packageListGrid.getSelection();
-     				
+     				ListGridRecord[] selectedRecords = packageListGrid.getSelection();     				
      				StringBuilder sbSelectedRecords = new StringBuilder();
      				
      				for (int i = 0; i < selectedRecords.length; i++) {
-     					ListGridRecord selectedRecord = selectedRecords[i];
-     					
+     					ListGridRecord selectedRecord = selectedRecords[i];     					
      					sbSelectedRecords.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID));
      					
      					if(i != selectedRecords.length -1)

@@ -22,10 +22,7 @@ public class PickingListPrint {
 	public List<WarehouseItemStorageStock> getWhItemStorageStock() {
 		return whItemStorageStock;
 	}
-	public void setWhItemStorageStock(
-			List<WarehouseItemStorageStock> whItemStorageStock) {
+	public void setWhItemStorageStock(List<WarehouseItemStorageStock> whItemStorageStock) {
 		this.whItemStorageStock = whItemStorageStock;
 	}
-
-    
 }

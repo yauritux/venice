@@ -67,7 +67,7 @@ public class FetchPickingListIRDetailDataCommand implements RafDsCommand {
     					System.out.println("whItem Id: "+whItem.getId());
                     	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
                     	for(WarehouseItemStorageStock storageStock : storageStockList){
-                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+" / "+storageStock.getQuantity();
+                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getQuantity();
                     		shelfCode+=", ";
                     	}
                     	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));

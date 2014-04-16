@@ -22,10 +22,17 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
+import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
+import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequest;
+import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
+import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
 import com.gdn.inventory.exchange.entity.module.outbound.PickingListDetail;
+import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
+import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.exportimport.inventory.dataexport.PickingListPrint;
 import com.gdn.venice.server.app.inventory.service.PickingListManagementService;
+import com.gdn.venice.server.app.inventory.service.PutawayManagementService;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.util.Util;
 
@@ -57,27 +64,66 @@ public class PickingListExportServlet extends HttpServlet {
 		System.out.println("PickingListExportServlet");
 		
 		PickingListManagementService pickingListService = new PickingListManagementService();
+		PutawayManagementService putawayService = new PutawayManagementService();
 		String username = Util.getUserName(request);
 		
-		String warehouseItemIds = request.getParameter("warehouseItemIds");		
+		String packageIds = request.getParameter("packageIds");		
 		
-		String[] split = warehouseItemIds.split(";");
-		List<String> warehouseItemIdList = new ArrayList<String>(); 
+		String[] split = packageIds.split(";");
+		List<String> packageIdList = new ArrayList<String>(); 
 		
 		for(String value:split){
-			warehouseItemIdList.add(value);
+			packageIdList.add(value);
 		}
 		
-		System.out.println("warehouseItemIdList size: "+warehouseItemIdList.size());
+		System.out.println("packageIdList size: "+packageIdList.size());
 			
 		PickingListPrint plPrint = new PickingListPrint();
 		List<PickingListPrint> plPrintList = new ArrayList<PickingListPrint>();
 		
-		for(String warehouseItemId : warehouseItemIdList){						
-			System.out.println("warehouse item id: "+warehouseItemId);
+		for(String packageId : packageIdList){						
+			System.out.println("package id: "+packageId);
+			PickPackage pickPackage = pickingListService.getSinglePickingListIR(packageId);
+			
+			if(pickPackage!=null){
+        		InventoryRequest inventoryRequest = pickPackage.getInventoryRequest();
+        		
+        		ResultListWrapper<InventoryRequestItem> irItemWrapper = pickingListService.getIRItemByIRId(Long.toString(inventoryRequest.getId()));
+        		for(InventoryRequestItem irItem : irItemWrapper.getContents()){	        		
+	        		HashMap<String, String> map = new HashMap<String, String>(); 
+					map.put(DataNameTokens.INV_PICKINGLISTIR_INVENTORYREQUESTCODE, inventoryRequest.getIrNumber());
+					map.put(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUID, irItem.getItem().getCode());
+					map.put(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUNAME, irItem.getItem().getName());
+					map.put(DataNameTokens.INV_PICKINGLISTIR_QTY, Long.toString(irItem.getQuantity()));
+					
+					WarehouseItem whItem = putawayService.getWarehouseItemData(irItem.getItem().getId(), 
+							irItem.getInventoryRequest().getFromWarehouse().getId(), 
+							irItem.getInventoryRequest().getSupplier().getId(), irItem.getInventoryRequest().getInventoryType());
+					
+					String shelfCode="";
+                    if(whItem!=null){
+    					System.out.println("whItem Id: "+whItem.getId());
+                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
+                    	for(WarehouseItemStorageStock storageStock : storageStockList){
+                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getQuantity();
+                    		shelfCode+=", ";
+                    	}
+                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+                    	
+                    	map.put(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, shelfCode);
+                    }   
+                    
+//                    dataList.add(map);
+        		}
+        	}
+			
+			
+			
+			
+			
 			HashMap<String, String> params = new HashMap<String, String>();
 	        params.put("username", username);
-	        params.put("warehouseItemId", warehouseItemId);
+	        params.put("packageId", packageId);
 	        
 			RafDsRequest req = new RafDsRequest();
 	        req.setParams(params);
@@ -161,7 +207,7 @@ public class PickingListExportServlet extends HttpServlet {
 					startRow=startRow+1;
 					detailRow = sheet.createRow(startRow);
 					
-					_log.debug("processing row: "+i+" warehouseItemId: "+pl.getWarehouseItem().getId() +", warehouseItemCode: "+pl.getWarehouseItem().getCode());
+					_log.debug("processing row: "+i+" packageId: "+pl.getWarehouseItem().getId() +", warehouseItemCode: "+pl.getWarehouseItem().getCode());
 					HSSFCell cell = detailRow.createCell(startCol);cell.setCellValue(new HSSFRichTextString(Integer.toString(i+1)));
 					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getCode()));
 					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
