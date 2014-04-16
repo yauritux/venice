@@ -118,6 +118,7 @@ import com.gdn.venice.facade.spring.VenOrderStatusHistoryService;
 import com.gdn.venice.facade.util.AWBReconciliation;
 import com.gdn.venice.facade.util.HolidayUtil;
 import com.gdn.venice.facade.util.KpiPeriodUtil;
+import com.gdn.venice.factory.VenOrderStatusCR;
 import com.gdn.venice.factory.VenOrderStatusFP;
 import com.gdn.venice.inbound.commands.Command;
 import com.gdn.venice.inbound.commands.impl.CreateOrderCommand;
@@ -766,7 +767,11 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                                 venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
                                 venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
                                 venOrderPayment.setVenPaymentType(venPaymentType);
-                            }                            
+                            }else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VEN_WCS_PAYMENT_TYPE_VISA)) {
+                                venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
+                                venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
+                                venOrderPayment.setVenPaymentType(venPaymentType);
+                            }               
                             venOrderPaymentList.add(venOrderPayment);
                         }
                     }
@@ -1263,9 +1268,10 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         return Boolean.FALSE;
     }
 
-    private void validateContainsOrderItemWithStatusPFOrOS(List<VenOrderItem> venOrderItemList) {
+    private void validateContainsOrderItemWithStatusPFOrOSOrCR(List<VenOrderItem> venOrderItemList) {
         Boolean pfFound = false;
         Boolean osFound = false;
+        Boolean crFound = false;
         for (int i = 0; i < venOrderItemList.size(); i++) {
             if (venOrderItemList.get(i).getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF) {
                 pfFound = true;
@@ -1275,10 +1281,14 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 osFound = true;
                 _log.info("order item with status OS found, order item id: " + venOrderItemList.get(i).getWcsOrderItemId());
             }
+            if (venOrderItemList.get(i).getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_CR) {
+                osFound = true;
+                _log.info("order item with status CR found, order item id: " + venOrderItemList.get(i).getWcsOrderItemId());
+            }
         }
 
-        if (!pfFound && !osFound) {
-            String errMsg = "updateOrder: message received for order with no order items that are in PF or OS status:" + venOrderItemList.get(0).getVenOrder().getWcsOrderId();
+        if (!pfFound && !osFound && !crFound) {
+            String errMsg = "updateOrder: message received for order with no order items that are in PF or OS or CR status:" + venOrderItemList.get(0).getVenOrder().getWcsOrderId();
             _log.error(errMsg);
             throw new EJBException(errMsg);
         }
@@ -1301,12 +1311,19 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
     }
 
     private void updateExistingOrderItemWithNewOrderItem(VenOrderItem venOrderItem, OrderItem orderItem) {
-        //adjust the quantity and the related price fields for the PF item.
-        _log.info("the order item in update order is found, check if it is in PF status in venice");
-        if (venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF) {
-            _log.info("the order item found, is in PF status, so update it");
-            // Set the status of the adjusted order to FP
-            venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
+        //adjust the quantity and the related price fields for the PF or CR item.
+        _log.info("the order item in update order is found, check if it is in PF or CR  status in venice");
+        if (venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF || venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_CR) {
+            if(venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF) {
+            	_log.info("the order item found, is in PF status, so update it");
+                // Set the status of the adjusted order to FP
+                venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
+            }
+            else {
+            	_log.info("the order item found, is in CR status, so update it");
+                // Set the status of the adjusted order to CR
+                venOrderItem.setVenOrderStatus(VenOrderStatusCR.createVenOrderStatus());
+            }
 
             mapExistingOrderItemWithNewOrderItem(venOrderItem, orderItem);
 
@@ -1350,7 +1367,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
             venOrderItemStatusHistoryService.savePartialPartialFulfillmentVenOrderItemStatusHistory(venOrderItem);
             _log.debug("done add order item status history");
         } else {
-            String errMsg = "updateOrder: message received for order with order items that are not in PF status. Only PF status items can be updated:" + venOrderItem.getVenOrder().getWcsOrderId();
+            String errMsg = "updateOrder: message received for order with order items that are not in PF or CR status. Only PF or CR status items can be updated:" + venOrderItem.getVenOrder().getWcsOrderId();
             _log.error(errMsg);
         }
 
@@ -1437,9 +1454,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 //    }
     private void cancelOrderItem(VenOrderItem cancelledVenOrderItem, List<VenOrderItem> venOrderItemList) throws FileNotFoundException, IOException {
 
-        _log.info("the order item in update order is not found, check if it is in PF or OS status in venice");
-        if (cancelledVenOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF || (cancelledVenOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_OS)) {
-            _log.info("the order item not found in new order, is in PF or OS status in venice, so set to cancel");
+        _log.info("the order item in update order is not found, check if it is in PF or OS or CR status in venice");
+        if (cancelledVenOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF || (cancelledVenOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_OS) || (cancelledVenOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_CR)) {
+            _log.info("the order item not found in new order, is in PF or OS or CR status in venice, so set to cancel");
             _log.info("order item id to remove: " + cancelledVenOrderItem.getWcsOrderItemId());
 
             try {
@@ -1498,7 +1515,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 _log.debug("the transaction fees is not found");
             }
         } else {
-            String errMsg = "updateOrder: message received for order with missing order items that are in PF or OS status. Only PF or OS status items can be removed:" + cancelledVenOrderItem.getWcsOrderItemId();
+            String errMsg = "updateOrder: message received for order with missing order items that are in PF or OS or CR status. Only PF or OS or CR status items can be removed:" + cancelledVenOrderItem.getWcsOrderItemId();
             _log.error(errMsg);
         }
     }
@@ -1570,9 +1587,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 venOrderItemList = venOrderItemDAO.findWithVenOrderStatusByVenOrder(venOrder);
                 _log.debug("venOrderItemList size: " + venOrderItemList.size());
 
-                //Check that the existing status of any order item in the order is PF or OS
-                _log.info("check that the existing status of any order item in the order is PF or OS");
-                validateContainsOrderItemWithStatusPFOrOS(venOrderItemList);
+                //Check that the existing status of any order item in the order is PF or OS or CR
+                _log.info("check that the existing status of any order item in the order is PF or OS or CR");
+                validateContainsOrderItemWithStatusPFOrOSOrCR(venOrderItemList);
 
                 // Make the changes
                 _log.debug("looping order item list");
@@ -1785,8 +1802,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 		                if(!venOrder.getVenOrderStatus().getOrderStatusCode().equals("VA")){
 			                for (VenOrderItem item : venOrderItemList) {
 			                    _log.debug("set new order item: " + item.getWcsOrderItemId() + ", status: " + venOrder.getVenOrderStatus().getOrderStatusCode());
-			                   if (item.getVenOrderStatus().getOrderStatusCode().equals("PF") || item.getVenOrderStatus().getOrderStatusCode().equals("OS") || item.getVenOrderStatus().getOrderStatusCode().equals("FC")) {
-			                    	
+			                   if (item.getVenOrderStatus().getOrderStatusCode().equals("PF") || item.getVenOrderStatus().getOrderStatusCode().equals("OS") || item.getVenOrderStatus().getOrderStatusCode().equals("FC") || item.getVenOrderStatus().getOrderStatusCode().equals("CR")) {			                    	
 			                    	VenOrderStatus venOrderItemStatusNew = new VenOrderStatus();
 			                    	venOrderItemStatusNew.setOrderStatusCode(venOrderStatusList.get(0).getOrderStatusCode());
 			                    	venOrderItemStatusNew.setOrderStatusId(venOrderStatusList.get(0).getOrderStatusId());
@@ -1809,7 +1825,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 			                        }
 			                    }else if (!item.getVenOrderStatus().getOrderStatusCode().equals("X")){
 			                    	trueOrFalseUpdateStatusOrder=false;
-			                    	 _log.debug("can not cancel order because there is at least one order item not in PF or OS status");
+			                    	 _log.debug("can not cancel order because there is at least one order item not in PF or OS or CR status");
 			                    }
 			                }		          
 		                }		                
@@ -3149,6 +3165,88 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 
 //                    _log.debug("Total Promo : " + totalPromo);
                     _log.debug("Total Order Item : " + totalOrderItemAfterPF);
+//                    _log.debug("Adjustment Spread : " + adjustmentSpread);
+
+                    //merge all non free shipping adjustment with the new adjustment spread
+//                    for (VenOrderItemAdjustment venOrderItemAdjustmentNewSpread : venOrderItemAdjustmentNewSpreadList) {
+//                        venOrderItemAdjustmentNewSpread.setAmount(adjustmentSpread);
+//
+//                        _log.debug("Merging Adjustment " + venOrderItemAdjustmentNewSpread.getVenPromotion().getPromotionId() + "," + venOrderItemAdjustmentNewSpread.getVenOrderItem().getOrderItemId());
+//
+//                        orderItemAdjustmentHome.mergeVenOrderItemAdjustment(venOrderItemAdjustmentNewSpread);
+//                    }
+
+                    venOrderItem = orderItemHome.mergeVenOrderItem(venOrderItem);
+                    this.createOrderItemStatusHistory(venOrderItem, venOrderItem.getVenOrderStatus());
+//					this.clockMerchantPartialFulfillmentKpi(this._genericLocator, venOrderItem);
+                }
+                
+             // ***** Case CR
+                if (order.getOrderItems().get(0).getStatus().equals("CR")) {
+                    // Enforce the state transition rules
+                    if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_CR)) {
+                        String errMsg = "updateOrderItemStatus: message received CR status change request for order item that is not status FP: illegal state transition";
+                        _log.error(errMsg);
+                        throw new EJBException(errMsg);
+                    }
+                    VenOrderStatus venOrderStatus = new VenOrderStatus();
+                    venOrderStatus.setOrderStatusCode("CR");
+                    venOrderStatus.setOrderStatusId(VEN_ORDER_STATUS_CR);
+                    venOrderItem.setVenOrderStatus(venOrderStatus);
+
+                    // Synchronize the reference data then merge the status
+                    venOrderItem = this.synchronizeVenOrderItemReferenceData(venOrderItem);
+
+                    List<VenOrderItem> venOrderItems = venOrder.getVenOrderItems();
+//                    List<VenOrderItemAdjustment> venOrderItemAdjustmentNewSpreadList = new ArrayList<VenOrderItemAdjustment>();
+                    _log.debug("Total Order Item : " + venOrderItems.size());
+
+//                    BigDecimal totalPromo = new BigDecimal(0);
+
+//                    for (VenOrderItem venOrderItem2 : venOrderItems) {
+//                        BigDecimal currentItemShippingAndInsuranceCost = venOrderItem2.getShippingCost().add(venOrderItem2.getInsuranceCost());
+//
+//                        String query = "select o from VenOrderItemAdjustment o where o.venOrderItem.orderItemId = " + venOrderItem2.getOrderItemId();
+//
+//                        List<VenOrderItemAdjustment> venOrderItemAdjustmentList = orderItemAdjustmentHome.queryByRange(query, 0, 0);
+//
+//                        _log.debug("Total Free Shipping " + currentItemShippingAndInsuranceCost);
+//                        _log.debug("Total Adjustment for Order Item " + venOrderItem2.getOrderItemId() + " : " + venOrderItemAdjustmentList.size());
+//
+//                        for (VenOrderItemAdjustment venOrderItemAdjustment : venOrderItemAdjustmentList) {
+//                            _log.debug("Adjustment " + venOrderItemAdjustment.getVenPromotion().getPromotionId() + "," + venOrderItemAdjustment.getVenOrderItem().getOrderItemId() + " : " + venOrderItemAdjustment.getAmount());
+//
+//                            // sum a not free shipping adjustment
+//                            if (currentItemShippingAndInsuranceCost.compareTo(venOrderItemAdjustment.getAmount().abs()) != 0) {
+//                                totalPromo = totalPromo.add(venOrderItemAdjustment.getAmount());
+//                            }
+//
+//                            // add non free shipping promo for item not cancelled to list
+//                            if (currentItemShippingAndInsuranceCost.compareTo(venOrderItemAdjustment.getAmount().abs()) != 0
+//                                    && venOrderItemAdjustment.getVenOrderItem().getOrderItemId() != venOrderItem.getOrderItemId()) {
+//
+//                                venOrderItemAdjustmentNewSpreadList.add(venOrderItemAdjustment);
+//                            }
+//
+//                            // set adjustment amount to Rp 0 for cancelled item
+//                            if (venOrderItemAdjustment.getVenOrderItem().getOrderItemId() == venOrderItem.getOrderItemId()) {
+//                                _log.debug("Merging Adjustment " + venOrderItemAdjustment.getVenPromotion().getPromotionId() + "," + venOrderItemAdjustment.getVenOrderItem().getOrderItemId());
+//
+//                                venOrderItemAdjustment.setAmount(new BigDecimal(0));
+//                                orderItemAdjustmentHome.mergeVenOrderItemAdjustment(venOrderItemAdjustment);
+//                            }
+//                        }
+//                    }
+
+                    int totalOrderItemAfterCR = venOrderItems.size() - 1;
+//                    BigDecimal adjustmentSpread = new BigDecimal(0);
+//
+//                    if (totalOrderItemAfterCR > 0) {
+//                        adjustmentSpread = totalPromo.divide(new BigDecimal(totalOrderItemAfterCR), 2, RoundingMode.HALF_UP);
+//                    }
+
+//                    _log.debug("Total Promo : " + totalPromo);
+                    _log.debug("Total Order Item : " + totalOrderItemAfterCR);
 //                    _log.debug("Adjustment Spread : " + adjustmentSpread);
 
                     //merge all non free shipping adjustment with the new adjustment spread
