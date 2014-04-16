@@ -52,7 +52,7 @@ public class CIMBNiagaInstallmentReportBatchJob {
 																											"left join ven_bin_credit_limit_estimate b on b.bin_number=substr(op.masked_credit_card_number,0,7) " +
 																											"where o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
 																											" and (op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_CIMBCreditCard +
-																											"or (op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSCreditCard + ")"+
+																											"or (op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSCreditCard + "))"+
 																											" and b.bank_name='"+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_CIMB_NIAGA+
 																											"' and op.installment_sent_flag=false and o.order_date>=?";
 	
