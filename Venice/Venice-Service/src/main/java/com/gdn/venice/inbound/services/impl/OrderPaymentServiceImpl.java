@@ -208,9 +208,12 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 					// Set the payment type based on the WCS payment type
 					// VenPaymentType venPaymentType = new VenPaymentType();
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::mapping payment type");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::venOrderPayment=" + venOrderPayment);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::venOrderPayment=" + payment);
 					
-					//venOrderPayment = OrderUtil.getVenOrderPaymentByWCSPaymentType(venOrderPayment, next);
 					venOrderPayment = OrderUtil.getVenOrderPaymentByWCSPaymentType(venOrderPayment, payment);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::venOrderPayment from OrderUtil=" + venOrderPayment);
+					
 					venOrderPaymentList.add(venOrderPayment);
 				}
 			}					
@@ -219,6 +222,10 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 			
 			//check whether payment's address equal with Customer's address
 			for (VenOrderPayment orderPayment : venOrderPaymentList) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "processPayment::orderPayment.venAddress = " + orderPayment.getVenAddress());
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "processPayment::orderPayment.venAddress = " + venOrder.getVenCustomer().getVenParty().getVenPartyAddresses());				
 				if (orderPayment.getVenAddress().equals(venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress())) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "processPayment::payment's address equal with Customer's address, assign customer's address to payment's address");
@@ -233,11 +240,8 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "processPayment::venOrderPaymentList members = " + (venOrderPaymentList != null ? venOrderPaymentList.size() : 0));
 
-			//paymentIterator = venOrderPaymentList.iterator();
 			int p=0;
-			//while (paymentIterator.hasNext()) {
 			for (VenOrderPayment venOrderPayment : venOrderPaymentList) {
-				//VenOrderPayment next = (VenOrderPayment) paymentIterator.next();
 
 				//Only include the allocations for non-VA payments
 				//because VA payments are already in the DB
