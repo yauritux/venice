@@ -543,6 +543,12 @@ public class OrderServiceImpl implements OrderService {
 						, "persistOrder::customer.venParty.partyId=" + customer.getVenParty().getPartyId());
 				
 				VenParty synchCustomerParty = partyService.retrieveExistingParty(customer.getCustomerUserName(), true);
+				if (customer.getVenParty() != null 
+						&& (customer.getVenParty().getFullOrLegalName() != null && customer.getVenParty().getFullOrLegalName().trim().length() > 0)
+						&& (!synchCustomerParty.getFullOrLegalName().equalsIgnoreCase(customer.getVenParty().getFullOrLegalName()))) {
+					synchCustomerParty.setFullOrLegalName(customer.getVenParty().getFullOrLegalName());
+				}
+				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::synchCustomerParty = " + synchCustomerParty);
 				contactDetailList = contactDetailService.persistContactDetails(contactDetailList, synchCustomerParty);
