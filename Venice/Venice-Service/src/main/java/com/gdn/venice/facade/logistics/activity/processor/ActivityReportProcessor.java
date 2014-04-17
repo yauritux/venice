@@ -26,6 +26,7 @@ import com.gdn.venice.dao.LogFileUploadLogDAO;
 import com.gdn.venice.dao.VenOrderItemStatusHistoryDAO;
 import com.gdn.venice.facade.LogActivityReconRecordSessionEJBRemote;
 import com.gdn.venice.facade.LogAirwayBillSessionEJBRemote;
+import com.gdn.venice.facade.LogInvoiceAirwaybillRecordSessionEJBRemote;
 import com.gdn.venice.facade.logistics.activity.ActivityReportData;
 import com.gdn.venice.facade.spring.FinSalesRecordService;
 import com.gdn.venice.facade.spring.VenOrderItemService;
@@ -40,6 +41,7 @@ import com.gdn.venice.persistence.LogActivityReportUpload;
 import com.gdn.venice.persistence.LogAirwayBill;
 import com.gdn.venice.persistence.LogApprovalStatus;
 import com.gdn.venice.persistence.LogFileUploadLog;
+import com.gdn.venice.persistence.LogInvoiceAirwaybillRecord;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.LogReconActivityRecordResult;
 import com.gdn.venice.persistence.LogReportStatus;
@@ -188,7 +190,9 @@ public abstract class ActivityReportProcessor {
 													            ActivityReportData activityReportData) {
 	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
 	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.facade.logistics.activity.processor.ActivityReportProcessor");
-
+	    
+		Locator<Object> locator = null;
+	    
         boolean isOverrideSuccess = true;
         String errorMessage = "";
         if (airwayBillNoFromEngine.equals(airwayBillNoFromLogistic)) {
@@ -208,23 +212,42 @@ public abstract class ActivityReportProcessor {
             getLogger().debug("Airway Bill Engine & Logistic are NOT matched");
             getLogger().debug("Airway Bill Engine : " + airwayBillNoFromEngine);
             getLogger().debug("Airway Bill Logistics : " + airwayBillNoFromLogistic);
-/*           _log.debug("invoice "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceAirwaybillRecordId());
-            _log.debug("result status "+logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus());*/
-    		if(logAirwayBill.getLogInvoiceAirwaybillRecord()!=null){
-	            if (logAirwayBill.getLogInvoiceAirwaybillRecord().getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
-	
-	                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
-	
-	                isOverrideSuccess = false;
-	            	}else {
+            getLogger().debug("airwaybill number (venice):"+logAirwayBill.getAirwayBillNumber());
+            
+            try{
+    			locator = new Locator<Object>();
+	        	LogInvoiceAirwaybillRecordSessionEJBRemote awbRecordHome = (LogInvoiceAirwaybillRecordSessionEJBRemote) locator
+				.lookup(LogInvoiceAirwaybillRecordSessionEJBRemote.class, "LogInvoiceAirwaybillRecordSessionEJBBean");
+	        	LogInvoiceAirwaybillRecord awbRecord= awbRecordHome.queryByRange("select o from LogInvoiceAirwaybillRecord o where o.airwayBillNumber ='" + logAirwayBill.getAirwayBillNumber() + "'" , 0, 1).get(0);
+	            
+	        	if(awbRecord!=null){
+		            if (awbRecord.getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
+		
+		                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
+		
+		                isOverrideSuccess = false;
+		            	}else {
+		            		getLogger().debug(awbRecord.getInvoiceResultStatus());
+		            		getLogger().debug("activity is not null");
+			                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, logProviderCode,uploadUsername);
+			                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
+			            } 
+		           	}else {
 		                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, logProviderCode,uploadUsername);
 		                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
-		            } 
-	           	}else {
-	                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, logProviderCode,uploadUsername);
-	                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
-	            }
-            airwayBillTransaction.setAirwayBillNo(airwayBillNoFromLogistic);
+		            }
+            
+            }catch(Exception e){
+            	e.printStackTrace();
+            }finally{
+    			try{
+    				if(locator!=null){
+    					locator.close();
+    				}
+    			}catch(Exception e){
+    				e.printStackTrace();
+    			}
+            }
 
             try {
                 errorMessage = updateOrderItemAndAirwayBillTransactionStatus(uploadUsername, venOrderItem, airwayBillTransaction, existingOrderItemStatus , newOrderItemStatus, existingAirwayBillTransactionStatus, newAirwayBillTransactionStatus, isOverrideSuccess);
@@ -278,6 +301,8 @@ public abstract class ActivityReportProcessor {
             activityReportData.getFailedStatusUpdateList().add(failedStatusUpdate);
 
             createProblemExistAwbNumber(airwayBillNoFromLogistic, airwayBillNoFromEngine, logAirwayBill, activityReportData.getActivityReportUpload());
+        }else{
+        	
         }
         return errorMessage;
     }
