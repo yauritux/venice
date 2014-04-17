@@ -1,6 +1,8 @@
 package com.gdn.venice.client.app.inventory.view;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.PickingListData;
@@ -164,19 +166,16 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         exportButton.addClickHandler(new ClickHandler() {
      			@Override
      			public void onClick(ClickEvent event) {
-     				ListGridRecord[] selectedRecords = packageListGrid.getSelection();     				
-     				StringBuilder sbSelectedRecords = new StringBuilder();
-     				
-     				for (int i = 0; i < selectedRecords.length; i++) {
-     					ListGridRecord selectedRecord = selectedRecords[i];     					
-     					sbSelectedRecords.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID));
-     					
-     					if(i != selectedRecords.length -1)
-     						sbSelectedRecords.append(";");
+     				ListGridRecord[] records = packageListGrid.getRecords();     				
+     				HashSet<String> set = new HashSet<String>();
+     				for (int i = 0; i < records.length; i++) {
+     					ListGridRecord selectedRecord = records[i];  
+     					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERID).isEmpty()){     						
+     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERID));
+     					}
      				}
      				
      				String host = GWT.getHostPageBaseURL();
-
      				if(host.contains("8889")){
      					host = "http://localhost:8090/";
      				}
@@ -184,9 +183,10 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
      				if(host.contains("Venice/")){
      					host = host.substring(0, host.indexOf("Venice/"));
      				}
-     												
-     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListIRExportServlet?packageIds=" + sbSelectedRecords.toString(), "_blank", null);
-     							
+     				
+					for(String pickerId : set){		
+	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListExportServlet?pickerId=" + pickerId, "_blank", null);
+					}    							
      			}
      		});
         

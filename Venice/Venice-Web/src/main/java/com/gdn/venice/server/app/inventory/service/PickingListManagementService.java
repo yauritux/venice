@@ -299,5 +299,29 @@ public class PickingListManagementService{
         	return null;
         }
 	}
+    
+	public ResultListWrapper<PickPackage> getPackageByPicker(String pickerId) throws HttpException, IOException{
+		System.out.println("getPackageByPicker");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "pickingList/getPackageByPicker?pickerId="+pickerId;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultListWrapper<PickPackage>>() {});
+        } else {
+        	return null;
+        }
+	}
 }
 

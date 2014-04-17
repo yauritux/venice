@@ -3,7 +3,6 @@ package com.gdn.venice.exportimport.inventory.dataexport.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -26,15 +25,10 @@ import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
 import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequest;
 import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
-import com.gdn.inventory.exchange.entity.module.outbound.PickingListDetail;
 import com.gdn.inventory.wrapper.ResultListWrapper;
-import com.gdn.inventory.wrapper.ResultWrapper;
-import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.exportimport.inventory.dataexport.PickingListPrint;
 import com.gdn.venice.server.app.inventory.service.PickingListManagementService;
 import com.gdn.venice.server.app.inventory.service.PutawayManagementService;
-import com.gdn.venice.server.data.RafDsRequest;
-import com.gdn.venice.server.util.Util;
 
 /**
  * Servlet implementation class PickingListExportServlet.
@@ -63,89 +57,64 @@ public class PickingListExportServlet extends HttpServlet {
 	protected void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("PickingListExportServlet");
 		
-		PickingListManagementService pickingListService = new PickingListManagementService();
-		PutawayManagementService putawayService = new PutawayManagementService();
-		String username = Util.getUserName(request);
-		
-		String packageIds = request.getParameter("packageIds");		
-		
-		String[] split = packageIds.split(";");
-		List<String> packageIdList = new ArrayList<String>(); 
-		
-		for(String value:split){
-			packageIdList.add(value);
-		}
-		
-		System.out.println("packageIdList size: "+packageIdList.size());
-			
 		PickingListPrint plPrint = new PickingListPrint();
 		List<PickingListPrint> plPrintList = new ArrayList<PickingListPrint>();
 		
-		for(String packageId : packageIdList){						
-			System.out.println("package id: "+packageId);
-			PickPackage pickPackage = pickingListService.getSinglePickingListIR(packageId);
-			
-			if(pickPackage!=null){
+		PickingListManagementService pickingListService = new PickingListManagementService();
+		PutawayManagementService putawayService = new PutawayManagementService();
+				
+		ResultListWrapper<PickPackage> packageWrapper = pickingListService.getPackageByPicker(request.getParameter("pickerId"));
+		if(packageWrapper!=null && packageWrapper.isSuccess()){							
+			for(PickPackage pickPackage : packageWrapper.getContents()){							
         		InventoryRequest inventoryRequest = pickPackage.getInventoryRequest();
+        		plPrint.setInventoryRequest(inventoryRequest);
+        		plPrint.setPickPackage(pickPackage);
         		
         		ResultListWrapper<InventoryRequestItem> irItemWrapper = pickingListService.getIRItemByIRId(Long.toString(inventoryRequest.getId()));
-        		for(InventoryRequestItem irItem : irItemWrapper.getContents()){	        		
-	        		HashMap<String, String> map = new HashMap<String, String>(); 
-					map.put(DataNameTokens.INV_PICKINGLISTIR_INVENTORYREQUESTCODE, inventoryRequest.getIrNumber());
-					map.put(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUID, irItem.getItem().getCode());
-					map.put(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUNAME, irItem.getItem().getName());
-					map.put(DataNameTokens.INV_PICKINGLISTIR_QTY, Long.toString(irItem.getQuantity()));
-					
-					WarehouseItem whItem = putawayService.getWarehouseItemData(irItem.getItem().getId(), 
+        		for(InventoryRequestItem irItem : irItemWrapper.getContents()){	    					
+        			plPrint.setWarehouseSkuId(irItem.getItem().getCode());
+        			plPrint.setItemName(irItem.getItem().getName());
+        			
+        			WarehouseItem whItem = putawayService.getWarehouseItemData(irItem.getItem().getId(), 
 							irItem.getInventoryRequest().getFromWarehouse().getId(), 
 							irItem.getInventoryRequest().getSupplier().getId(), irItem.getInventoryRequest().getInventoryType());
-					
-					String shelfCode="";
+					        			
                     if(whItem!=null){
     					System.out.println("whItem Id: "+whItem.getId());
-                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
+                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
+                    	int counter = 0;
                     	for(WarehouseItemStorageStock storageStock : storageStockList){
-                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getQuantity();
-                    		shelfCode+=", ";
-                    	}
-                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
-                    	
-                    	map.put(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, shelfCode);
-                    }   
-                    
-//                    dataList.add(map);
+                    		if(counter==0){
+                    			System.out.println("add first stock");
+                    			plPrint.setQty(Integer.toString(irItem.getQuantity()));
+                        		plPrint.setShelfCode(storageStock.getStorage().getShelf().getCode());
+                        		plPrint.setStorageCode(storageStock.getStorage().getCode());
+                    			plPrint.setQtyStorage(Integer.toString(storageStock.getQuantity()));
+                        		plPrintList.add(plPrint);
+                    			counter+=1;
+                    		}else{
+                    			System.out.println("add other stock");
+                    			PickingListPrint plPrintTemp = new PickingListPrint();
+                    			plPrintTemp.setInventoryRequest(plPrint.getInventoryRequest());
+                    			plPrintTemp.setPickPackage(plPrint.getPickPackage());
+                    			plPrintTemp.setWarehouseSkuId(plPrint.getWarehouseSkuId());
+                    			plPrintTemp.setItemName(plPrint.getItemName());
+                    			plPrintTemp.setShelfCode(storageStock.getStorage().getShelf().getCode());
+                    			plPrintTemp.setStorageCode(storageStock.getStorage().getCode());
+                    			plPrintTemp.setQtyStorage(Integer.toString(storageStock.getQuantity()));
+                    			plPrintList.add(plPrintTemp);
+                    		}
+                    	}                    	
+                    }                       
         		}
-        	}
-			
-			
-			
-			
-			
-			HashMap<String, String> params = new HashMap<String, String>();
-	        params.put("username", username);
-	        params.put("packageId", packageId);
-	        
-			RafDsRequest req = new RafDsRequest();
-	        req.setParams(params);
-	        					
-	        ResultWrapper<WarehouseItem> whiWrapper = pickingListService.getWarehouseItem(req);
-	        ResultWrapper<PickingListDetail> plWrapper = pickingListService.getPickingListDetail(req);	
-	        if(whiWrapper!=null && whiWrapper.isSuccess() && plWrapper!=null && plWrapper.isSuccess()){
-	        	System.out.println("set warehouse item");
-	        	plPrint.setWarehouseItem(whiWrapper.getContent());
-
-	        	System.out.println("set storage");
-	        	plPrint.setWhItemStorageStock(plWrapper.getContent().getWhItemStorageStock());
 	        	
-				plPrintList.add(plPrint);
-	        }
-		}				
-			
+			}				
+		}	
 		System.out.println("plPrintList size: "+plPrintList.size()+", start print report to excel");
 		OutputStream out = null;
 
 		try {
-			String shortname="PickingList" + System.currentTimeMillis() + ".xls";								
+			String shortname="PickingListIR" + System.currentTimeMillis() + ".xls";								
 						
 			if(plPrintList!=null && plPrintList.size()>0){
 				response.setContentType("application/vnd.ms-excel");
@@ -181,19 +150,29 @@ public class PickingListExportServlet extends HttpServlet {
 				detailCellstyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
 				detailCellstyle.setAlignment(CellStyle.ALIGN_CENTER);	 
 				 
-				int startRow = 0;
+				int startRow = 2;
 				int startCol=0;
 				
+				HSSFRow titleRow = sheet.createRow((short) 0);
+				titleRow.createCell(startCol).setCellValue(new HSSFRichTextString("Picking List"));
+				
 				HSSFRow headerRow = sheet.createRow((short) startRow);
-				headerRow.createCell(startCol).setCellValue(new HSSFRichTextString("No"));
-				headerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
-				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Item SKU Name"));
-				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Tipe Inventory"));
-				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("Merchant"));
-				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Qty"));
-					   
+				headerRow.createCell(startCol).setCellValue(new HSSFRichTextString("Package ID"));
+				headerRow.createCell(startCol+1).setCellValue(new HSSFRichTextString("Merchant Code"));
+				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Merchant Store"));
+				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Picker Name"));
+				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("Keterangan"));
+				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Sales Order ID"));				
+				headerRow.createCell(startCol+6).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
+				headerRow.createCell(startCol+7).setCellValue(new HSSFRichTextString("Item Name"));
+				headerRow.createCell(startCol+8).setCellValue(new HSSFRichTextString("Qty"));
+				headerRow.createCell(startCol+9).setCellValue(new HSSFRichTextString("Shelf Code"));
+				headerRow.createCell(startCol+10).setCellValue(new HSSFRichTextString("Storage Code"));
+				headerRow.createCell(startCol+11).setCellValue(new HSSFRichTextString("Qty Storage"));
+				headerRow.createCell(startCol+12).setCellValue(new HSSFRichTextString("Qty Picked"));
+									   
 				//set style for header
-				for(int i=startCol; i<=startCol+5; i++){
+				for(int i=startCol; i<=startCol+12; i++){
 					HSSFCell cell = headerRow.getCell(i);
 					cell.setCellStyle(headerCellstyle);
 				}    
@@ -207,23 +186,30 @@ public class PickingListExportServlet extends HttpServlet {
 					startRow=startRow+1;
 					detailRow = sheet.createRow(startRow);
 					
-					_log.debug("processing row: "+i+" packageId: "+pl.getWarehouseItem().getId() +", warehouseItemCode: "+pl.getWarehouseItem().getCode());
-					HSSFCell cell = detailRow.createCell(startCol);cell.setCellValue(new HSSFRichTextString(Integer.toString(i+1)));
-					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getCode()));
-					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getItem().getName()));
-					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getStockType().name()));	
-					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseItem().getSupplier().getName()));
-					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(Integer.toString(pl.getWarehouseItem().getStock())));
+					System.out.println("processing row: "+i+" packageId: "+pl.getPickPackage().getCode());
+					HSSFCell cell = detailRow.createCell(startCol);cell.setCellValue(new HSSFRichTextString(pl.getPickPackage().getCode()));
+					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier().getCode()));
+					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier().getName()));	
+					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getPickPackage().getAssignedPicker().getName()));
+					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getInventoryType().name()));
+					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(""));
+					cell = detailRow.createCell(startCol+6);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseSkuId()));
+					cell = detailRow.createCell(startCol+7);cell.setCellValue(new HSSFRichTextString(pl.getItemName()));
+					cell = detailRow.createCell(startCol+8);cell.setCellValue(new HSSFRichTextString(pl.getQty()));
+					cell = detailRow.createCell(startCol+9);cell.setCellValue(new HSSFRichTextString(pl.getShelfCode()));
+					cell = detailRow.createCell(startCol+10);cell.setCellValue(new HSSFRichTextString(pl.getStorageCode()));
+					cell = detailRow.createCell(startCol+11);cell.setCellValue(new HSSFRichTextString(pl.getQtyStorage()));
+					cell = detailRow.createCell(startCol+12);cell.setCellValue(new HSSFRichTextString(""));
 					
 					//set style for list
-					for(int l=startCol; l<=startCol+5; l++){
+					for(int l=startCol; l<=startCol+12; l++){
 						HSSFCell cell2 = detailRow.getCell(l);
 						cell2.setCellStyle(detailCellstyle);
 					}	
 				}		
 				
 				//set style for list
-				for(int l=startCol; l<=startCol+5; l++){
+				for(int l=startCol; l<=startCol+12; l++){
 					sheet.autoSizeColumn(l);
 				}	
 				
