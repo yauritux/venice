@@ -88,16 +88,14 @@ public class OrderItemAdjustmentServiceImpl implements OrderItemAdjustmentServic
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrderItemAdjustmentList::existingVenOrderItemAdjustments.size: "
 					           + (existingVenOrderItemAdjustments != null ? existingVenOrderItemAdjustments.size() : 0));
-					if(existingVenOrderItemAdjustments != null && (!(existingVenOrderItemAdjustments.isEmpty()))) {
+					if(existingVenOrderItemAdjustments == null || existingVenOrderItemAdjustments.size() == 0) {
 						if(synchOrderItemAdjustment.getAdminDesc() == null || synchOrderItemAdjustment.getAdminDesc().trim().equals("")){
 							synchOrderItemAdjustment.setAdminDesc("-");
 							CommonUtil.logInfo(CommonUtil.getLogger(this.getClass().getCanonicalName())
 									, "persistOrderItemAdjustmentList::Set adminDesc to (-) if null or empty");
 						}
-						//newVenOrderItemAdjustmentList.add((VenOrderItemAdjustment) venOrderItemAdjustmentDAO.save(next));
-						newVenOrderItemAdjustmentList.add(synchOrderItemAdjustment);
+						newVenOrderItemAdjustmentList.add((VenOrderItemAdjustment) venOrderItemAdjustmentDAO.save(synchOrderItemAdjustment));
 					}else{
-						//newVenOrderItemAdjustmentList.add((VenOrderItemAdjustment) next);
 						newVenOrderItemAdjustmentList.add(synchOrderItemAdjustment);						
 					}					
 				}
