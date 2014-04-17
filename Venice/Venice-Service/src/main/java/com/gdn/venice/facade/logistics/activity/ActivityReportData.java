@@ -17,8 +17,6 @@ public class ActivityReportData {
     private LogActivityReportUpload activityReportUpload = new LogActivityReportUpload();
     private HashMap<String, String> failedProviderForGdnReffList = new HashMap<String, String>();
     
-    
-    
 	public ArrayList<PojoInterface> getOrderItemList() {
 		return orderItemList;
 	}

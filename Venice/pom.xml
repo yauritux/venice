@@ -267,6 +267,6 @@
         <module>Venice-Service</module>
         <module>Venice-Batch</module>
         <module>Venice-EAR</module>
-        <module>Venice-Web</module>  
+<!--         <module>Venice-Web</module>     -->
     </modules>
 </project>

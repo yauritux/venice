@@ -37,17 +37,23 @@ public class OrderItemAddressServiceImpl implements OrderItemAddressService {
 	public VenOrderItemAddress persist(VenOrderItemAddress venOrderItemAddress) 
 	  throws VeniceInternalException {
 		VenOrderItemAddress persistedOrderItemAddress = venOrderItemAddress;
-		if (!em.contains(venOrderItemAddress)) {
-			// venOrderItemAddress is not in attach mode, hence should be attached by calling save explicitly
-			try {
-				persistedOrderItemAddress = venOrderItemAddressDAO.save(venOrderItemAddress);
-			} catch (Exception e) {
-				CommonUtil.logAndReturnException(new CannotPersistOrderItemAddressException(
-						"Cannot persist VenOrderItemAddress " + e, VeniceExceptionConstants.VEN_EX_000027)
-				, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+		if (venOrderItemAddress != null && venOrderItemAddress.getOrderItemAddressId() == null) {
+			if (!em.contains(venOrderItemAddress)) {
+				// venOrderItemAddress is not in attach mode, hence should be attached by calling save explicitly
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "persist::calling venOrderItemAddressDAO.save explicitly");
+				try {
+					persistedOrderItemAddress = venOrderItemAddressDAO.save(venOrderItemAddress);
+				} catch (Exception e) {
+					CommonUtil.logError(this.getClass().getCanonicalName(), e);
+					throw CommonUtil.logAndReturnException(new CannotPersistOrderItemAddressException(
+							"Cannot persist VenOrderItemAddress " + e, VeniceExceptionConstants.VEN_EX_000027)
+					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+				}
 			}
 		}
 	
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persist::returning persistedOrderItemAddress = " + persistedOrderItemAddress);
 		return persistedOrderItemAddress;
 	}
 

@@ -59,7 +59,7 @@ public interface VeniceConstants {
 	public static final String VEN_WCS_PAYMENT_TYPE_BCACreditCard = "BCACreditCard";
 	public static final String VEN_WCS_PAYMENT_TYPE_ANZ = "ANZ";
 	public static final String VEN_WCS_PAYMENT_TYPE_CIMBCreditCard = "CIMBCreditCard";
-	public static final String VEN_WCS_PAYMENT_TYPE_DanamonCreditCard = "DanamonCreditCard";	
+	public static final String VEN_WCS_PAYMENT_TYPE_DanamonCreditCard = "DanamonCreditCard";
 	
 	//this is only for wcs
 	public static final String VEN_WCS_PAYMENT_TYPE_PartialFulfillment = "PartialFulfillment";
@@ -86,7 +86,7 @@ public interface VeniceConstants {
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_BCACreditCard = 19;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_ANZ = 20;
 	public static final long VEN_WCS_PAYMENT_TYPE_ID_CIMBCreditCard = 21;	
-	public static final long VEN_WCS_PAYMENT_TYPE_ID_DanamonCreditCard = 22;	
+	public static final long VEN_WCS_PAYMENT_TYPE_ID_DanamonCreditCard = 22; 
 	
 	public static final Integer VEN_FULFILLMENT_STATUS_ZERO = 0;
 	public static final Integer VEN_FULFILLMENT_STATUS_ONE = 1;
@@ -113,7 +113,7 @@ public interface VeniceConstants {
 	public static final long VEN_ORDER_STATUS_B = 19;
 	public static final long VEN_ORDER_STATUS_R = 20;
 	public static final long VEN_ORDER_STATUS_RF = 21;
-	public static final long VEN_ORDER_STATUS_TS = 22;
+	public static final long VEN_ORDER_STATUS_TS = 22;	
 	public static final long VEN_ORDER_STATUS_S = 23;
 	
 	public static final long VEN_ACTIVITY_RECON_RESULT_0 = 0;
@@ -256,7 +256,7 @@ public interface VeniceConstants {
 	public static final String FIN_SALES_BATCH_STATUS_READY = "Ready";
 	public static final String FIN_SALES_BATCH_STATUS_IN_PROCESS = "In process";
 	public static final String FIN_SALES_BATCH_STATUS_DONE = "Done";
-        public static final String FIN_SALES_BATCH_STATUS_FAILED = "Failed";
+	public static final String FIN_SALES_BATCH_STATUS_FAILED = "Failed";
 		
 	public static final long FIN_APPROVAL_STATUS_NEW = 0;
 	public static final long FIN_APPROVAL_STATUS_SUBMITTED = 1;
@@ -265,7 +265,7 @@ public interface VeniceConstants {
 	public static final long FIN_APPROVAL_STATUS_DONE= 4;
 	
 	public static final String FIN_APPROVAL_STATUS_DESC_APPROVED="Approved";
-
+	
 	public static final long FIN_ACCOUNT_1120101 = 1120101;
 	public static final long FIN_ACCOUNT_1120102 = 1120102;
 	public static final long FIN_ACCOUNT_1120103 = 1120103;
@@ -321,7 +321,8 @@ public interface VeniceConstants {
 	public static final long FIN_JOURNAL_PAYMENT = 4;
 	public static final long FIN_JOURNAL_MANUAL = 5;
 	public static final long FIN_JOURNAL_ALLOCATION = 6;
-	public static final long FIN_JOURNAL_CANCEL_REFUND_OTHERS = 7;	
+	public static final long FIN_JOURNAL_CANCEL_REFUND_OTHERS = 7;
+	
 	
 	public static final long FIN_TRANSACTION_STATUS_NEW = 0;
 	public static final long FIN_TRANSACTION_STATUS_RECONCILED = 1;
@@ -393,7 +394,7 @@ public interface VeniceConstants {
 	public static final long VEN_BANK_ID_XLAXIATA = 3;
 	public static final long VEN_BANK_ID_BII = 4;
 	public static final long VEN_BANK_ID_BRI = 5;
-	public static final long VEN_BANK_ID_TELKOMSEL= 6;
+	public static final long VEN_BANK_ID_TELKOMSEL= 6;	
 	public static final long VEN_BANK_ID_ANZ= 7;
 	public static final long VEN_BANK_ID_Danamon= 8;
 	

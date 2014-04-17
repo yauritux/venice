@@ -94,7 +94,7 @@ ModuleConfigurationPresenter.MyView {
 //		moduleToolStrip.addSeparator();
 //		moduleToolStrip.addButton(saveButton);
 		
-		moduleListGrid.setAutoFetchData(true);
+		moduleListGrid.setAutoFetchData(false);
 		moduleListGrid.setCanEdit(true);
 		moduleListGrid.setShowFilterEditor(true);
 		moduleListGrid.setSelectionType(SelectionStyle.SIMPLE);
@@ -112,7 +112,7 @@ ModuleConfigurationPresenter.MyView {
 			@Override
 			public void onEditComplete(EditCompleteEvent event) {
 				moduleListGrid.saveAllEdits();
-				getComboBoxData();
+				//getComboBoxData();
 				refreshModuleData();				
 				if(event.getDsResponse().getStatus()==0){
 					SC.say("Data Added/Edited");
@@ -127,7 +127,7 @@ ModuleConfigurationPresenter.MyView {
 					public void execute(Boolean value) {
 						if(value != null && value){							
 							moduleListGrid.removeSelectedData();
-							getComboBoxData();
+							//getComboBoxData();
 							refreshModuleData();
 							SC.say("Data Removed");
 						}
@@ -283,7 +283,7 @@ ModuleConfigurationPresenter.MyView {
 				moduleListGrid.setData(response.getData());
 			}
 		};
-		getComboBoxData();
+		//getComboBoxData();
 		moduleListGrid.getDataSource().fetchData(moduleListGrid.getFilterEditorCriteria(), callBack);
 	}
 }
