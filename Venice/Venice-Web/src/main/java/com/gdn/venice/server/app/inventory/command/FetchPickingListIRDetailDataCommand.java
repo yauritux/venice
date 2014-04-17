@@ -13,6 +13,7 @@ import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequest;
 import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
 import com.gdn.inventory.wrapper.ResultListWrapper;
+import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.PickingListManagementService;
 import com.gdn.venice.server.app.inventory.service.PutawayManagementService;
@@ -46,9 +47,9 @@ public class FetchPickingListIRDetailDataCommand implements RafDsCommand {
         	pickingListService = new PickingListManagementService();        	
         	putawayService = new PutawayManagementService();
         	
-        	PickPackage pickPackage = pickingListService.getSinglePickingListIR(request.getParams().get(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID));
-        	if(pickPackage!=null){
-        		InventoryRequest inventoryRequest = pickPackage.getInventoryRequest();
+        	ResultWrapper<PickPackage> pickPackageWrapper = pickingListService.getSinglePickingListIR(request.getParams().get("username"), request.getParams().get(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID));
+        	if(pickPackageWrapper!=null && pickPackageWrapper.isSuccess()){
+        		InventoryRequest inventoryRequest = pickPackageWrapper.getContent().getInventoryRequest();
         		
         		ResultListWrapper<InventoryRequestItem> irItemWrapper = pickingListService.getIRItemByIRId(Long.toString(inventoryRequest.getId()));
         		for(InventoryRequestItem irItem : irItemWrapper.getContents()){	        		

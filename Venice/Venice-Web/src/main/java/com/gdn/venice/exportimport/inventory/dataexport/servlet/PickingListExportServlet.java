@@ -3,6 +3,7 @@ package com.gdn.venice.exportimport.inventory.dataexport.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -29,6 +30,8 @@ import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.venice.exportimport.inventory.dataexport.PickingListPrint;
 import com.gdn.venice.server.app.inventory.service.PickingListManagementService;
 import com.gdn.venice.server.app.inventory.service.PutawayManagementService;
+import com.gdn.venice.server.data.RafDsRequest;
+import com.gdn.venice.server.util.Util;
 
 /**
  * Servlet implementation class PickingListExportServlet.
@@ -62,8 +65,14 @@ public class PickingListExportServlet extends HttpServlet {
 		
 		PickingListManagementService pickingListService = new PickingListManagementService();
 		PutawayManagementService putawayService = new PutawayManagementService();
-				
-		ResultListWrapper<PickPackage> packageWrapper = pickingListService.getPackageByPicker(request.getParameter("pickerId"));
+		
+		RafDsRequest rafDsRequest = new RafDsRequest();
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("limit", "1");
+        params.put("page", "20");
+        rafDsRequest.setParams(params);
+        
+		ResultListWrapper<PickPackage> packageWrapper = pickingListService.getPackageByPicker(Util.getUserName(request), request.getParameter("pickerName"), rafDsRequest);
 		if(packageWrapper!=null && packageWrapper.isSuccess()){							
 			for(PickPackage pickPackage : packageWrapper.getContents()){							
         		InventoryRequest inventoryRequest = pickPackage.getInventoryRequest();
