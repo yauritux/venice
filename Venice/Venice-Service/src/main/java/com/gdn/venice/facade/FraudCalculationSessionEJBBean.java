@@ -689,6 +689,11 @@ public class FraudCalculationSessionEJBBean implements FraudCalculationSessionEJ
 						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
 						
 						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
+						fraudPoint.setFraudRuleName(FraudRuleConstants.FRAUD_RULE_44.title());
+						fraudPoint.setRiskPoints(pointRule44);
+						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
+						
+						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
 						fraudPoint.setFraudRuleName(FraudRuleConstants.FRAUD_RULE_45.title());
 						fraudPoint.setRiskPoints(pointRule45);
 						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);

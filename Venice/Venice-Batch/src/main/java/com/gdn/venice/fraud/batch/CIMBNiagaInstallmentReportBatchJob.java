@@ -27,11 +27,11 @@ import com.gdn.venice.util.EmailSender;
 import com.gdn.venice.util.VeniceConstants;
 
 /**
- * Batch job for generating installment report 
+ * Batch job for generating CIMB Niaga installment 12 month report 
  * 
- * @author Roland
+ * @author Daniel Hutama Putra
  */
-public class BCAInstallmentReportBatchJob {
+public class CIMBNiagaInstallmentReportBatchJob {
 	
 	protected static Logger _log = null;
 	private static String CONFIG_FILE = System.getenv("VENICE_HOME") + "/admin/config.properties";
@@ -50,17 +50,19 @@ public class BCAInstallmentReportBatchJob {
 																											"left join ven_customer c on c.customer_id=o.customer_id " +
 																											"left join ven_party p on p.party_id=c.party_id " +
 																											"left join ven_bin_credit_limit_estimate b on b.bin_number=substr(op.masked_credit_card_number,0,7) " +
-																											"where op.amount>500000 and o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
-																											" and op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSBCAInstallment +
-																											" and b.bank_name='BCA' and op.installment_sent_flag=false and op.tenor is not null and op.tenor>0 and o.order_date>=?";
+																											"where o.order_status_id= " + VeniceConstants.VEN_ORDER_STATUS_FP +
+																											" and (op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_CIMBCreditCard +
+																											"or (op.wcs_payment_type_id= " +VeniceConstants.VEN_WCS_PAYMENT_TYPE_ID_MIGSCreditCard + "))"+
+																											" and b.bank_name='"+VeniceConstants.VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_CIMB_NIAGA+
+																											"' and op.installment_sent_flag=false and o.order_date>=?";
 	
 	private static final String UPDATE_INSTALLMENT_LIST_SQL = "update ven_order_payment set installment_sent_flag = true, installment_sent_date=? where wcs_payment_id=?";
 	
 	private static final String INSERT_INSTALLMENT_HISTORY_LIST_SQL = "insert into ven_order_payment_installment_history (order_payment_id, installment_timestamp, history_reason) values (?, ?, ?)";
 	
-    private BCAInstallmentReportBatchJob() throws FileNotFoundException, IOException, ClassNotFoundException, SQLException {
+    private CIMBNiagaInstallmentReportBatchJob() throws FileNotFoundException, IOException, ClassNotFoundException, SQLException {
         Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-        _log = loggerFactory.getLog4JLogger("com.gdn.venice.fraud.batch.BCAInstallmentReportBatchJob");
+        _log = loggerFactory.getLog4JLogger("com.gdn.venice.fraud.batch.CIMBNiagaInstallmentReportBatchJob");
         
     	Properties prop = new Properties();
 		prop.load(new FileInputStream(CONFIG_FILE));
@@ -89,7 +91,7 @@ public class BCAInstallmentReportBatchJob {
       	ArrayList<Installment> InstallmentList = null;	
 	    
 	    try{	            
-	    	_log.debug("Query installment data");
+	    	_log.debug("Query installment data"); 
 	    	
 	    	InstallmentList = new ArrayList<Installment>();
             psInstallmentList = conn.prepareStatement(CONVERT_INSTALLMENT_LIST_SQL, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -146,8 +148,8 @@ public class BCAInstallmentReportBatchJob {
 	}
 
     public static void main(String[] args) throws FileNotFoundException, IOException, ClassNotFoundException, SQLException {
-    	BCAInstallmentReportBatchJob installmentJob = new BCAInstallmentReportBatchJob();
-    	_log.info("Start BCAInstallmentReportBatchJob");
+    	CIMBNiagaInstallmentReportBatchJob installmentJob = new CIMBNiagaInstallmentReportBatchJob();
+    	_log.info("Start CIMBNiagaInstallmentReportBatchJob");
         
         Long startTime = System.currentTimeMillis();
                 
@@ -155,7 +157,7 @@ public class BCAInstallmentReportBatchJob {
         
         if(InstallmentList!=null){
         	String filePath = System.getenv("VENICE_HOME") + "/files/export/fraud/installment/";
-    		String fileName = "ConvertInstallmentBCA" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())+ ".xls";
+    		String fileName = "ConvertInstallmentCIMBNiaga" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())+ ".xls";
     		 
     		Date date = new Date();
     		PreparedStatement psUpdateInstallment = null;
@@ -183,7 +185,7 @@ public class BCAInstallmentReportBatchJob {
         		
         		_log.info("send email");
     			EmailSender es = new EmailSender();
-    			Boolean sendFiles = es.sendInstallmentFiles(VeniceConstants.FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BCA);
+    			Boolean sendFiles = es.sendInstallmentFiles(VeniceConstants.FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_CIMBNIAGA);
     			if (!sendFiles) {
     				_log.error("send files failed");
     			}else{
@@ -202,6 +204,6 @@ public class BCAInstallmentReportBatchJob {
         }
 
         Long endTime = System.currentTimeMillis();
-        _log.info("BCAInstallmentReportBatchJob finished, with duration:" + (endTime - startTime) + "ms");
+        _log.info("CIMBNiagaInstallmentReportBatchJob finished, with duration:" + (endTime - startTime) + "ms");
     }
 }

@@ -39,7 +39,7 @@ public interface AirwayBillEngineConnector {
 
 	public List<AirwayBillTransactionResource> getAirwayBillTransaction(String gdnRefOrAwbNo, boolean isAwbNo) throws Exception;
 
-	public abstract boolean overrideAirwayBillNumber(String gdnRefNo, String awbNo, String user, String logProviderCode);
+	public abstract boolean overrideAirwayBillNumber(String gdnRefNo, String awbNo,  String logProviderCode, String user);
 
 	public List<AirwayBillTransaction> getAirwayBillReadyForES(String logisticProviderCode, Date startDate, Date endDate) throws Exception;
 	

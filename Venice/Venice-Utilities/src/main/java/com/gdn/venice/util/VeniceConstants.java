@@ -398,6 +398,13 @@ public interface VeniceConstants {
 	public static final long VEN_BANK_ID_ANZ= 7;
 	public static final long VEN_BANK_ID_Danamon= 8;
 	
+	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_BANK_MEGA="Bank Mega";
+	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_MEGA="Mega";
+	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_CIMB_NIAGA="CIMB Niaga";
+	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_DANAMON="Danamon";
+	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_BII="BII";	
+	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_ANZ_PANIN="ANZ Panin";
+	
 	public static final double VEN_GDN_PPN_RATE = 10; //This is the global tax rate 
 	
 	public static final long VEN_PROMOTION_SHARE_CALC_METHOD_PERCENTAGE = 0;
@@ -489,4 +496,12 @@ public interface VeniceConstants {
 	public static final String VEN_PRODUCT_CATEGORY_LEVEL_ONE= "1";
 	
 	public static final String FRD_PARAMETER_RULE_44_RISK_POINT = "Risk Point";
+
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BCA="0";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_ANZ="1";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_CIMBNIAGA="2";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BII="3";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_DANAMON="4";
+	public static final String FRAUD_INSTALLMENT_BANK_REPORT_BATCH_JOB_BANK_MEGA="5";
+	public static final String FRAUD_CANCEL_INSTALLMENT_BANK_REPORT_BATCH_JOB_BCA="6";
 }
