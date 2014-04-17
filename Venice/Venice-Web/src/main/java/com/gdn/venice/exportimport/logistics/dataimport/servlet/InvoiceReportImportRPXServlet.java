@@ -136,7 +136,7 @@ public class InvoiceReportImportRPXServlet extends HttpServlet {
 			try {
 				fileItemsList = servletFileUpload.parseRequest(request);
 				
-				if(fileItemsList.get(0).getName()==null || fileItemsList.get(0).getName().equals("") || fileItemsList.get(0).getSize()<=0){
+				if(fileItemsList.get(2).getName()==null || fileItemsList.get(2).getName().equals("") ||fileItemsList.get(2).getSize()<=0){
 					String errMsg = LogisticsServletConstants.EXCEPTION_TEXT_INVOICE_FILE_NULL;
 					_log.error(errMsg);
 					notificationText = notificationText.replaceFirst("REPLACE", errMsg);
