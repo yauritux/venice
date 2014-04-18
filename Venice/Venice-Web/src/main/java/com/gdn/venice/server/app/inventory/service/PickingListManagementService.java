@@ -313,7 +313,7 @@ public class PickingListManagementService{
         }
 	}
     
-	public ResultListWrapper<PickPackage> getPackageByPicker(String username, String pickerName, RafDsRequest request) throws HttpException, IOException{
+	public InventoryPagingWrapper<PickPackage> getPackageByPicker(String username, String pickerName, RafDsRequest request) throws HttpException, IOException{
 		System.out.println("getPackageByPicker");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "pickPackaging/getAllCreatedIR?username="+username
@@ -342,7 +342,7 @@ public class PickingListManagementService{
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<ResultListWrapper<PickPackage>>() {});
+            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PickPackage>>() {});
         } else {
         	return null;
         }

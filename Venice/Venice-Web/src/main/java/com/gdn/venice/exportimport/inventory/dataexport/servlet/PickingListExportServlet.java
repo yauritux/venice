@@ -26,6 +26,7 @@ import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
 import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequest;
 import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
+import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.venice.exportimport.inventory.dataexport.PickingListPrint;
 import com.gdn.venice.server.app.inventory.service.PickingListManagementService;
@@ -68,13 +69,15 @@ public class PickingListExportServlet extends HttpServlet {
 		
 		RafDsRequest rafDsRequest = new RafDsRequest();
 		HashMap<String, String> params = new HashMap<String, String>();
-		params.put("limit", "1");
-        params.put("page", "20");
-        rafDsRequest.setParams(params);
+        params.put("page", "1");
+		params.put("limit", "20");
+        rafDsRequest.setParams(params);        
         
-		ResultListWrapper<PickPackage> packageWrapper = pickingListService.getPackageByPicker(Util.getUserName(request), request.getParameter("pickerName"), rafDsRequest);
+        String packageType = request.getParameter("packageType");
+        
+        InventoryPagingWrapper<PickPackage> packageWrapper = pickingListService.getPackageByPicker(Util.getUserName(request), request.getParameter("pickerName"), rafDsRequest);
 		if(packageWrapper!=null && packageWrapper.isSuccess()){							
-			for(PickPackage pickPackage : packageWrapper.getContents()){							
+			for(PickPackage pickPackage : packageWrapper.getContent()){							
         		InventoryRequest inventoryRequest = pickPackage.getInventoryRequest();
         		plPrint.setInventoryRequest(inventoryRequest);
         		plPrint.setPickPackage(pickPackage);
@@ -171,7 +174,11 @@ public class PickingListExportServlet extends HttpServlet {
 				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Merchant Store"));
 				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Picker Name"));
 				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("Keterangan"));
-				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Sales Order ID"));				
+				if(packageType.equals("IR")){
+					headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Inventory Request ID"));
+				}else{
+					headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Sales Order ID"));
+				}
 				headerRow.createCell(startCol+6).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
 				headerRow.createCell(startCol+7).setCellValue(new HSSFRichTextString("Item Name"));
 				headerRow.createCell(startCol+8).setCellValue(new HSSFRichTextString("Qty"));
@@ -201,7 +208,11 @@ public class PickingListExportServlet extends HttpServlet {
 					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier().getName()));	
 					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getPickPackage().getAssignedPicker().getName()));
 					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getInventoryType().name()));
-					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(""));
+					if(packageType.equals("IR")){
+						cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getIrNumber()));
+					}else{
+						cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(""));
+					}
 					cell = detailRow.createCell(startCol+6);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseSkuId()));
 					cell = detailRow.createCell(startCol+7);cell.setCellValue(new HSSFRichTextString(pl.getItemName()));
 					cell = detailRow.createCell(startCol+8);cell.setCellValue(new HSSFRichTextString(pl.getQty()));

@@ -2,12 +2,12 @@ package com.gdn.venice.client.app.inventory.view;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.PickingListData;
 import com.gdn.venice.client.app.inventory.presenter.PickingListIRPresenter;
 import com.gdn.venice.client.app.inventory.view.handler.PickingListIRUiHandler;
+import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
 import com.google.gwt.core.client.GWT;
@@ -20,6 +20,7 @@ import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.Encoding;
 import com.smartgwt.client.types.SelectionAppearance;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.BooleanCallback;
@@ -32,6 +33,7 @@ import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
+import com.smartgwt.client.widgets.form.fields.UploadItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.CellFormatter;
@@ -56,7 +58,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 
     RafViewLayout layout, pickerLayout;
     ListGrid packageListGrid, packageDetailListGrid;
-    Window pickingListDetailWindow, assignPickerWindow;
+    Window pickingListDetailWindow, assignPickerWindow, uploadWindow;
     ToolStrip toolStrip;
     ComboBoxItem pickerComboBox; 
     IButton submitButton;
@@ -185,13 +187,87 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
      				}
      				
 					for(String pickerName : set){		
-	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListExportServlet?pickerName=" + pickerName, "_blank", null);
+	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListExportServlet?packageType=IR&pickerName=" + pickerName, "_blank", null);
 					}    							
      			}
      		});
         
+        uploadButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				buildUploadWindow().show();
+			}
+		});
+        
         layout.setMembers(toolStrip, packageListGrid);
     }
+    
+    /**
+	 * Builds the upload window as a modal dialog
+	 * @return the window once it is built
+	 */
+	private Window buildUploadWindow() {
+		uploadWindow = new Window();
+		uploadWindow.setWidth(350);
+		uploadWindow.setHeight(120);
+		uploadWindow.setTitle("Upload Picking List");
+		uploadWindow.setShowMinimizeButton(false);
+		uploadWindow.setIsModal(true);
+		uploadWindow.setShowModalMask(true);
+		uploadWindow.centerInPage();
+		
+		uploadWindow.addCloseClickHandler(new CloseClickHandler() {
+			public void onCloseClick(CloseClientEvent event) {
+				uploadWindow.destroy();
+			}
+		});
+
+		VLayout uploadLayout = new VLayout();
+		uploadLayout.setHeight100();
+		uploadLayout.setWidth100();
+
+		final DynamicForm uploadForm = new DynamicForm();
+		uploadForm.setPadding(5);
+		uploadForm.setEncoding(Encoding.MULTIPART);
+		uploadForm.setTarget("upload_frame");
+
+		UploadItem reportFileItem = new UploadItem();
+		reportFileItem.setTitle("Report");
+		uploadForm.setItems(reportFileItem);
+
+		HLayout uploadButtons = new HLayout(5);
+
+		IButton buttonUpload = new IButton("Upload");
+		IButton buttonCancel = new IButton("Cancel");
+
+		buttonUpload.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				String host = GWT.getHostPageBaseURL();
+				if(host.contains(":8889")){
+					host = "http://localhost:8090/";
+				}else{
+					host = host.substring(0, host.lastIndexOf("/", host.length() - 2) + 1);
+				}
+
+				uploadForm.setAction(host + "Venice/PickingListIRImportServlet?username=" + MainPagePresenter.signedInUser);								
+				uploadForm.submitForm();
+				uploadWindow.destroy();
+			}
+		});
+		
+		buttonCancel.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				uploadWindow.destroy();
+			}
+		});
+		uploadButtons.setAlign(Alignment.CENTER);
+		uploadButtons.setMembers(buttonUpload, buttonCancel);
+
+		uploadLayout.setMembers(uploadForm, uploadButtons);
+		uploadWindow.addItem(uploadLayout);
+		return uploadWindow;
+	}
     
     private Window buildAssignPickerWindow() {
     	assignPickerWindow = new Window();
