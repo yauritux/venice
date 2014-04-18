@@ -19,6 +19,7 @@ import com.gdn.venice.exception.VenMerchantProductSynchronizingError;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.MerchantService;
+import com.gdn.venice.inbound.services.ProductCategoryService;
 import com.gdn.venice.inbound.services.ProductTypeService;
 import com.gdn.venice.persistence.VenMerchant;
 import com.gdn.venice.persistence.VenMerchantProduct;
@@ -43,6 +44,9 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 
 	@Autowired
 	private MerchantService merchantService;
+	
+	@Autowired
+	private ProductCategoryService productCategoryService;
 
 	@Autowired
 	private ProductTypeService productTypeService;
@@ -51,7 +55,7 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 	private EntityManager em;
 
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenMerchantProduct synchronizeVenMerchantProductData(
 			VenMerchantProduct venMerchantProduct) throws VeniceInternalException {
 
@@ -61,9 +65,13 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 
 		VenMerchantProduct synchVenMerchantProduct = venMerchantProduct;
 		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductData::venMerchantProduct.productId=" + venMerchantProduct.getProductId());
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenMerchantProductData::venMerchantProduct.productCategories=" + venMerchantProduct.getVenProductCategories());
+		
 		try {
-			//if (venMerchantProduct.getWcsProductSku() != null) {
-			if (venMerchantProduct != null && venMerchantProduct.getWcsProductSku() != null) {
+			if (venMerchantProduct != null && venMerchantProduct.getWcsProductSku() != null && venMerchantProduct.getProductId() == null) {
 
 				CommonUtil.logDebug(this.getClass().getCanonicalName(),
 						"synchronizeVenMerchantProductData::Synchronizing VenMerchantProduct... :"
@@ -73,43 +81,17 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 						"synchronizeVenMerchantProductData::merchantProduct merchant = "
 								+ venMerchantProduct.getVenMerchant());
 
-				/*
-				synchVenMerchantProduct = synchronizeVenMerchantProductReferenceData(venMerchantProduct); // merchantProduct is in attach mode
-
-				CommonUtil
-						.logDebug(
-								this.getClass().getCanonicalName(),
-								"synchronizeVenMerchantProductReferences::merchantProduct merchant after synchronized = "
-										+ synchVenMerchantProduct.getVenMerchant());
-				CommonUtil
-						.logDebug(
-								this.getClass().getCanonicalName(),
-								"synchronizeVenMerchantProductReferences::merchantProduct merchant WCS Merchant ID = "
-										+ synchVenMerchantProduct.getVenMerchant()
-												.getWcsMerchantId());
-				
-				CommonUtil.logDebug(this.getClass().getCanonicalName(),
-						"synchronizeVenMerchantProductReferences::merchantProduct SKU = "
-								+ synchVenMerchantProduct.getMerchantProductSku());
-				
-				CommonUtil.logDebug(this.getClass().getCanonicalName(),
-						"synchronizeVenMerchantProductReferences::merchantProduct merchant ID = "
-								+ synchVenMerchantProduct.getVenMerchant().getMerchantId());
-				*/
-				
 				List<VenMerchantProduct> merchantProductList = findByWcsProductSku(venMerchantProduct.getWcsProductSku());
 				CommonUtil.logDebug(this.getClass().getCanonicalName(),
 						"synchronizeVenMerchantProductData::found merchantProductList = "
 								+ (merchantProductList != null ? merchantProductList.size() : 0));
 
 				if (merchantProductList == null || (merchantProductList.isEmpty())) {
-					CommonUtil
-							.logDebug(
-									this.getClass().getCanonicalName(),
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
 									"synchronizeVenMerchantProductData::VenMerchantProduct is not listed in the database, saving it");
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductData::first of all, synchronizing all VenMerchantProduct References");
-					venMerchantProduct = synchronizeVenMerchantProductReferenceData(venMerchantProduct);
+					synchVenMerchantProduct = synchronizeVenMerchantProductReferenceData(venMerchantProduct);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "synchronizeVenMerchantProductData::venMerchantProduct is being synchronized now");
 
@@ -126,20 +108,21 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 					synchVenMerchantProduct = merchantProductList.get(0);
 				}
 
-				// venMerchantProduct.setVenProductCategories(synchronizeVenProductCategories(merchantProduct.getVenProductCategories()));
-				//
-				// venMerchantProduct =
-				// synchronizeVenMerchantProductCategories(venMerchantProduct);
-
-			} //end if venMerchantProduct IS NOT NULL
+				//synchronize and persist venProductCategories
+				Boolean isProductCategorySynchronized = synchronizeAndPersistVenProductCategories(venMerchantProduct, synchVenMerchantProduct);
+				if (!isProductCategorySynchronized) {
+					throw new VenMerchantProductSynchronizingError("Cannot synchronize VenMerchantProduct.productCategories!",
+							VeniceExceptionConstants.VEN_EX_130007);
+				}
+				
+			} else {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenMerchantProductData::venMerchantProduct already synchronized, no need to do it twice");
+			}
 		} catch (Exception e) {
 			CommonUtil.logError(this.getClass().getCanonicalName(), e);
-			e.printStackTrace();
-			CommonUtil.logAndReturnException(
-					new VenMerchantProductSynchronizingError(
-							"Cannot synchronize VenMerchantProduct!",
-							VeniceExceptionConstants.VEN_EX_130007), CommonUtil
-							.getLogger(this.getClass().getCanonicalName()),
+			CommonUtil.logAndReturnException(new VenMerchantProductSynchronizingError("Cannot synchronize VenMerchantProduct!-" + e.getMessage(),
+							VeniceExceptionConstants.VEN_EX_130007), CommonUtil.getLogger(this.getClass().getCanonicalName()),
 					LoggerLevel.ERROR);
 		}
 
@@ -254,25 +237,16 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 		venMerchantProduct.setVenProductType(synchronizedProductType);
 		// }
 
-		CommonUtil
-				.logDebug(
-						this.getClass().getCanonicalName(),
+		CommonUtil.logDebug(this.getClass().getCanonicalName(),
 						"synchronizeVenMerchantProductReferenceData::venProductType is being synchronized");
 
 		// if (venMerchantProduct.getVenMerchant() != null) {
 		VenMerchant merchant = venMerchantProduct.getVenMerchant();
-		VenMerchant synchronizedMerchant = merchantService
-				.synchronizeVenMerchantData(merchant);
+		VenMerchant synchronizedMerchant = merchantService.synchronizeVenMerchantData(merchant);
 		venMerchantProduct.setVenMerchant(synchronizedMerchant);
 		// }
 
-		CommonUtil
-				.logDebug(this.getClass().getCanonicalName(),
-						"synchronizeVenMerchantProductReferenceData::venMerchant is being synchronized");
-
-		CommonUtil
-				.logDebug(
-						this.getClass().getCanonicalName(),
+		CommonUtil.logDebug(this.getClass().getCanonicalName(),
 						"synchronizeVenMerchantProductReferenceData::EOM, returning venMerchantProduct = "
 								+ venMerchantProduct);
 		return venMerchantProduct;
@@ -297,6 +271,71 @@ public class MerchantProductServiceImpl implements MerchantProductService {
 								: 0));
 
 		return merchantProducts;
+	}
+	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	private Boolean synchronizeAndPersistVenProductCategories(VenMerchantProduct venMerchantProduct, VenMerchantProduct synchVenMerchantProduct) {
+		
+		try {
+			if (venMerchantProduct.getVenProductCategories() != null && (!venMerchantProduct.getVenProductCategories().isEmpty())) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeAndPersistVenProductCategories::synchronizing and persisting venProductCategories");
+				List<VenProductCategory> venProductCategories = new ArrayList<VenProductCategory>();
+				List<VenMerchantProduct> venMerchantProducts = new ArrayList<VenMerchantProduct>();
+				for (VenProductCategory venProductCategory : venMerchantProduct.getVenProductCategories()) {
+					venProductCategory = productCategoryService.synchronizeVenProductCategory(venProductCategory);
+					venMerchantProducts = venProductCategory.getVenMerchantProducts();
+					boolean merchantProductExists = false;
+					for (VenMerchantProduct merchantProduct : venMerchantProducts) {
+						if (merchantProduct.getProductId() == synchVenMerchantProduct.getProductId()) {
+							merchantProductExists = true;
+							break;
+						}
+					}
+					if (!merchantProductExists) {
+						venMerchantProducts.add(synchVenMerchantProduct);
+					}
+					venProductCategory.setVenMerchantProducts(venMerchantProducts);
+					venProductCategories.add(venProductCategory);
+				}
+
+				if (synchVenMerchantProduct.getVenProductCategories() != null && (!synchVenMerchantProduct.getVenProductCategories().isEmpty())) {
+
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeAndPersistVenProductCategories::synchVenMerchantProduct.productCategories is not empty");
+					List<VenProductCategory> synchVenProductCategories = new ArrayList<VenProductCategory>(synchVenMerchantProduct.getVenProductCategories());
+
+					boolean productCategoryExists = false;
+					for (VenProductCategory venProductCategory : venProductCategories) {
+						for (VenProductCategory productCategory : synchVenMerchantProduct.getVenProductCategories()) {
+							if (venProductCategory.getProductCategory().equalsIgnoreCase(productCategory.getProductCategory())
+									&& (venProductCategory.getLevel() == productCategory.getLevel())) {
+								productCategoryExists = true;
+								break;
+							} 
+						}
+						if (!productCategoryExists) {
+							synchVenProductCategories.add(venProductCategory);
+						} else {
+							productCategoryExists = false;
+						}
+					}
+
+					synchVenMerchantProduct.setVenProductCategories(synchVenProductCategories);
+				} else {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeAndPersistVenProductCategories::synchVenMerchantProduct.productCategories is empty");
+					synchVenMerchantProduct.setVenProductCategories(venProductCategories);						
+				}
+
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeAndPersistVenProductCategories::successfully synchronized and persisted venProductCategories");
+			}
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			e.printStackTrace();
+			return Boolean.FALSE;
+		}
+		
+		return Boolean.TRUE;
 	}
 
 }
