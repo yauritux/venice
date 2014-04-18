@@ -23,6 +23,7 @@ import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
 import com.gdn.inventory.exchange.entity.module.outbound.PickingListDetail;
+import com.gdn.inventory.exchange.entity.request.PickPackageRequest;
 import com.gdn.inventory.exchange.type.InventoryRequestStatus;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultListWrapper;
@@ -186,7 +187,7 @@ public class PickingListManagementService{
         System.out.println("url: "+url);
         
         Map<String, Object> searchMap = new HashMap<String, Object>();
-        searchMap.put("status", InventoryRequestStatus.APPROVED.toString());
+        searchMap.put("status", InventoryRequestStatus.PICK_PACKAGE_CREATED.toString());
         
         String json = mapper.writeValueAsString(searchMap);
         System.out.println("json: "+json);
@@ -343,6 +344,35 @@ public class PickingListManagementService{
             System.out.println(sb.toString());
             is.close();
             return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PickPackage>>() {});
+        } else {
+        	return null;
+        }
+	}
+	
+    public ResultWrapper<String> uploadPickingListIR(String username, List<PickPackageRequest> pickPackageRequest) throws HttpException, IOException{
+		System.out.println("uploadPickingListIR");
+		String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "pickPackaging/uploadPickPackageIR?username="+ username;
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: "+url);
+        
+		String json = mapper.writeValueAsString(pickPackageRequest);
+		System.out.println("json: "+json);
+		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+		httpPost.setRequestHeader("Content-Type", "application/json");
+        
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<String>>() {});
         } else {
         	return null;
         }
