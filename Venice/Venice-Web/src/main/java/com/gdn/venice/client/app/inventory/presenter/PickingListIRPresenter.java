@@ -45,7 +45,7 @@ public class PickingListIRPresenter extends Presenter<PickingListIRPresenter.MyV
 	}
 
 	public interface MyView extends View, HasUiHandlers<PickingListIRUiHandler> {
-		public void loadPickingListData(LinkedHashMap<String, String> pickerMap);
+		public void loadPickingListData(LinkedHashMap<String, String> warehouseMap);
 		public void refreshPickingListIRData();
 		public Window getPickingListDetailWindow();
 		public Window getAssignPickerWindow();
@@ -57,7 +57,7 @@ public class PickingListIRPresenter extends Presenter<PickingListIRPresenter.MyV
 		getView().setUiHandlers(this);
 		
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		onFetchPickerComboBoxData();
+		onFetchWarehouseComboBoxData();
 		this.dispatcher = dispatcher;
 	}
 
@@ -67,21 +67,20 @@ public class PickingListIRPresenter extends Presenter<PickingListIRPresenter.MyV
 	}
 	
 	@Override
-	public void onFetchPickerComboBoxData() {	
-		RPCRequest request=new RPCRequest();
-		request = new RPCRequest();
-		request.setActionURL(GWT.getHostPageBaseURL() + pickingListManagementPresenterServlet + "?method=fetchPickerComboBoxData&type=RPC");
-		request.setHttpMethod("POST");
-		request.setUseSimpleHttp(true);
-		request.setShowPrompt(false);
-		RPCManager.sendRequest(request, 
-				new RPCCallback () {
+	public void onFetchWarehouseComboBoxData() {
+		RPCRequest requestWarehouse = new RPCRequest();
+		requestWarehouse.setActionURL(GWT.getHostPageBaseURL() + "WarehouseManagementPresenterServlet?method=fetchWarehouseComboBoxData&type=RPC&username="+MainPagePresenter.signedInUser);
+		requestWarehouse.setHttpMethod("POST");
+		requestWarehouse.setUseSimpleHttp(true);
+		requestWarehouse.setShowPrompt(false);
+		
+		RPCManager.sendRequest(requestWarehouse, new RPCCallback () {
 					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
-						String rpcResponse = rawData.toString();
-						String xmlData = rpcResponse;
-						final LinkedHashMap<String, String> pickerMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlData));
-						getView().loadPickingListData(pickerMap);
-				}
+						String rpcResponseWarehouse = rawData.toString();
+						String xmlDataWarehouse = rpcResponseWarehouse;
+						final LinkedHashMap<String, String> warehouseMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlDataWarehouse));
+						getView().loadPickingListData(warehouseMap);
+					}
 		});
 	}
 	

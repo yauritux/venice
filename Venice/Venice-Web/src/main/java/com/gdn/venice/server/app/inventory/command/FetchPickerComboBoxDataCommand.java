@@ -1,12 +1,12 @@
 package com.gdn.venice.server.app.inventory.command;
 
 import java.util.HashMap;
-import java.util.List;
 
 import com.gdn.inventory.exchange.entity.Picker;
-import com.gdn.inventory.wrapper.ResultWrapper;
+import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.venice.server.app.inventory.service.PickingListManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
+import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.util.Util;
 
 /**
@@ -16,8 +16,10 @@ import com.gdn.venice.server.util.Util;
  */
 public class FetchPickerComboBoxDataCommand implements RafRpcCommand {
     PickingListManagementService pickingService;
+    RafDsRequest request;
 
-    public FetchPickerComboBoxDataCommand() {
+    public FetchPickerComboBoxDataCommand(RafDsRequest request) {
+    	this.request=request;
     }
 
     public String execute() {
@@ -25,7 +27,8 @@ public class FetchPickerComboBoxDataCommand implements RafRpcCommand {
         HashMap<String, String> map = new HashMap<String, String>();
         try {
         	pickingService = new PickingListManagementService();
-            ResultWrapper<List<Picker>> pickerWrapper = pickingService.getPickerData();
+        	
+            InventoryPagingWrapper<Picker> pickerWrapper = pickingService.getPickerDataByWarehouse(request);
             if (pickerWrapper != null && pickerWrapper.isSuccess()) {
                 for (Picker p : pickerWrapper.getContent()) {
                 	map.put("data" + p.getId().toString(), p.getName());                        

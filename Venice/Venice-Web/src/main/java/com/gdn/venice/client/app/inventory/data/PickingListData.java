@@ -92,7 +92,7 @@ public class PickingListData {
 		return dataSource;		 
 	}
 	
-	public static DataSource getPickingListIRData(int page, int limit) {
+	public static DataSource getPickingListIRData(String warehouseId, int page, int limit) {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceIntegerField(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID, "Package ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_DETAIL, "Detail"),
@@ -105,7 +105,7 @@ public class PickingListData {
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
 				GWT.getHostPageBaseURL() + PickingListPresenter.pickingListManagementPresenterServlet + 
-				"?method=fetchPickingListIRData&type=DataSource&limit="+limit+"&page="+page,
+				"?method=fetchPickingListIRData&type=DataSource&warehouseId="+warehouseId+"&limit="+limit+"&page="+page,
 				null,
 				null,
 				null, 

@@ -21,7 +21,7 @@ import com.gdn.venice.server.data.RafDsResponse;
  */
 public class FetchPickingListIRDataCommand implements RafDsCommand {
 
-    private RafDsRequest request;
+    RafDsRequest request;
     PickingListManagementService pickingListService;
     protected static Logger _log = null;
     
@@ -38,7 +38,7 @@ public class FetchPickingListIRDataCommand implements RafDsCommand {
         System.out.println("FetchPickingListIRDataCommand");
         try {
         		pickingListService = new PickingListManagementService();
-                InventoryPagingWrapper<PickPackage> pickPackageWrapper = pickingListService.getPickingListIR(request.getParams().get("username"), request);
+                InventoryPagingWrapper<PickPackage> pickPackageWrapper = pickingListService.getPickingListIR(request);
                 if(pickPackageWrapper!=null && pickPackageWrapper.isSuccess()){	 		        
 	                for(PickPackage pp : pickPackageWrapper.getContent()){
 	                    HashMap<String, String> map = new HashMap<String, String>();

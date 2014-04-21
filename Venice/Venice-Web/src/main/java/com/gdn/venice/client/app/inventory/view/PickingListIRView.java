@@ -18,6 +18,10 @@ import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.rpc.RPCCallback;
+import com.smartgwt.client.rpc.RPCManager;
+import com.smartgwt.client.rpc.RPCRequest;
+import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.types.Encoding;
@@ -56,32 +60,24 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
 public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler> implements
         PickingListIRPresenter.MyView {
 
+	VLayout headerLayout;
     RafViewLayout layout, pickerLayout;
     ListGrid packageListGrid, packageDetailListGrid;
     Window pickingListDetailWindow, assignPickerWindow, uploadWindow;
     ToolStrip toolStrip;
-    ComboBoxItem pickerComboBox; 
+    ComboBoxItem pickerComboBox, warehouseComboBox; 
     IButton submitButton;
-    LinkedHashMap<String, String> pickerMap;
+    LinkedHashMap<String, String> warehouseMap;
+    ToolStripButton asignPickerButton, exportButton, uploadButton; 
 
     @Inject
     public PickingListIRView() {
         toolStrip = new ToolStrip();
         toolStrip.setWidth100();
-        toolStrip.setPadding(2);
+        toolStrip.setPadding(2);                   
         
-        DataSource packageData = PickingListData.getPickingListIRData(1, 20);        
-        
-    	packageListGrid = new ListGrid();
-        packageListGrid.setDataSource(packageData); 
-    	packageListGrid.setAutoFetchData(true);
-        packageListGrid.setFields(Util.getListGridFieldsFromDataSource(packageData));
-        packageListGrid.setSortField(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID);
-
-        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID).setHidden(true);
-        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_PICKERID).setHidden(true);
-        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_DETAIL).setWidth(50);
-        
+    	packageListGrid = new ListGrid();       
+    	packageListGrid.setAutoFetchData(false); 
         packageListGrid.setWidth100();
         packageListGrid.setHeight100();
         packageListGrid.setShowAllRecords(true);
@@ -92,14 +88,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         packageListGrid.setSelectionAppearance(SelectionAppearance.CHECKBOX);
         packageListGrid.setSelectionType(SelectionStyle.SIMPLE);
         packageListGrid.setAutoFitData(Autofit.BOTH);
-        
-        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_DETAIL).setCellFormatter(new CellFormatter() {			
-			@Override
-			public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
-				return "<span style='color:blue;text-decoration:underline;cursor:hand;cursor:pointer'>"+value+"</span>";
-			}
-		});
-
+                
         packageListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
             @Override
             public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
@@ -119,52 +108,28 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         
     	layout = new RafViewLayout();
 
-        ToolStripButton asignPickerButton = new ToolStripButton();
+        asignPickerButton = new ToolStripButton();
         asignPickerButton.setIcon("[SKIN]/icons/business_user_next.png");
         asignPickerButton.setTooltip("Assign Picker");
         asignPickerButton.setTitle("Assign Picker");
+        asignPickerButton.setDisabled(true);
         
-        ToolStripButton exportButton = new ToolStripButton();
+        exportButton = new ToolStripButton();
         exportButton.setIcon("[SKIN]/icons/book_down.png");
         exportButton.setTooltip("Export");
         exportButton.setTitle("Export");
-        
-        ToolStripButton uploadButton = new ToolStripButton();
+        exportButton.setDisabled(true);
+
+        uploadButton = new ToolStripButton();
         uploadButton.setIcon("[SKIN]/icons/book_up.png");
         uploadButton.setTooltip("Upload");
         uploadButton.setTitle("Upload");
+        uploadButton.setDisabled(true);
 
         toolStrip.addButton(asignPickerButton);
         toolStrip.addButton(exportButton);
         toolStrip.addButton(uploadButton);   
-        
-        asignPickerButton.addClickHandler(new ClickHandler() {			
-			@Override
-			public void onClick(ClickEvent event) {
-				ListGridRecord[] selectedRecords = packageListGrid.getSelection(); 				 				
-				StringBuilder sb = new StringBuilder();
-				
- 				for (int i = 0; i < selectedRecords.length; i++) {
- 					ListGridRecord selectedRecord = selectedRecords[i];
- 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){
- 	 					sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGECODE));
- 	 					if(i != selectedRecords.length -1) sb.append(", ");
- 					}
- 				}
- 				
- 				if(sb.length()>0){
- 					SC.ask("Package "+sb+" has already been assigned, are you sure you want to reassign the picker?", new BooleanCallback() {
-						@Override
-						public void execute(Boolean value) {
-						    if (value != null && value == true) {	 
-						    		buildAssignPickerWindow().show();
-						        }	                      
-						    }	
-						});	
- 				}
-			}
-		});
-        
+                        
         exportButton.addClickHandler(new ClickHandler() {
      			@Override
      			public void onClick(ClickEvent event) {
@@ -269,7 +234,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 		return uploadWindow;
 	}
     
-    private Window buildAssignPickerWindow() {
+    private Window buildAssignPickerWindow(String warehouseName) {
     	assignPickerWindow = new Window();
     	assignPickerWindow.setWidth(400);
     	assignPickerWindow.setHeight(120);
@@ -296,8 +261,23 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 		
     	pickerComboBox = new ComboBoxItem();
     	pickerComboBox.setTitle("Picker");
-    	pickerComboBox.setValueMap(pickerMap);
-        
+		    	
+		RPCRequest requestPicker = new RPCRequest();
+		requestPicker.setActionURL(GWT.getHostPageBaseURL() + "PickingListManagementPresenterServlet?method=fetchPickerComboBoxData&type=RPC&warehouseName="+warehouseName+"&page=1&limit=50");
+		requestPicker.setHttpMethod("POST");
+		requestPicker.setUseSimpleHttp(true);
+		requestPicker.setShowPrompt(false);
+				
+		RPCManager.sendRequest(requestPicker, new RPCCallback () {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						String xmlData = rpcResponse;
+						
+						LinkedHashMap<String, String> pickerMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlData));
+						pickerComboBox.setValueMap(pickerMap);
+					}
+		});
+		        
     	pickerComboBox.addChangedHandler(new ChangedHandler() {			
 			@Override
 			public void onChanged(ChangedEvent event) {
@@ -310,8 +290,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 		pickerLayout = new RafViewLayout();
 		pickerLayout.setMembers(pickerForm, buttonSet);
 		
-		assignPickerWindow.addItem(pickerLayout);
-        
+		assignPickerWindow.addItem(pickerLayout);        
         assignPickerWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {
             	assignPickerWindow.destroy();
@@ -403,8 +382,85 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
     }
 	
     @Override
-    public void loadPickingListData(LinkedHashMap<String, String> pickerMap) {
-    	this.pickerMap = pickerMap;        
+    public void loadPickingListData(LinkedHashMap<String, String> warehouseMap) {     
+    	this.warehouseMap = warehouseMap;
+    	
+    	final DynamicForm warehouseForm = new DynamicForm();
+        warehouseForm.setPadding(5);
+        warehouseForm.setNumCols(2);
+
+        warehouseComboBox = new ComboBoxItem();
+        warehouseComboBox.setTitle("Warehouse");
+        warehouseComboBox.setValueMap(warehouseMap);
+
+        warehouseForm.setFields(warehouseComboBox);
+
+        warehouseComboBox.addChangedHandler(new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent event) {
+                buildPackageListGrid(warehouseComboBox.getValue().toString());
+            }
+        });
+
+        headerLayout = new VLayout();
+        headerLayout.setWidth100();
+        headerLayout.setMargin(10);
+        headerLayout.setMembers(warehouseForm);
+        
+        asignPickerButton.addClickHandler(new ClickHandler() {			
+			@Override
+			public void onClick(ClickEvent event) {
+				ListGridRecord[] selectedRecords = packageListGrid.getSelection(); 				 				
+				StringBuilder sb = new StringBuilder();
+				
+ 				for (int i = 0; i < selectedRecords.length; i++) {
+ 					ListGridRecord selectedRecord = selectedRecords[i];
+ 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){
+ 	 					sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGECODE));
+ 	 					if(i != selectedRecords.length -1) sb.append(", ");
+ 					}
+ 				}
+ 				
+ 				if(sb.length()>0){
+ 					SC.ask("Package "+sb+" has already been assigned, are you sure you want to reassign the picker?", new BooleanCallback() {
+						@Override
+						public void execute(Boolean value) {
+						    if (value != null && value == true) {	 
+						    		buildAssignPickerWindow(warehouseComboBox.getDisplayValue().toString()).show();
+						        }	                      
+						    }	
+						});	
+ 				}
+			}
+		});
+
+        layout.setMembers(toolStrip, headerLayout, packageListGrid);        
+    }
+    
+    private void buildPackageListGrid(String warehouseId) {
+    	DataSource packageData = PickingListData.getPickingListIRData(warehouseId, 1, 50);   
+    	packageListGrid.setDataSource(packageData); 
+    	
+    	ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(packageData);
+        ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3], listGridField[4], listGridField[6]};
+
+        packageListGrid.setFields(finalListGridField);    	
+        packageListGrid.setSortField(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID);
+        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_DETAIL).setWidth(50);
+        packageListGrid.setAutoFitData(Autofit.BOTH);
+        
+        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_DETAIL).setCellFormatter(new CellFormatter() {			
+			@Override
+			public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
+				return "<span style='color:blue;text-decoration:underline;cursor:hand;cursor:pointer'>"+value+"</span>";
+			}
+		});
+        
+        asignPickerButton.setDisabled(false);
+        exportButton.setDisabled(false);
+        uploadButton.setDisabled(false);
+        
+        refreshPickingListIRData();
     }
 
     @Override
