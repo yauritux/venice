@@ -58,18 +58,34 @@ public class VeniceOrderPaidStatusServlet extends HttpServlet {
         try{
             locator = new Locator<Object>();
             orderHome = (VenOrderItemSessionEJBRemote) locator.lookup(VenOrderItemSessionEJBRemote.class, "VenOrderItemSessionEJBBean");
-            VenOrderItem venOrderItem=null;
+            List<VenOrderItem> venOrderItemList=null;
             for(int i=0;i<orderItemIdArray.length;i++){
-            	String query="select o from VenOrderItem o where o.wcsOrderItemId = '"+orderItemIdArray[i]+"' and o.venOrderStatus.orderStatusId = "+VeniceConstants.VEN_ORDER_STATUS_FP+"";
-            	venOrderItem=orderHome.queryByRange(query,0,1).get(0);
-            	if(venOrderItem!=null){
-            		orderItemIdList.add(orderItemIdArray[i]);
+            	try{
+            		venOrderItemList=null;
+            		String query="select o from VenOrderItem o where o.wcsOrderItemId = '"+orderItemIdArray[i]+"' and o.venOrderStatus.orderStatusId = "+VeniceConstants.VEN_ORDER_STATUS_FP+"";
+            		venOrderItemList=orderHome.queryByRange(query,0,0);
+            		
+                	if(venOrderItemList.size()>=1){
+                		orderItemIdList.add(orderItemIdArray[i]);
+                	}
+            		
+            	}catch (Exception e){
+            		e.printStackTrace();
             	}
             }
         }catch(JSONException e){
         	e.printStackTrace();
         }catch(Exception e){
         	e.printStackTrace();
+        }finally{
+
+            try {
+                if (locator != null) {
+                    locator.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         
         json=mapper.writeValueAsString(orderItemIdList);
