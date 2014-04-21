@@ -984,12 +984,33 @@ public class AWBReconciliation {
             //If logistic partner charge us more than what's saved on engine.
             //report that there's problem exist, other's marked as OK.
             Boolean problemExists = false;
+            
 
             // 01 - Weight Mismatch
             BigDecimal correctWeight = new BigDecimal("0");
             correctWeight = correctWeight.setScale(2, RoundingMode.UP);
             correctWeight = BigDecimal.valueOf(0);
+            int i=1;
             for( AirwayBillTransactionItemResource airwayBillTransactionItemResourceList:  mtaAirwayBill.getItems()){
+                _log.debug(i+" Weight Berat MTA adalah : "+airwayBillTransactionItemResourceList.getWeight());
+                _log.debug(i+" Jumlah Qtyt MTA adalah : "+airwayBillTransactionItemResourceList.getQuantity());
+                _log.debug(i+" Printed Weight MTA adalah : "+airwayBillTransactionItemResourceList.getPrintedWeight());
+                _log.debug(i+" GDN Ref No MTA adalah : "+airwayBillTransactionItemResourceList.getGdnRefNo());
+                _log.debug(i+"Product Price MTA adalah : "+airwayBillTransactionItemResourceList.getProductPrice());
+                _log.debug(i+" Fix Price MTA adalah : "+airwayBillTransactionItemResourceList.getFixPrice());
+                _log.debug(i+" Price PerKg MTA adalah : "+airwayBillTransactionItemResourceList.getPricePerKg());
+                _log.debug(i+" Class MTA adalah : "+airwayBillTransactionItemResourceList.getClass().toString());
+                _log.debug("\n\n");
+                _log.debug(i+" Provider berat adalah : "+providerAirwayBill.getPackageWeight());
+                _log.debug(i+" Provider awb number adalah : "+providerAirwayBill.getAirwayBillNumber());
+                _log.debug(i+" Provider gdn ref adalah : "+providerAirwayBill.getGdnReference());
+                _log.debug(i+" Provider ppkg adalah : "+providerAirwayBill.getPricePerKg());
+                _log.debug(i+" Provider provider total charge adalah : "+providerAirwayBill.getProviderTotalCharge());
+                _log.debug(i+" Provider total charge adalah : "+providerAirwayBill.getTotalCharge());
+                _log.debug(i+" Provider class adalah : "+providerAirwayBill.getClass().toString());
+                _log.debug("\n\n");
+                
+                i++;
             	 correctWeight = correctWeight.add(BigDecimal.valueOf(airwayBillTransactionItemResourceList.getQuantity()*airwayBillTransactionItemResourceList.getWeight()));
             }
 
@@ -1007,6 +1028,24 @@ public class AWBReconciliation {
 
                 invoiceAWBRecord.setVenicePackageWeight(correctWeight);
                 invoiceAWBRecord.setProviderPackageWeight(providerWeight);
+
+                _log.debug(i+" correct weight adalah : "+correctWeight);
+                _log.debug(i+" provider weight adalah : "+providerWeight);
+                _log.debug("\n\n");
+                
+                _log.debug(i+" awb number adalah : "+invoiceAWBRecord.getAirwayBillNumber());
+                _log.debug(i+" App berat adalah : "+invoiceAWBRecord.getApprovedPackageWeight());
+                _log.debug(i+" App gdn ref adalah : "+invoiceAWBRecord.getApprovedPricePerKg());
+                _log.debug(i+" App ppkg adalah : "+invoiceAWBRecord.getApprovedTotalCharge());
+                _log.debug("\n\n");
+                _log.debug(i+" Provider awb number adalah : "+invoiceAWBRecord.getProviderPackageWeight());
+                _log.debug(i+" Provider berat adalah : "+invoiceAWBRecord.getProviderPricePerKg());
+                _log.debug(i+" Provider gdn ref adalah : "+invoiceAWBRecord.getProviderTotalCharge());
+                _log.debug("\n\n");
+                _log.debug(i+" Venice berat adalah : "+invoiceAWBRecord.getVenicePackageWeight());
+                _log.debug(i+" Venice gdn ref adalah : "+invoiceAWBRecord.getVenicePricePerKg());
+                _log.debug(i+" Venice ppkg adalah : "+invoiceAWBRecord.getVeniceTotalCharge());
+                _log.debug("\n\n");
 
                 ArrayList<LogInvoiceReconRecord> logInvoiceReconRecordList = (ArrayList<LogInvoiceReconRecord>) invoiceReconRecordHome
                         .queryByRange("select o from LogInvoiceReconRecord o where o.logInvoiceAirwaybillRecord.invoiceAirwaybillRecordId =" + invoiceAWBRecord.getInvoiceAirwaybillRecordId()
