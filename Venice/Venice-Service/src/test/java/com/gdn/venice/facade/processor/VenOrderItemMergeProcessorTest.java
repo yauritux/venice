@@ -449,7 +449,7 @@ public class VenOrderItemMergeProcessorTest {
 	public void preMerge_orderItemStatusChangeFromCRtoFP_publishUpdateOrderItemStatusMessage(){
 		
 		VenOrderItem existingOrderItem = orderItemWithStatusCR;
-		VenOrderItem newOrderItem = orderItemWithStatusCR;
+		VenOrderItem newOrderItem = orderItemWithStatusFP;
 		
 		commonPreMergeTest(existingOrderItem, newOrderItem);
 		
@@ -460,7 +460,7 @@ public class VenOrderItemMergeProcessorTest {
 	public void preMerge_orderItemStatusChangeFromCRtoFP_DOESNOTAddOrderItemStatusHistory(){
 		
 		VenOrderItem existingOrderItem = orderItemWithStatusCR;
-		VenOrderItem newOrderItem = orderItemWithStatusCR;
+		VenOrderItem newOrderItem = orderItemWithStatusFP;
 		
 		commonPreMergeTest(existingOrderItem, newOrderItem);
 		
@@ -470,7 +470,7 @@ public class VenOrderItemMergeProcessorTest {
 	@Test
 	public void preMerge_orderItemStatusChangeFromCRtoFP_DOESNOTAddDummyLogAirwayBill(){
 		VenOrderItem existingOrderItem = orderItemWithStatusCR;
-		VenOrderItem newOrderItem = orderItemWithStatusCR;
+		VenOrderItem newOrderItem = orderItemWithStatusFP;
 		
 		commonPreMergeTest(existingOrderItem, newOrderItem);
 		
