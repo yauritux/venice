@@ -17,7 +17,6 @@ import org.json.JSONException;
 import com.djarum.raf.utilities.Locator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gdn.venice.facade.VenOrderSessionEJBRemote;
-import com.gdn.venice.general.Integration.Bean.PaidOrderItem;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.util.VeniceConstants;
 import com.gwtplatform.annotation.Out;
