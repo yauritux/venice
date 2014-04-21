@@ -402,8 +402,6 @@ public class OrderServiceImpl implements OrderService {
 							, "persistOrder::going to persist customer");
 					VenCustomer persistedCustomer = customerService.persistCustomer(customer);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistOrder::customer is successfully persisted");
-					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::is customer [" + customer.hashCode() + "] attached ? " + (em.contains(customer)));
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::is persistedCustomer [" + persistedCustomer.hashCode() + "] attached ? " + (em.contains(persistedCustomer)));
@@ -418,11 +416,9 @@ public class OrderServiceImpl implements OrderService {
 							, "persistOrder::member of persistedCustomer.getVenParty().getVenPartyAddresses() = " 
 					        + (persistedCustomer.getVenParty().getVenPartyAddresses().size()));					
 					
-					//customer = customerService.persistCustomer(customer);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::venCustomer has been successfully persisted");					
 					venOrder.setVenCustomer(persistedCustomer);
-					//venOrder.setVenCustomer(customer);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::persistedCustomer has just been assigned to venOrder");
 				} catch (Exception e) {
@@ -493,6 +489,7 @@ public class OrderServiceImpl implements OrderService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistOrder::venOrder.wcsOrderId: "+venOrder.getWcsOrderId());
 												
+				//persist order items
 				try {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistOrder::trying to persistOrderItemList");
@@ -512,7 +509,8 @@ public class OrderServiceImpl implements OrderService {
 					throw CommonUtil.logAndReturnException(new CannotPersistOrderItemException("Cannot persist VenOrderItem!"
 							, VeniceExceptionConstants.VEN_EX_000021)
 					        , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-				}							
+				}					
+				
 				
 				//Tally Order with customer address and contact details
 				//defined in the ref tables VenOrderAddress and VenOrderContactDetail

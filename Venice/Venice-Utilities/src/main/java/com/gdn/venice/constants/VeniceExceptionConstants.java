@@ -54,6 +54,7 @@ public enum VeniceExceptionConstants {
 	VEN_EX_130008("Error occured while synchronizing VenOrderStatus"),
 	VEN_EX_130009("Error occured while synchronizing VenPromotion"),
 	VEN_EX_130010("Error occured while synchronizing VenOrderItemAdjustment"),
+	VEN_EX_130011("Error occured while synchronizing VenPaymentStatus"),
 	VEN_EX_140001("Error occured while performing query on VenPromotion"),
 	VEN_EX_200001("Bank does not exist"),
 	VEN_EX_300001("Fraud Check Value does not exist"),
@@ -62,6 +63,7 @@ public enum VeniceExceptionConstants {
 	VEN_EX_400003("WCS Payment Type does not exist"),
 	VEN_EX_400004("Payment processing failed"),
 	VEN_EX_500001("LogLogisticService does not exist"),
+	VEN_EX_600001("Product Category does not exist"),
 	VEN_EX_800001("Error occured while persisting FinArFundsInReconRecord"),
 	VEN_EX_999999("Unknown Exception");
 	
