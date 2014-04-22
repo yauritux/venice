@@ -24,6 +24,8 @@
         <lib.dir>${project.basedir}/src/main/webapp/WEB-INF/lib</lib.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <inventory-exchange-model.version>0.1.5</inventory-exchange-model.version>
+        <jxls.version>1.0-RC-1</jxls.version>
+        <poi.version>3.6</poi.version>
     </properties>
 
     <dependencies>
@@ -138,6 +140,20 @@
             <artifactId>Venice-Utilities</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>poi</artifactId>
+                    <groupId>org.apache.poi</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>poi-ooxml-schemas</artifactId>
+                    <groupId>org.apache.poi</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>poi-ooxml</artifactId>
+                    <groupId>org.apache.poi</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -149,6 +165,12 @@
             <groupId>com.gdn.inventory</groupId>
             <artifactId>inventory-exchange-model</artifactId>
             <version>${inventory-exchange-model.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jxls</groupId>
+            <artifactId>jxls-core</artifactId>
+            <version>${jxls.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -182,6 +204,8 @@
                         <configuration>
                             <outputDirectory>${lib.dir}</outputDirectory>
                             <silent>false</silent>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
@@ -197,6 +221,26 @@
                                     <groupId>com.gdn.inventory</groupId>
                                     <artifactId>inventory-exchange-model</artifactId>
                                     <version>${inventory-exchange-model.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.sf.jxls</groupId>
+                                    <artifactId>jxls-core</artifactId>
+                                    <version>${jxls.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.poi</groupId>
+                                    <artifactId>poi</artifactId>
+                                    <version>${poi.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <artifactId>poi-ooxml</artifactId>
+                                    <groupId>org.apache.poi</groupId>
+                                    <version>${poi.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <artifactId>commons-jexl</artifactId>
+                                    <groupId>org.apache.commons</groupId>
+                                    <version>2.0.1</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

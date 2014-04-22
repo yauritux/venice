@@ -107,6 +107,12 @@ public class OpnamePresenterServlet extends HttpServlet {
                     Logger.getLogger(OpnamePresenterServlet.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 rafDsCommand = new AddOpnameDetailDataCommand(username, rafDsRequest);
+            } else if (method.equals("getStorageByItem")) {
+                String itemCode = rafDsRequest.getCriteria().getSimpleCriteria().get(0).getValue(),
+                        stockType = request.getParameter("stockType"),
+                        supplierCode = request.getParameter("supplierCode"),
+                        warehouseCode = request.getParameter("warehouseCode");
+                rafDsCommand = new FetchStorageByItemDataCommand(warehouseCode, stockType, supplierCode, itemCode);
             }
 
             if (rafDsCommand != null) {
@@ -132,15 +138,8 @@ public class OpnamePresenterServlet extends HttpServlet {
                 response.setContentType("application/vnd.ms-excel");
                 String filename = "StockOpname/" + request.getParameter("warehouseCode")
                         + "_" + new SimpleDateFormat("yyyyMMdd").format(new Date());
-                response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+                response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xls");
                 saveOpnameCommand.execute().write(response.getOutputStream());
-            } else if (method.equals("getStorageByItem")) {
-                String itemCode = request.getParameter("itemSKU"),
-                        stockType = request.getParameter("stockType"),
-                        supplierCode = request.getParameter("supplierCode"),
-                        warehouseCode = request.getParameter("warehouseCode");
-                RafRpcCommand getStorageByItemCommand = new FetchStorageByItemDataCommand(warehouseCode, stockType, supplierCode, itemCode);
-                response.getOutputStream().println(getStorageByItemCommand.execute());
             } else if (method.equals("saveOpnameAdjustment")) {
                 RafRpcCommand getStorageByItemCommand = new SaveOpnameAdjustmentDataCommand(request.getParameter("opnameId"), username);
                 response.getOutputStream().println(getStorageByItemCommand.execute());
