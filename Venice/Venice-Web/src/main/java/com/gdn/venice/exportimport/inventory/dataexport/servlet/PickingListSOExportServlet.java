@@ -23,9 +23,8 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
-import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequest;
-import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
+import com.gdn.inventory.exchange.entity.module.outbound.PickPackageSalesOrder;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.venice.exportimport.inventory.dataexport.PickingListPrint;
@@ -35,19 +34,19 @@ import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.util.Util;
 
 /**
- * Servlet implementation class PickingListExportServlet.
+ * Servlet implementation class PickingListSOExportServlet.
  * 
  * @author Roland
  * 
  */
-public class PickingListExportServlet extends HttpServlet {
+public class PickingListSOExportServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	protected static Logger _log = null;
 
-	public PickingListExportServlet() {
+	public PickingListSOExportServlet() {
 		super();
 		Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-		_log = loggerFactory.getLog4JLogger("com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListExportServlet");
+		_log = loggerFactory.getLog4JLogger("com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListSOExportServlet");
 	}
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -59,7 +58,7 @@ public class PickingListExportServlet extends HttpServlet {
 	}
 	
 	protected void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("PickingListExportServlet");
+		System.out.println("PickingListSOExportServlet");
 		
 		PickingListPrint plPrint = new PickingListPrint();
 		List<PickingListPrint> plPrintList = new ArrayList<PickingListPrint>();
@@ -70,63 +69,60 @@ public class PickingListExportServlet extends HttpServlet {
 		RafDsRequest rafDsRequest = new RafDsRequest();
 		HashMap<String, String> params = new HashMap<String, String>();
         params.put("page", "1");
-		params.put("limit", "20");
-        rafDsRequest.setParams(params);        
-        
-        String packageType = request.getParameter("packageType");
-        
-        InventoryPagingWrapper<PickPackage> packageWrapper = pickingListService.getPackageByPicker(Util.getUserName(request), request.getParameter("pickerName"), rafDsRequest);
+		params.put("limit", "100");
+        rafDsRequest.setParams(params);       
+
+        InventoryPagingWrapper<PickPackage> packageWrapper = pickingListService.getPackageSOByPicker(Util.getUserName(request), request.getParameter("pickerName"), request.getParameter("warehouseId"), rafDsRequest);
 		if(packageWrapper!=null && packageWrapper.isSuccess()){							
-			for(PickPackage pickPackage : packageWrapper.getContent()){							
-        		InventoryRequest inventoryRequest = pickPackage.getInventoryRequest();
-        		plPrint.setInventoryRequest(inventoryRequest);
-        		plPrint.setPickPackage(pickPackage);
-        		
-        		ResultListWrapper<InventoryRequestItem> irItemWrapper = pickingListService.getIRItemByIRId(Long.toString(inventoryRequest.getId()));
-        		for(InventoryRequestItem irItem : irItemWrapper.getContents()){	    					
-        			plPrint.setWarehouseSkuId(irItem.getItem().getCode());
-        			plPrint.setItemName(irItem.getItem().getName());
-        			
-        			WarehouseItem whItem = putawayService.getWarehouseItemData(irItem.getItem().getId(), 
-							irItem.getInventoryRequest().getFromWarehouse().getId(), 
-							irItem.getInventoryRequest().getSupplier().getId(), irItem.getInventoryRequest().getInventoryType());
-					        			
-                    if(whItem!=null){
-    					System.out.println("whItem Id: "+whItem.getId());
-                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
-                    	int counter = 0;
-                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-                    		if(counter==0){
-                    			System.out.println("add first stock");
-                    			plPrint.setQty(Integer.toString(irItem.getQuantity()));
-                        		plPrint.setShelfCode(storageStock.getStorage().getShelf().getCode());
-                        		plPrint.setStorageCode(storageStock.getStorage().getCode());
-                    			plPrint.setQtyStorage(Integer.toString(storageStock.getQuantity()));
-                        		plPrintList.add(plPrint);
-                    			counter+=1;
-                    		}else{
-                    			System.out.println("add other stock");
-                    			PickingListPrint plPrintTemp = new PickingListPrint();
-                    			plPrintTemp.setInventoryRequest(plPrint.getInventoryRequest());
-                    			plPrintTemp.setPickPackage(plPrint.getPickPackage());
-                    			plPrintTemp.setWarehouseSkuId(plPrint.getWarehouseSkuId());
-                    			plPrintTemp.setItemName(plPrint.getItemName());
-                    			plPrintTemp.setShelfCode(storageStock.getStorage().getShelf().getCode());
-                    			plPrintTemp.setStorageCode(storageStock.getStorage().getCode());
-                    			plPrintTemp.setQtyStorage(Integer.toString(storageStock.getQuantity()));
-                    			plPrintList.add(plPrintTemp);
-                    		}
-                    	}                    	
-                    }                       
-        		}
-	        	
+			for(PickPackage pickPackage : packageWrapper.getContent()){					
+				ResultListWrapper<PickPackageSalesOrder> pickPackageWrapper = pickingListService.getPickingListSODetail(Util.getUserName(request), pickPackage.getId().toString());
+	        	if(pickPackageWrapper!=null && pickPackageWrapper.isSuccess()){
+	        		for(PickPackageSalesOrder ppso : pickPackageWrapper.getContents()){ 
+	        			plPrint.setSalesOrder(ppso.getSalesOrder());
+	        			plPrint.setPickPackage(ppso.getPickPackage());
+	        			plPrint.setWarehouseSkuId(ppso.getSalesOrder().getAssignedItem().getCode());
+	        			plPrint.setItemName(ppso.getSalesOrder().getAssignedItem().getName());
+	        									            			
+						WarehouseItem whItem = putawayService.getWarehouseItemData(ppso.getSalesOrder().getAssignedItem().getId(), 
+								ppso.getSalesOrder().getWarehouse().getId(), 
+								ppso.getSalesOrder().getSupplier().getId(), ppso.getSalesOrder().getStockType());
+						        			
+                        if(whItem!=null){
+        					System.out.println("whItem Id: "+whItem.getId());
+                        	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
+                        	int counter = 0;
+                        	for(WarehouseItemStorageStock storageStock : storageStockList){
+                        		if(counter==0){
+                        			System.out.println("add first stock");
+                        			plPrint.setQty(Integer.toString(ppso.getSalesOrder().getQuantity()));
+                            		plPrint.setShelfCode(storageStock.getStorage().getShelf().getCode());
+                            		plPrint.setStorageCode(storageStock.getStorage().getCode());
+                        			plPrint.setQtyStorage(Integer.toString(storageStock.getQuantity()));
+                            		plPrintList.add(plPrint);
+                        			counter+=1;
+                        		}else{
+                        			System.out.println("add other stock");
+                        			PickingListPrint plPrintTemp = new PickingListPrint();
+                        			plPrintTemp.setSalesOrder(plPrint.getSalesOrder());
+                        			plPrintTemp.setPickPackage(plPrint.getPickPackage());
+                        			plPrintTemp.setWarehouseSkuId(plPrint.getWarehouseSkuId());
+                        			plPrintTemp.setItemName(plPrint.getItemName());
+                        			plPrintTemp.setShelfCode(storageStock.getStorage().getShelf().getCode());
+                        			plPrintTemp.setStorageCode(storageStock.getStorage().getCode());
+                        			plPrintTemp.setQtyStorage(Integer.toString(storageStock.getQuantity()));
+                        			plPrintList.add(plPrintTemp);
+                        		}
+                        	}                    	
+                        }                       	            		
+	        		}
+	        	}
 			}				
 		}	
 		System.out.println("plPrintList size: "+plPrintList.size()+", start print report to excel");
 		OutputStream out = null;
 
 		try {
-			String shortname="PickingListIR" + System.currentTimeMillis() + ".xls";								
+			String shortname="PickingListSO" + System.currentTimeMillis() + ".xls";								
 						
 			if(plPrintList!=null && plPrintList.size()>0){
 				response.setContentType("application/vnd.ms-excel");
@@ -174,11 +170,7 @@ public class PickingListExportServlet extends HttpServlet {
 				headerRow.createCell(startCol+2).setCellValue(new HSSFRichTextString("Merchant Store"));
 				headerRow.createCell(startCol+3).setCellValue(new HSSFRichTextString("Picker Name"));
 				headerRow.createCell(startCol+4).setCellValue(new HSSFRichTextString("Keterangan"));
-				if(packageType.equals("IR")){
-					headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Inventory Request ID"));
-				}else{
-					headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Sales Order ID"));
-				}
+				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Sales Order ID"));
 				headerRow.createCell(startCol+6).setCellValue(new HSSFRichTextString("Warehouse SKU ID"));
 				headerRow.createCell(startCol+7).setCellValue(new HSSFRichTextString("Item Name"));
 				headerRow.createCell(startCol+8).setCellValue(new HSSFRichTextString("Qty"));
@@ -204,15 +196,11 @@ public class PickingListExportServlet extends HttpServlet {
 					
 					System.out.println("processing row: "+i+" packageId: "+pl.getPickPackage().getCode());
 					HSSFCell cell = detailRow.createCell(startCol);cell.setCellValue(new HSSFRichTextString(pl.getPickPackage().getCode()));
-					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier().getCode()));
-					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier().getName()));	
+					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getSalesOrder().getSupplier().getCode()));
+					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getSalesOrder().getSupplier().getName()));	
 					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getPickPackage().getAssignedPicker().getName()));
-					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getInventoryType().name()));
-					if(packageType.equals("IR")){
-						cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getIrNumber()));
-					}else{
-						cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(""));
-					}
+					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getSalesOrder().getStockType().name()));
+					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(pl.getSalesOrder().getSalesOrderNumber()));
 					cell = detailRow.createCell(startCol+6);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseSkuId()));
 					cell = detailRow.createCell(startCol+7);cell.setCellValue(new HSSFRichTextString(pl.getItemName()));
 					cell = detailRow.createCell(startCol+8);cell.setCellValue(new HSSFRichTextString(pl.getQty()));

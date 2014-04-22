@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.PickingListData;
-import com.gdn.venice.client.app.inventory.presenter.PickingListIRPresenter;
-import com.gdn.venice.client.app.inventory.view.handler.PickingListIRUiHandler;
+import com.gdn.venice.client.app.inventory.presenter.PickingListSOPresenter;
+import com.gdn.venice.client.app.inventory.view.handler.PickingListSOUiHandler;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
@@ -57,8 +57,8 @@ import com.smartgwt.client.widgets.toolbar.ToolStripButton;
  *
  * @author Roland
  */
-public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler> implements
-        PickingListIRPresenter.MyView {
+public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler> implements
+        PickingListSOPresenter.MyView {
 
 	VLayout headerLayout;
     RafViewLayout layout, pickerLayout;
@@ -71,7 +71,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
     ToolStripButton asignPickerButton, exportButton, uploadButton; 
 
     @Inject
-    public PickingListIRView() {
+    public PickingListSOView() {
         toolStrip = new ToolStrip();
         toolStrip.setWidth100();
         toolStrip.setPadding(2);                   
@@ -92,14 +92,14 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         packageListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
             @Override
             public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
-                refreshPickingListIRData();
+                refreshPickingListSOData();
             }
         });  
         
 		packageListGrid.addCellClickHandler(new CellClickHandler() {			
 			@Override
 			public void onCellClick(CellClickEvent event) {
-				if (packageListGrid.getField(event.getColNum()).getName().equals(DataNameTokens.INV_PICKINGLISTIR_DETAIL)) {
+				if (packageListGrid.getField(event.getColNum()).getName().equals(DataNameTokens.INV_PICKINGLISTSO_DETAIL)) {
 	                ListGridRecord record = event.getRecord();
 	                buildPickingListDetailWindow(record).show();
 				}				
@@ -137,8 +137,8 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
      				HashSet<String> set = new HashSet<String>();
      				for (int i = 0; i < records.length; i++) {
      					ListGridRecord selectedRecord = records[i];  
-     					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){     						
-     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME));
+     					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).isEmpty()){     						
+     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME));
      					}
      				}
      				
@@ -152,7 +152,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
      				}
      				
 					for(String pickerName : set){		
-	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListIRExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerName=" + pickerName, "_blank", null);
+	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListSOExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerName=" + pickerName, "_blank", null);
 					}    							
      			}
      		});
@@ -214,10 +214,10 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 					host = host.substring(0, host.lastIndexOf("/", host.length() - 2) + 1);
 				}
 
-				uploadForm.setAction(host + "Venice/PickingListIRImportServlet?username=" + MainPagePresenter.signedInUser);								
+				uploadForm.setAction(host + "Venice/PickingListSOImportServlet?username=" + MainPagePresenter.signedInUser);								
 				uploadForm.submitForm();
 				uploadWindow.destroy();
-				refreshPickingListIRData();
+				refreshPickingListSOData();
 			}
 		});
 		
@@ -320,7 +320,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 						    	StringBuilder sb = new StringBuilder();
 								for (int i = 0; i < packageRecords.length; i++) {
 									ListGridRecord selectedRecord = packageRecords[i];             					
-									sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID));
+									sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PACKAGEID));
 									
 									if(i != packageRecords.length -1)
 										sb.append(";");
@@ -346,7 +346,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         pickingListDetailWindow.setShowModalMask(true);
         pickingListDetailWindow.centerInPage();      
 
-        DataSource packageDetailData = PickingListData.getPickingListIRDetailData(record.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID));
+        DataSource packageDetailData = PickingListData.getPickingListSODetailData(record.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PACKAGEID));
         ListGridField listGridSalesField[] = Util.getListGridFieldsFromDataSource(packageDetailData);
 
         packageDetailListGrid = new ListGrid();
@@ -365,7 +365,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         packageDetailListGrid.setSortField(0);
         packageDetailListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
         packageDetailListGrid.setSelectionType(SelectionStyle.SIMPLE);
-        packageDetailListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE).setWidth("40%");
+        packageDetailListGrid.getField(DataNameTokens.INV_PICKINGLISTSO_SHELFCODE).setWidth("40%");
         
         pickingListDetailWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {
@@ -416,8 +416,8 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 				
  				for (int i = 0; i < selectedRecords.length; i++) {
  					ListGridRecord selectedRecord = selectedRecords[i];
- 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){
- 	 					sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGECODE));
+ 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).isEmpty()){
+ 	 					sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PACKAGECODE));
  	 					if(i != selectedRecords.length -1) sb.append(", ");
  					}
  				}
@@ -439,18 +439,18 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
     }
     
     private void buildPackageListGrid(String warehouseId) {
-    	DataSource packageData = PickingListData.getPickingListIRData(warehouseId, 1, 50);   
+    	DataSource packageData = PickingListData.getPickingListSOData(warehouseId, 1, 50);   
     	packageListGrid.setDataSource(packageData); 
     	
     	ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(packageData);
-        ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3], listGridField[4], listGridField[6]};
+        ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3], listGridField[5]};
 
         packageListGrid.setFields(finalListGridField);    	
-        packageListGrid.setSortField(DataNameTokens.INV_PICKINGLISTIR_PACKAGEID);
-        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_DETAIL).setWidth(50);
+        packageListGrid.setSortField(DataNameTokens.INV_PICKINGLISTSO_PACKAGEID);
+        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTSO_DETAIL).setWidth(50);
         packageListGrid.setAutoFitData(Autofit.BOTH);
         
-        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_DETAIL).setCellFormatter(new CellFormatter() {			
+        packageListGrid.getField(DataNameTokens.INV_PICKINGLISTSO_DETAIL).setCellFormatter(new CellFormatter() {			
 			@Override
 			public String format(Object value, ListGridRecord record, int rowNum, int colNum) {
 				return "<span style='color:blue;text-decoration:underline;cursor:hand;cursor:pointer'>"+value+"</span>";
@@ -461,11 +461,11 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         exportButton.setDisabled(false);
         uploadButton.setDisabled(false);
         
-        refreshPickingListIRData();
+        refreshPickingListSOData();
     }
 
     @Override
-    public void refreshPickingListIRData() {
+    public void refreshPickingListSOData() {
         DSCallback callBack = new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {

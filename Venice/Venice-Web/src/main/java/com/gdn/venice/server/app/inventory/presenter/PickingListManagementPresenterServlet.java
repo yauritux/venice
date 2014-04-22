@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.gdn.venice.server.app.inventory.command.FetchPickerComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchPickingListIRDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchPickingListIRDetailDataCommand;
-import com.gdn.venice.server.app.inventory.command.ReleaseLockDataCommand;
-import com.gdn.venice.server.app.inventory.command.SavePickingListDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchPickingListSODataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchPickingListSODetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.SubmitPickerDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
@@ -78,6 +78,22 @@ public class PickingListManagementPresenterServlet extends HttpServlet {
             } else if(method.equals("fetchPickingListIRDetailData")){
 				RafDsCommand fetchPickingListIRDetailDataCommand = new FetchPickingListIRDetailDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchPickingListIRDetailDataCommand.execute();
+				try {
+				    retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				} catch (Exception e) {
+				    e.printStackTrace();
+				}
+            }else if (method.equals("fetchPickingListSOData")) {
+                RafDsCommand fetchPickingListSODataCommand = new FetchPickingListSODataCommand(rafDsRequest);
+                RafDsResponse rafDsResponse = fetchPickingListSODataCommand.execute();
+                try {
+                    retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if(method.equals("fetchPickingListSODetailData")){
+				RafDsCommand fetchPickingListSODetailDataCommand = new FetchPickingListSODetailDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchPickingListSODetailDataCommand.execute();
 				try {
 				    retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
 				} catch (Exception e) {

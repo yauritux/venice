@@ -115,7 +115,6 @@ public class PickingListData {
 	}
 	
 	public static DataSource getPickingListIRDetailData(String packageId) {
-		System.out.println("packageId: "+packageId);
 		DataSourceField[] dataSourceFields = {				
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_INVENTORYREQUESTCODE, "Inventory Request ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUID, "Warehouse SKU ID"),
@@ -127,6 +126,47 @@ public class PickingListData {
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
 				GWT.getHostPageBaseURL() + PickingListPresenter.pickingListManagementPresenterServlet + 
 				"?method=fetchPickingListIRDetailData&type=DataSource&packageId="+packageId,
+				null,
+				null,
+				null, 
+				dataSourceFields);
+
+		return dataSource;		  
+	}
+	
+	public static DataSource getPickingListSOData(String warehouseId, int page, int limit) {
+		DataSourceField[] dataSourceFields = {
+				new DataSourceIntegerField(DataNameTokens.INV_PICKINGLISTSO_PACKAGEID, "Package ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_DETAIL, "Detail"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_PACKAGECODE, "Package Code"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_MERCHANTNAME, "Merchant Store"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_PICKERID, "Picker ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME, "Picker Name")};
+		dataSourceFields[0].setPrimaryKey(true);
+
+		RafDataSource dataSource = new RafDataSource("/response/data/*",
+				GWT.getHostPageBaseURL() + PickingListPresenter.pickingListManagementPresenterServlet + 
+				"?method=fetchPickingListSOData&type=DataSource&warehouseId="+warehouseId+"&limit="+limit+"&page="+page,
+				null,
+				null,
+				null, 
+				dataSourceFields);
+
+		return dataSource;		  
+	}
+	
+	public static DataSource getPickingListSODetailData(String packageId) {
+		DataSourceField[] dataSourceFields = {				
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_SALESORDERCODE, "Sales Order ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUID, "Warehouse SKU ID"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUNAME, "Item Name"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_QTY, "Qty"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_SHELFCODE, "Shelf Code/Qty")};
+		dataSourceFields[0].setPrimaryKey(true);
+
+		RafDataSource dataSource = new RafDataSource("/response/data/*",
+				GWT.getHostPageBaseURL() + PickingListPresenter.pickingListManagementPresenterServlet + 
+				"?method=fetchPickingListSODetailData&type=DataSource&packageId="+packageId,
 				null,
 				null,
 				null, 

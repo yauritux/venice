@@ -6,6 +6,7 @@ import com.gdn.inventory.exchange.entity.WarehouseItem;
 import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
 import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequest;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
+import com.gdn.inventory.exchange.entity.module.outbound.SalesOrder;
 
 /**
  *
@@ -13,6 +14,7 @@ import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
  */
 public class PickingListPrint {
 	private InventoryRequest inventoryRequest;
+	private SalesOrder salesOrder;
 	private PickPackage pickPackage;
 	private String warehouseSkuId;
 	private String itemName;
@@ -23,6 +25,12 @@ public class PickingListPrint {
 	private WarehouseItem warehouseItem;
     private List<WarehouseItemStorageStock> whItemStorageStock;
     
+	public SalesOrder getSalesOrder() {
+		return salesOrder;
+	}
+	public void setSalesOrder(SalesOrder salesOrder) {
+		this.salesOrder = salesOrder;
+	}
 	public InventoryRequest getInventoryRequest() {
 		return inventoryRequest;
 	}

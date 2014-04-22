@@ -603,10 +603,28 @@
   </servlet>  
   <servlet>
     <description></description>
-    <display-name>PickingListExportServlet</display-name>
-    <servlet-name>PickingListExportServlet</servlet-name>
-    <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListExportServlet</servlet-class>
+    <display-name>PickingListIRExportServlet</display-name>
+    <servlet-name>PickingListIRExportServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListIRExportServlet</servlet-class>
   </servlet>
+  <servlet>
+    <description></description>
+    <display-name>PickingListSOExportServlet</display-name>
+    <servlet-name>PickingListSOExportServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PickingListSOExportServlet</servlet-class>
+  </servlet>  
+  <servlet>
+    <description></description>
+    <display-name>PickingListIRImportServlet</display-name>
+    <servlet-name>PickingListIRImportServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataimport.servlet.PickingListIRImportServlet</servlet-class>
+  </servlet>    
+  <servlet>
+    <description></description>
+    <display-name>PickingListSOImportServlet</display-name>
+    <servlet-name>PickingListSOImportServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataimport.servlet.PickingListSOImportServlet</servlet-class>
+  </servlet>     
   <servlet>
     <description></description>
     <display-name>PutawayExportServlet</display-name>
@@ -858,13 +876,25 @@
     <url-pattern>/OpnamePresenterServlet</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-    <servlet-name>PickingListExportServlet</servlet-name>
-    <url-pattern>/PickingListExportServlet</url-pattern>
-  </servlet-mapping>  
+    <servlet-name>PickingListIRExportServlet</servlet-name>
+    <url-pattern>/PickingListIRExportServlet</url-pattern>
+  </servlet-mapping> 
+  <servlet-mapping>
+    <servlet-name>PickingListSOExportServlet</servlet-name>
+    <url-pattern>/PickingListSOExportServlet</url-pattern>
+  </servlet-mapping>     
+  <servlet-mapping>
+    <servlet-name>PickingListIRImportServlet</servlet-name>
+    <url-pattern>/PickingListIRImportServlet</url-pattern>
+  </servlet-mapping>   
+  <servlet-mapping>
+    <servlet-name>PickingListSOImportServlet</servlet-name>
+    <url-pattern>/PickingListSOImportServlet</url-pattern>
+  </servlet-mapping>     
   <servlet-mapping>
     <servlet-name>PutawayExportServlet</servlet-name>
     <url-pattern>/PutawayExportServlet</url-pattern>
-  </servlet-mapping>
+  </servlet-mapping>  
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>
