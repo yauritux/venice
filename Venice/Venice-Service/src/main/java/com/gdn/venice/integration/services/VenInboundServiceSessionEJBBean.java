@@ -3184,7 +3184,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
              // ***** Case CR
                 if (order.getOrderItems().get(0).getStatus().equals("CR")) {
                     // Enforce the state transition rules
-                    if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_CR)) {
+                    if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_FP)) {
                         String errMsg = "updateOrderItemStatus: message received CR status change request for order item that is not status FP: illegal state transition";
                         _log.error(errMsg);
                         throw new EJBException(errMsg);
