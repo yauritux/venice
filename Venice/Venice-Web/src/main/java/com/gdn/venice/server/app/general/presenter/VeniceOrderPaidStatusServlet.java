@@ -68,7 +68,6 @@ public class VeniceOrderPaidStatusServlet extends HttpServlet {
                 	if(venOrderItemList.size()>=1){
                 		orderItemIdList.add(orderItemIdArray[i]);
                 	}
-            		
             	}catch (Exception e){
             		e.printStackTrace();
             	}
@@ -78,7 +77,6 @@ public class VeniceOrderPaidStatusServlet extends HttpServlet {
         }catch(Exception e){
         	e.printStackTrace();
         }finally{
-
             try {
                 if (locator != null) {
                     locator.close();
