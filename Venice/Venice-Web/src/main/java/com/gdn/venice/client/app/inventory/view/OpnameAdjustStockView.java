@@ -13,10 +13,12 @@ import com.gdn.venice.client.widgets.RafViewLayout;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.gwtplatform.mvp.client.ViewWithUiHandlers;
+import com.smartgwt.client.data.Criteria;
 import com.smartgwt.client.data.DSCallback;
 import com.smartgwt.client.data.DSRequest;
 import com.smartgwt.client.data.DSResponse;
 import com.smartgwt.client.data.DataSource;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Autofit;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
@@ -26,11 +28,11 @@ import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
+import com.smartgwt.client.widgets.form.fields.FilterCriteriaFunction;
 import com.smartgwt.client.widgets.form.fields.SelectItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
-import com.smartgwt.client.widgets.grid.EditorValueMapFunction;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -41,9 +43,12 @@ import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.toolbar.ToolStrip;
 import com.smartgwt.client.widgets.toolbar.ToolStripButton;
+import java.lang.String;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -53,12 +58,13 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
         OpnameAdjustStockPresenter.MyView {
 
     RafViewLayout opnameLayout;
-    ListGrid opnameGrid, opnameDetailGrid;
+    ListGrid opnameGrid, opnameDetailGrid, storageGrid;
     Window adjustOpnameWindow;
     DynamicForm warehouseSelectionForm;
     ComboBoxItem cbWarehouse, cbInventoryType;
     SelectItem cbSupplier;
     ToolStripButton processButton;
+    Record selectedSkuRecord;
 
     @Inject
     public OpnameAdjustStockView() {
@@ -85,6 +91,13 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
         opnameDetailGrid.setCanSelectText(true);
         opnameDetailGrid.setAutoFetchData(true);
         opnameDetailGrid.setCanEdit(true);
+
+        storageGrid = new ListGrid();
+        storageGrid.setWidth100();
+        storageGrid.setSortField(2);
+        storageGrid.setShowFilterEditor(false);
+        storageGrid.setAutoFetchData(true);
+        storageGrid.setCanSelectText(true);
 
         bindCustomUiHandlers();
     }
@@ -141,7 +154,7 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
         opnameNo.setValue(record.getAttribute(DataNameTokens.INV_OPNAME_NO));
 
         final String id = record.getAttribute(DataNameTokens.INV_OPNAME_ID);
-        DataSource ds = OpnameData.getOpnameDetail(id);
+        final DataSource ds = OpnameData.getOpnameDetail(id);
 
         opnameDetailGrid.setDataSource(ds);
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
@@ -160,26 +173,55 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
         });
 
         final SelectItem skuSelection = new SelectItem();
+        final SelectItem storageSelection = new SelectItem();
+        
         skuSelection.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
-                getUiHandlers().onSkuSelected(event.getValue().toString(),
-                        record.getAttribute(DataNameTokens.INV_OPNAME_WAREHOUSECODE),
-                        record.getAttribute(DataNameTokens.INV_OPNAME_STOCKTYPE),
-                        record.getAttribute(DataNameTokens.INV_OPNAME_SUPPLIERCODE));
-//                opnameDetailGrid.setValueMap(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE, new LinkedHashMap());
+                opnameDetailGrid.clearEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE);
+                selectedSkuRecord = opnameDetailGrid.getRecord(Integer.parseInt(event.getValue().toString()));
+                String itemName = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME),
+                        itemCategory = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY),
+                        itemUoM = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMUOM);
+                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME, itemName);
+                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY, itemCategory);
+                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMUOM, itemUoM);
             }
         });
 
-        final SelectItem storageSelection = new SelectItem();
-        storageSelection.setAddUnknownValues(false);
-//        opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).setEditorValueMapFunction(new EditorValueMapFunction() {
-//            @Override
-//            public Map getEditorValueMap(Map values, ListGridField field, ListGrid grid) {
-//                return storageData;
-//            }
-//        });
+        storageSelection.setPickListFilterCriteriaFunction(new FilterCriteriaFunction() {
+            @Override
+            public Criteria getCriteria() {
+                try {
+                    String itemSku = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU);
+                    if (itemSku != null && !itemSku.trim().isEmpty()) {
+                        return new Criteria(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU, itemSku);
+                    }
+                } catch (Exception e) {
+                    return null;
+                }
+                return null;
+            }
+        });
+        
+        storageSelection.addChangedHandler(new ChangedHandler() {
+            @Override
+            public void onChanged(ChangedEvent event) {
+                SC.say(event.getItem().getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY));
+                String qty = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME);
+                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_QTY, qty);
+            }
+        });
 
+        DataSource storageDs = OpnameData.getStorageComboboxData(record.getAttribute(DataNameTokens.INV_OPNAME_WAREHOUSECODE),
+                record.getAttribute(DataNameTokens.INV_OPNAME_STOCKTYPE), record.getAttribute(DataNameTokens.INV_OPNAME_SUPPLIERCODE));
+        storageSelection.setOptionDataSource(storageDs);
+        storageSelection.setPickListFields(Util.getListGridFieldsFromDataSource(storageDs));
+        storageSelection.setDisplayField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE);
+        storageSelection.setValueField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE);
+        storageSelection.setPickListProperties(storageGrid);
+        opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).setEditorType(storageSelection);
+        
         opnameDetailGrid.addEditCompleteHandler(new EditCompleteHandler() {
             @Override
             public void onEditComplete(EditCompleteEvent event) {
@@ -211,14 +253,15 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
                 Map<String, String> data = new HashMap<String, String>();
                 data.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ID, id);
                 LinkedHashMap<String, String> availableSKU = new LinkedHashMap<String, String>();
+                Set<String> setSKU = new HashSet<String>();
                 for (int i = 0; i < opnameDetailGrid.getRecords().length; i++) {
-                    availableSKU.put(opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU),
-                            opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
+                    if (!setSKU.contains(opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU))) {
+                        availableSKU.put(i + "", opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
+                        setSKU.add(opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
+                    }
                 }
                 skuSelection.setValueMap(availableSKU);
-                storageSelection.setValueMap(new LinkedHashMap());
                 opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU).setEditorType(skuSelection);
-                opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).setEditorType(storageSelection);
                 opnameDetailGrid.startEditingNew(data);
             }
         });
@@ -281,7 +324,7 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
     }
 
     @Override
-    public ListGrid getOpnameDetailGrid(){
+    public ListGrid getOpnameDetailGrid() {
         return opnameDetailGrid;
     }
 }

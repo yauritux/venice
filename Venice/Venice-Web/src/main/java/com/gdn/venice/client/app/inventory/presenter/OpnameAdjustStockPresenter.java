@@ -4,13 +4,11 @@
  */
 package com.gdn.venice.client.app.inventory.presenter;
 
-import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.inventory.data.OpnameData;
 import com.gdn.venice.client.app.inventory.view.handler.OpnameAdjustStockUiHandler;
 import com.gdn.venice.client.app.logistic.presenter.DeliveryStatusTrackingPresenter;
 import com.gdn.venice.client.presenter.MainPagePresenter;
-import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
@@ -33,8 +31,6 @@ import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.grid.ListGrid;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  *
@@ -127,26 +123,5 @@ public class OpnameAdjustStockPresenter extends Presenter<OpnameAdjustStockPrese
         } catch (Exception e) {
             SC.warn("Failed saving opname, please try again later");
         }
-    }
-
-    @Override
-    public void onSkuSelected(String itemSKU, String warehouseCode,
-            String stockType, String supplierCode) {
-        RPCRequest request = new RPCRequest();
-        request.setActionURL(GWT.getHostPageBaseURL() + opnamePresenterServlet
-                + "?method=getStorageByItem&type=RPC" + "&itemSKU=" + itemSKU
-                + "&warehouseCode=" + warehouseCode + "&stockType=" + stockType + "&supplierCode=" + supplierCode);
-        request.setHttpMethod("POST");
-        request.setUseSimpleHttp(true);
-        RPCManager.sendRequest(request,
-                new RPCCallback() {
-                    @Override
-                    public void execute(RPCResponse response,
-                            Object rawData, RPCRequest request) {
-                        String rpcResponse = rawData.toString();
-                        SC.say(rpcResponse);
-                        getView().getOpnameDetailGrid().getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).setValueMap(Util.formComboBoxMap(Util.formHashMapfromXML(rpcResponse)));
-                    }
-                });
     }
 }

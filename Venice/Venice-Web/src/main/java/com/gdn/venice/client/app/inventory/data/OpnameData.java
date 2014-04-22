@@ -148,4 +148,24 @@ public class OpnameData {
 
         return retVal;
     }
+    
+    public static RafDataSource getStorageComboboxData(String warehouseCode,
+            String stockType, String supplierCode) {
+        String fetchUrl = GWT.getHostPageBaseURL() + OpnamePresenter.opnamePresenterServlet
+                + "?method=getStorageByItem&type=DataSource" + "&warehouseCode=" + warehouseCode + "&stockType=" + stockType + "&supplierCode=" + supplierCode;
+        DataSourceField[] dataSourceFields = {
+            new DataSourceTextField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE, "Storage Code"),
+            new DataSourceTextField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE, "Shelf Code / Qty")            
+        };
+        dataSourceFields[0].setPrimaryKey(true);
+        RafDataSource retVal = new RafDataSource(
+                "/response/data/*",
+                fetchUrl,
+                null,
+                null,
+                null,
+                dataSourceFields);
+
+        return retVal;
+    }
 }

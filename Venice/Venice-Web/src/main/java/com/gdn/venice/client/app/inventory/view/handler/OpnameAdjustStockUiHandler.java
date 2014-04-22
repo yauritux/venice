@@ -13,6 +13,4 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface OpnameAdjustStockUiHandler extends UiHandlers {
 
     public void onSubmitButton(String opnameId);
-
-    public void onSkuSelected(String itemSKU, String warehouseCode, String stockType, String supplierCode);
 }

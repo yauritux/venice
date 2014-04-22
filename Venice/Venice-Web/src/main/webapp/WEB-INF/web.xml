@@ -655,6 +655,18 @@
     <servlet-name>OpnamePresenterServlet</servlet-name>
     <servlet-class>com.gdn.venice.server.app.inventory.presenter.OpnamePresenterServlet</servlet-class>
   </servlet>
+  <servlet>
+    <description></description>
+    <display-name>PickerManagementPresenterServlet</display-name>
+    <servlet-name>PickerManagementPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.inventory.presenter.PickerManagementPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>PrintGRNServlet</display-name>
+    <servlet-name>PrintGRNServlet</servlet-name>
+    <servlet-class>com.gdn.venice.exportimport.inventory.dataexport.servlet.PrintGRNServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>FraudBinCreditLimitPresenterServlet</servlet-name>
     <url-pattern>/FraudBinCreditLimitPresenterServlet</url-pattern>
@@ -890,11 +902,19 @@
   <servlet-mapping>
     <servlet-name>PickingListSOImportServlet</servlet-name>
     <url-pattern>/PickingListSOImportServlet</url-pattern>
-  </servlet-mapping>     
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>PutawayExportServlet</servlet-name>
     <url-pattern>/PutawayExportServlet</url-pattern>
-  </servlet-mapping>  
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>PickerManagementPresenterServlet</servlet-name>
+    <url-pattern>/PickerManagementPresenterServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>PrintGRNServlet</servlet-name>
+    <url-pattern>/PrintGRNServlet</url-pattern>
+  </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>
