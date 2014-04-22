@@ -62,9 +62,9 @@ public class VeniceOrderPaidStatusServlet extends HttpServlet {
             for(int i=0;i<orderItemIdArray.length;i++){
             	try{
             		venOrderItemList=null;
-            		String query="select o from VenOrderItem o where o.wcsOrderItemId = '"+orderItemIdArray[i]+"' and o.venOrderStatus.orderStatusId = "+VeniceConstants.VEN_ORDER_STATUS_FP+"";
+            		String query="select o from VenOrderItem o where o.wcsOrderItemId = '"+orderItemIdArray[i]+"' and o.venOrderStatus.orderStatusId not in("+VeniceConstants.VEN_ORDER_STATUS_C+"," +
+            				""+VeniceConstants.VEN_ORDER_STATUS_FC+","+VeniceConstants.VEN_ORDER_STATUS_SF+","+VeniceConstants.VEN_ORDER_STATUS_VA+","+VeniceConstants.VEN_ORDER_STATUS_CS+","+VeniceConstants.VEN_ORDER_STATUS_CR+")";
             		venOrderItemList=orderHome.queryByRange(query,0,0);
-            		
                 	if(venOrderItemList.size()>=1){
                 		orderItemIdList.add(orderItemIdArray[i]);
                 	}
