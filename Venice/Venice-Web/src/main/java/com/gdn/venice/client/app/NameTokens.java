@@ -85,17 +85,20 @@ public class NameTokens {
 	public static final String grnListPage = "!grnListPage";
 	
 	public static final String pickingListPage = "!pickingListPage";
+	public static final String pickingListIRPage = "!pickingListIRPage";
+	public static final String pickingListSOPage = "!pickingListSOPage";
 	
 	public static final String putawayCreatePage = "!putawayCreatePage";
 	public static final String putawayInputPage = "!putawayInputPage";
         
-        public static final String packingListPage = "!packingListPage";
-        
-        public static final String ginPage = "!ginPage";
-        
-        public static final String opnamePage = "!opnamePage";
-        public static final String opnameAdjustStockPage = "!opnameAdjustStockPage";
-        public static final String pickerManagementPage = "!pickerManagementPage";
+    public static final String packingListPage = "!packingListPage";
+    
+    public static final String ginPage = "!ginPage";
+    
+    public static final String opnamePage = "!opnamePage";
+    public static final String opnameAdjustStockPage = "!opnameAdjustStockPage";
+    public static final String pickerManagementPage = "!pickerManagementPage";
+
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;
 	}

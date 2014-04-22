@@ -14,6 +14,7 @@ import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNote;
 import com.gdn.inventory.exchange.entity.module.inbound.PurchaseOrder;
 import com.gdn.inventory.exchange.type.ASNReferenceType;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
+import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.ASNManagementService;
 import com.gdn.venice.server.app.inventory.service.GRNManagementService;
@@ -64,18 +65,18 @@ public class FetchGRNDataCommand implements RafDsCommand {
 	                    _log.debug("reff number: "+asn.getReferenceNumber());
 		                String supplierCode="", supplierName="";
 		                if(asn.getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
-		                	InventoryPagingWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber());
+		                	ResultWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber());
 		                  	if(poWrapper!=null && poWrapper.isSuccess()){
-		                   		PurchaseOrder po = poWrapper.getContent().get(0);
+		                   		PurchaseOrder po = poWrapper.getContent();
 		                   		supplierCode = po.getSupplier().getCode();
 		                   		supplierName = po.getSupplier().getName();
 		                   	}else{
 		                   		_log.error("PO not found");
 		                   	}                    	
 		                   }else if(asn.getReferenceType().name().equals(ASNReferenceType.CONSIGNMENT_FINAL.name())){
-		                   	InventoryPagingWrapper<ConsignmentFinalForm> cffWrapper = asnService.getCFFData(request, asn.getReferenceNumber());
+		                	   ResultWrapper<ConsignmentFinalForm> cffWrapper = asnService.getCFFData(request, asn.getReferenceNumber());
 		                   	if(cffWrapper!=null && cffWrapper.isSuccess()){
-		                  		ConsignmentFinalForm cff = cffWrapper.getContent().get(0);
+		                  		ConsignmentFinalForm cff = cffWrapper.getContent();
 		                   		supplierCode = cff.getConsignmentApprovalForm().getSupplier().getCode();
 		                   		supplierName = cff.getConsignmentApprovalForm().getSupplier().getName();
 		                   	}else{

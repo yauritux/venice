@@ -36,16 +36,18 @@ public class InventoryNavigationPaneSectionData {
                     new NavigationPaneTreeNodeRecord("14", "1", "Good Received Note", null, "IM13", DataWidgetNameTokens.INV_GRNTREENODE),
                     new NavigationPaneTreeNodeRecord("15", "14", "Create Good Received Note", NameTokens.grnCreatePage, "IM14", DataWidgetNameTokens.INV_GRNCREATETREENODE),
                     new NavigationPaneTreeNodeRecord("16", "14", "Good Received Note List", NameTokens.grnListPage, "IM15", DataWidgetNameTokens.INV_GRNLISTTREENODE),
-                    new NavigationPaneTreeNodeRecord("17", "1", "Picking List", NameTokens.pickingListPage, "IM16", DataWidgetNameTokens.INV_PICKINGLISTTREENODE),
-                    new NavigationPaneTreeNodeRecord("18", "1", "Putaway", null, "IM17", DataWidgetNameTokens.INV_PUTAWAYTREENODE),
-                    new NavigationPaneTreeNodeRecord("19", "18", "Create Putaway", NameTokens.putawayCreatePage, "IM18", DataWidgetNameTokens.INV_CREATEPUTAWAYTREENODE),
-                    new NavigationPaneTreeNodeRecord("20", "18", "Input Putaway Location", NameTokens.putawayInputPage, "IM19", DataWidgetNameTokens.INV_INPUTPUTAWAYLOCATIONTREENODE),
-                    new NavigationPaneTreeNodeRecord("21", "1", "Packing List", NameTokens.packingListPage, "IM20", DataWidgetNameTokens.INV_PACKINGLISTTREENODE),
-                    new NavigationPaneTreeNodeRecord("22", "1", "Good Issued Note", NameTokens.ginPage, "IM21", DataWidgetNameTokens.INV_GINTREENODE),
-                    new NavigationPaneTreeNodeRecord("23", "1", "Stock Opname", null, "IM22", DataWidgetNameTokens.INV_OPNAMETREENODE),
-                    new NavigationPaneTreeNodeRecord("24", "23", "Create Stock Opname List", NameTokens.opnamePage, "IM23", DataWidgetNameTokens.INV_CREATEOPNAMETREENODE),
-                    new NavigationPaneTreeNodeRecord("25", "23", "Adjust Stock", NameTokens.opnameAdjustStockPage, "IM24", DataWidgetNameTokens.INV_OPNAMEADJUSTMENTTREENODE),
-                    new NavigationPaneTreeNodeRecord("26", "1", "Master Picker", NameTokens.pickerManagementPage, "IM25", DataWidgetNameTokens.INV_PICKERMANAGEMENTTREENODE)
+                    new NavigationPaneTreeNodeRecord("17", "1", "Picking List", null, "IM16", DataWidgetNameTokens.INV_PICKINGLISTTREENODE),
+                    new NavigationPaneTreeNodeRecord("18", "17", "Picking List IR", NameTokens.pickingListIRPage, "IM17", DataWidgetNameTokens.INV_PICKINGLISTIRTREENODE),
+                    new NavigationPaneTreeNodeRecord("19", "17", "Picking List SO", NameTokens.pickingListSOPage, "IM18", DataWidgetNameTokens.INV_PICKINGLISTSOTREENODE),
+                    new NavigationPaneTreeNodeRecord("20", "1", "Putaway", null, "IM19", DataWidgetNameTokens.INV_PUTAWAYTREENODE),
+                    new NavigationPaneTreeNodeRecord("21", "20", "Create Putaway", NameTokens.putawayCreatePage, "IM20", DataWidgetNameTokens.INV_CREATEPUTAWAYTREENODE),
+                    new NavigationPaneTreeNodeRecord("22", "20", "Input Putaway Location", NameTokens.putawayInputPage, "IM21", DataWidgetNameTokens.INV_INPUTPUTAWAYLOCATIONTREENODE),
+                    new NavigationPaneTreeNodeRecord("23", "1", "Packing List", NameTokens.packingListPage, "IM22", DataWidgetNameTokens.INV_PACKINGLISTTREENODE),
+                    new NavigationPaneTreeNodeRecord("24", "1", "Good Issued Note", NameTokens.ginPage, "IM23", DataWidgetNameTokens.INV_GINTREENODE),
+                    new NavigationPaneTreeNodeRecord("25", "1", "Stock Opname", null, "IM24", DataWidgetNameTokens.INV_OPNAMETREENODE),
+                    new NavigationPaneTreeNodeRecord("26", "25", "Create Stock Opname List", NameTokens.opnamePage, "IM25", DataWidgetNameTokens.INV_CREATEOPNAMETREENODE),
+                    new NavigationPaneTreeNodeRecord("27", "25", "Adjust Stock", NameTokens.ginPage, "IM26", DataWidgetNameTokens.INV_OPNAMEADJUSTMENTTREENODE),                    
+                    new NavigationPaneTreeNodeRecord("28", "1", "Master Picker", NameTokens.pickerManagementPage, "IM27", DataWidgetNameTokens.INV_PICKERMANAGEMENTTREENODE)
                 };
     }
 }

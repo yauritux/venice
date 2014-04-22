@@ -40,7 +40,8 @@ import com.gdn.venice.client.app.inventory.presenter.OpnameAdjustStockPresenter;
 import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickerManagementPresenter;
-import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListIRPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListSOPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
@@ -217,8 +218,6 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<GRNCreatePresenter> getGRNCreatePresenter();
   
   AsyncProvider<PackingListPresenter> getPackingListPresenter();
-
-  AsyncProvider<PickingListPresenter> getPickingListPresenter();  
   
   AsyncProvider<PutawayCreatePresenter> getPutawayCreatePresenter();
   
@@ -228,7 +227,11 @@ public interface VeniceGinjector extends Ginjector {
   
   AsyncProvider<OpnamePresenter> getOpnamePresenter(); 
   
-  AsyncProvider<OpnameAdjustStockPresenter> getOpnameAdjustStockPresenter(); 
+  AsyncProvider<PickingListIRPresenter> getPickingListIRPresenter();
+  
+  AsyncProvider<PickingListSOPresenter> getPickingListSOPresenter(); 
   
   AsyncProvider<PickerManagementPresenter> getPickerManagementPresenter(); 
+
+  AsyncProvider<OpnameAdjustStockPresenter> getOpnameAdjustStockPresenter(); 
 }

@@ -1288,6 +1288,31 @@ public class DataNameTokens {
     	public static String INV_PICKINGLIST_SHELFCODE = "shelfCode";
     	public static String INV_PICKINGLIST_WAREHOUSESTORAGEID = "shelfStorageId";
     	
+    	public static String INV_PICKINGLISTIR_PACKAGEID = "packageId";
+    	public static String INV_PICKINGLISTIR_DETAIL = "Detail";
+    	public static String INV_PICKINGLISTIR_PACKAGECODE = "packageCode";
+    	public static String INV_PICKINGLISTIR_INVENTORYTYPE = "inventoryType";
+    	public static String INV_PICKINGLISTIR_IRTYPE = "irType";
+    	public static String INV_PICKINGLISTIR_PICKERID = "pickerId";
+    	public static String INV_PICKINGLISTIR_PICKERNAME = "pickerName";    	
+    	public static String INV_PICKINGLISTIR_INVENTORYREQUESTCODE = "inventoryRequestCode";
+    	public static String INV_PICKINGLISTIR_WAREHOUSESKUID = "warehouseItemSKU";
+    	public static String INV_PICKINGLISTIR_WAREHOUSESKUNAME = "warehouseItemSKUName";
+    	public static String INV_PICKINGLISTIR_QTY = "qty";
+    	public static String INV_PICKINGLISTIR_SHELFCODE = "shelfCode";
+    	
+    	public static String INV_PICKINGLISTSO_PACKAGEID = "packageId";
+    	public static String INV_PICKINGLISTSO_DETAIL = "Detail";
+    	public static String INV_PICKINGLISTSO_PACKAGECODE = "packageCode";
+    	public static String INV_PICKINGLISTSO_MERCHANTNAME = "merchantName";
+    	public static String INV_PICKINGLISTSO_PICKERID = "pickerId";
+    	public static String INV_PICKINGLISTSO_PICKERNAME = "pickerName";    	
+    	public static String INV_PICKINGLISTSO_SALESORDERCODE = "salesOrderCode";
+    	public static String INV_PICKINGLISTSO_WAREHOUSESKUID = "warehouseItemSKU";
+    	public static String INV_PICKINGLISTSO_WAREHOUSESKUNAME = "warehouseItemSKUName";
+    	public static String INV_PICKINGLISTSO_QTY = "qty";
+    	public static String INV_PICKINGLISTSO_SHELFCODE = "shelfCode";
+    	
     	public static String INV_PUTAWAY_GRN_ITEMID = "grnItemId";
     	public static String INV_PUTAWAY_GRN_GRNNUMBER = "grnNumber";
     	public static String INV_PUTAWAY_GRN_ITEMCODE = "itemCode";

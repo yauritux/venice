@@ -207,10 +207,11 @@ public class WarehouseManagementService {
     public ResultWrapper<List<WarehouseUser>> getWarehouseUserData(String username) throws HttpException, IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
                 + "user/getWarehouseList?username=" + username;
-        System.out.println(url);
+        System.out.println("url: "+url);
         PostMethod httpPost = new PostMethod(url);
 
         int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: "+httpCode);
         if (httpCode == HttpStatus.SC_OK) {
             InputStream is = httpPost.getResponseBodyAsStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));

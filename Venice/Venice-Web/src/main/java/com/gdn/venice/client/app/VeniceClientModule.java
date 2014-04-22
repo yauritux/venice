@@ -71,7 +71,8 @@ import com.gdn.venice.client.app.inventory.presenter.OpnameAdjustStockPresenter;
 import com.gdn.venice.client.app.inventory.presenter.OpnamePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PackingListPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PickerManagementPresenter;
-import com.gdn.venice.client.app.inventory.presenter.PickingListPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListIRPresenter;
+import com.gdn.venice.client.app.inventory.presenter.PickingListSOPresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
 import com.gdn.venice.client.app.inventory.presenter.PutawayInputPresenter;
 import com.gdn.venice.client.app.inventory.presenter.ShelfAddWithApprovalPresenter;
@@ -91,7 +92,8 @@ import com.gdn.venice.client.app.inventory.view.OpnameAdjustStockView;
 import com.gdn.venice.client.app.inventory.view.OpnameView;
 import com.gdn.venice.client.app.inventory.view.PackingListView;
 import com.gdn.venice.client.app.inventory.view.PickerManagementView;
-import com.gdn.venice.client.app.inventory.view.PickingListView;
+import com.gdn.venice.client.app.inventory.view.PickingListIRView;
+import com.gdn.venice.client.app.inventory.view.PickingListSOView;
 import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
 import com.gdn.venice.client.app.inventory.view.PutawayInputView;
 import com.gdn.venice.client.app.inventory.view.ShelfAddWithApprovalView;
@@ -460,11 +462,6 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 GRNCreateView.class,
                 GRNCreatePresenter.MyProxy.class);
 
-        bindPresenter(PickingListPresenter.class,
-                PickingListPresenter.MyView.class,
-                PickingListView.class,
-                PickingListPresenter.MyProxy.class);
-
         bindPresenter(PutawayCreatePresenter.class,
                 PutawayCreatePresenter.MyView.class,
                 PutawayCreateView.class,
@@ -490,14 +487,24 @@ public class VeniceClientModule extends AbstractPresenterModule {
                 OpnameView.class,
                 OpnamePresenter.MyProxy.class);
         
-        bindPresenter(OpnameAdjustStockPresenter.class,
-                OpnameAdjustStockPresenter.MyView.class,
-                OpnameAdjustStockView.class,
-                OpnameAdjustStockPresenter.MyProxy.class);
+        bindPresenter(PickingListIRPresenter.class,
+        		PickingListIRPresenter.MyView.class,
+                PickingListIRView.class,
+                PickingListIRPresenter.MyProxy.class);
         
+        bindPresenter(PickingListSOPresenter.class,
+        		PickingListSOPresenter.MyView.class,
+                PickingListSOView.class,
+                PickingListSOPresenter.MyProxy.class);        
+                
         bindPresenter(PickerManagementPresenter.class,
                 PickerManagementPresenter.MyView.class,
                 PickerManagementView.class,
                 PickerManagementPresenter.MyProxy.class);
+
+        bindPresenter(OpnameAdjustStockPresenter.class,
+                OpnameAdjustStockPresenter.MyView.class,
+                OpnameAdjustStockView.class,
+                OpnameAdjustStockPresenter.MyProxy.class);        
     }
 }

@@ -36,6 +36,5 @@
                 </realm>
             </role>
         </role-mappings>
-    </security>
-    
+    </security>    
 </web:web-app>
