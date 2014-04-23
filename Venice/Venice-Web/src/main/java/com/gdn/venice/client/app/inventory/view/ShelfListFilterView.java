@@ -151,55 +151,53 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
 	      }
         });
 
-        editButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-            	if(editButton.getTitle().equals("Edit")){
-            		shelfDetailForm.setDisabled(false);
-            		addStorageButton.setDisabled(false);
-            		removeStorageButton.setDisabled(false);
-            		storageListGrid.setCanEdit(true);
-            		editButton.setTitle("Save");
-            	} else {
-            		if(shelfDetailForm.validate()){
-            			HashMap<String, String> shelfDataMap = new HashMap<String, String>();
-    	                HashMap<String, String> shelfRowMap = new HashMap<String, String>();    	 
-    	                
-    	                shelfRowMap.put(DataNameTokens.INV_SHELF_ORIGINID, id);
-    	                shelfRowMap.put(DataNameTokens.INV_SHELF_CODE, shelfCodeItem.getValueAsString());
-    	                shelfRowMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());    	             
-    	                shelfRowMap.put(DataNameTokens.INV_SHELF_ACTIVESTATUS, record.getAttribute(DataNameTokens.INV_SHELF_ACTIVESTATUS));
-    	                shelfDataMap.put("SHELF"+0, Util.formXMLfromHashMap(shelfRowMap));
-    	                
-    	                //get storage listgrid values
-    	                HashMap<String, String> storageDataMap = new HashMap<String, String>();
-    					ListGridRecord[] storageRecords = storageListGrid.getSelection();
-
-    					HashMap<String, String> storageMap = new HashMap<String, String>();
-    					HashMap<String, String> storageRowMap = new HashMap<String, String>();
-    										
-    					for (int i=0;i<storageRecords.length;i++) {
-    						storageRowMap.put(DataNameTokens.INV_STORAGE_ID, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_ID));
-    						storageRowMap.put(DataNameTokens.INV_STORAGE_CODE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_CODE));
-    						storageRowMap.put(DataNameTokens.INV_STORAGE_DESCRIPTION, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_DESCRIPTION));
-    						storageRowMap.put(DataNameTokens.INV_STORAGE_TYPE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_TYPE));
-    						storageMap.put("STORAGE" + i, Util.formXMLfromHashMap(storageRowMap));
-    					}
-    					storageDataMap.put("STORAGE", Util.formXMLfromHashMap(storageMap));
-        	            getUiHandlers().onSaveShelfClicked(shelfDataMap, storageDataMap, shelfDetailWindow);
-            		}
-            	}
-            }
-        });
+//        editButton.addClickHandler(new ClickHandler() {
+//            @Override
+//            public void onClick(ClickEvent event) {
+//            	if(editButton.getTitle().equals("Edit")){
+//            		shelfDetailForm.setDisabled(false);
+//            		addStorageButton.setDisabled(false);
+//            		removeStorageButton.setDisabled(false);
+//            		storageListGrid.setCanEdit(true);
+//            		editButton.setTitle("Save");
+//            	} else {
+//            		if(shelfDetailForm.validate()){
+//            			HashMap<String, String> shelfDataMap = new HashMap<String, String>();
+//    	                HashMap<String, String> shelfRowMap = new HashMap<String, String>();    	 
+//    	                
+//    	                shelfRowMap.put(DataNameTokens.INV_SHELF_ORIGINID, id);
+//    	                shelfRowMap.put(DataNameTokens.INV_SHELF_ID, id);
+//    	                shelfRowMap.put(DataNameTokens.INV_SHELF_CODE, shelfCodeItem.getValueAsString());
+//    	                shelfRowMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());    	             
+//    	                shelfRowMap.put(DataNameTokens.INV_SHELF_ACTIVESTATUS, record.getAttribute(DataNameTokens.INV_SHELF_ACTIVESTATUS));
+//    	                shelfDataMap.put("SHELF"+0, Util.formXMLfromHashMap(shelfRowMap));
+//    	                
+//    	                //get storage listgrid values
+//    	                HashMap<String, String> storageDataMap = new HashMap<String, String>();
+//    					ListGridRecord[] storageRecords = storageListGrid.getSelection();
+//
+//    					HashMap<String, String> storageMap = new HashMap<String, String>();
+//    					HashMap<String, String> storageRowMap = new HashMap<String, String>();
+//    										
+//    					for (int i=0;i<storageRecords.length;i++) {
+//    						storageRowMap.put(DataNameTokens.INV_STORAGE_ID, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_ID));
+//    						storageRowMap.put(DataNameTokens.INV_STORAGE_CODE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_CODE));
+//    						storageRowMap.put(DataNameTokens.INV_STORAGE_DESCRIPTION, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_DESCRIPTION));
+//    						storageRowMap.put(DataNameTokens.INV_STORAGE_TYPE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_TYPE));
+//    						storageMap.put("STORAGE" + i, Util.formXMLfromHashMap(storageRowMap));
+//    					}
+//    					storageDataMap.put("STORAGE", Util.formXMLfromHashMap(storageMap));
+//        	            getUiHandlers().onSaveShelfClicked(shelfDataMap, storageDataMap, shelfDetailWindow);
+//            		}
+//            	}
+//            }
+//        });
 
         nonActiveButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
             	HashMap<String, String> shelfDataMap = new HashMap<String, String>();
-            	shelfDataMap.put(DataNameTokens.INV_SHELF_ORIGINID, id);
-            	shelfDataMap.put(DataNameTokens.INV_SHELF_CODE, shelfCodeItem.getValueAsString());
-            	shelfDataMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());
-            	shelfDataMap.put(DataNameTokens.INV_SHELF_ACTIVESTATUS, "Non Active");
+            	shelfDataMap.put(DataNameTokens.INV_SHELF_ID, id);
             	shelfDataMap.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "CREATED");
             	shelfDataMap.put(DataNameTokens.INV_SHELF_APPROVALTYPE, "APPROVAL_NON_ACTIVE");
                 getUiHandlers().onNonActiveShelfClicked(shelfDataMap, shelfDetailWindow);
@@ -313,10 +311,8 @@ public class ShelfListFilterView extends ViewWithUiHandlers<ShelfListFilterUiHan
 	          	if(addShelfForm.validate()){	          		
 					HashMap<String, String> shelfRowMap = new HashMap<String, String>();
 						
-					//get shelf form values
 					shelfRowMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());
 		                
-		            //get storage listgrid values
 		            HashMap<String, String> storageDataMap = new HashMap<String, String>();
 					ListGridRecord[] storageRecords = storageListGrid.getRecords();
 

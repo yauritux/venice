@@ -1,7 +1,6 @@
 package com.gdn.venice.server.app.inventory.command;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,18 +10,18 @@ import com.gdn.inventory.exchange.entity.Storage;
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
-import com.gdn.venice.server.util.Util;
 import com.gdn.venice.server.app.inventory.service.ShelfManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
+import com.gdn.venice.server.util.Util;
 
-public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
+public class SaveShelfWIPDataCommand implements RafRpcCommand {
 
 	HashMap<String, String> shelfMap;
 	HashMap<String, String> storageMap;
 	String username, url;
 	ShelfManagementService shelfService;
 
-	public SaveOrUpdateShelfWIPDataCommand(String username, String data) {
+	public SaveShelfWIPDataCommand(String username, String data) {
 		String[] split = data.split("#");
 		System.out.println("split 0: "+split[0]);
 		System.out.println("split 1: "+split[1]);
@@ -37,57 +36,16 @@ public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 
 	@Override
 	public String execute() {
-		ShelfWIP shelf;
+		System.out.println("SaveShelfWIPDataCommand");
+		ShelfWIP shelf = new ShelfWIP();
 		List<Storage> storageList = new ArrayList<Storage>();
 		ResultWrapper<ShelfWIP> shelfWrapper = new ResultWrapper<ShelfWIP>();
 		try {
 			shelfService = new ShelfManagementService();
-			System.out.println("Masuk ke command save shelf wip");
-			if(shelfMap.get(DataNameTokens.INV_SHELF_ID) == null){
-				System.out.println("set common values");
-				shelf = new ShelfWIP();
-						
-				shelf.setCode("");
-				shelf.setCreatedBy(username);
-				shelf.setCreatedDate(new Date());
-				shelf.setDeleted(false);
-				shelf.setDiscriminator("shelfInProcess");
-				shelf.setApprovalStatus(ApprovalStatus.CREATED);				
-				shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));
-
-				if(shelfMap.get(DataNameTokens.INV_SHELF_ORIGINID) == null) {
-					System.out.println("add new shelf process");
-					shelf.setApprovalType(ApprovalStatus.APPROVAL_CREATE);
-					shelf.setActive(false);
-				}else{
-					if(shelfMap.get(DataNameTokens.INV_SHELF_ACTIVESTATUS).equalsIgnoreCase("Non Active")) {
-						System.out.println("non-active process");
-						shelf.setApprovalType(ApprovalStatus.APPROVAL_NON_ACTIVE);
-						shelf.setOriginalShelf(Long.parseLong(shelfMap.get(DataNameTokens.INV_SHELF_ORIGINID)));
-					}else{
-						System.out.println("update process");
-						shelf.setApprovalType(ApprovalStatus.APPROVAL_UPDATE);
-						shelf.setOriginalShelf(Long.parseLong(shelfMap.get(DataNameTokens.INV_SHELF_ORIGINID)));
-					}
-				}
-			}else{
-				System.out.println("Masuk ke command update shelf wip");
-				shelfWrapper = shelfService.findShelfWIPById(username, shelfMap.get(DataNameTokens.INV_SHELF_ID));
-				
-				if(shelfWrapper!=null && shelfWrapper.isSuccess()){
-					shelf = shelfWrapper.getContent();
-					if(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION) != null) {
-						System.out.println("update exsisting process");
-						shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));
-						shelf.setApprovalStatus(ApprovalStatus.CREATED);
-					}else{
-						System.out.println(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS));
-						shelf.setApprovalStatus(ApprovalStatus.valueOf(shelfMap.get(DataNameTokens.INV_SHELF_APPROVALSTATUS)));
-					}						
-				}else{
-					return "Failed saving shelf, " + shelfWrapper.getError();
-				}
-			}
+			shelf = new ShelfWIP();	
+			shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));			
+			shelf.setApprovalStatus(ApprovalStatus.CREATED);
+			shelf.setApprovalType(ApprovalStatus.APPROVAL_CREATE);					
 			
 			System.out.println("save storage");		
 			for(Map.Entry<String, String> entry : storageMap.entrySet()){
@@ -120,7 +78,7 @@ public class SaveOrUpdateShelfWIPDataCommand implements RafRpcCommand {
 			
 			System.out.println("storage size: "+storageList.size());
 			
-			shelfWrapper = shelfService.saveOrUpdateShelfInProcess(username, shelf, storageList);
+			shelfWrapper = shelfService.saveShelfWIP(username, shelf, storageList);
 			if(shelfWrapper==null || !shelfWrapper.isSuccess()){
 				return shelfWrapper.getError();
 			}

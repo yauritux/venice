@@ -115,6 +115,8 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
         shelfDetailForm.setPadding(5);
 
         final String id = record.getAttribute(DataNameTokens.INV_SHELF_ID);
+        
+        final String originId = record.getAttribute(DataNameTokens.INV_SHELF_ORIGINID);
 
         final TextItem whCode = new TextItem(DataNameTokens.INV_SHELF_CODE, "Shelf Code");
         whCode.setValue(record.getAttribute(DataNameTokens.INV_SHELF_CODE));
@@ -128,7 +130,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
 		Label storageLabel = new Label("<b>Storage Bin:</b>");
 		storageLabel.setHeight(10);
         
-        storageListGrid = buildStorageListGrid(id);
+        storageListGrid = buildStorageListGrid(originId);
         storageListGrid.setCanEdit(false);
 
         HLayout buttonSet = new HLayout(5);
@@ -141,9 +143,10 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
             public void onClick(ClickEvent event) {
                 HashMap<String, String> data = new HashMap<String, String>();
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
+                data.put(DataNameTokens.INV_SHELF_ORIGINID, originId);
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "APPROVED");
 
-                getUiHandlers().updateShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().approveNonActiveShelfData(MainPagePresenter.signedInUser, data);
             }
         });
 
@@ -152,9 +155,10 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
             public void onClick(ClickEvent event) {
                 HashMap<String, String> data = new HashMap<String, String>();
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
+                data.put(DataNameTokens.INV_SHELF_ORIGINID, originId);
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "REJECTED");
 
-                getUiHandlers().updateShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().rejectNonActiveShelfData(MainPagePresenter.signedInUser, data);
             }
         });
 
@@ -228,6 +232,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
         shelfListGrid.setFields(listGridField);
         shelfListGrid.getField(DataNameTokens.INV_SHELF_ID).setHidden(Boolean.TRUE);
         shelfListGrid.getField(DataNameTokens.INV_SHELF_CODE).setHidden(Boolean.TRUE);
+        shelfListGrid.getField(DataNameTokens.INV_SHELF_ORIGINID).setHidden(Boolean.TRUE);
         shelfListGrid.getField(DataNameTokens.INV_SHELF_DESCRIPTION).setCanFilter(Boolean.FALSE);
         shelfListGrid.setAutoFitData(Autofit.BOTH);
 

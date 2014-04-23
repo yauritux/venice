@@ -140,23 +140,23 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
         IButton approveButton = new IButton("Approve");
         IButton rejectButton = new IButton("Reject");
        
-        editButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-            	if(editButton.getTitle().equals("Edit")){
-            		shelfDetailForm.setDisabled(false);
-            		editButton.setTitle("Save");
-            	} else {
-            		if(shelfDetailForm.validate()){
-    	                HashMap<String, String> data = new HashMap<String, String>();
-		            	data.put(DataNameTokens.INV_SHELF_ID, id.toString());
-		            	data.put(DataNameTokens.INV_SHELF_DESCRIPTION, whDescription.getValueAsString());
-		
-		            	getUiHandlers().updateShelfWIPData(MainPagePresenter.signedInUser, data);
-            		}
-            	}
-            }
-        });
+//        editButton.addClickHandler(new ClickHandler() {
+//            @Override
+//            public void onClick(ClickEvent event) {
+//            	if(editButton.getTitle().equals("Edit")){
+//            		shelfDetailForm.setDisabled(false);
+//            		editButton.setTitle("Save");
+//            	} else {
+//            		if(shelfDetailForm.validate()){
+//    	                HashMap<String, String> data = new HashMap<String, String>();
+//		            	data.put(DataNameTokens.INV_SHELF_ID, id.toString());
+//		            	data.put(DataNameTokens.INV_SHELF_DESCRIPTION, whDescription.getValueAsString());
+//		
+//		            	getUiHandlers().updateShelfWIPData(MainPagePresenter.signedInUser, data);
+//            		}
+//            	}
+//            }
+//        });
 
         approveButton.addClickHandler(new ClickHandler() {
             @Override
@@ -165,7 +165,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "APPROVED");
 
-                getUiHandlers().updateStatusShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().approveCreateShelfWIPData(MainPagePresenter.signedInUser, data);
             }
         });
 
@@ -176,7 +176,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "NEED_CORRECTION");
 
-                getUiHandlers().updateStatusShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().needCorrectionCreateShelfWIPData(MainPagePresenter.signedInUser, data);
             }
         });
 
@@ -187,7 +187,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
                 data.put(DataNameTokens.INV_SHELF_ID, id.toString());
                 data.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, "REJECTED");
 
-                getUiHandlers().updateStatusShelfWIPData(MainPagePresenter.signedInUser, data);
+                getUiHandlers().rejectCreateShelfWIPData(MainPagePresenter.signedInUser, data);
             }
         });
 
@@ -231,7 +231,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
             storageType.put("pallet", "Pallet");
             storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
     	}else{
-        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 20);
+        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 50);
     		storageListGrid.setDataSource(storageData);
     		storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
     		

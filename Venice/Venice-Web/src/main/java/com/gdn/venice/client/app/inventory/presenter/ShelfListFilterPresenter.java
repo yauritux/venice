@@ -94,13 +94,10 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 						String rpcResponse = rawData.toString();
 						
 						if (rpcResponse.startsWith("0")) {
-                            SC.say("Shelf added/updated and need approval for changes to take place");
+                            SC.say("Shelf added and need approval for changes to take place");
                             window.destroy();
 							getView().refreshShelfData();
 						} else {
-							/*
-							 * Use the 2nd positional split on ":" as the error message
-							 */
 							String[] split = rpcResponse.split(":");
 							if(split.length>1){
 								SC.warn(split[1]);
@@ -120,7 +117,7 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		
 		request.setData(shelfMap);
 		
-		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=saveUpdateStatusShelf&type=RPC");
+		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=nonActiveShelf&type=RPC");
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setWillHandleError(true);
@@ -134,13 +131,10 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 						String rpcResponse = rawData.toString();
 						
 						if (rpcResponse.startsWith("0")) {
-                            SC.say("Shelf added/updated and need approval for changes to take place");
+                            SC.say("Shelf updated and need approval for changes to take place");
                             window.destroy();
 							getView().refreshShelfData();
 						} else {
-							/*
-							 * Use the 2nd positional split on ":" as the error message
-							 */
 							String[] split = rpcResponse.split(":");
 							if(split.length>1){
 								SC.warn(split[1]);

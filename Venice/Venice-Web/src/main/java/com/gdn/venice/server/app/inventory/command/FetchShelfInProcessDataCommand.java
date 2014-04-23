@@ -45,6 +45,7 @@ public class FetchShelfInProcessDataCommand implements RafDsCommand {
 							? "Approved":shelf.getApprovalStatus() == ApprovalStatus.NEED_CORRECTION
 							? "Need Correction":shelf.getApprovalStatus() == ApprovalStatus.REJECTED
 							? "Rejected":"");
+					map.put(DataNameTokens.INV_SHELF_ORIGINID, shelf.getOriginalShelf()!=null?shelf.getOriginalShelf().toString():"");
 					dataList.add(map);
 					
 					System.out.println("code: "+shelf.getCode());

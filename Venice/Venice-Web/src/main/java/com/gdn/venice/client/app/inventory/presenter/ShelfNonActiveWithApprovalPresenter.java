@@ -61,9 +61,7 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
             HasUiHandlers<ShelfNonActiveWithApprovalUiHandler> {
 
         public void loadApprovalNonActiveShelfData(DataSource dataSource);
-
         public void refreshAllShelfData();
-
         public Window getShelfDetailWindow();
     }
 
@@ -84,14 +82,14 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
         getView().loadApprovalNonActiveShelfData(ShelfData.getAllShelfInProcessData(MainPagePresenter.signedInUser, 1, 20,"NonActive"));
         this.dispatcher = dispatcher;
     }
-
+    
     @Override
-    public void updateShelfWIPData(String username, HashMap<String, String> data) {
+    public void approveNonActiveShelfData(String username, HashMap<String, String> data) {
         try {
             RPCRequest request = new RPCRequest();
             request.setData(Util.formXMLfromHashMap(data));
             request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
-                    + "?method=saveUpdateStatusShelfWIP&type=RPC&username=" + username);
+                    + "?method=approveNonActiveShelf&type=RPC&username=" + username);
             request.setHttpMethod("POST");
             request.setUseSimpleHttp(true);
             request.setWillHandleError(true);
@@ -107,17 +105,51 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
                             String rpcResponse = rawData.toString();
 
                             if (rpcResponse.startsWith("0")) {
-                                SC.say("Shelf updated");
+                                SC.say("Shelf non active approved");
                                 getView().getShelfDetailWindow().destroy();
                                 getView().refreshAllShelfData();
                             } else {
                                 SC.warn(rpcResponse);
                             }
-
                         }
                     });
         } catch (Exception e) {
-            SC.warn("Failed saving shelf, please try again later");
+            SC.warn("Failed approve shelf, please try again later");
+        }
+    }
+    
+    @Override
+    public void rejectNonActiveShelfData(String username, HashMap<String, String> data) {
+        try {
+            RPCRequest request = new RPCRequest();
+            request.setData(Util.formXMLfromHashMap(data));
+            request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
+                    + "?method=rejectNonActiveShelf&type=RPC&username=" + username);
+            request.setHttpMethod("POST");
+            request.setUseSimpleHttp(true);
+            request.setWillHandleError(true);
+            RPCManager.setPromptStyle(PromptStyle.DIALOG);
+            RPCManager.setDefaultPrompt("Saving records...");
+            RPCManager.setShowPrompt(true);
+
+            RPCManager.sendRequest(request,
+                    new RPCCallback() {
+                        @Override
+                        public void execute(RPCResponse response,
+                                Object rawData, RPCRequest request) {
+                            String rpcResponse = rawData.toString();
+
+                            if (rpcResponse.startsWith("0")) {
+                                SC.say("Shelf non active rejected");
+                                getView().getShelfDetailWindow().destroy();
+                                getView().refreshAllShelfData();
+                            } else {
+                                SC.warn(rpcResponse);
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            SC.warn("Failed reject shelf, please try again later");
         }
     }
 }

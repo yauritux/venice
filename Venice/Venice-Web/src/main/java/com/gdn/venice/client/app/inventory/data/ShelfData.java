@@ -66,7 +66,8 @@ public class ShelfData {
 				new DataSourceTextField(DataNameTokens.INV_SHELF_ID, "Shelf ID"),
 				new DataSourceTextField(DataNameTokens.INV_SHELF_CODE, "Shelf Code"),     
 				new DataSourceTextField(DataNameTokens.INV_SHELF_DESCRIPTION, "Shelf Description"),
-				new DataSourceTextField(DataNameTokens.INV_SHELF_APPROVALSTATUS, "Approval Status")
+				new DataSourceTextField(DataNameTokens.INV_SHELF_APPROVALSTATUS, "Approval Status"),
+				new DataSourceTextField(DataNameTokens.INV_SHELF_ORIGINID, "Original Shelf")
 		};
 
 		dataSourceFields[0].setPrimaryKey(true);

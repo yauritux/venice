@@ -9,5 +9,6 @@ import com.gwtplatform.mvp.client.UiHandlers;
  * @author Roland
  */
 public interface ShelfNonActiveWithApprovalUiHandler extends UiHandlers{
-    public void updateShelfWIPData(String username, HashMap<String, String> data);   
+    public void approveNonActiveShelfData(String username, HashMap<String, String> data); 
+    public void rejectNonActiveShelfData(String username, HashMap<String, String> data);
 }

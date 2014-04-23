@@ -10,11 +10,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.venice.client.app.DataNameTokens;
+import com.gdn.venice.server.app.inventory.command.ApproveCreateShelfWIPDataCommand;
+import com.gdn.venice.server.app.inventory.command.ApproveNonActiveShelfDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchShelfDataCommand;
-import com.gdn.venice.server.app.inventory.command.FetchStorageDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchShelfInProcessDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchStorageDataCommand;
+import com.gdn.venice.server.app.inventory.command.NeedCorrectionCreateShelfWIPDataCommand;
+import com.gdn.venice.server.app.inventory.command.NonActiveShelfDataCommand;
+import com.gdn.venice.server.app.inventory.command.RejectCreateShelfWIPDataCommand;
+import com.gdn.venice.server.app.inventory.command.RejectNonActiveShelfDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveOrUpdateShelfWIPDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveOrUpdateStatusShelfWIPDataCommand;
+import com.gdn.venice.server.app.inventory.command.SaveShelfWIPDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -119,16 +126,46 @@ public class ShelfManagementPresenterServlet extends HttpServlet{
             }
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");	
-			if(method.equals("saveShelfData") || method.equals("saveUpdateShelfWIP")){		
+
+			String requestBody = Util.extractRequestBody(request);		
+			System.out.println("requestBody: "+requestBody);
+			if(method.equals("saveShelfData")){
 				System.out.println("saveShelfData");
-				String requestBody = Util.extractRequestBody(request);		
-				System.out.println("requestBody: "+requestBody);
+				RafRpcCommand saveShelfWIPDataCommand = new SaveShelfWIPDataCommand(username, requestBody);
+				retVal = saveShelfWIPDataCommand.execute();
+			}else if(method.equals("approveCreateShelfWIP")){		
+				System.out.println("approveCreateShelfWIP");
+				RafRpcCommand approveCreateShelfWIPDataCommand = new ApproveCreateShelfWIPDataCommand(username, requestBody);
+				retVal = approveCreateShelfWIPDataCommand.execute();
+			}else if(method.equals("rejectCreateShelfWIP")){		
+				System.out.println("rejectCreateShelfWIP");
+				RafRpcCommand rejectCreateShelfWIPDataCommand = new RejectCreateShelfWIPDataCommand(username, requestBody);
+				retVal = rejectCreateShelfWIPDataCommand.execute();
+			}else if(method.equals("needCorrectionCreateShelfWIP")){		
+				System.out.println("needCorrectionCreateShelfWIP");
+				RafRpcCommand needCorrectionCreateShelfWIPDataCommand = new NeedCorrectionCreateShelfWIPDataCommand(username, requestBody);
+				retVal = needCorrectionCreateShelfWIPDataCommand.execute();
+			}else if(method.equals("nonActiveShelf")){		
+				System.out.println("nonActiveShelf");
+				RafRpcCommand nonActiveShelfDataCommand = new NonActiveShelfDataCommand(username, requestBody);
+				retVal = nonActiveShelfDataCommand.execute();
+			}else if(method.equals("approveNonActiveShelf")){		
+				System.out.println("approveNonActiveShelf");
+				RafRpcCommand approveNonActiveShelfDataCommand = new ApproveNonActiveShelfDataCommand(username, requestBody);
+				retVal = approveNonActiveShelfDataCommand.execute();
+			}else if(method.equals("rejectNonActiveShelf")){		
+				System.out.println("rejectNonActiveShelf");
+				RafRpcCommand rejectNonActiveShelfDataCommand = new RejectNonActiveShelfDataCommand(username, requestBody);
+				retVal = rejectNonActiveShelfDataCommand.execute();
+			}
+			
+			
+			else if(method.equals("saveUpdateShelfWIP")){		
+				System.out.println("saveUpdateShelfWIP");
 				RafRpcCommand saveOrUpdateShelfWIPDataCommand = new SaveOrUpdateShelfWIPDataCommand(username, requestBody);
 				retVal = saveOrUpdateShelfWIPDataCommand.execute();
-			} else if(method.equals("saveUpdateStatusShelf") || method.equals("saveUpdateStatusShelf")){		
+			}else if(method.equals("saveUpdateStatusShelf") || method.equals("saveUpdateStatusShelfWIP")){		
 				System.out.println("updateStatusShelfData");
-				String requestBody = Util.extractRequestBody(request);		
-				System.out.println("requestBody: "+requestBody);
 				RafRpcCommand saveOrUpdateStatusShelfWIPDataCommand = new SaveOrUpdateStatusShelfWIPDataCommand(username, requestBody);
 				retVal = saveOrUpdateStatusShelfWIPDataCommand.execute();
 			} 
