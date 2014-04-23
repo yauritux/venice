@@ -40,7 +40,8 @@ public class FetchStorageByItemDataCommand implements RafDsCommand {
                     //Put result
                     for (WarehouseItemStorageStock itemStock : wrapper.getContent()) {
                         HashMap<String, String> map = new HashMap<String, String>();
-                        map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE, itemStock.getStorage().getShelf().getCode() + " / " + itemStock.getQuantity());
+                        map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE, itemStock.getStorage().getCode() + "/" + 
+                                itemStock.getStorage().getShelf().getCode() + "/" + itemStock.getQuantity());
                         map.put(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE, itemStock.getStorage().getCode());
                         dataList.add(map);
                     }

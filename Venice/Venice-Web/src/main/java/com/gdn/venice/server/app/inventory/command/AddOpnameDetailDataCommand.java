@@ -37,13 +37,13 @@ public class AddOpnameDetailDataCommand implements RafDsCommand {
             Map<String, String> data = request.getData().get(0);
             System.out.println("data: " + data);
             opnameDetail.setCategory(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY));
-            opnameDetail.setItemCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
+            opnameDetail.setItemCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU).split("/")[1]);
             opnameDetail.setItemName(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME));
             opnameDetail.setNewQuantity(Integer.parseInt(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY)));
             opnameDetail.setNote(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NOTE));
             opnameDetail.setQuantity(Integer.parseInt(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_QTY)));
             opnameDetail.setShelfCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE));
-            opnameDetail.setStorageCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE));
+            opnameDetail.setStorageCode(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).split("/")[0]);
             opnameDetail.setUom(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMUOM));
 
             ResultWrapper<String> wrapper = opnameService.saveOrUpdateOpnameDetail(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ID), opnameDetail, username);

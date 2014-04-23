@@ -174,12 +174,12 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
 
         final SelectItem skuSelection = new SelectItem();
         final SelectItem storageSelection = new SelectItem();
-        
+
         skuSelection.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
                 opnameDetailGrid.clearEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE);
-                selectedSkuRecord = opnameDetailGrid.getRecord(Integer.parseInt(event.getValue().toString()));
+                selectedSkuRecord = opnameDetailGrid.getRecord(Integer.parseInt(event.getValue().toString().split("/")[0]));
                 String itemName = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME),
                         itemCategory = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY),
                         itemUoM = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMUOM);
@@ -203,13 +203,14 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
                 return null;
             }
         });
-        
+
         storageSelection.addChangedHandler(new ChangedHandler() {
             @Override
             public void onChanged(ChangedEvent event) {
-                SC.say(event.getItem().getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY));
-                String qty = selectedSkuRecord.getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME);
-                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_QTY, qty);
+                String notes[] = event.getValue().toString().split("/");
+                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE, notes[1]);
+                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_QTY, notes[2]);
+                opnameDetailGrid.setEditValue(opnameDetailGrid.getEditRow(), DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY, notes[2]);
             }
         });
 
@@ -221,7 +222,7 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
         storageSelection.setValueField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_SHELFCODE);
         storageSelection.setPickListProperties(storageGrid);
         opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).setEditorType(storageSelection);
-        
+
         opnameDetailGrid.addEditCompleteHandler(new EditCompleteHandler() {
             @Override
             public void onEditComplete(EditCompleteEvent event) {
@@ -256,7 +257,8 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
                 Set<String> setSKU = new HashSet<String>();
                 for (int i = 0; i < opnameDetailGrid.getRecords().length; i++) {
                     if (!setSKU.contains(opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU))) {
-                        availableSKU.put(i + "", opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
+                        availableSKU.put(i + "/" + opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU),
+                                opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
                         setSKU.add(opnameDetailGrid.getRecords()[i].getAttribute(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU));
                     }
                 }

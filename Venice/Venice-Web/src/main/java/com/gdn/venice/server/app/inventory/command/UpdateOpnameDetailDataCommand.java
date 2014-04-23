@@ -37,7 +37,8 @@ public class UpdateOpnameDetailDataCommand implements RafDsCommand {
             Map<String, String> data = request.getData().get(0);
             System.out.println("data: " + request.getData());
             opnameDetail.setId(Long.parseLong(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ID)));
-            opnameDetail.setNewQuantity(Integer.parseInt(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY)));
+            int newQty = data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY) == null? 0:Integer.parseInt(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NEWQTY));
+            opnameDetail.setNewQuantity(newQty);
             opnameDetail.setNote(data.get(DataNameTokens.INV_OPNAME_ITEMSTORAGE_NOTE));
 
             ResultWrapper<String> wrapper = opnameService.saveOrUpdateOpnameDetail(null, opnameDetail, username);
