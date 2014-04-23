@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.client.app.task.ProcessNameTokens;
 import com.gdn.venice.server.bpmenablement.BPMAdapter;
 import com.gdn.venice.server.command.RafRpcCommand;
@@ -13,7 +16,8 @@ import com.lombardisoftware.webapi.Task;
 public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 	boolean isSynchronizerCompleted = false;
 	String userName;
-	
+
+    protected static Logger _log = null;
 	
 	public RetrieveTaskSummaryDataCommand(String userName) {
 		this.userName = userName;
@@ -21,6 +25,10 @@ public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 
 	@Override
 	public String execute() {
+
+	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.facade.logistics.activity.processor.RetrieveTaskSummaryDataCommand");
+		
 		String retVal = "";
 		
 		int totalInboxItem=0;
@@ -36,6 +44,9 @@ public class RetrieveTaskSummaryDataCommand implements RafRpcCommand {
 			List<Long> taskIds = bpmAdapter.getClientRepository().loadTaskIdsForSavedSearch(1);
 			for (int i=0;i<taskIds.size();i++) {
 				Task task = bpmAdapter.getClientRepository().loadTask(taskIds.get(i));
+
+				_log.debug("proses instance = '"+task.getProcessInstance().getName()+"'"); 
+				
 				if (task.getProcessInstance()!=null) {
 					String processName = task.getProcessInstance().getProcess().getName();
 					String activityName = task.getActivityName();
