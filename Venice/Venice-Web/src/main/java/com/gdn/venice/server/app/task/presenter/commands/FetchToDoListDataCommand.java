@@ -9,11 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import teamworks.samples.client.repository.ClientRepositoryException;
 
 import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.djarum.raf.utilities.Locator;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.task.ProcessNameTokens;
 import com.gdn.venice.client.app.task.StatusNameTokens;
@@ -41,6 +44,8 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 	String fraudStatusId;
 	String wcsOrderId;
 	
+    protected static Logger _log = null;
+	
 	public FetchToDoListDataCommand(RafDsRequest request, String userName) {
 		this.request = request;
 		this.userName = userName;
@@ -48,6 +53,10 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 
 	@Override
 	public RafDsResponse execute() {
+		
+	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.facade.logistics.activity.processor.FetchToDoListDataCommand");
+		
 		BPMAdapter bpmAdapter = BPMAdapter.getBPMAdapter(userName, BPMAdapter.getUserPasswordFromLDAP(userName));
 		bpmAdapter.synchronize();
 		
@@ -69,6 +78,7 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 					
 					for (int i=0;i<taskSize;i++) {
 						Task task = bpmAdapter.getClientRepository().loadTask(taskIds.get(i));
+						_log.debug("proses instance = '"+task.getProcessInstance().getName()+"' task id = '"+task+"' criteria value = '"+criteriaValue+"',  task.getProcessInstance().getProcess().getName() = '"+task.getProcessInstance().getProcess().getName()+"'");
 						if(!task.getProcessInstance().getProcess().getName().equals(criteriaValue)){
 							taskIds.remove(taskIds.get(i));
 							--i;
