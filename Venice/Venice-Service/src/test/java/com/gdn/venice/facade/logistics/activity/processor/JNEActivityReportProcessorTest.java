@@ -326,7 +326,7 @@ public class JNEActivityReportProcessorTest {
 	@Test
 	public void composeLogAirwayBill_orderItemNewStatusIsCXWithInvalidReceivedDate_updateFail(){
 		ActivityReportData activityReportData = new ActivityReportData();
-		LogFileUploadLog fileUploadLog = new LogFileUploadLog();
+		LogFileUploadLog fileUploadLog = new LogFileUploadLog(); 
 		
 		VenOrderItem orderItemES = new VenOrderItem();
 		orderItemES.setVenOrderStatus(VenOrderStatusES.createVenOrderStatus());

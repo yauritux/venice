@@ -123,6 +123,10 @@ public class OrderUtil {
 				VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_DanamonCreditCard.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
+		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+			VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_VISACreditCard.desc())){
+			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
+			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
 		} 	 	 
 		
 
