@@ -9,11 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import teamworks.samples.client.repository.ClientRepositoryException;
 
 import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.djarum.raf.utilities.Locator;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.task.ProcessNameTokens;
 import com.gdn.venice.client.app.task.StatusNameTokens;
@@ -41,6 +44,8 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 	String fraudStatusId;
 	String wcsOrderId;
 	
+    protected static Logger _log = null;
+	
 	public FetchToDoListDataCommand(RafDsRequest request, String userName) {
 		this.request = request;
 		this.userName = userName;
@@ -48,6 +53,10 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 
 	@Override
 	public RafDsResponse execute() {
+		
+	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.facade.logistics.activity.processor.FetchToDoListDataCommand");
+		
 		BPMAdapter bpmAdapter = BPMAdapter.getBPMAdapter(userName, BPMAdapter.getUserPasswordFromLDAP(userName));
 		bpmAdapter.synchronize();
 		
@@ -64,12 +73,14 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 				
 				try {
 					taskIds = bpmAdapter.getClientRepository().loadTaskIdsForSavedSearch(1);
-					System.out.println("taskIds awal size: "+taskIds.size());
+					_log.debug("taskIds awal size: "+taskIds.size());
 					int taskSize = taskIds.size();
 					
 					for (int i=0;i<taskSize;i++) {
 						Task task = bpmAdapter.getClientRepository().loadTask(taskIds.get(i));
+						_log.debug("proses instance = '"+task.getProcessInstance().getName()+"' task id = '"+task+"' criteria value = '"+criteriaValue+"',  task.getProcessInstance().getProcess().getName() = '"+task.getProcessInstance().getProcess().getName()+"'");
 						if(!task.getProcessInstance().getProcess().getName().equals(criteriaValue)){
+							_log.debug("after if, process = '"+task.getProcessInstance().getName()+"' criteria value = '"+criteriaValue+"'");
 							taskIds.remove(taskIds.get(i));
 							--i;
 							--taskSize;
@@ -84,16 +95,17 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 					
 					try {
 						Locator<Object> locator = null;
-						System.out.println("taskIds akhir size: "+taskIds.size());
+						_log.debug("taskIds akhir size: "+taskIds.size());
 						
 						String desc="";
 						for (int i=taskIds.size()-1;i>=0;i--) {
 							if(i==taskIds.size()-50) {
-								System.out.println("taskIds size already 50, break!");
+								_log.debug("taskIds size already 50, break!");
 								break;
 							}
 							
 							Task task = bpmAdapter.getClientRepository().loadTask(taskIds.get(i));
+							_log.debug("process = "+task.getProcessInstance().getName());
 							if (task.getProcessInstance() != null) {
 								LinkedHashMap<String, String> map = createHashMapEntry(task, null);
 								
@@ -102,8 +114,9 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 								boolean excludedFromCurrentUser = false; 
 								fraudCaseId = "";
 								fraudStatusId = "";
-								
+								_log.debug("processName = '"+task.getProcessInstance().getProcess().getName()+"'");
 								if (task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSACTIVITYREPORTAPPROVAL)) {
+									_log.debug(ProcessNameTokens.LOGISTICSACTIVITYREPORTAPPROVAL);
 									String submittedBy = bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.SUBMITTEDBY);
 									excludedFromCurrentUser = userName.equals(submittedBy);
 									String wcsOrderIdWcsOrderItemId="";
@@ -155,6 +168,7 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 									desc=task.getActivityName()==null?"":task.getActivityName()+" (" + wcsOrderIdWcsOrderItemId + ")";
 									map = createHashMapEntry(task, desc);						
 								} else if (task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSINVOICEAPPROVAL)) {
+									_log.debug("'"+ProcessNameTokens.LOGISTICSINVOICEAPPROVAL+"'");
 									String invoiceNumberAll = bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.INVOICERENUMBER);
 									
 									Pattern p = Pattern.compile("[\\{\\}\\=\\,]++");
@@ -172,6 +186,7 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 									
 									invoiceNumber = invoiceNumber.substring(0, invoiceNumber.length()-1);
 									desc=task.getActivityName()==null?"":task.getActivityName()+" (" + invoiceNumber + ")";
+									_log.debug("desc = '"+desc+"'");
 									map = createHashMapEntry(task, desc);		
 								} else if (task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSMTADATAACTIVITYRECONCILIATION) || 
 										task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSMTADATAINVOICERECONCILIATION)) {
@@ -378,10 +393,12 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 			//if there is only one, this is simple Criteria which is not part of internal advanced criteria
 			JPQLSimpleQueryCriteria simpleCriteria = simpleCriteriaListWithKeyFieldName.get(0);
 			if (simpleCriteria.getOperator()!=null && simpleCriteria.getOperator().equals("iContains")) {
+				_log.debug("simple criteria operator ='"+simpleCriteria.getOperator()+"' value = '"+value+"' value simple criteria = "+simpleCriteria.getValue());
 				if (value.contains(simpleCriteria.getValue())) {
 					return true;
 				}
 			} else if (simpleCriteria.getOperator()!=null && simpleCriteria.getOperator().equals("equals")) {
+				_log.debug("simple criteria operator ='"+simpleCriteria.getOperator()+"' value = '"+value+"' value simple criteria = "+simpleCriteria.getValue());
 				if (value.equals(simpleCriteria.getValue())) {
 					return true;
 				}
@@ -421,6 +438,7 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 			//if criteria doesn't even specify it, it's not filtered, include it in the map
 			return true;
 		}
+		_log.debug("isIncludedAccordingToFilter returning false");
 		return false;
 	}
 	
@@ -428,8 +446,10 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 		ArrayList<JPQLSimpleQueryCriteria> simpleCriteriaListWithFieldName = new ArrayList<JPQLSimpleQueryCriteria>();
 		for (int i=0;i<simpleCriteriaList.size();i++) {
 			if (simpleCriteriaList.get(i).getFieldName().equals(fieldName)) {
+				_log.debug(simpleCriteriaList.get(i).getFieldName());
 				simpleCriteriaListWithFieldName.add(simpleCriteriaList.get(i));
 			}
+			_log.debug("getSimpleCriteriaWithFieldName after if simpleCriteriaList.get(i).getFieldName().equals(fieldName)");
 		}
 		return simpleCriteriaListWithFieldName;
 	}
