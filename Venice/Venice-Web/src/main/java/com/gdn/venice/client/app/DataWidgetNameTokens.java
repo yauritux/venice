@@ -10,6 +10,7 @@ public class DataWidgetNameTokens {
 	public static String  VENICE_ADMINISTRATIONMODULESECTION = "VeniceAdministrationModuleSection";
 	public static String  VENICE_RESERVATIONMODULESECTION = "ReservationModuleSection";
 	public static String  VENICE_GENERALMODULESECTION = "VeniceGeneralModuleSection";
+	public static String  VENICE_SEATTLEMODULESECTION = "VeniceSeattleModuleSection";
 	
 	public static String  TASK_TASKMANAGEMENTTREENODE = "TaskTaskManagementTreeNode";
 	public static String  TASK_TASKSUMMARYTREENODE = "TaskTaskSummaryTreeNode";
@@ -75,5 +76,11 @@ public class DataWidgetNameTokens {
 
 	public static String  RSV_SALESCENTERMODULETREENODE = "RsvSalesCenterTreeNode";
 	public static String  RSV_ORDERMANAGEMENTMODULETREENODE = "RsvOrderManagementTreeNode";
+	
+	public static String  SEATTLE_GENERALMODULE_TREENODE = "SeattleSeattleModuleTreeNode";
+	public static String  SEATTLE_SLAFULFILLMENT_TREENODE = "SeattleSLAFulfillmentTreeNode";
+	public static String  SEATTLE_SLASTATUS_TREENODE = "SeattleSLAStatusTreeNode";
+	public static String  SEATTLE_ETD_TREENODE = "SeattleETDTreeNode";
+	public static String  SEATTLE_UOM_TREENODE = "SeattleUoMTreeNode";
 
 }

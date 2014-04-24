@@ -1,313 +1,494 @@
 <?xml version="1.0"?>
 <project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.gdn.venice</groupId>
-        <artifactId>Venice</artifactId>
-        <version>1.0</version>
-    </parent>
-    <!-- <groupId>com.gdn.venice</groupId> -->
-    <artifactId>Venice-Batch</artifactId>
-    <!-- <version>1.0</version> -->
-    <name>Venice-Batch</name>
-    <url>http://maven.apache.org</url>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <classpath>lib/Venice-Interface-Model-${project.version}.jar lib/Venice-Utilities-${project.version}.jar lib/joda-time-2.3.jar lib/log4j-1.2.13.jar lib/commons-lang-2.4.jar lib/openejb-client-3.1.4.jar lib/geronimo-ejb_3.0_spec-1.0.1.jar lib/hibernate-core-3.6.10.Final.jar lib/javassist-3.4.GA.jar lib/slf4j-api-1.4.2.jar lib/ejb3-persistence-1.0.2.GA.jar lib/postgresql-8.4-702.jdbc4.jar lib/slf4j-log4j12-1.4.2.jar lib/awb-client-1.2-RELEASE.jar lib/awb-exchange-model-1.1.1-RELEASE.jar lib/httpclient-4.1.jar lib/httpcore-4.1.jar lib/commons-logging-1.0.4.jar lib/json-20131018.jar lib/json-lib-2.4jdk15.jar lib/antlr-2.7.6.jar lib/xmlbeans-2.3.0.jar lib/dom4j-1.6.1.jar lib/poi-3.6.jar lib/poi-ooxml-3.6.jar lib/poi-ooxml-schemas-3.6.jar lib/commons-configuration-1.6.jar lib/activation-1.1.jar lib/geronimo-javamail_1.4_mail-1.8.2.jar lib/commons-collections-3.2.1.jar lib/geronimo-jta_1.1_spec-1.1.1.jar</classpath>
-    </properties>
-    
-    <dependencies>                     
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.3</version>
-        </dependency>   
-        <dependency>
-            <groupId>org.apache.openejb</groupId>
-            <artifactId>openejb-client</artifactId>
-            <version>3.1.4</version>
-        </dependency>         
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Venice-Utilities</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Venice-Interface-Model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Venice-Service</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>generate_update-fp</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>    
-                                <jar destfile="${project.build.directory}/batch-jars/UpdateOrderFPBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/UpdateOrderFPBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.UpdateOrderFPBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_pickup_report</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <jar destfile="${project.build.directory}/batch-jars/LogisticsPickupReportBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/LogisticsPickupReportBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.logistics.batch.LogisticsPickupReportBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_order_tracking</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <jar destfile="${project.build.directory}/batch-jars/OrderTrackingReportBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/OrderTrackingReportBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.logistics.batch.OrderTrackingReportBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_pickup_problem</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <jar destfile="${project.build.directory}/batch-jars/ProblemPickupBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/ProblemPickupBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.logistics.batch.ProblemPickupBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_pivot_risk_point</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <jar destfile="${project.build.directory}/batch-jars/PivotFraudRiskPointBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/PivotFraudRiskPointBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.PivotFraudRiskPointBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_sales_record_journal</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <jar destfile="${project.build.directory}/batch-jars/SalesRecordGeneratorBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/SalesRecordGeneratorBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.finance.batch.SalesRecordGeneratorBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_sales_record_journal_cleanup</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <jar destfile="${project.build.directory}/batch-jars/SalesRecordCleanupGeneratorBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/SalesRecordCleanupGeneratorBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.finance.batch.SalesRecordCleanupGeneratorBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>                    
-                    <execution>
-                        <id>generate_bca_installment</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>    
-                                <jar destfile="${project.build.directory}/batch-jars/BCAInstallmentReportBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/BCAInstallmentReportBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.BCAInstallmentReportBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_cancel_bca_installment</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>    
-                                <jar destfile="${project.build.directory}/batch-jars/BCACancelInstallmentReportBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/BCACancelInstallmentReportBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.fraud.batch.BCACancelInstallmentReportBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate_sales_journal</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <jar destfile="${project.build.directory}/batch-jars/SalesJournalGeneratorBatchJob.jar">
-                                    <fileset dir="${project.build.directory}/classes">
-                                        <include name="**/SalesJournalGeneratorBatchJob.class"/>
-                                    </fileset>
-                                    <manifest>
-                                        <attribute name="Class-Path" value="${classpath}" />
-                                        <attribute name="Main-Class" value="com.gdn.venice.finance.batch.SalesJournalGeneratorBatchJob" />
-                                    </manifest>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                        </configuration>    
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-        <pluginManagement>
-        	<plugins>
-        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-        		<plugin>
-        			<groupId>org.eclipse.m2e</groupId>
-        			<artifactId>lifecycle-mapping</artifactId>
-        			<version>1.0.0</version>
-        			<configuration>
-        				<lifecycleMappingMetadata>
-        					<pluginExecutions>
-        						<pluginExecution>
-        							<pluginExecutionFilter>
-        								<groupId>
-        									org.apache.maven.plugins
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.gdn.venice</groupId>
+		<artifactId>Venice</artifactId>
+		<version>1.0</version>
+	</parent>
+	<!-- <groupId>com.gdn.venice</groupId> -->
+	<artifactId>Venice-Batch</artifactId>
+	<!-- <version>1.0</version> -->
+	<name>Venice-Batch</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<classpath>lib/Venice-Interface-Model-${project.version}.jar
+			lib/Venice-Utilities-${project.version}.jar lib/joda-time-2.3.jar
+			lib/log4j-1.2.13.jar lib/commons-lang-2.4.jar
+			lib/openejb-client-3.1.4.jar lib/geronimo-ejb_3.0_spec-1.0.1.jar
+			lib/hibernate-core-3.6.10.Final.jar lib/javassist-3.4.GA.jar
+			lib/slf4j-api-1.4.2.jar lib/ejb3-persistence-1.0.2.GA.jar
+			lib/postgresql-8.4-702.jdbc4.jar lib/slf4j-log4j12-1.4.2.jar
+			lib/awb-client-1.2-RELEASE.jar
+			lib/awb-exchange-model-1.1.1-RELEASE.jar lib/httpclient-4.1.jar
+			lib/httpcore-4.1.jar lib/commons-logging-1.0.4.jar
+			lib/json-20131018.jar lib/json-lib-2.4jdk15.jar lib/antlr-2.7.6.jar
+			lib/xmlbeans-2.3.0.jar lib/dom4j-1.6.1.jar lib/poi-3.6.jar
+			lib/poi-ooxml-3.6.jar lib/poi-ooxml-schemas-3.6.jar
+			lib/commons-configuration-1.6.jar lib/activation-1.1.jar
+			lib/geronimo-javamail_1.4_mail-1.8.2.jar
+			lib/commons-collections-3.2.1.jar lib/geronimo-jta_1.1_spec-1.1.1.jar</classpath>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.openejb</groupId>
+			<artifactId>openejb-client</artifactId>
+			<version>3.1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>8.4-702.jdbc4</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>Venice-Utilities</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>Venice-Interface-Model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>Venice-Service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.gdn.app</groupId>
+			<artifactId>GdnJiraClient</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>generate_update-fp</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/UpdateOrderFPBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/UpdateOrderFPBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.fraud.batch.UpdateOrderFPBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_pickup_report</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/LogisticsPickupReportBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/LogisticsPickupReportBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.logistics.batch.LogisticsPickupReportBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_order_tracking</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/OrderTrackingReportBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/OrderTrackingReportBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.logistics.batch.OrderTrackingReportBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_pickup_problem</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/ProblemPickupBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/ProblemPickupBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.logistics.batch.ProblemPickupBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_pivot_risk_point</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/PivotFraudRiskPointBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/PivotFraudRiskPointBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.fraud.batch.PivotFraudRiskPointBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_sales_record_journal</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SalesRecordGeneratorBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SalesRecordGeneratorBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.finance.batch.SalesRecordGeneratorBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_sales_record_journal_cleanup</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SalesRecordCleanupGeneratorBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SalesRecordCleanupGeneratorBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.finance.batch.SalesRecordCleanupGeneratorBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_bca_installment</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/BCAInstallmentReportBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/BCAInstallmentReportBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.fraud.batch.BCAInstallmentReportBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_cancel_bca_installment</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/BCACancelInstallmentReportBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/BCACancelInstallmentReportBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.fraud.batch.BCACancelInstallmentReportBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_sales_journal</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SalesJournalGeneratorBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SalesJournalGeneratorBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.finance.batch.SalesJournalGeneratorBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					
+					
+					<execution>
+						<id>generate_Seattle_Fulfillment_Order</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SeattleFulfillmentOrderBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SeattleFulfillmentOrderBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.seattle.batch.SeattleFulfillmentOrderBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_Seattle_Status_Logistic_Settle</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SeattleStatusLogisticSettleBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SeattleStatusLogisticSettleBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.seattle.batch.SeattleStatusLogisticSettleBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_Seattle_Status_Order_Delivery</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SeattleStatusOrderDeliveryBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SeattleStatusOrderDeliveryBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.seattle.batch.SeattleStatusOrderDeliveryBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_Seattle_Status_Order_Fraud_Checking</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SeattleStatusOrderFraudCheckingBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SeattleStatusOrderFraudCheckingBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.seattle.batch.SeattleStatusOrderFraudCheckingBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_Seattle_Status_Order_Fulfill</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SeattleStatusOrderFulfillBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SeattleStatusOrderFulfillBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.seattle.batch.SeattleStatusOrderFulfillBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate_Seattle_Status_Order_Payment_Approval</id>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<jar
+									destfile="${project.build.directory}/batch-jars/SeattleStatusOrderPaymentApprovalBatchJob.jar">
+									<fileset dir="${project.build.directory}/classes">
+										<include name="**/SeattleStatusOrderPaymentApprovalBatchJob.class" />
+									</fileset>
+									<manifest>
+										<attribute name="Class-Path" value="${classpath}" />
+										<attribute name="Main-Class"
+											value="com.gdn.venice.seattle.batch.SeattleStatusOrderPaymentApprovalBatchJob" />
+									</manifest>
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
         								</groupId>
-        								<artifactId>
-        									maven-dependency-plugin
+										<artifactId>
+											maven-dependency-plugin
         								</artifactId>
-        								<versionRange>
-        									[2.4,)
+										<versionRange>
+											[2.4,)
         								</versionRange>
-        								<goals>
-        									<goal>
-        										copy-dependencies
+										<goals>
+											<goal>
+												copy-dependencies
         									</goal>
-        								</goals>
-        							</pluginExecutionFilter>
-        							<action>
-        								<ignore></ignore>
-        							</action>
-        						</pluginExecution>
-        					</pluginExecutions>
-        				</lifecycleMappingMetadata>
-        			</configuration>
-        		</plugin>
-        	</plugins>
-        </pluginManagement>
-    </build>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>

@@ -243,6 +243,20 @@
 		<class>com.gdn.venice.persistence.FrdParameterRule42</class>
 		<class>com.gdn.venice.persistence.FrdParameterRule43</class>
 		<class>com.gdn.venice.persistence.FrdParameterRule44</class>
+		<class>com.gdn.venice.persistence.SeatFulfillmentInPercentage</class>
+		<class>com.gdn.venice.persistence.SeatOrderEtd</class>
+		<class>com.gdn.venice.persistence.SeatOrderFulfillment</class>
+		<class>com.gdn.venice.persistence.SeatOrderFulfillmentHistory</class>
+		<class>com.gdn.venice.persistence.SeatOrderStatus</class>
+		<class>com.gdn.venice.persistence.SeatOrderStatusHistory</class>
+		<class>com.gdn.venice.persistence.SeatOrderStatusTracking</class>
+		<class>com.gdn.venice.persistence.SeatResultStatusTracking</class>
+		<class>com.gdn.venice.persistence.SeatSlaStatus</class>
+		<class>com.gdn.venice.persistence.SeatSlaStatusPercentage</class>
+		<class>com.gdn.venice.persistence.SeatStatusInPercentage</class>
+		<class>com.gdn.venice.persistence.SeatStatusUom</class>
+		<class>com.gdn.venice.persistence.SeatFulfillmentConsistOfSlaStatus</class>
+		<class>com.gdn.venice.persistence.SeatFulfillmentConsistOfSlaStatusPK</class>
 
 		<!-- Use this for Geronimo OpenJPA -->
 		<!-- <shared-cache-mode>NONE</shared-cache-mode> -->

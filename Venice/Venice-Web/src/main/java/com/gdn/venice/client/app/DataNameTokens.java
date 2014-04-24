@@ -1172,6 +1172,15 @@ public class DataNameTokens {
 	public static String FINARFUNDSINACTIONAPPLIEDHISTORY_DATE="FinArFundsInActionAppliedHistory.actionTakenTimestamp";
 	public static String FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT="FinArFundsInActionAppliedHistory.amount";
 	
+	public static String SEATFULFILLMENTINPERCENTAGE_ID="SeatFulfillmentInPercentage.fulfillmentInPercentageId";
+	public static String SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_VENORDERSTATUS_CODE="SeatFulfillmentInPercentage.seatOrderStatus.venOrderStatus.orderStatusCode";
+	public static String SEATFULFILLMENTINPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC="SeatFulfillmentInPercentage.seatResultStatusTracking.resultStatusTrackingDesc";
+	public static String SEATFULFILLMENTINPERCENTAGE_MIN="SeatFulfillmentInPercentage.min";
+	public static String SEATFULFILLMENTINPERCENTAGE_MAX="SeatFulfillmentInPercentage.max";
+	public static String SEATFULFILLMENTINPERCENTAGE_BYUSER="SeatFulfillmentInPercentage.byUser";
+	public static String SEATFULFILLMENTINPERCENTAGE_UPDATEDATE="SeatFulfillmentInPercentage.updateDate";
+	public static String SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_PIC="SeatFulfillmentInPercentage.seatOrderStatus.pic";
+	
 	/**
 	 * This constructor adds all of the name token and the wrapper type
 	 * definitions into the Map. This should really be removed so that the 
@@ -2214,7 +2223,16 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_FINARFUNDSINRECONRECORD_NOMORREFF,"java.lang.String");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_DATE,"java.sql.Timestamp");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT,"java.math.BigDecimal");
-							
+		
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_ID,"java.lang.Long");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_VENORDERSTATUS_CODE,"java.lang.String");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC,"java.lang.String");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_MIN,"java.math.BigDecimal");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_MAX,"java.math.BigDecimal");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_BYUSER,"java.lang.String");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_UPDATEDATE,"java.sql.Timestamp");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_PIC,"java.lang.String");	
+									
 	}
 	
 	/**

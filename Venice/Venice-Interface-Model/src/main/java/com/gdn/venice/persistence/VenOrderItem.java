@@ -209,8 +209,12 @@ public class VenOrderItem implements Serializable {
 	//bi-directional many-to-one association to VenOrderItem
 	@OneToMany(mappedBy="venOrderItem")
 	private List<VenOrderItemContactDetail> venOrderItemContactDetails;
+	
+	//bi-directional many-to-one association to SeatOrderStatusHistory
+	@OneToMany(mappedBy="venOrderItem")
+	private List<SeatOrderStatusHistory> SeatOrderStatusHistories;
 
-    public VenOrderItem() {
+   	public VenOrderItem() {
     }
 
 	public Long getOrderItemId() {
@@ -658,4 +662,13 @@ public class VenOrderItem implements Serializable {
     public void setCxMtaDate(Timestamp cxMtaDate) {
         this.cxMtaDate = cxMtaDate;
     }
+    
+    public List<SeatOrderStatusHistory> getSeatOrderStatusHistories() {
+		return SeatOrderStatusHistories;
+	}
+
+	public void setSeatOrderStatusHistories(
+			List<SeatOrderStatusHistory> seatOrderStatusHistories) {
+		SeatOrderStatusHistories = seatOrderStatusHistories;
+	}
 }

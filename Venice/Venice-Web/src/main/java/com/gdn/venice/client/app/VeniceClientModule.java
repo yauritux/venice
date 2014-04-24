@@ -29,7 +29,6 @@ import com.gdn.venice.client.app.finance.view.PromotionView;
 import com.gdn.venice.client.app.finance.view.ReportsLauncherView;
 import com.gdn.venice.client.app.finance.view.SalesRecordView;
 import com.gdn.venice.client.app.fraud.presenter.BlackListMaintenancePresenter;
-import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.CustomerBlackListMaintenancePresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudBinCreditLimitPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCalculatePresenter;
@@ -38,11 +37,11 @@ import com.gdn.venice.client.app.fraud.presenter.FraudCaseViewerPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCustomerWhitelistPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudDashboardPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule31Presenter;
+import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
 import com.gdn.venice.client.app.fraud.presenter.UncalculatedCreditCardOrderPresenter;
 import com.gdn.venice.client.app.fraud.view.BlackListMaintenanceView;
-import com.gdn.venice.client.app.fraud.view.InstallmentBCAView;
 import com.gdn.venice.client.app.fraud.view.CustomerBlackListMaintenanceView;
 import com.gdn.venice.client.app.fraud.view.FraudBinCreditLimitView;
 import com.gdn.venice.client.app.fraud.view.FraudCalculateView;
@@ -51,6 +50,7 @@ import com.gdn.venice.client.app.fraud.view.FraudCaseViewerView;
 import com.gdn.venice.client.app.fraud.view.FraudCustomerWhitelistView;
 import com.gdn.venice.client.app.fraud.view.FraudDashboardView;
 import com.gdn.venice.client.app.fraud.view.FraudParameterRule31View;
+import com.gdn.venice.client.app.fraud.view.InstallmentBCAView;
 import com.gdn.venice.client.app.fraud.view.MigsMasterView;
 import com.gdn.venice.client.app.fraud.view.MigsUploadView;
 import com.gdn.venice.client.app.fraud.view.UncalculatedCreditCardOrderView;
@@ -82,6 +82,14 @@ import com.gdn.venice.client.app.logistic.view.LogisticsDashboardView;
 import com.gdn.venice.client.app.logistic.view.ProviderManagementView;
 import com.gdn.venice.client.app.reservation.presenter.ReservationOrderManagementPresenter;
 import com.gdn.venice.client.app.reservation.view.ReservationOrderManagementView;
+import com.gdn.venice.client.app.seattle.presenter.SeatETDPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatSLAFulfillmentReportPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatSLAStatusReportPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatUoMPresenter;
+import com.gdn.venice.client.app.seattle.view.SeatETDView;
+import com.gdn.venice.client.app.seattle.view.SeatSLAFulfillmentReportView;
+import com.gdn.venice.client.app.seattle.view.SeatSLAStatusReportView;
+import com.gdn.venice.client.app.seattle.view.SeatUoMView;
 import com.gdn.venice.client.app.task.presenter.AssignedTaskPresenter;
 import com.gdn.venice.client.app.task.presenter.TaskLaunchpadPresenter;
 import com.gdn.venice.client.app.task.presenter.TaskSummaryPresenter;
@@ -353,5 +361,25 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				FinSalesSettlementReportPresenter.MyView.class,
 				FinSalesSettlementReportView.class,
 				FinSalesSettlementReportPresenter.MyProxy.class);	
+		
+		bindPresenter(SeatSLAFulfillmentReportPresenter.class, 
+				SeatSLAFulfillmentReportPresenter.MyView.class,
+				SeatSLAFulfillmentReportView.class,
+				SeatSLAFulfillmentReportPresenter.MyProxy.class);
+		
+		bindPresenter(SeatSLAStatusReportPresenter.class, 
+				SeatSLAStatusReportPresenter.MyView.class,
+				SeatSLAStatusReportView.class,
+				SeatSLAStatusReportPresenter.MyProxy.class);
+		
+		bindPresenter(SeatETDPresenter.class, 
+				SeatETDPresenter.MyView.class,
+				SeatETDView.class,
+				SeatETDPresenter.MyProxy.class);
+		
+		bindPresenter(SeatUoMPresenter.class, 
+				SeatUoMPresenter.MyView.class,
+				SeatUoMView.class,
+				SeatUoMPresenter.MyProxy.class);
 	}
 }

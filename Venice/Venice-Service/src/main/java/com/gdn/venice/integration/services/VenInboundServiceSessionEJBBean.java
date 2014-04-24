@@ -69,6 +69,7 @@ import com.gdn.venice.facade.LogAirwayBillReturSessionEJBLocal;
 import com.gdn.venice.facade.LogAirwayBillReturSessionEJBRemote;
 import com.gdn.venice.facade.LogAirwayBillSessionEJBLocal;
 import com.gdn.venice.facade.LogMerchantPickupInstructionSessionEJBLocal;
+import com.gdn.venice.facade.SeatOrderEtdSessionEJBLocal;
 import com.gdn.venice.facade.VenAddressSessionEJBLocal;
 import com.gdn.venice.facade.VenAddressTypeSessionEJBLocal;
 import com.gdn.venice.facade.VenCitySessionEJBLocal;
@@ -142,6 +143,7 @@ import com.gdn.venice.persistence.LogApprovalStatus;
 import com.gdn.venice.persistence.LogLogisticService;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.LogMerchantPickupInstruction;
+import com.gdn.venice.persistence.SeatOrderEtd;
 import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenAddressType;
 import com.gdn.venice.persistence.VenBank;
@@ -984,9 +986,21 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 }
             }
         }
-
+        //tampung etd terlebih dahulu sebelum di remove
+        SeatOrderEtd etdForSeattle = new SeatOrderEtd();        
+        etdForSeattle.setEtdMax(com.djarum.raf.utilities.SQLDateUtility.utilDateToSqlTimestamp((com.djarum.raf.utilities.XMLGregorianCalendarConverter
+                .asDate(order.getOrderItems().get(0).getEtdMax()))));
+        etdForSeattle.setEtdMin(com.djarum.raf.utilities.SQLDateUtility.utilDateToSqlTimestamp((com.djarum.raf.utilities.XMLGregorianCalendarConverter
+                .asDate(order.getOrderItems().get(0).getEtdMin()))));
+        etdForSeattle.setDiffEtd(new BigDecimal(0));
+        etdForSeattle.setReason("Set From System");
+        etdForSeattle.setOther("Set From System");
+        etdForSeattle.setByUser("System");
+        etdForSeattle.setUpdateEtdDate(new Timestamp(System.currentTimeMillis()));
+        etdForSeattle.setWcsOrderId(order.getOrderId().getCode());
+        
         // Remove the customer and the order items because they need to be ignored at this stage
-       // order.setCustomer(null);
+       // order.setCustomer(null);        
         order.getOrderItems().clear();
 
         // Map the jaxb Order object to a JPA VenOrder object.
@@ -1041,6 +1055,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         try {
             _genericLocator = new Locator<Object>();
             VenOrderSessionEJBLocal orderHome = (VenOrderSessionEJBLocal) this._genericLocator.lookupLocal(VenOrderSessionEJBLocal.class, "VenOrderSessionEJBBeanLocal");
+            SeatOrderEtdSessionEJBLocal orderEtdHome = (SeatOrderEtdSessionEJBLocal) this._genericLocator.lookupLocal(SeatOrderEtdSessionEJBLocal.class, "SeatOrderEtdSessionEJBBeanLocal");
             Boolean orderExists = false;
             if (this.orderExists(order.getOrderId().getCode())) {
                 orderExists = true;
@@ -1061,6 +1076,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
             }
             if (!orderExists) {
                 venOrder = (VenOrder) orderHome.persistVenOrder(venOrder);
+                etdForSeattle = orderEtdHome.persistSeatOrderEtd(etdForSeattle);                
             } else {
                 //venice 117, remove existing order, then persist new order, so the payment not duplicate
                 orderHome.removeVenOrder(existingOrder);

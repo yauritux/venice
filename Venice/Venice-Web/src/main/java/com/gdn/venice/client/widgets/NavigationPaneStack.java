@@ -14,6 +14,7 @@ import com.gdn.venice.client.ui.data.KpiNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.LogisticNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.NavigationPaneTreeNodeRecord;
 import com.gdn.venice.client.ui.data.ReservationNavigationPaneSectionData;
+import com.gdn.venice.client.ui.data.SeattleNavigationPaneSectionData;
 import com.gdn.venice.client.ui.data.TaskManagementNavigationPaneSectionData;
 import com.gdn.venice.client.util.PermissionsUtil;
 import com.smartgwt.client.types.VisibilityMode;
@@ -30,6 +31,7 @@ public class NavigationPaneStack extends SectionStack {
 	static NavigationPaneStackSection administrationModuleSection;
 	static NavigationPaneStackSection reservationModuleSection;
 	static NavigationPaneStackSection generalModuleSection;
+	static NavigationPaneStackSection seattleModuleSection;
 	List<NavigationPaneStackSection> navigationPaneStackSectionArrayList;
 	
 	boolean autorizationReady = false;
@@ -93,6 +95,11 @@ public class NavigationPaneStack extends SectionStack {
 		generalModuleSection = new NavigationPaneStackSection("General", DataWidgetNameTokens.VENICE_GENERALMODULESECTION, GeneralNavigationPaneSectionData.getRecords());
 		generalModuleSection.setExpanded(true);
 		navigationPaneStackSectionArrayList.add(generalModuleSection);
+		
+		// initialise the General Module section 
+		seattleModuleSection = new NavigationPaneStackSection("Seattle", DataWidgetNameTokens.VENICE_SEATTLEMODULESECTION, SeattleNavigationPaneSectionData.getRecords());
+		seattleModuleSection.setExpanded(true);
+		navigationPaneStackSectionArrayList.add(seattleModuleSection);
 
 		
 
@@ -105,6 +112,7 @@ public class NavigationPaneStack extends SectionStack {
 		addSection(financeModuleSection); 
 		addSection(kpiModuleSection); 
 		addSection(administrationModuleSection);		
+		addSection(seattleModuleSection);
 		addSection(generalModuleSection);
 		
 		expandSection(0);
@@ -204,7 +212,7 @@ public class NavigationPaneStack extends SectionStack {
 					administrationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
 				}
 			}
-		}
+		}		
 //		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)) {
 //			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_ADMINISTRATIONMODULESECTION)).longValue();
 //			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
@@ -224,6 +232,16 @@ public class NavigationPaneStack extends SectionStack {
 				}
 			}
 		}
+		
+		if (userPermission.containsKey(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_SEATTLEMODULESECTION)) {
+			long permission = new Long(userPermission.get(navigationPaneStackSectionClass + "." + DataWidgetNameTokens.VENICE_SEATTLEMODULESECTION)).longValue();
+			if (PermissionsUtil.hasExecute(new Integer(new Long(permission).intValue()))) {
+				if (getSection(seattleModuleSection.getID()) == null ){
+					addSection(seattleModuleSection);
+					seattleModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+				}
+			}
+		}
 	}
 	
 	//This is temporary: shall be replaced by user permission!
@@ -236,6 +254,7 @@ public class NavigationPaneStack extends SectionStack {
 		administrationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
 		reservationModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
 		generalModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
+		seattleModuleSection.getTreeGrid().addRecordClickHandler(clickHandler);
 	}
 
 	/**

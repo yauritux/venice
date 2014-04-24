@@ -560,6 +560,30 @@
     <servlet-name>SalesSettlementReportLauncherServlet</servlet-name>
     <servlet-class>com.gdn.venice.exportimport.finance.dataexport.servlet.SalesSettlementReportLauncherServlet</servlet-class>
   </servlet>
+   <servlet>
+    <description></description>
+    <display-name>SeaSLAFulfillmentPresenterServlet</display-name>
+    <servlet-name>SeaSLAFulfillmentPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.seattle.presenter.SeaSLAFulfillmentPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>SeatSLAStatusPresenterServlet</display-name>
+    <servlet-name>SeatSLAStatusPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.seattle.presenter.SeatSLAStatusPresenterServlet</servlet-class>
+  </servlet>
+   <servlet>
+    <description></description>
+    <display-name>SeatETDPresenterServlet</display-name>
+    <servlet-name>SeatETDPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.seattle.presenter.SeatETDPresenterServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <description></description>
+    <display-name>SeatUoMPresenterServlet</display-name>
+    <servlet-name>SeatUoMPresenterServlet</servlet-name>
+    <servlet-class>com.gdn.venice.server.app.seattle.presenter.SeatUoMPresenterServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>FraudBinCreditLimitPresenterServlet</servlet-name>
     <url-pattern>/FraudBinCreditLimitPresenterServlet</url-pattern>
@@ -735,7 +759,23 @@
   <servlet-mapping>
     <servlet-name>SalesSettlementReportLauncherServlet</servlet-name>
     <url-pattern>/SalesSettlementReportLauncherServlet</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>SeaSLAFulfillmentPresenterServlet</servlet-name>
+    <url-pattern>/SeaSLAFulfillmentPresenterServlet</url-pattern>
+  </servlet-mapping>  
+  <servlet-mapping>
+    <servlet-name>SeatSLAStatusPresenterServlet</servlet-name>
+    <url-pattern>/SeatSLAStatusPresenterServlet</url-pattern>
   </servlet-mapping> 
+  <servlet-mapping>
+    <servlet-name>SeatETDPresenterServlet</servlet-name>
+    <url-pattern>/SeatETDPresenterServlet</url-pattern>
+  </servlet-mapping>  
+  <servlet-mapping>
+    <servlet-name>SeatUoMPresenterServlet</servlet-name>
+    <url-pattern>/SeatUoMPresenterServlet</url-pattern>
+  </servlet-mapping>
   <welcome-file-list>
     <welcome-file>Venice.html</welcome-file>
     <welcome-file>index.html</welcome-file>
@@ -744,5 +784,5 @@
     <welcome-file>default.html</welcome-file>
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
-  </welcome-file-list>
+  </welcome-file-list>  
 </web-app>

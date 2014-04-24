@@ -65,6 +65,11 @@ public class NameTokens {
 	public static final String generalPartyMaintenance = "!generalPartyMaintenance";
 
 	public static final String reservationOrderManagement= "!reservationOrderManagement";
+	
+	public static final String seattleSLAFulfillmentViewer = "!seattleSLAFulfillmentViewer";
+	public static final String seattleSLAStatusViewer = "!seattleSLAStatusViewer";
+	public static final String seattleETDViewer = "!seattleETDViewer";
+	public static final String seattleUoMViewer = "!seattleUoMViewer";
 
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;

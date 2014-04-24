@@ -41,6 +41,10 @@ import com.gdn.venice.client.app.logistic.presenter.InvoiceReconciliationPresent
 import com.gdn.venice.client.app.logistic.presenter.LogisticsDashboardPresenter;
 import com.gdn.venice.client.app.logistic.presenter.ProviderManagementPresenter;
 import com.gdn.venice.client.app.reservation.presenter.ReservationOrderManagementPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatETDPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatSLAFulfillmentReportPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatSLAStatusReportPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatUoMPresenter;
 import com.gdn.venice.client.app.task.presenter.AssignedTaskPresenter;
 import com.gdn.venice.client.app.task.presenter.TaskLaunchpadPresenter;
 import com.gdn.venice.client.app.task.presenter.TaskSummaryPresenter;
@@ -168,4 +172,12 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<FraudParameterRule31Presenter> getFraudParameterRule31Presenter();
   
   AsyncProvider<FinSalesSettlementReportPresenter> getFinSalesSettlementReportPresenter();
+  
+  AsyncProvider<SeatSLAFulfillmentReportPresenter> getSeatSLAFulfillmentReportPresenter();
+  
+  AsyncProvider<SeatSLAStatusReportPresenter> getSeatSLAStatusReportPresenter();
+  
+  AsyncProvider<SeatETDPresenter> getSeatETDPresenter();
+  
+  AsyncProvider<SeatUoMPresenter> getSeatUoMPresenter();
 }

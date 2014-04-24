@@ -127,7 +127,11 @@ public class VenOrder implements Serializable {
 	@OneToMany(mappedBy="venOrder")
 	private List<VenOrderContactDetail> venOrderContactDetails;
 	
-    public VenOrder() {
+	//bi-directional many-to-one association to SeatOrderStatusHistory
+	@OneToMany(mappedBy="venOrder")
+	private List<SeatOrderStatusHistory> SeatOrderStatusHistories;
+	
+   	public VenOrder() {
     }
 
 	public Long getOrderId() {
@@ -347,4 +351,12 @@ public class VenOrder implements Serializable {
 		this.venOrderContactDetails = venOrderContactDetails;
 	}
 	
+	 public List<SeatOrderStatusHistory> getSeatOrderStatusHistories() {
+			return SeatOrderStatusHistories;
+		}
+
+		public void setSeatOrderStatusHistories(
+				List<SeatOrderStatusHistory> seatOrderStatusHistories) {
+			SeatOrderStatusHistories = seatOrderStatusHistories;
+		}
 }
