@@ -451,7 +451,7 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 			}
 			_log.debug("getSimpleCriteriaWithFieldName after if simpleCriteriaList.get(i).getFieldName().equals(fieldName)");
 		}
-		return simpleCriteriaListWithFieldName; 
+		return simpleCriteriaListWithFieldName;
 	}
 	
 	private LinkedHashMap<String, String> createHashMapEntry(Task task, String desc) {
