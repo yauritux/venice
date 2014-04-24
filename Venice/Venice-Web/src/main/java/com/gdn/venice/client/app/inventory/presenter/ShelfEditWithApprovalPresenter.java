@@ -86,12 +86,12 @@ public class ShelfEditWithApprovalPresenter extends Presenter<ShelfEditWithAppro
     }
 
     @Override
-    public void updateShelfWIPData(String username, HashMap<String, String> data) {
+    public void approveEditShelfData(String username, HashMap<String, String> data) {
         try {
             RPCRequest request = new RPCRequest();
             request.setData(Util.formXMLfromHashMap(data));
             request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
-                    + "?method=saveUpdateShelfWIP&type=RPC&username=" + username);
+                    + "?method=approveEditShelf&type=RPC&username=" + username);
             request.setHttpMethod("POST");
             request.setUseSimpleHttp(true);
             request.setWillHandleError(true);
@@ -107,17 +107,118 @@ public class ShelfEditWithApprovalPresenter extends Presenter<ShelfEditWithAppro
                             String rpcResponse = rawData.toString();
 
                             if (rpcResponse.startsWith("0")) {
-                                SC.say("Shelf updated");
+                                SC.say("Shelf edit approved");
                                 getView().getShelfDetailWindow().destroy();
                                 getView().refreshAllShelfData();
                             } else {
                                 SC.warn(rpcResponse);
                             }
+                        }
+                    });
+        } catch (Exception e) {
+            SC.warn("Failed approve shelf, please try again later");
+        }
+    }
+    
+    @Override
+    public void rejectEditShelfData(String username, HashMap<String, String> data) {
+        try {
+            RPCRequest request = new RPCRequest();
+            request.setData(Util.formXMLfromHashMap(data));
+            request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
+                    + "?method=rejectEditShelf&type=RPC&username=" + username);
+            request.setHttpMethod("POST");
+            request.setUseSimpleHttp(true);
+            request.setWillHandleError(true);
+            RPCManager.setPromptStyle(PromptStyle.DIALOG);
+            RPCManager.setDefaultPrompt("Saving records...");
+            RPCManager.setShowPrompt(true);
 
+            RPCManager.sendRequest(request,
+                    new RPCCallback() {
+                        @Override
+                        public void execute(RPCResponse response,
+                                Object rawData, RPCRequest request) {
+                            String rpcResponse = rawData.toString();
+
+                            if (rpcResponse.startsWith("0")) {
+                                SC.say("Shelf edit rejected");
+                                getView().getShelfDetailWindow().destroy();
+                                getView().refreshAllShelfData();
+                            } else {
+                                SC.warn(rpcResponse);
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            SC.warn("Failed reject shelf, please try again later");
+        }
+    }
+    
+    @Override
+    public void needCorrectionEditShelfData(String username, HashMap<String, String> data) {
+        try {
+            RPCRequest request = new RPCRequest();
+            request.setData(Util.formXMLfromHashMap(data));
+            request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet
+                    + "?method=needCorrectionEditShelf&type=RPC&username=" + username);
+            request.setHttpMethod("POST");
+            request.setUseSimpleHttp(true);
+            request.setWillHandleError(true);
+            RPCManager.setPromptStyle(PromptStyle.DIALOG);
+            RPCManager.setDefaultPrompt("Saving records...");
+            RPCManager.setShowPrompt(true);
+
+            RPCManager.sendRequest(request,
+                    new RPCCallback() {
+                        @Override
+                        public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+                            String rpcResponse = rawData.toString();
+
+                            if (rpcResponse.startsWith("0")) {
+                                SC.say("Shelf need correction created");
+                                getView().getShelfDetailWindow().destroy();
+                                getView().refreshAllShelfData();
+                            } else {
+                                SC.warn(rpcResponse);
+                            }
                         }
                     });
         } catch (Exception e) {
             SC.warn("Failed saving shelf, please try again later");
         }
     }
+	
+	@Override
+	public void onEditShelfEditClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, final Window window) {
+		RPCRequest request=new RPCRequest();
+		
+		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
+		String storageMap = Util.formXMLfromHashMap(storageDataMap);
+		
+		request.setData(shelfMap+"#"+storageMap);
+		
+		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=editShelfEditWIPData&type=RPC");
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setWillHandleError(true);
+		RPCManager.setPromptStyle(PromptStyle.DIALOG);
+		RPCManager.setDefaultPrompt("Saving records...");
+		RPCManager.setShowPrompt(true);
+		
+		RPCManager.sendRequest(request, 
+				new RPCCallback () {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						
+						if (rpcResponse.startsWith("0")) {
+                            SC.say("Shelf approval edited");
+                            window.destroy();
+							getView().refreshAllShelfData();
+						} else {
+							SC.warn("Edit shelf failed");
+						}
+					}
+		});		
+	}
 }

@@ -11,6 +11,7 @@ import com.smartgwt.client.widgets.Window;
  */
 
 public interface ShelfListFilterUiHandler extends UiHandlers {
-	void onSaveShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, Window window);
-	void onNonActiveShelfClicked(HashMap<String, String> shelfDataMap, Window window);
+	public void onSaveShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, Window window);
+	public void onNonActiveShelfClicked(HashMap<String, String> shelfDataMap, Window window);
+	public void onEditShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, Window window);
 }

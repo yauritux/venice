@@ -186,4 +186,37 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
             SC.warn("Failed saving shelf, please try again later");
         }
     }
+    
+    @Override
+	public void onEditShelfAddClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, final Window window) {
+		RPCRequest request=new RPCRequest();
+		
+		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
+		String storageMap = Util.formXMLfromHashMap(storageDataMap);
+		
+		request.setData(shelfMap+"#"+storageMap);
+		
+		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=editShelfAddWIPData&type=RPC");
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setWillHandleError(true);
+		RPCManager.setPromptStyle(PromptStyle.DIALOG);
+		RPCManager.setDefaultPrompt("Saving records...");
+		RPCManager.setShowPrompt(true);
+		
+		RPCManager.sendRequest(request, 
+				new RPCCallback () {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						
+						if (rpcResponse.startsWith("0")) {
+                            SC.say("Shelf approval edited");
+                            window.destroy();
+							getView().refreshAllShelfData();
+						} else {
+							SC.warn("Edit shelf failed");
+						}
+					}
+		});		
+	}
 }

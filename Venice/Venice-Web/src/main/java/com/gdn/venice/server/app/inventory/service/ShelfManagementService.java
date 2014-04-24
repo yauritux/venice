@@ -433,16 +433,11 @@ public class ShelfManagementService {
         }
     }
     
-    
-    
-    
-    
-
-    public ResultWrapper<ShelfWIP> saveOrUpdateShelfInProcess(String username, ShelfWIP shelf, List<Storage> storageList)
+    public ResultWrapper<ShelfWIP> editShelf(String username, ShelfWIP shelf, List<Storage> storageList)
             throws JsonGenerationException, JsonMappingException, IOException {
-        System.out.println("saveOrUpdateShelfInProcess");
+        System.out.println("editShelf");
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "shelf/saveOrUpdateWIP?username=" + username;
+                + "shelf/editShelf?username=" + username;
         System.out.println("url: " + url);
         PostMethod httpPost = new PostMethod(url);
 
@@ -451,41 +446,6 @@ public class ShelfManagementService {
         ShelfRequest shelfRequest = new ShelfRequest();
         shelfRequest.setShelfWIP(shelf);
         shelfRequest.setStorage(storage);
-
-        String json = mapper.writeValueAsString(shelfRequest);
-        System.out.println("json: " + json);
-        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-
-        httpPost.setRequestHeader("Content-Type", "application/json");
-
-        int httpCode = httpClient.executeMethod(httpPost);
-        System.out.println("response code: " + httpCode);
-        if (httpCode == HttpStatus.SC_OK) {
-            InputStream is = httpPost.getResponseBodyAsStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuilder sb = new StringBuilder();
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                sb.append(line);
-            }
-            is.close();
-            System.out.println(sb.toString());
-            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ShelfWIP>>() {
-            });
-        } else {
-            return null;
-        }
-    }
-
-    public ResultWrapper<ShelfWIP> saveOrUpdateStatusShelfInProcess(String username, ShelfWIP shelf)
-            throws JsonGenerationException, JsonMappingException, IOException {
-        System.out.println("saveOrUpdateShelfInProcess");
-        String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "shelf/saveOrUpdateWIP?username=" + username;
-        System.out.println("url: " + url);
-        PostMethod httpPost = new PostMethod(url);
-
-        ShelfRequest shelfRequest = new ShelfRequest();
-        shelfRequest.setShelfWIP(shelf);
 
         String json = mapper.writeValueAsString(shelfRequest);
         System.out.println("json: " + json);
@@ -566,6 +526,187 @@ public class ShelfManagementService {
             is.close();
             System.out.println(sb.toString());
             return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<WarehouseItemStorageStock>>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<ShelfWIP> rejectEditShelf(String username, ShelfWIP shelf)
+            throws JsonGenerationException, JsonMappingException, IOException {
+        System.out.println("rejectEditShelf");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "shelf/rejectEditShelf?username=" + username;
+        System.out.println("url: " + url);
+        PostMethod httpPost = new PostMethod(url);
+
+        ShelfRequest shelfRequest = new ShelfRequest();
+        shelfRequest.setShelfWIP(shelf);
+
+        String json = mapper.writeValueAsString(shelfRequest);
+        System.out.println("json: " + json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+
+        httpPost.setRequestHeader("Content-Type", "application/json");
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: " + httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ShelfWIP>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<ShelfWIP> approveEditShelf(String username, ShelfWIP shelf)
+            throws JsonGenerationException, JsonMappingException, IOException {
+        System.out.println("approveEditShelf");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "shelf/approveEditShelf?username=" + username;
+        System.out.println("url: " + url);
+        PostMethod httpPost = new PostMethod(url);
+
+        ShelfRequest shelfRequest = new ShelfRequest();
+        shelfRequest.setShelfWIP(shelf);
+
+        String json = mapper.writeValueAsString(shelfRequest);
+        System.out.println("json: " + json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+
+        httpPost.setRequestHeader("Content-Type", "application/json");
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: " + httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ShelfWIP>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<ShelfWIP> needCorrectionEditShelf(String username, ShelfWIP shelf)
+            throws JsonGenerationException, JsonMappingException, IOException {
+        System.out.println("needCorrectionEditShelf");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "shelf/needCorrectionEditShelf?username=" + username;
+        System.out.println("url: " + url);
+        PostMethod httpPost = new PostMethod(url);
+
+        ShelfRequest shelfRequest = new ShelfRequest();
+        shelfRequest.setShelfWIP(shelf);
+
+        String json = mapper.writeValueAsString(shelfRequest);
+        System.out.println("json: " + json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+
+        httpPost.setRequestHeader("Content-Type", "application/json");
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: " + httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ShelfWIP>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<ShelfWIP> editShelfAddWIP(String username, ShelfWIP shelf, List<Storage> storageList)
+            throws JsonGenerationException, JsonMappingException, IOException {
+        System.out.println("editShelfAddWIP");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "shelf/editShelfAddWIP?username=" + username;
+        System.out.println("url: " + url);
+        PostMethod httpPost = new PostMethod(url);
+
+        Storage[] storage = storageList.toArray(new Storage[0]);
+
+        ShelfRequest shelfRequest = new ShelfRequest();
+        shelfRequest.setShelfWIP(shelf);
+        shelfRequest.setStorage(storage);
+
+        String json = mapper.writeValueAsString(shelfRequest);
+        System.out.println("json: " + json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+
+        httpPost.setRequestHeader("Content-Type", "application/json");
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: " + httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ShelfWIP>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+    
+    public ResultWrapper<ShelfWIP> editShelfEditWIP(String username, ShelfWIP shelf, List<Storage> storageList)
+            throws JsonGenerationException, JsonMappingException, IOException {
+        System.out.println("editShelfEditWIP");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "shelf/editShelfEditWIP?username=" + username;
+        System.out.println("url: " + url);
+        PostMethod httpPost = new PostMethod(url);
+
+        Storage[] storage = storageList.toArray(new Storage[0]);
+
+        ShelfRequest shelfRequest = new ShelfRequest();
+        shelfRequest.setShelfWIP(shelf);
+        shelfRequest.setStorage(storage);
+
+        String json = mapper.writeValueAsString(shelfRequest);
+        System.out.println("json: " + json);
+        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+
+        httpPost.setRequestHeader("Content-Type", "application/json");
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: " + httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<ShelfWIP>>() {
             });
         } else {
             return null;

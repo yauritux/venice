@@ -145,4 +145,37 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 					}
 		});		
 	}
+	
+	@Override
+	public void onEditShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, final Window window) {
+		RPCRequest request=new RPCRequest();
+		
+		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
+		String storageMap = Util.formXMLfromHashMap(storageDataMap);
+		
+		request.setData(shelfMap+"#"+storageMap);
+		
+		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=editShelfData&type=RPC");
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setWillHandleError(true);
+		RPCManager.setPromptStyle(PromptStyle.DIALOG);
+		RPCManager.setDefaultPrompt("Saving records...");
+		RPCManager.setShowPrompt(true);
+		
+		RPCManager.sendRequest(request, 
+				new RPCCallback () {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();
+						
+						if (rpcResponse.startsWith("0")) {
+                            SC.say("Shelf edited and need approval for changes to take place");
+                            window.destroy();
+							getView().refreshShelfData();
+						} else {
+							SC.warn("Edit shelf failed");
+						}
+					}
+		});		
+	}
 }

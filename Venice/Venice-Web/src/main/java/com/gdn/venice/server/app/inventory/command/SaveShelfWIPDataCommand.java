@@ -43,7 +43,7 @@ public class SaveShelfWIPDataCommand implements RafRpcCommand {
 		try {
 			shelfService = new ShelfManagementService();
 			shelf = new ShelfWIP();	
-			shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));			
+			shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));		
 			shelf.setApprovalStatus(ApprovalStatus.CREATED);
 			shelf.setApprovalType(ApprovalStatus.APPROVAL_CREATE);					
 			
