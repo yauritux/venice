@@ -168,6 +168,7 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
              * o ES > D 
              * o CX > D
              * o PF > FP
+             * o CR > FP
              *  CX must include the logistics info with distribution cart containing airway bill
              * also write it to the status history
              */
@@ -185,7 +186,9 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
                         || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_ES && newStatus == VeniceConstants.VEN_ORDER_STATUS_D)
                         || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_CX && newStatus == VeniceConstants.VEN_ORDER_STATUS_D)
                         //ketika PF dan status order item diupdate jadi FP, maka publish FP untuk order item tersebut
-                        || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP)) {
+                        || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP)
+                        //ketika CR dan status order item diupdate jadi FP, maka publish FP untuk order item tersebut
+                        || (existingStatus == VeniceConstants.VEN_ORDER_STATUS_CR && newStatus == VeniceConstants.VEN_ORDER_STATUS_FP)) {
 
                     _log.debug("condition for publish order item status is true");
 
