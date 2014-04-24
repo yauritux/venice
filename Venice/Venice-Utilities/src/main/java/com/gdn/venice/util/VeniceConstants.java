@@ -404,7 +404,7 @@ public interface VeniceConstants {
 	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_BII="BII";	
 	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_ANZ_PANIN="ANZ Panin";
 	
-	public static final double VEN_GDN_PPN_RATE = 10;
+	public static final double VEN_GDN_PPN_RATE = 10; //This is the global tax rate 
 	
 	public static final long VEN_PROMOTION_SHARE_CALC_METHOD_PERCENTAGE = 0;
 	public static final long VEN_PROMOTION_SHARE_CALC_METHOD_FLAT = 1;
