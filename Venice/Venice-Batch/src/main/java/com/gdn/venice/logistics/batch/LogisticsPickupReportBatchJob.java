@@ -240,6 +240,7 @@ public class LogisticsPickupReportBatchJob {
 		pickupOrderTemp.setAirwayBillNumber(airwayBillTransaction.getAirwayBillNo());			
 		pickupOrderTemp.setAirwayBillTransaction(airwayBillTransaction);
 		
+		
 		return pickupOrderTemp;		
 	}
 
@@ -541,7 +542,7 @@ public class LogisticsPickupReportBatchJob {
 					// Calculate the sum insured if the item is insured
 					if (pickupList.getInsuranceCost().compareTo(new BigDecimal(0)) > 0) {
 						
-						Double insuredAmount = (pickupList.getItemQuantity() * pickupList.getAirwayBillTransaction().getHargaProduk()) + (pickupList.getShippingCost()==null?Double.valueOf("0"):pickupList.getShippingCost().doubleValue()) + (pickupList.getGiftWrapPrice()==null?Double.valueOf("0"):pickupList.getGiftWrapPrice().doubleValue()) + (pickupList.getAirwayBillTransaction().getFixedPrice()==null?Double.valueOf("0"):pickupList.getAirwayBillTransaction().getFixedPrice().doubleValue());
+						Double insuredAmount = (pickupList.getItemQuantity() * pickupList.getAirwayBillTransaction().getHargaProduk()) + (pickupList.getShippingCost()==null?Double.valueOf("0"):pickupList.getShippingCost().doubleValue());
 						pickupOrder.setInsuredAmount(insuredAmount);
 						
 					} else {
