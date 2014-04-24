@@ -110,8 +110,7 @@ public class VenOrderItemMergeProcessor extends MergeProcessor{
                 || (existingOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_ES && newOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_RT)
                 || (existingOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_ES && newOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_D)
                 || (existingOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_CX && newOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_D)
-                || (existingOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_FP)
-                || (existingOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_CR && newOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_FP)) {
+                || (existingOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_PF && newOrderItemStatus == VeniceConstants.VEN_ORDER_STATUS_FP)) {
 			
 			return true;
 		}

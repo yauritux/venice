@@ -25,7 +25,6 @@ import com.gdn.venice.facade.spring.LogAirwayBillService;
 import com.gdn.venice.facade.spring.PublisherService;
 import com.gdn.venice.facade.spring.VenOrderItemStatusHistoryService;
 import com.gdn.venice.factory.VenOrderStatusC;
-import com.gdn.venice.factory.VenOrderStatusCR;
 import com.gdn.venice.factory.VenOrderStatusCX;
 import com.gdn.venice.factory.VenOrderStatusD;
 import com.gdn.venice.factory.VenOrderStatusES;
@@ -57,7 +56,6 @@ public class VenOrderItemMergeProcessorTest {
 
 	private VenOrderItem orderItemWithStatusFP;
 	private VenOrderItem orderItemWithStatusPF;
-	private VenOrderItem orderItemWithStatusCR;
 	private VenOrderItem orderItemWithStatusPU;
 	private VenOrderItem orderItemWithStatusES;
 	private VenOrderItem orderItemWithStatusCX;
@@ -88,9 +86,6 @@ public class VenOrderItemMergeProcessorTest {
 
 		orderItemWithStatusPF = new VenOrderItem();
 		orderItemWithStatusPF.setVenOrderStatus(VenOrderStatusPF.createVenOrderStatus());
-		
-		orderItemWithStatusCR = new VenOrderItem();
-		orderItemWithStatusCR.setVenOrderStatus(VenOrderStatusCR.createVenOrderStatus());
 		
 		orderItemWithStatusPU = new VenOrderItem();
 		orderItemWithStatusPU.setVenOrderStatus(VenOrderStatusPU.createVenOrderStatus());
@@ -438,38 +433,6 @@ public class VenOrderItemMergeProcessorTest {
 	@Test
 	public void preMerge_orderItemStatusChangeFromPFtoFP_DOESNOTAddDummyLogAirwayBill(){
 		VenOrderItem existingOrderItem = orderItemWithStatusPF;
-		VenOrderItem newOrderItem = orderItemWithStatusFP;
-		
-		commonPreMergeTest(existingOrderItem, newOrderItem);
-		
-		verify(logAirwayBillService, never()).addDummyLogAirwayBillForNewlyFPOrderItem(existingOrderItem);
-	}
-	
-	@Test
-	public void preMerge_orderItemStatusChangeFromCRtoFP_publishUpdateOrderItemStatusMessage(){
-		
-		VenOrderItem existingOrderItem = orderItemWithStatusCR;
-		VenOrderItem newOrderItem = orderItemWithStatusFP;
-		
-		commonPreMergeTest(existingOrderItem, newOrderItem);
-		
-		verify(publisherService).publishUpdateOrderItemStatus(newOrderItem);
-	}
-	
-	@Test
-	public void preMerge_orderItemStatusChangeFromCRtoFP_DOESNOTAddOrderItemStatusHistory(){
-		
-		VenOrderItem existingOrderItem = orderItemWithStatusCR;
-		VenOrderItem newOrderItem = orderItemWithStatusFP;
-		
-		commonPreMergeTest(existingOrderItem, newOrderItem);
-		
-		verify(venOrderItemStatusHistoryService, never()).saveVenOrderItemStatusHistory(newOrderItem);
-	}
-	
-	@Test
-	public void preMerge_orderItemStatusChangeFromCRtoFP_DOESNOTAddDummyLogAirwayBill(){
-		VenOrderItem existingOrderItem = orderItemWithStatusCR;
 		VenOrderItem newOrderItem = orderItemWithStatusFP;
 		
 		commonPreMergeTest(existingOrderItem, newOrderItem);

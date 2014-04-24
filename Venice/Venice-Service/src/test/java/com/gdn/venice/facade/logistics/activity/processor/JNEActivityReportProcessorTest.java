@@ -132,12 +132,6 @@ public class JNEActivityReportProcessorTest {
 	}
 	
 	@Test
-	public void isEligibleForStatusChange_existingOrderItemStatusCR_returnsFalse() throws ActivityReportFileParserException{
-		boolean result = sutSpy.isEligibleForStatusChange(VeniceConstants.VEN_ORDER_STATUS_CR);
-		assertFalse(result);
-	}
-	
-	@Test
 	public void updateOrderItemStatusBeforeAirwayBillAutomation_PUtoCX_mergeOrderItemStatusInvoked2Times(){
 		VenOrderItem dummyItem = new VenOrderItem();
 		sutSpy.updateOrderItemStatusBeforeAirwayBillAutomation(dummyItem, VenOrderStatusConstants.VEN_ORDER_STATUS_PU, VenOrderStatusConstants.VEN_ORDER_STATUS_CX);
@@ -303,7 +297,7 @@ public class JNEActivityReportProcessorTest {
 	@Test
 	public void composeLogAirwayBill_orderItemNewStatusIsCXWithInvalidReceivedDate_updateFail(){
 		ActivityReportData activityReportData = new ActivityReportData();
-		LogFileUploadLog fileUploadLog = new LogFileUploadLog();
+		LogFileUploadLog fileUploadLog = new LogFileUploadLog(); 
 		
 		VenOrderItem orderItemES = new VenOrderItem();
 		orderItemES.setVenOrderStatus(VenOrderStatusES.createVenOrderStatus());
