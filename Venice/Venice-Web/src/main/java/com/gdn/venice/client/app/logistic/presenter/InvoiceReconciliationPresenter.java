@@ -3,9 +3,6 @@ package com.gdn.venice.client.app.logistic.presenter;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
-import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.client.app.DataMessageTokens;
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.logistic.data.LogisticsData;
