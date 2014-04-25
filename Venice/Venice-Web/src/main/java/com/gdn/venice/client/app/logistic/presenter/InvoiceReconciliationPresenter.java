@@ -47,7 +47,6 @@ public class InvoiceReconciliationPresenter
 	private final DispatchAsync dispatcher;
 	public final static String invoiceReconciliationServlet = "InvoiceReconciliationPresenterServlet";
 	
-	protected static Logger _log = null;
 
 	/**
 	 * {@link InvoiceReconciliationPresenter}'s proxy.
@@ -104,10 +103,6 @@ public class InvoiceReconciliationPresenter
 	 */
 	@Override
 	public DataSource onExpandAirwayBillRow(String invoiceAirwaybillId) {
-	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.client.app.logistics.presenter.InvoiceReconciliationPresenterServlet");
-	    
-		_log.debug(invoiceAirwaybillId);
 		RafDataSource activityReportsReconciliationProblemData = LogisticsData.getInvoiceReconciliationProblemData(invoiceAirwaybillId);
 		
 		return activityReportsReconciliationProblemData;
