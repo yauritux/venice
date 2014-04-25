@@ -8,7 +8,10 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import com.djarum.raf.utilities.Locator;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.client.app.DataConstantNameTokens;
 import com.gdn.venice.client.app.task.ProcessNameTokens;
 import com.gdn.venice.facade.LogInvoiceReconCommentHistorySessionEJBRemote;
@@ -25,6 +28,8 @@ import com.gdn.venice.server.command.RafRpcCommand;
 
 public class InvoiceAirwayBillProcessCommand implements RafRpcCommand {
 	
+	protected static Logger _log = null;
+	
 	HashMap<String,String> invoiceNumbers;
 	String parameter;
 	String userName;
@@ -35,10 +40,15 @@ public class InvoiceAirwayBillProcessCommand implements RafRpcCommand {
 		Pattern p = Pattern.compile("[\\{\\}\\=\\,]++");
         String[] split = p.split( parameter );
 
+	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.logistics.presenter.commands.InvoiceAirwayBillProcessCommand");
+	    
         invoiceNumbers = new HashMap<String,String>();
         for ( int i=1; i< split.length; i+=2) {
             invoiceNumbers.put((split[i]).trim(), (split[i+1]).trim());
         }
+        
+        _log.debug("parameter = '"+parameter+"', invoice = '"+invoiceNumbers+"'");
         
 		this.parameter = parameter;
 		this.userName = userName;
@@ -51,11 +61,17 @@ public class InvoiceAirwayBillProcessCommand implements RafRpcCommand {
 		if (method.equals("submitForApproval")) {
 			BPMAdapter bpmAdapter = BPMAdapter.getBPMAdapter(userName, BPMAdapter.getUserPasswordFromLDAP(userName));
 			
+		    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+		    _log = loggerFactory.getLog4JLogger("com.gdn.venice.server.app.logistics.presenter.commands.InvoiceAirwayBillProcessCommand");
+			
 			bpmAdapter.synchronize();
 			
 			HashMap<String, String> taskData = new HashMap<String, String>();
 			taskData.put(ProcessNameTokens.INVOICERENUMBER, parameter);
 		
+			if (parameter!=null)
+			_log.debug("parameter for bpm adapter(invoice number) = "+parameter);
+			
 			try {
 				bpmAdapter.startBusinessProcess(ProcessNameTokens.LOGISTICSINVOICEAPPROVAL, taskData);
 			} catch (Exception e) {

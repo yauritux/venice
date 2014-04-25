@@ -3,6 +3,9 @@ package com.gdn.venice.client.app.logistic.presenter;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.client.app.DataMessageTokens;
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.logistic.data.LogisticsData;
@@ -43,6 +46,8 @@ public class InvoiceReconciliationPresenter
 	@SuppressWarnings("unused")
 	private final DispatchAsync dispatcher;
 	public final static String invoiceReconciliationServlet = "InvoiceReconciliationPresenterServlet";
+	
+	protected static Logger _log = null;
 
 	/**
 	 * {@link InvoiceReconciliationPresenter}'s proxy.
@@ -99,6 +104,10 @@ public class InvoiceReconciliationPresenter
 	 */
 	@Override
 	public DataSource onExpandAirwayBillRow(String invoiceAirwaybillId) {
+	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.client.app.logistics.presenter.InvoiceReconciliationPresenterServlet");
+	    
+		_log.debug(invoiceAirwaybillId);
 		RafDataSource activityReportsReconciliationProblemData = LogisticsData.getInvoiceReconciliationProblemData(invoiceAirwaybillId);
 		
 		return activityReportsReconciliationProblemData;
