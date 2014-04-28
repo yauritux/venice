@@ -104,9 +104,9 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   "SELECT COUNT(o) " +
 		   "FROM VenOrderPaymentAllocation AS o " +
 		   " JOIN o.venOrderPayment AS op " +
-		   " JOIN o.venOrder or " +
+		   " JOIN o.venOrder AS order " +
 		   "WHERE " +
-		   " or.wcsOrderId = ?1 AND " +
+		   " order.wcsOrderId = ?1 AND " +
 		   " op.referenceId = ?2 ";
 	
 	@Query(FIND_BY_VEN_ORDER)
