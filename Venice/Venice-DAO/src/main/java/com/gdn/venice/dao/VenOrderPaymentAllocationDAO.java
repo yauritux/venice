@@ -100,6 +100,10 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   "INNER JOIN FETCH a.venCity c " +
 		   "WHERE o.venOrder = ?1 ";
 	
+	public static final String FIND_BY_ORDERPAYMENTID = 
+		   "SELECT o FROM VenOrderPaymentAllocation o " +
+	       "WHERE o.venOrderPayment.orderPaymentId = ?1";
+	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
@@ -129,4 +133,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(FIND_WITH_VENADDRESS_VENCITY_BY_VENORDER)
 	public List<VenOrderPaymentAllocation> findWithVenAddressVenCityByVenOrder(VenOrder order);
+	
+	@Query(FIND_BY_ORDERPAYMENTID)
+	public List<VenOrderPaymentAllocation> findByOrderPaymentId(Long orderPaymentId);
 }

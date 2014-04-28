@@ -42,6 +42,8 @@ public interface VenOrderPaymentDAO extends JpaRepository<VenOrderPayment, Long>
 	
 	public List<VenOrderPayment> findByWcsPaymentId(String wcsPaymentId);
 	
+	public VenOrderPayment findByOrderPaymentId(Long orderPaymentId);
+	
 	@Query(FIND_BY_REFERENCEID_BANKID_PAYMENTDATE)
 	public VenOrderPayment findByReferenceIdAndAmountAndDatePayment(String referenceId, BigDecimal amount,Date paymentDate);
 

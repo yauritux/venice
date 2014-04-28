@@ -18,4 +18,6 @@ public interface VenPartyDAO extends JpaRepository<VenParty, Long>{
 	
 	@Query(FIND_BY_LEGAL_NAME)
 	public List<VenParty> findByLegalName(String fullOrLegalName);
+	
+	public VenParty findByPartyId(Long partyId);
 }

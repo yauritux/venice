@@ -21,4 +21,7 @@ public interface VenPromotionDAO extends JpaRepository<VenPromotion, Long>{
 	@Query(FIND_BY_PROMOTION_AND_MARGIN)
 	public List<VenPromotion> findByPromotionAndMargin(String promotionCode, String promotionName
 			, Integer gdnMargin, Integer merchantMargin, Integer othersMargin);	
+	
+	@Query("select o from VenPromotion o left join fetch o.venPromotionType where o.promotionId = ?1")
+	public List<VenPromotion> findByPromotionIdLeftJoinPromotionType(Long promotionId);
 }

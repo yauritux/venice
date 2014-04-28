@@ -82,6 +82,8 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 	@Query(COUNT_BY_WCSORDERITEMID_SQL)
     public int countByWcsOrderItemId(String wcsOrderItemId);
 	
+	public VenOrderItem findByOrderItemId(Long orderItemId);
+	
 	public List<VenOrderItem> findByVenOrder(VenOrder venOrder);
 	
 	@Query(FIND_WITH_VENORDERSTATUS_BY_VENORDER_SQL)
