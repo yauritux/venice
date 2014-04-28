@@ -29,7 +29,8 @@ public enum VenOrderStatusConstants {
 	 VEN_ORDER_STATUS_B(19),
 	 VEN_ORDER_STATUS_R(20),
 	 VEN_ORDER_STATUS_RF(21),
-	 VEN_ORDER_STATUS_TS(22);
+	 VEN_ORDER_STATUS_TS(22),
+	 VEN_ORDER_STATUS_S(23);
 	 
 	 private long code;
 	 
