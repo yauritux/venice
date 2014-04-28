@@ -125,7 +125,7 @@ public class MigsUploadProcessorServiceImpl implements
 	@Override
 	public String formatAuthCode(String authCode) {
 		CommonUtil.logInfo(CLASS_NAME, "Formating Auth Code : " + authCode);
-		if(!authCode.equals("null")){
+		if(authCode!=null && !authCode.equals("null")){
 			if(authCode.length()<6 ){
 				authCode="000000".substring(0, 6-authCode.length())+authCode;
 			}

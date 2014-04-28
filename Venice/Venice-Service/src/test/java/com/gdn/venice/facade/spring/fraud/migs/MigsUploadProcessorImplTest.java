@@ -98,8 +98,17 @@ public class MigsUploadProcessorImplTest {
 	}
 	
 	@Test
-	public void formatAuthCode_authCodeNull_returnsNull(){
+	public void formatAuthCode_authCodeNullString_returnsNull(){
 		String testData = "null";
+		
+		String result = sut.formatAuthCode(testData);
+		
+		assertEquals(null, result);
+	}
+	
+	@Test
+	public void formatAuthCode_authCodeNull_returnsNull(){
+		String testData = null;
 		
 		String result = sut.formatAuthCode(testData);
 		
