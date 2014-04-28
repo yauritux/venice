@@ -4,3 +4,5 @@
 target/**.*
 Venice/pom.xml
 **/*.class
+*.jasper
+*.cache.html

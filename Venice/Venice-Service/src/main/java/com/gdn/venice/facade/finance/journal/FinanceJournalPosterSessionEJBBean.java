@@ -5903,8 +5903,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								"select o from LogProviderAgreement o where o.logLogisticsProvider.logisticsProviderCode = '"
 										+ logisticProvider + "'", 0, 1);
 				*/
-				List<LogProviderAgreement> provAgreement = logProviderAgreementDAO.findByLogisticsProviderCode(
-						logisticProvider);
+				List<LogProviderAgreement> provAgreement = logProviderAgreementDAO.findByLogLogisticsProviderCode(logisticProvider);
 				if (logisticProvider != null
 						&& !logisticProvider.equalsIgnoreCase("MSG")) {
 					boolean freeShippingFlag = false;
@@ -5931,7 +5930,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 											+ VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK,
 									0, 1).get(0).getTransactionAmount();
 					*/
-					List<FinJournalTransaction> finJournalTransactions = finJournalTransactionDAO.findByCommentsAndTransactionTypeId("%"+ wcsOrderItemId + "%",
+					List<FinJournalTransaction> finJournalTransactions = finJournalTransactionDAO.findByCommentsAndTransactionTypeId(wcsOrderItemId,
 							FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
 					if (finJournalTransactions == null || finJournalTransactions.isEmpty()) {
 						throw new EJBException(
