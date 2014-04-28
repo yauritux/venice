@@ -104,6 +104,15 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   "SELECT o FROM VenOrderPaymentAllocation o " +
 	       "WHERE o.venOrderPayment.orderPaymentId = ?1";
 	
+	public static final String COUNT_BY_WCSORDERIDANDPAYMENTREFID_SQL =
+		   "SELECT COUNT(o) " +
+		   "FROM VenOrderPaymentAllocation AS o " +
+		   " JOIN o.venOrderPayment AS op " +
+		   " JOIN o.venOrder AS order " +
+		   "WHERE " +
+		   " order.wcsOrderId = ?1 AND " +
+		   " op.referenceId = ?2 ";
+	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
@@ -136,4 +145,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(FIND_BY_ORDERPAYMENTID)
 	public List<VenOrderPaymentAllocation> findByOrderPaymentId(Long orderPaymentId);
+	
+	@Query(COUNT_BY_WCSORDERIDANDPAYMENTREFID_SQL)
+	public int countByWcsOrderIdAndPaymentRef(String wcsOrderId, String paymentRefId);
 }
