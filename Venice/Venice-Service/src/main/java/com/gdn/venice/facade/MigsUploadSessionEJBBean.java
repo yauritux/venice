@@ -10,7 +10,7 @@ import com.gdn.venice.exception.MIGSFileParserException;
 import com.gdn.venice.facade.spring.fraud.migs.MigsUploadProcessorService;
 
 @Interceptors(SpringBeanAutowiringInterceptor.class)
-@Stateless(mappedName = "MIGSUploadSessionEJBBean")
+@Stateless(mappedName = "MigsUploadSessionEJBBean")
 public class MigsUploadSessionEJBBean implements 
 		MigsUploadSessionEJBLocal,
 		MigsUploadSessionEJBRemote {
