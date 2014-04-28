@@ -5931,7 +5931,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 											+ VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK,
 									0, 1).get(0).getTransactionAmount();
 					*/
-					List<FinJournalTransaction> finJournalTransactions = finJournalTransactionDAO.findByCommentsAndTransactionTypeId(wcsOrderItemId,
+					List<FinJournalTransaction> finJournalTransactions = finJournalTransactionDAO.findByCommentsAndTransactionTypeId("%"+ wcsOrderItemId + "%",
 							FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
 					if (finJournalTransactions == null || finJournalTransactions.isEmpty()) {
 						throw new EJBException(
