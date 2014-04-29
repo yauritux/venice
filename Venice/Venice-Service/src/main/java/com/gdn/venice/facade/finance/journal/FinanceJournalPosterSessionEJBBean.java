@@ -26,6 +26,7 @@ import com.gdn.venice.facade.FinArFundsInJournalTransactionSessionEJBLocal;
 import com.gdn.venice.facade.FinArFundsInReconRecordSessionEJBLocal;
 import com.gdn.venice.facade.FinArFundsInRefundSessionEJBLocal;
 import com.gdn.venice.facade.FinJournalApprovalGroupSessionEJBLocal;
+import com.gdn.venice.facade.FinJournalSessionEJBLocal;
 import com.gdn.venice.facade.FinJournalTransactionSessionEJBLocal;
 import com.gdn.venice.facade.FinSalesRecordSessionEJBLocal;
 import com.gdn.venice.facade.LogProviderAgreementSessionEJBLocal;
@@ -153,6 +154,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinArFundsInRefundSessionEJBLocal refundRecordHome = (FinArFundsInRefundSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinArFundsInRefundSessionEJBLocal.class,
 							"FinArFundsInRefundSessionEJBBeanLocal");
+			
+			FinJournalSessionEJBLocal journalCashRecieveHome = (FinJournalSessionEJBLocal) this._genericLocator
+			.lookupLocal(FinJournalSessionEJBLocal.class,
+					"FinJournalSessionEJBBeanLocal");
 
 			if (finArFundsInReconRecordIdList.isEmpty()) {
 				throw new EJBException(
@@ -178,10 +183,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
-			FinJournal finJournalCashReceive = new FinJournal();
+			FinJournal finJournalCashReceive = journalCashRecieveHome.queryByRange("select o from FinJournal o where o.journalId='"+VeniceConstants.FIN_JOURNAL_CASH_RECEIVE+"'", 0, 1).get(0);
+;
 			// FinJournalApprovalGroup finJournalApprovalGroups = null;
 			int count = 0;
-
+			
 			/*
 			 * Process the list: o create the grouping record o create the
 			 * funds-in journal transactions as credits o create bank account
@@ -232,9 +238,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					if (finJournalApprovalGroup == null
 							&& finArFundsInJournalTransactionList.isEmpty()) {
-						finJournalCashReceive
-								.setJournalId(VeniceConstants.FIN_JOURNAL_CASH_RECEIVE);
-
+		/*				finJournalCashReceive
+								.setJournalId(VeniceConstants.FIN_JOURNAL_CASH_RECEIVE);*/
+						
+					
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyy-MMM-dd");
 						finJournalApprovalGroup = new FinJournalApprovalGroup();
