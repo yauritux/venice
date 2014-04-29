@@ -18,6 +18,7 @@ import com.gdn.venice.exception.FundInFileAlreadyUploadedException;
 import com.gdn.venice.exception.FundInFileParserException;
 import com.gdn.venice.exception.FundInNoFinancePeriodFoundException;
 import com.gdn.venice.exportimport.finance.dataimport.MT942_FileReader;
+import com.gdn.venice.finance.dataexportimport.BCA_VA_IB_Record;
 import com.gdn.venice.finance.dataexportimport.MT942_Record;
 import com.gdn.venice.hssf.PojoInterface;
 import com.gdn.venice.persistence.FinApprovalStatus;
@@ -143,18 +144,43 @@ public class MandiriVAFundInServiceImpl extends AbstractFundInService {
 
 	@Override
 	public FundInData mergeAndSumDuplicate(ArrayList<PojoInterface> fundInList) {
-		CommonUtil.logDebug(CLASS_NAME, "No fund in duplication check for this fund in");
+		
+		CommonUtil.logDebug(CLASS_NAME, "Check for duplicate fund in");
 		FundInData fundInData = new FundInData();
 		
-		MT942_Record rec = null;
+		MT942_Record currentRecord = null;
+		MT942_Record otherRecord = null;
+		String currentAccountNumber = null;
+		String otherAccountNumber = null;
 		
 		for(int i = 0 ; i < fundInList.size(); i++){
-			rec = (MT942_Record) fundInList.get(i);
+			currentRecord = (MT942_Record) fundInList.get(i);
+			
+			fundInList.remove(i);
+			i = -1;
+			
+			currentAccountNumber = currentRecord.getAccountNumber();
+			
+			for(int j = 0 ; j < fundInList.size(); j++){
+				otherRecord = (MT942_Record) fundInList.get(j);
 				
-			fundInData.getFundInList().add(rec);
+				otherAccountNumber = otherRecord.getAccountNumber();
+				
+				if(currentAccountNumber.equals(otherAccountNumber)){
+					CommonUtil.logDebug(CLASS_NAME, "Duplicate Fund In with Account Number" + currentAccountNumber);
+					fundInList.remove(j);
+					j = 0;
+					
+					currentRecord.setPaymentAmount(currentRecord.getPaymentAmount() + otherRecord.getPaymentAmount());
+					currentRecord.setBankFee(currentRecord.getBankFee() + otherRecord.getBankFee());
+				}
+			}
+			
+			fundInData.getFundInList().add(currentRecord);
 		}
 		
 		return fundInData;
+		
 	}
 	
 	public FinArFundsInReconRecord processEachFundIn(PojoInterface pojo, FinArFundsInReport finArFundsInReport, boolean isNextDayPayment) throws ParseException{
