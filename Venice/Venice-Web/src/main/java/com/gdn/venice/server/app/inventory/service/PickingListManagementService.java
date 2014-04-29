@@ -24,6 +24,7 @@ import com.gdn.inventory.exchange.entity.module.outbound.InventoryRequestItem;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
 import com.gdn.inventory.exchange.entity.module.outbound.PickPackageSalesOrder;
 import com.gdn.inventory.exchange.entity.module.outbound.PickingListDetail;
+import com.gdn.inventory.exchange.entity.request.PickPackagePrintRequest;
 import com.gdn.inventory.exchange.entity.request.PickPackageRequest;
 import com.gdn.inventory.exchange.type.InventoryRequestStatus;
 import com.gdn.inventory.exchange.type.SOStatus;
@@ -327,24 +328,13 @@ public class PickingListManagementService{
         }
 	}
     
-	public InventoryPagingWrapper<PickPackage> getPackageIRByPicker(String username, String pickerName, String warehouseId, RafDsRequest request) throws HttpException, IOException{
-		System.out.println("getPackageIRByPicker");
+    public List<PickPackagePrintRequest> getPickPackageIRPrint(String pickerId, String warehouseId) throws HttpException, IOException{
+		System.out.println("getPickPackageIRPrint");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "pickPackaging/getAllCreatedIR?username="+username
-				+ "&page=" + request.getParams().get("page")
-                + "&limit=" + request.getParams().get("limit");
+                + "pickPackaging/getPickPackageIRPrint?warehouseId=" + warehouseId
+                + "&pickerId=" + pickerId;
         PostMethod httpPost = new PostMethod(url);
         System.out.println("url: "+url);
-        
-        Map<String, Object> searchMap = new HashMap<String, Object>();
-        searchMap.put("status", InventoryRequestStatus.APPROVED.toString());
-        searchMap.put("picker", pickerName);
-        searchMap.put("warehouseId", warehouseId);
-        
-        String json = mapper.writeValueAsString(searchMap);
-        System.out.println("json: "+json);
-        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-        httpPost.setRequestHeader("Content-Type", "application/json");
         
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println("response code: "+httpCode);
@@ -357,7 +347,7 @@ public class PickingListManagementService{
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PickPackage>>() {});
+            return mapper.readValue(sb.toString(), new TypeReference<List<PickPackagePrintRequest>>() {});
         } else {
         	return null;
         }
@@ -452,24 +442,13 @@ public class PickingListManagementService{
         }
 	}	
 	
-	public InventoryPagingWrapper<PickPackage> getPackageSOByPicker(String username, String pickerName, String warehouseId, RafDsRequest request) throws HttpException, IOException{
-		System.out.println("getPackageSOByPicker");
+   public List<PickPackagePrintRequest> getPickPackageSOPrint(String pickerId, String warehouseId) throws HttpException, IOException{
+		System.out.println("getPickPackageSOPrint");
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "pickPackaging/getAllCreatedSO?username="+username
-				+ "&page=" + request.getParams().get("page")
-                + "&limit=" + request.getParams().get("limit");
+                + "pickPackaging/getPickPackageSOPrint?warehouseId=" + warehouseId
+                + "&pickerId=" + pickerId;
         PostMethod httpPost = new PostMethod(url);
         System.out.println("url: "+url);
-        
-        Map<String, Object> searchMap = new HashMap<String, Object>();
-        searchMap.put("status", SOStatus.PICK_PACKAGE_CREATED.toString());
-        searchMap.put("picker", pickerName);
-        searchMap.put("warehouseId", warehouseId);
-        
-        String json = mapper.writeValueAsString(searchMap);
-        System.out.println("json: "+json);
-        httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-        httpPost.setRequestHeader("Content-Type", "application/json");
         
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println("response code: "+httpCode);
@@ -482,7 +461,7 @@ public class PickingListManagementService{
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<PickPackage>>() {});
+            return mapper.readValue(sb.toString(), new TypeReference<List<PickPackagePrintRequest>>() {});
         } else {
         	return null;
         }

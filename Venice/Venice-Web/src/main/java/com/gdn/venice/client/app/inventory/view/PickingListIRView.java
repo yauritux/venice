@@ -138,7 +138,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
      				for (int i = 0; i < records.length; i++) {
      					ListGridRecord selectedRecord = records[i];  
      					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){     						
-     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME));
+     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERID));
      					}
      				}
      				
@@ -151,8 +151,8 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
      					host = host.substring(0, host.indexOf("Venice/"));
      				}
      				
-					for(String pickerName : set){		
-	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListIRExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerName=" + pickerName, "_blank", null);
+					for(String pickerId : set){		
+	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListIRExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerId=" + pickerId, "_blank", null);
 					}    							
      			}
      		});

@@ -138,7 +138,7 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
      				for (int i = 0; i < records.length; i++) {
      					ListGridRecord selectedRecord = records[i];  
      					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).isEmpty()){     						
-     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME));
+     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERID));
      					}
      				}
      				
@@ -151,8 +151,8 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
      					host = host.substring(0, host.indexOf("Venice/"));
      				}
      				
-					for(String pickerName : set){		
-	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListSOExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerName=" + pickerName, "_blank", null);
+					for(String pickerId : set){		
+	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListSOExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerId=" + pickerId, "_blank", null);
 					}    							
      			}
      		});

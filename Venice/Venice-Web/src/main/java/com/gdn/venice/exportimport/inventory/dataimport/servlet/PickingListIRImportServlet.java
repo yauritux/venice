@@ -96,7 +96,7 @@ public class PickingListIRImportServlet extends HttpServlet {
 			ExcelToPojo x = null;
 			try {
 				x = new ExcelToPojo(PickingListIR.class, System.getenv("VENICE_HOME") + "/files/template/PickingListIRReport.xml", filePath + fileName, 1, 0);
-				x = x.getPojoToExcel(13, "1", "0");
+				x = x.getPojoToExcel(14, "1", "0");
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				message = LogisticsServletConstants.EXCEPTION_TEXT_UPLOAD_FILE_WRITE + fileName + " :" + e1.getMessage();				
@@ -130,7 +130,8 @@ public class PickingListIRImportServlet extends HttpServlet {
 				System.out.println("warehouseSkuId: "+pickingListIR.getWarehouseSkuId());
 				System.out.println("shelfCode: "+pickingListIR.getShelfCode());
 				System.out.println("storageCode: "+pickingListIR.getStorageCode());
-				System.out.println("qtyPicked: "+pickingListIR.getQtyPicked());		
+				System.out.println("qtyPicked: "+pickingListIR.getQtyPicked());	
+				System.out.println("containerID: "+pickingListIR.getContainerId());	
 				
 				PickPackageRequest pickPackageRequest = new PickPackageRequest();
 				pickPackageRequest.setPackageId(pickingListIR.getPackageId());
@@ -141,7 +142,8 @@ public class PickingListIRImportServlet extends HttpServlet {
 				pickPackageRequest.setWarehouseSkuId(pickingListIR.getWarehouseSkuId());
 				pickPackageRequest.setShelfCode(pickingListIR.getShelfCode());
 				pickPackageRequest.setStorageCode(pickingListIR.getStorageCode());
-				pickPackageRequest.setQtyPicked(pickingListIR.getQtyPicked());				
+				pickPackageRequest.setQtyPicked(pickingListIR.getQtyPicked());	
+				pickPackageRequest.setContainerId(pickingListIR.getContainerId());			
 				
 				pickPackageRequestList.add(pickPackageRequest);
 			}

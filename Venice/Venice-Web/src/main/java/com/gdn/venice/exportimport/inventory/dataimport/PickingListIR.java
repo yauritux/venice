@@ -17,6 +17,7 @@ public class PickingListIR implements PojoInterface {
 	String storageCode;
 	String qtyStorage;
 	String qtyPicked;
+	String containerId;
 	
 	public String getPackageId() {
 		return packageId;
@@ -96,4 +97,10 @@ public class PickingListIR implements PojoInterface {
 	public void setQtyPicked(String qtyPicked) {
 		this.qtyPicked = qtyPicked;
 	}	
+	public String getContainerId() {
+		return containerId;
+	}
+	public void setContainerId(String containerId) {
+		this.containerId = containerId;
+	}
 }
