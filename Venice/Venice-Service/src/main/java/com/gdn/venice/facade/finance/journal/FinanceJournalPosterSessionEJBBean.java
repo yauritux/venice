@@ -183,10 +183,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
-			FinJournal finJournalCashReceive = null;
+			FinJournal finJournalCashReceive = journalCashRecieveHome.queryByRange("select o from FinJournal o where o.journalId='"+VeniceConstants.FIN_JOURNAL_CASH_RECEIVE+"'", 0, 1).get(0);
+;
 			// FinJournalApprovalGroup finJournalApprovalGroups = null;
 			int count = 0;
-
+			
 			/*
 			 * Process the list: o create the grouping record o create the
 			 * funds-in journal transactions as credits o create bank account
@@ -240,8 +241,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 		/*				finJournalCashReceive
 								.setJournalId(VeniceConstants.FIN_JOURNAL_CASH_RECEIVE);*/
 						
-						finJournalCashReceive=journalCashRecieveHome.queryByRange("select o from FinJournal o where o.journalId='"+VeniceConstants.FIN_JOURNAL_CASH_RECEIVE+"'", 0, 1).get(0);
-
+					
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyy-MMM-dd");
 						finJournalApprovalGroup = new FinJournalApprovalGroup();
