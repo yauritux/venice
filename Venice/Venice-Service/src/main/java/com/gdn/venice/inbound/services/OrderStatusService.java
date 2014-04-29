@@ -1,7 +1,5 @@
 package com.gdn.venice.inbound.services;
 
-import java.util.List;
-
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.persistence.VenOrderStatus;
 
@@ -12,7 +10,6 @@ import com.gdn.venice.persistence.VenOrderStatus;
  */
 public interface OrderStatusService {
 	
-	public List<VenOrderStatus> synchronizeVenOrderStatusReferences
-	   (List<VenOrderStatus> orderStatusReferences)
+	public VenOrderStatus synchronizeVenOrderStatusReferences(VenOrderStatus venOrderStatus)
 	   throws VeniceInternalException;
 }

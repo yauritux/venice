@@ -1,6 +1,5 @@
 package com.gdn.venice.inbound.services.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,41 +29,45 @@ public class ContactDetailTypeServiceImpl implements ContactDetailTypeService {
 	private VenContactDetailTypeDAO venContactDetailTypeDAO;
 	
 	@Override
-	public List<VenContactDetailType> synchronizeVenContactDetailTypeReferences(
-			List<VenContactDetailType> contactDetailTypes) throws VeniceInternalException {
+	public VenContactDetailType synchronizeVenContactDetailType(
+			VenContactDetailType contactDetailType) throws VeniceInternalException {
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
-				, "synchronizeVenContactDetailTypeReferences::BEGIN,contactDetailTypes="
-				  + contactDetailTypes);
+				, "synchronizeVenContactDetailType::BEGIN,contactDetailType="
+				  + contactDetailType);
 		
-		List<VenContactDetailType> synchronizedContactDetailTypes = new ArrayList<VenContactDetailType>();
+		VenContactDetailType synchronizedContactDetailType = new VenContactDetailType();
 		
-		if (contactDetailTypes != null) {
-			for (VenContactDetailType contactDetailType : contactDetailTypes) {
+		if (contactDetailType != null) {
+			//for (VenContactDetailType contactDetailType : contactDetailTypes) {
 				if (contactDetailType.getContactDetailTypeDesc() != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "synchronizeVenContactDetailTypeReferences::Restricting VenContactDetailType... :" 
+							, "synchronizeVenContactDetailType::Restricting VenContactDetailType... :" 
 									+ contactDetailType.getContactDetailTypeDesc());
 
 					List<VenContactDetailType> contactDetailTypeList = venContactDetailTypeDAO.findByContactDetailTypeDesc(contactDetailType.getContactDetailTypeDesc());
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "::synchronizeVenContactDetailTypeReferences::contactDetailTypeList.size = "
+							, "::synchronizeVenContactDetailType::contactDetailTypeList.size = "
 									+ (contactDetailTypeList != null ? contactDetailTypeList.size() : 0));
-					if (contactDetailTypeList == null || (contactDetailTypeList.size() == 0)) {
+					if (contactDetailTypeList == null || (contactDetailTypeList.isEmpty())) {
 						throw CommonUtil.logAndReturnException(new InvalidOrderException(
 								"Contact detail type does not exist", VeniceExceptionConstants.VEN_EX_999999)
 						, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 					} else {
+						/*
 						VenContactDetailType venContactDetailType = contactDetailTypeList.get(0);
 						synchronizedContactDetailTypes.add(venContactDetailType);
-						CommonUtil.logDebug(this.getClass().getCanonicalName()
-								, "synchronizeVenContactDetailTypeReferences::successfully added contactDetailType into synchronizedContactDetailTypes");
+						*/
+						synchronizedContactDetailType = contactDetailTypeList.get(0);
 					}
 				}		
-			} //end of 'for'
+			//} //end of 'for'
 		}
 		
-		return synchronizedContactDetailTypes;
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenContactDetailType::END,returning synchronizedContactDetailType=" + synchronizedContactDetailType);
+		
+		return synchronizedContactDetailType;
 	}
 
 }

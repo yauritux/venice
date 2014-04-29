@@ -208,8 +208,7 @@
 <!--		<entity name="VenReturItemContactDetail" pkmethod="getReturItemContactDetailId" />-->
 <!--  		<entity name="FrdParameterRule41" pkmethod="getId" />-->
 <!--  		<entity name="FrdParameterRule42" pkmethod="getId" />-->
-<!--  		<entity name="FrdParameterRule43" pkmethod="getId" />-->
-	  		<entity name="FrdParameterRule44" pkmethod="getId" />
+	  		<entity name="FrdParameterRule43" pkmethod="getId" />
 	</facade>
 	<templates>
 		<localInterfaceTemplate>/home/software/venice_workspace/GDN-VENICE-Facade/ejbModule/com/djarum/raf/facade/generator/SessionBeanLocalInterfaceTemplate.jtl</localInterfaceTemplate>

@@ -95,7 +95,7 @@ public class LogInvoiceReportMDB implements MessageListener {
             if (fileUploadLog.getFileUploadFormat().equals("JNE")) {
                 processJNEFormat(fileUploadLog);
             }
-
+            
             if (fileUploadLog.getFileUploadFormat().equals("NCS")) {
                 processNCSFormat(fileUploadLog);
             }

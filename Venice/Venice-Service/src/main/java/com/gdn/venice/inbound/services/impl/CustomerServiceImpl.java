@@ -65,6 +65,7 @@ public class CustomerServiceImpl implements CustomerService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::Persisting VenCustomer... :" + venCustomer.getCustomerUserName());
 				// If the customer already exists then return it, else persist everything
+				
 				VenCustomer existingVenCustomer = findByWcsCustomerId(venCustomer.getWcsCustomerId());
 				if (existingVenCustomer != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -74,7 +75,7 @@ public class CustomerServiceImpl implements CustomerService {
 					*/
 					venCustomer = existingVenCustomer;
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistCustomer::venCustomer.customerId = "+ venCustomer.getCustomerId());					
+							, "persistCustomer::venCustomer.customerId = "+ venCustomer.getCustomerId());	
 				}
 
 				CommonUtil.logDebug(this.getClass().getCanonicalName()

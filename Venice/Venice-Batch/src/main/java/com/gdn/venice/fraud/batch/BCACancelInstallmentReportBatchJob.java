@@ -187,7 +187,7 @@ public class BCACancelInstallmentReportBatchJob {
         		
         		_log.info("send email");
     			EmailSender es = new EmailSender();
-    			Boolean sendFiles = es.sendCancelInstallmentFiles();
+    			Boolean sendFiles = es.sendCancelInstallmentFiles(VeniceConstants.FRAUD_CANCEL_INSTALLMENT_BANK_REPORT_BATCH_JOB_BCA);
     			if (!sendFiles) {
     				_log.error("send files failed");
     			}else{

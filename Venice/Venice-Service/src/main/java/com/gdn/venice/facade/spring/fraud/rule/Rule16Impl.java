@@ -58,21 +58,22 @@ public class Rule16Impl implements Rule {
 			String customerNameOtherOrder = getCustomerName(otherOrder);
 			
 			if(customerUsernameCurrentOrder.equalsIgnoreCase(customerUsernameOtherOrder) || 
-			   customerNameCurrentOrder.equalsIgnoreCase(customerNameOtherOrder)){
+			   customerNameCurrentOrder.equalsIgnoreCase(customerNameOtherOrder) 
+			   && !customerUsernameOtherOrder.trim().isEmpty() && !customerNameOtherOrder.trim().isEmpty()){
 				CommonUtil.logInfo(CLASS_NAME, "Order : " + order.getWcsOrderId() + " matched username/customer name  with Order : " + otherOrder.getWcsOrderId());
 				noOfOrderHit++;
 				continue;
 			}
 			
 			String customerEmailOtherOrder = getCustomerEmail(otherOrder);
-			if(customerEmailCurrentOrder.equalsIgnoreCase(customerEmailOtherOrder)){
+			if(customerEmailCurrentOrder.equalsIgnoreCase(customerEmailOtherOrder) && !customerEmailCurrentOrder.trim().isEmpty()){
 				CommonUtil.logInfo(CLASS_NAME, "Order : " + order.getWcsOrderId() + " matched email with Order : " + otherOrder.getWcsOrderId());
 				noOfOrderHit++;
 				continue;
 			}
 			
 			String customerAddressOtherOrder = getCustomerAddress(otherOrder);
-			if(customerAddressCurrentOrder.equalsIgnoreCase(customerAddressOtherOrder)){
+			if(customerAddressCurrentOrder.equalsIgnoreCase(customerAddressOtherOrder) && !customerAddressCurrentOrder.trim().isEmpty()){
 				CommonUtil.logInfo(CLASS_NAME, "Order : " + order.getWcsOrderId() + " matched address with Order : " + otherOrder.getWcsOrderId());
 				noOfOrderHit++;
 				continue;

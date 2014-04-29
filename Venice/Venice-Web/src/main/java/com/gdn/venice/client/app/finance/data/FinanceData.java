@@ -19,7 +19,6 @@ import com.smartgwt.client.data.fields.DataSourceFloatField;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.DSOperationType;
-import com.smartgwt.client.types.FieldType;
 
 public class FinanceData {
 
@@ -327,7 +326,7 @@ public class FinanceData {
             new DataSourceFloatField(DataNameTokens.FINJOURNALTRANSACTION_DEBITTRANSACTIONMOUNT, "Debit"),
             new DataSourceFloatField(DataNameTokens.FINJOURNALTRANSACTION_CREDITTRANSACTIONMOUNT, "Credit"),
             new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_FINTRANSACTIONSTATUS_TRANSACTIONSTATUSDESC, "Status"),
-            new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, "Comments"),
+            new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_COMMENTS, "Comments"),
             new DataSourceTextField(DataNameTokens.FINJOURNALTRANSACTION_GROUP_JOURNAL, "Group Desc")
         };
         dataSourceFields[0].setPrimaryKey(true);
@@ -626,11 +625,11 @@ public class FinanceData {
             new DataSourceIntegerField(DataNameTokens.FINARFUNDSINREFUND_REFUNDRECORDID, "ID"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_WCSORDERID, "Order ID"),
             new DataSourceDateField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_ORDERDATE, "Order Date"),
-            new DataSourceField(DataNameTokens.FINARFUNDSINREFUND_REFUNDTIMESTAMP, FieldType.DATETIME, "Refund Date"),
+            new DataSourceDateField(DataNameTokens.FINARFUNDSINREFUND_REFUNDTIMESTAMP, "Refund Date"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME, "Customer Name"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_ACTION_TAKEN, "Action Taken"),
             new DataSourceFloatField(DataNameTokens.FINARFUNDSINREFUND_APAMOUNT, "A/P Amount"),
-            new DataSourceFloatField(DataNameTokens.FINARFUNDSINREFUND_BANKFEE, "Bank Fee"),
+            new DataSourceFloatField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE, "Bank Fee"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON, "Reason")
         };
         dataSourceFields[0].setPrimaryKey(true);
@@ -639,7 +638,7 @@ public class FinanceData {
                 "/response/data/*",
                 GWT.getHostPageBaseURL() + PaymentProcessingPresenter.paymentProcessingPresenterServlet + "?method=fetchRefundPaymentProcessingData&type=DataSource",
                 null,
-                GWT.getHostPageBaseURL() + PaymentProcessingPresenter.paymentProcessingPresenterServlet + "?method=UpdateRefundPaymentProcessingData&type=DataSource",
+                null,
                 null,
                 dataSourceFields);
 

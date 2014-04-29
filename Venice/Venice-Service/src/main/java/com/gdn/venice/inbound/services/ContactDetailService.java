@@ -19,11 +19,19 @@ public interface ContactDetailService {
 			, List<VenContactDetail> existingVenContactDetailList, List<VenContactDetail> newVenContactDetailList)
 			throws VeniceInternalException;
 	
+	public VenContactDetail persistContactDetail(VenContactDetail venContactDetail) throws VeniceInternalException;
+	
 	public List<VenContactDetail> persistContactDetails(List<VenContactDetail> venContactDetails) 
 			throws VeniceInternalException; 
+	
+	public VenContactDetail persistContactDetail(VenContactDetail venContactDetail, VenParty venParty)
+	        throws VeniceInternalException;
+	
+	public List<VenContactDetail> persistContactDetails(List<VenContactDetail> venContactDetails, VenParty venParty) 
+			throws VeniceInternalException;	
 	
 	public VenContactDetail synchronizeVenContactDetailReferenceData(VenContactDetail venContactDetail)
 	        throws VeniceInternalException;
 	
-	public List<VenContactDetail> synchronizeVenContactDetailReferences(List<VenContactDetail> contactDetailReferences);
+	public List<VenContactDetail> synchronizeVenContactDetailReferences(List<VenContactDetail> contactDetailReferences);	
  }

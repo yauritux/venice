@@ -28,6 +28,7 @@ public enum VenWCSPaymentTypeConstants {
 	 VEN_WCS_PAYMENT_TYPE_ANZ(20, "ANZ"),
 	 VEN_WCS_PAYMENT_TYPE_CIMBCreditCard(21, "CIMBCreditCard"),
 	 VEN_WCS_PAYMENT_TYPE_DanamonCreditCard(22, "DanamonCreditCard"),
+	 VEN_WCS_PAYMENT_TYPE_VISACreditCard(23,"VISACreditCard"),
 	//this is only for wcs
 	 VEN_WCS_PAYMENT_TYPE_PartialFulfillment(19, "PartialFulfillment");
 	 
