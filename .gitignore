@@ -4,5 +4,7 @@
 target/**.*
 Venice/pom.xml
 **/*.class
-**/*.jasper
+Venice/Venice-Web/src/main/java/com/gdn/venice/server/app/fraud/report/*.jasper
+Venice/Venice-Web/src/main/webapp/Venice/Venice.nocache.js
+Venice/Venice-Web/src/main/webapp/WEB-INF/lib/*.jar
 *.cache.html
