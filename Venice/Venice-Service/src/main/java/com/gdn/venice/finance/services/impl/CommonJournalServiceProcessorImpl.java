@@ -22,6 +22,11 @@ import com.gdn.venice.persistence.FinJournalApprovalGroup;
 import com.gdn.venice.util.CommonUtil;
 
 /**
+ * This class should be the first service's class (first entry gate) 
+ * in the JournalServiceProcessor chain (CoR) 
+ * before another class in the same particular chain going to be executed.
+ * Since JournalServiceProcessor is using CoR, therefore priority should be 
+ * considered carefully.
  * 
  * @author yauritux
  *
@@ -32,6 +37,8 @@ public class CommonJournalServiceProcessorImpl implements JournalServiceProcesso
 
 	@Autowired
 	private FinArFundsInReconRecordDAO finArFundsInReconRecordDAO;
+	
+	@Autowired
 	private FinArFundsInAllocatePaymentDAO finArFundsInAllocatePaymentDAO;
 	
 	private JournalServiceProcessor nextProcessor;
@@ -58,11 +65,12 @@ public class CommonJournalServiceProcessorImpl implements JournalServiceProcesso
 			   , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 		}
 		
+		// Read all the relevant funds in records from the database
 		List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
 		for (Object reconciliationRecordID : finArFundsInReconRecordIdList) {
 			FinArFundsInReconRecord finArFundsInReconRecord = null;
 			try {
-				finArFundsInReconRecord = finArFundsInReconRecordDAO.findActiveRecordById((Long) reconciliationRecordID);
+				finArFundsInReconRecord = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved((Long) reconciliationRecordID);
 			} catch (Exception e) {
 				throw CommonUtil.logAndReturnException(new NoRecordFoundException(
 						"cannot find reconciliation record. perhaps due to cannot parse reconciliationRecordIDList into appropriate type.", e)
@@ -78,6 +86,7 @@ public class CommonJournalServiceProcessorImpl implements JournalServiceProcesso
 			}
 		}
 		
+		//proceed with journal
 		for (FinArFundsInReconRecord reconRecord : reconRecordList) {
 			List<FinArFundsInAllocatePayment> idRecordDestination = finArFundsInAllocatePaymentDAO.findByIdReconRecordDest(
 					reconRecord.getReconciliationRecordId());

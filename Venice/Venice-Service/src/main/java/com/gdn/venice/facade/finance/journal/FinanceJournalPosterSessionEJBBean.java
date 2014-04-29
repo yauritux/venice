@@ -57,8 +57,10 @@ import com.gdn.venice.dao.VenOrderPaymentDAO;
 import com.gdn.venice.dao.VenPartyDAO;
 import com.gdn.venice.dao.VenPromotionDAO;
 import com.gdn.venice.dao.VenSettlementRecordDAO;
+import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.facade.VenSettlementRecordSessionEJBLocal;
 import com.gdn.venice.facade.util.FinancePeriodUtil;
+import com.gdn.venice.finance.services.FinAccountService;
 import com.gdn.venice.logistics.integration.AirwayBillEngineClientConnector;
 import com.gdn.venice.logistics.integration.AirwayBillEngineConnector;
 import com.gdn.venice.logistics.integration.bean.AirwayBillTransaction;
@@ -115,6 +117,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 	private EntityManager em;
 	
 	@Autowired
+	private FinAccountService finAccountService;
+	
+	@Autowired
 	private FinApManualJournalTransactionDAO finApManualJournalTransactionDAO;
 	
 	@Autowired
@@ -168,8 +173,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 	@Autowired
 	private VenSettlementRecordDAO venSettlementRecordDAO;
 	
-	//protected static Logger _log = null;
-	//protected Locator<Object> _genericLocator = null;
 	private static BigDecimal GDNPPN_DIVISOR = new BigDecimal(
 			VeniceConstants.VEN_GDN_PPN_RATE).divide(new BigDecimal(100), 2,
 			RoundingMode.HALF_UP).add(new BigDecimal(1));
@@ -179,22 +182,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 */
 	public FinanceJournalPosterSessionEJBBean() {
 		super();
-		/*
-		Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-		_log = loggerFactory
-				.getLog4JLogger("com.gdn.venice.facade.finance.journal.FinanceJournalPosterSessionEJBBean");
-		*/
-
-		/*
-		try {
-			// Establish a JNDI connection when the bean is started
-			this._genericLocator = new Locator<Object>();
-		} catch (Exception e) {
-			CommonUtil.logError(this.getClass().getCanonicalName(), "FinanceJournalPosterSessionEJBBean::An exception occured when looking instantiating the generic locator"
-					+ e.getMessage());
-			e.printStackTrace();
-		}
-		*/
 	}
 
 	/*
@@ -213,42 +200,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 		Long startTime = System.currentTimeMillis();
 
 		try {
-			/*
-			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
-							"FinArFundsInReconRecordSessionEJBBeanLocal");
-			*/
-
-			/*
-			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
-							"FinJournalTransactionSessionEJBBeanLocal");
-			*/
-
-			/*
-			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
-							"FinJournalApprovalGroupSessionEJBBeanLocal");
-			*/
-
-			/*
-			FinArFundsInAllocatePaymentSessionEJBLocal finArFundsInAllocateHome = (FinArFundsInAllocatePaymentSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							FinArFundsInAllocatePaymentSessionEJBLocal.class,
-							"FinArFundsInAllocatePaymentSessionEJBBeanLocal");
-			*/
-
-			/*
-			FinArFundsInJournalTransactionSessionEJBLocal finArFundsInJournalTransactionHome = (FinArFundsInJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							FinArFundsInJournalTransactionSessionEJBLocal.class,
-							"FinArFundsInJournalTransactionSessionEJBBeanLocal");
-
-			FinArFundsInRefundSessionEJBLocal refundRecordHome = (FinArFundsInRefundSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInRefundSessionEJBLocal.class,
-							"FinArFundsInRefundSessionEJBBeanLocal");
-			*/
-
 			if (finArFundsInReconRecordIdList.isEmpty()) {
 				throw new EJBException(
 						"Empty list passed to postCashReceiveJournalTransaction. The reconciliation record list must contain entries");
@@ -257,18 +208,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			// Read all the relevant funds in records from the database
 			List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
 			for (Long reconciliationRecordId : finArFundsInReconRecordIdList) {
-				/*
-				List<FinArFundsInReconRecord> reconRecordListTemp = fundsInReconRecordHome
-						.queryByRange(
-								"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-										+ reconciliationRecordId
-										+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-										+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-								0, 0);
-				*/
-				List<FinArFundsInReconRecord> reconRecordListTemp = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
-				if (!reconRecordListTemp.isEmpty()) {
-					reconRecordList.add(reconRecordListTemp.get(0));
+				FinArFundsInReconRecord reconRecord = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
+				if (reconRecord != null) {
+					reconRecordList.add(reconRecord);
 				} else {
 					throw new EJBException(
 							"List passed to postCashReceiveJournalTransaction contains no valid keys. The reconciliation record list must contain valid keys for existing reconciliation records");
@@ -302,23 +244,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.getFinArFundsInActionApplied()
 						.getActionAppliedId()
 						.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
-					/*
-					itemsAllocate = finArFundsInAllocateHome.queryByRange(
-							"select o from FinArFundsInAllocatePayment o where o.idReconRecordSource="
-									+ reconRecord.getReconciliationRecordId()
-									+ " and o.isactive=true", 0, 0);
-				    */
 					itemsAllocate = finArFundsInAllocatePaymentDAO.findByIdReconRecordSourceIsActive(reconRecord.getReconciliationRecordId());
 				}
 
-				/*
-				finArFundsInJournalTransactionList = finArFundsInJournalTransactionHome
-						.queryByRange(
-								"select o from FinArFundsInJournalTransaction o where o.finArFundsInReconRecords.reconciliationRecordId="
-										+ reconRecord
-												.getReconciliationRecordId(),
-								0, 0);
-			    */
 				finArFundsInJournalTransactionList = finArFundsInJournalTransactionDAO.findByReconcilicationRecordId(
 						reconRecord.getReconciliationRecordId());
 
@@ -328,11 +256,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getFinArFundsInActionApplied()
 								.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 					// BLOCK FOR ALLOCATION JOURNAL
-					//postAllocationJournal(reconRecord, fundsInReconRecordHome,
 					postAllocationJournal(reconRecord,
-							//journalApprovalGroupHome, journalTransactionHome,
-							//journalApprovalGroupHome,
-							//finArFundsInAllocateHome, itemsAllocate.get(0),
 							itemsAllocate.get(0),
 							reconRecordList);
 				} else { // CASH RECEIVE JOURNAL
@@ -362,10 +286,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.currentTimeMillis()));
 
 						// Persist the journal group
-						/*
-						finJournalApprovalGroup = journalApprovalGroupHome
-								.persistFinJournalApprovalGroup(finJournalApprovalGroup);
-					    */
 						if (!em.contains(finJournalApprovalGroup)) {
 							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
 							finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
@@ -395,55 +315,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 									: new BigDecimal(0));
 
 					long accountNumberBank = 0;
-					if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC.id()
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB.id()) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120104;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA.id()) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120102;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB.id()
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC.id()
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC.id()) {
-						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120105.id();
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA.id()) {
-						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120301.id();
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB.id()
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC.id()) {
-						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120302.id();
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB.id()) {
-						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120402.id();
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB.id()) {
-						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120888.id();
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB.id()) {
-						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1121001.id();
-					} else {
-						throw new EJBException(
-								"Account number not available for the payment, please add account number to fin account and venice constants");
+					try {
+						accountNumberBank = finAccountService.getAccountNumberBank(reconRecord.getFinArFundsInReport()
+								.getFinArFundsInReportType().getPaymentReportTypeId());
+					} catch (VeniceInternalException e) {
+						throw new EJBException(e.getMessage());						
 					}
-
+					
 					FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 					finTransactionStatus
 							.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
@@ -452,14 +330,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 					finTransactionType
 							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 
-					/*
-					List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocateHome
-							.queryByRange(
-									"select o from FinArFundsInAllocatePayment o where o.idReconRecordDest="
-											+ reconRecord
-													.getReconciliationRecordId(),
-									0, 1);
-					*/
 					List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocatePaymentDAO.findByIdReconRecordDest(
 							reconRecord.getReconciliationRecordId());
 					if (!cekIdRecordDest.isEmpty()
@@ -1143,13 +1013,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 														+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
 												0, 0);
 								*/
-								List<FinArFundsInReconRecord> destItems = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+								FinArFundsInReconRecord destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
 										itemsAllocate.get(0).getIdReconRecordDest());
 									
-								if (!destItems.isEmpty()
-										&& destItems.size() > 0) {
-									wcsOrderId = destItems.get(0)
-											.getWcsOrderId();
+								if (destItem != null) {
+									wcsOrderId = destItem.getWcsOrderId();
 								}
 							}
 							cashReceiveJournalTransaction
@@ -1342,30 +1210,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 														+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
 												0, 0);
 								*/
-								List<FinArFundsInReconRecord> destItems = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+								FinArFundsInReconRecord destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
 										itemsAllocate.get(0).getIdReconRecordDest());
-								if (!destItems.isEmpty()
-										&& destItems.size() > 0) {
-									wcsOrderId = destItems.get(0)
-											.getWcsOrderId();
+								if (destItem != null) {
+									wcsOrderId = destItem.getWcsOrderId();
 								}
 							}
-							cashReceiveJournalTransaction
-									.setWcsOrderID(wcsOrderId);
-							cashReceiveJournalTransaction
-									.setVenBank(reconRecord
-											.getVenOrderPayment() != null ? reconRecord
-											.getVenOrderPayment().getVenBank()
-											: reconRecord
-													.getFinArFundsInReport()
-													.getFinArFundsInReportType()
-													.getVenBank());
-							cashReceiveJournalTransaction
-									.setGroupJournal(accountNumberBank);
+							cashReceiveJournalTransaction.setWcsOrderID(wcsOrderId);
+							cashReceiveJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord.getVenOrderPayment().getVenBank()
+											: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
+							cashReceiveJournalTransaction.setGroupJournal(accountNumberBank);
 							// Persist the cash received journal transaction
 							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi )");
-							/*journalTransactionHome
-									.persistFinJournalTransaction(cashReceiveJournalTransaction);*/
 							if (!em.contains(cashReceiveJournalTransaction)) {
 								CommonUtil.logDebug(this.getClass().getCanonicalName(), 
 										"postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
@@ -1396,15 +1252,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 									.setFinAccount(finAccountPenghasilan);
 
 							List<FinArFundsInReconRecord> belumTerindetifikasiFundsInRecordList = new ArrayList<FinArFundsInReconRecord>();
-							belumTerindetifikasiFundsInRecordList
-									.add(reconRecord);
-							belumTerindetifikasiJournalTransaction
-									.setFinArFundsInReconRecords(belumTerindetifikasiFundsInRecordList);
-							belumTerindetifikasiJournalTransaction
-									.setFinJournal(finJournalCashReceive);
-							belumTerindetifikasiJournalTransaction
-									.setFinPeriod(FinancePeriodUtil
-											.getCurrentPeriod());
+							belumTerindetifikasiFundsInRecordList.add(reconRecord);
+							belumTerindetifikasiJournalTransaction.setFinArFundsInReconRecords(belumTerindetifikasiFundsInRecordList);
+							belumTerindetifikasiJournalTransaction.setFinJournal(finJournalCashReceive);
+							belumTerindetifikasiJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 							belumTerindetifikasiJournalTransaction
 									.setFinTransactionStatus(finTransactionStatus);
 							belumTerindetifikasiJournalTransaction
@@ -1513,31 +1364,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 		Long startTime = System.currentTimeMillis();
 		try {
 
-			/*
-			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
-							"FinArFundsInReconRecordSessionEJBBeanLocal");
-			*/
-			
-			/*
-			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
-							"FinJournalTransactionSessionEJBBeanLocal");
-			*/
-
-			/*
-			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
-							"FinJournalApprovalGroupSessionEJBBeanLocal");
-			*/
-			
-			/*
-			FinArFundsInAllocatePaymentSessionEJBLocal finArFundsInAllocateHome = (FinArFundsInAllocatePaymentSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							FinArFundsInAllocatePaymentSessionEJBLocal.class,
-							"FinArFundsInAllocatePaymentSessionEJBBeanLocal");
-			*/
-
 			if (finArFundsInReconRecordIdList.isEmpty()) {
 				throw new EJBException(
 						"Empty list passed to postVirtualAccountH1Journal. The reconciliation record list must contain entries");
@@ -1546,19 +1372,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 			// Read all the relevant funds in records from the database
 			List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
 			for (Long reconciliationRecordId : finArFundsInReconRecordIdList) {
-				/*
-				List<FinArFundsInReconRecord> reconRecordListTemp = fundsInReconRecordHome
-						.queryByRange(
-								"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-										+ reconciliationRecordId
-										+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-										+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-								0, 0);
-				*/
-				List<FinArFundsInReconRecord> reconRecordListTemp = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+				FinArFundsInReconRecord reconRecordTemp = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
 						reconciliationRecordId);
-				if (!reconRecordListTemp.isEmpty()) {
-					reconRecordList.add(reconRecordListTemp.get(0));
+				if (reconRecordTemp != null) {
+					reconRecordList.add(reconRecordTemp);
 				} else {
 					throw new EJBException(
 							"List passed to postCashReceiveJournalTransaction contains no valid keys. The reconciliation record list must contain valid keys for existing reconciliation records");
@@ -1596,23 +1413,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 				if ((reconRecord
 						.getFinArFundsInActionApplied()
 						.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
-					/*
-					itemsAllocate = finArFundsInAllocateHome.queryByRange(
-							"select o from FinArFundsInAllocatePayment o where o.idReconRecordSource="
-									+ reconRecord.getReconciliationRecordId()
-									+ " and o.isactive=true", 0, 0);
-					*/
 					itemsAllocate = finArFundsInAllocatePaymentDAO.findByIdReconRecordSourceIsActive(
 							reconRecord.getReconciliationRecordId());
 				}
-				/*
-				List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocateHome
-						.queryByRange(
-								"select o from FinArFundsInAllocatePayment o where o.idReconRecordDest="
-										+ reconRecord
-												.getReconciliationRecordId(),
-								0, 0);
-				*/
 				List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocatePaymentDAO.findByIdReconRecordDest(
 						reconRecord.getReconciliationRecordId());
 				if (!cekIdRecordDest.isEmpty()
@@ -1636,7 +1439,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getProviderReportPaidAmount() != null ? reconRecord
 							.getProviderReportPaidAmount() : new BigDecimal(0);
 					BigDecimal paymentAmountOrderDestination = new BigDecimal(0);
-					List<FinArFundsInReconRecord> destItems = null;
+					FinArFundsInReconRecord destItem = null;
 					if ((reconRecord
 							.getFinArFundsInActionApplied()
 							.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())
@@ -1645,21 +1448,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 						paidAmount = itemsAllocate.get(0).getAmount() != null ? itemsAllocate
 								.get(0).getAmount() : new BigDecimal(0);
 
-						/*
-						destItems = fundsInReconRecordHome
-								.queryByRange(
-										"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-												+ itemsAllocate.get(0)
-														.getIdReconRecordDest()
-												+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-												+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-										0, 0);
-						*/
-						destItems = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+						destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
 								itemsAllocate.get(0).getIdReconRecordDest());
-						if (!destItems.isEmpty() && destItems.size() > 0) {
-							paymentAmountOrderDestination = destItems.get(0)
-									.getPaymentAmount();
+						if (destItem != null) {
+							paymentAmountOrderDestination = destItem.getPaymentAmount();
 						}
 
 					}
@@ -1680,11 +1472,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 							time,
 							reconRecord.getVenOrderPayment() != null ? reconRecord
 									.getVenOrderPayment().getVenBank()
-									: reconRecord.getFinArFundsInReport()
-											.getFinArFundsInReportType()
-											.getVenBank(),
-							//journalTransactionHome, accountNumberBank,
-											accountNumberBank, 
+									: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(), 
+							accountNumberBank, 
 							paidAmount, false,
 							"System Debit Ayat-Ayat Silang Bank :" + wcsOrderId);
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( Ayat-Ayat Silang Bank)::END");
@@ -1701,9 +1490,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 						remainingBalanceAmount = paidAmount
 								.subtract(paymentAmountOrderDestination);
-						if (!destItems.isEmpty() && destItems.size() > 0) {
-							paymentAmount = destItems.get(0).getPaymentAmount();
-							wcsOrderId = destItems.get(0).getWcsOrderId();
+						if (destItem != null) {
+							paymentAmount = destItem.getPaymentAmount();
+							wcsOrderId = destItem.getWcsOrderId();
 						}
 					}
 					if (remainingBalanceAmount.compareTo(new BigDecimal(0)) < 1) {
@@ -1731,13 +1520,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 								FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
 								FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id(),
 								time,
-								reconRecord.getVenOrderPayment() != null ? reconRecord
-										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank(),
-								//journalTransactionHome, accountNumberBank,
-												accountNumberBank,
+								reconRecord.getVenOrderPayment() != null ? reconRecord.getVenOrderPayment().getVenBank()
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(),
+								accountNumberBank,
 								paymentAmount, true,
 								"System Credit Uang Jaminan Transaksi :"
 										+ wcsOrderId);
@@ -1763,12 +1548,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 									time,
 									reconRecord.getVenOrderPayment() != null ? reconRecord
 											.getVenOrderPayment().getVenBank()
-											: reconRecord
-													.getFinArFundsInReport()
-													.getFinArFundsInReportType()
-													.getVenBank(),
-									//journalTransactionHome, accountNumberBank,
-													accountNumberBank,
+											: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(),
+									accountNumberBank,
 									remainingBalanceAmount.abs(),
 									debetOrCredit,
 									"System Lebih / Kurang Bayar :"
@@ -1796,11 +1577,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 								time,
 								reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank(),
-								//journalTransactionHome, accountNumberBank,
-												accountNumberBank,
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(),
+								accountNumberBank,
 								paymentAmount, true,
 								"System Credit Uang Jaminan Transaksi Belum Teridentifikasi :"
 										+ wcsOrderId);
@@ -1817,7 +1595,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 						FinArFundsInAllocatePayment finallocate = itemsAllocate
 								.get(0);
 						finallocate.setIsactive(false);
-						//finArFundsInAllocateHome.mergeFinArFundsInAllocatePayment(finallocate);
 						if (!em.contains(finallocate)) {
 							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::calling finArFundsInAllocatePaymentDAO.save explicitly.");
 							finallocate = finArFundsInAllocatePaymentDAO.save(finallocate);
@@ -1826,7 +1603,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 					// merge the recon record with the list of transactions
 					reconRecord.setFinJournalTransactions(transactionList);
 					reconRecord.setFinApprovalStatus(finApprovalStatus);
-					//reconRecord = fundsInReconRecordHome.mergeFinArFundsInReconRecord(reconRecord);
 					if (!em.contains(reconRecord)) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualaccountH1Journal::calling finArFundsInReconRecordDAO.save explicitly.");
 						reconRecord = finArFundsInReconRecordDAO.save(reconRecord);
@@ -1848,16 +1624,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
-		} finally {
-			/*
-			try {
-				if (_genericLocator != null) {
-					_genericLocator.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
@@ -1986,10 +1752,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postAllocationJournal(
 			FinArFundsInReconRecord reconRecord,
-			//FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome,
-			//FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome,
-			//FinJournalTransactionSessionEJBLocal journalTransactionHome,
-			//FinArFundsInAllocatePaymentSessionEJBLocal finArFundsInAllocateHome,
 			FinArFundsInAllocatePayment finArFundsInAllocatePayment,
 			List<FinArFundsInReconRecord> reconRecordList) {
 
@@ -2000,22 +1762,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			String wcsOrderId = reconRecord.getWcsOrderId() != null ? reconRecord
 					.getWcsOrderId() : reconRecord.getWcsOrderId();
 
-			/*
-			List<FinArFundsInReconRecord> destItem = fundsInReconRecordHome
-					.queryByRange(
-							"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-									+ finArFundsInAllocatePayment
-											.getIdReconRecordDest()
-									+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-							0, 0);
-			*/
-			List<FinArFundsInReconRecord> destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+			FinArFundsInReconRecord destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
 					finArFundsInAllocatePayment.getIdReconRecordDest());
 
 			ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
-			if (!destItem.isEmpty() && destItem.size() > 0) {
+			if (destItem != null) {
 
 				FinJournal finJournalAllocation = new FinJournal();
 				finJournalAllocation
@@ -2039,16 +1791,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 				// initialize journal account
 				FinAccount finAccount2230001 = new FinAccount();
 				finAccount2230001
-						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id()); // UANG
-																			// JAMINAN
-																			// TRANSAKSI
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id()); // UANG JAMINAN TRANSAKSI
 				FinAccount finAccount2230002 = new FinAccount();
 				finAccount2230002
-						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id()); // UANG
-																			// JAMINAN
-																			// TRANSAKSI
-																			// BELUM
-																			// TERIDENTIFIKASI
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id()); // UANG JAMINAN TRANSAKSI BELUM TERIDENTIFIKASI
 
 				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 				finTransactionStatus
@@ -2058,8 +1804,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 
 				// Persist the journal group
-				/*finJournalApprovalGroups = journalApprovalGroupHome
-						.persistFinJournalApprovalGroup(finJournalApprovalGroups);*/
 				if (!em.contains(finJournalApprovalGroups)) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalApprovalGroupDAO.save explicitly.");
 					finJournalApprovalGroups = finJournalApprovalGroupDAO.save(finJournalApprovalGroups);
@@ -2077,47 +1821,27 @@ public class FinanceJournalPosterSessionEJBBean implements
 					debitMsgBuffer.append("Allocation DEBIT from WCS Order:");
 					debitMsgBuffer.append(wcsOrderId);
 					debitMsgBuffer.append(" to WCS Order:");
-					debitMsgBuffer.append(destItem.get(0).getWcsOrderId());
-					originAllocJournalTransaction.setComments(debitMsgBuffer
-							.toString());
+					debitMsgBuffer.append(destItem.getWcsOrderId());
+					originAllocJournalTransaction.setComments(debitMsgBuffer.toString());
 					originAllocJournalTransaction.setCreditDebitFlag(false);
-					originAllocJournalTransaction
-							.setFinJournalApprovalGroup(finJournalApprovalGroups);
-					originAllocJournalTransaction
-							.setFinAccount(finAccount2230002);
-					originAllocJournalTransaction
-							.setFinArFundsInReconRecords(reconRecordList);
-					originAllocJournalTransaction
-							.setFinJournal(finJournalAllocation);
-					originAllocJournalTransaction
-							.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+					originAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
+					originAllocJournalTransaction.setFinAccount(finAccount2230002);
+					originAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+					originAllocJournalTransaction.setFinJournal(finJournalAllocation);
+					originAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
-					originAllocJournalTransaction
-							.setFinTransactionStatus(finTransactionStatus);
+					originAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 					FinTransactionType finTransactionTypeNotRecognized = new FinTransactionType();
-					finTransactionTypeNotRecognized
-							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI.id());
-					originAllocJournalTransaction
-							.setFinTransactionType(finTransactionTypeNotRecognized);
-					originAllocJournalTransaction
-							.setTransactionAmount(finArFundsInAllocatePayment
-									.getAmount());
-					originAllocJournalTransaction
-							.setTransactionTimestamp(new Timestamp(System
-									.currentTimeMillis()));
+					finTransactionTypeNotRecognized.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI.id());
+					originAllocJournalTransaction.setFinTransactionType(finTransactionTypeNotRecognized);
+					originAllocJournalTransaction.setTransactionAmount(finArFundsInAllocatePayment.getAmount());
+					originAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-					originAllocJournalTransaction.setWcsOrderID(reconRecord
-							.getWcsOrderId() != null ? reconRecord
-							.getWcsOrderId() : null);
-					originAllocJournalTransaction.setVenBank(reconRecord
-							.getVenOrderPayment() != null ? reconRecord
-							.getVenOrderPayment().getVenBank() : reconRecord
-							.getFinArFundsInReport()
-							.getFinArFundsInReportType().getVenBank());
+					originAllocJournalTransaction.setWcsOrderID(reconRecord.getWcsOrderId() != null ? reconRecord.getWcsOrderId() : null);
+					originAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+							.getVenOrderPayment().getVenBank() : reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 					// Persist the DEBIT journal transaction
-					/*journalTransactionHome
-							.persistFinJournalTransaction(originAllocJournalTransaction);*/
 					if (!em.contains(originAllocJournalTransaction)) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
 						originAllocJournalTransaction = finJournalTransactionDAO.save(originAllocJournalTransaction);
@@ -2130,43 +1854,26 @@ public class FinanceJournalPosterSessionEJBBean implements
 					creditMsgBuffer.append("Allocation CREDIT from WCS Order:");
 					creditMsgBuffer.append(wcsOrderId);
 					creditMsgBuffer.append(" to WCS Order:");
-					creditMsgBuffer.append(destItem.get(0).getWcsOrderId());
-					destAllocJournalTransaction.setComments(creditMsgBuffer
-							.toString());
+					creditMsgBuffer.append(destItem.getWcsOrderId());
+					destAllocJournalTransaction.setComments(creditMsgBuffer.toString());
 					destAllocJournalTransaction.setCreditDebitFlag(true);
-					destAllocJournalTransaction
-							.setFinJournalApprovalGroup(finJournalApprovalGroups);
+					destAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
 
-					destAllocJournalTransaction
-							.setFinAccount(finAccount2230001);
+					destAllocJournalTransaction.setFinAccount(finAccount2230001);
 
-					destAllocJournalTransaction
-							.setFinArFundsInReconRecords(reconRecordList);
-					destAllocJournalTransaction
-							.setFinJournal(finJournalAllocation);
-					destAllocJournalTransaction.setFinPeriod(FinancePeriodUtil
-							.getCurrentPeriod());
-					destAllocJournalTransaction
-							.setFinTransactionStatus(finTransactionStatus);
+					destAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+					destAllocJournalTransaction.setFinJournal(finJournalAllocation);
+					destAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+					destAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-					destAllocJournalTransaction
-							.setFinTransactionType(finTransactionType);
-					destAllocJournalTransaction.setTransactionAmount(destItem
-							.get(0).getPaymentAmount());
-					destAllocJournalTransaction
-							.setTransactionTimestamp(new Timestamp(System
-									.currentTimeMillis()));
+					destAllocJournalTransaction.setFinTransactionType(finTransactionType);
+					destAllocJournalTransaction.setTransactionAmount(destItem.getPaymentAmount());
+					destAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-					destAllocJournalTransaction.setWcsOrderID(destItem.get(0)
-							.getWcsOrderId());
-					destAllocJournalTransaction.setVenBank(reconRecord
-							.getVenOrderPayment() != null ? reconRecord
-							.getVenOrderPayment().getVenBank() : reconRecord
-							.getFinArFundsInReport()
-							.getFinArFundsInReportType().getVenBank());
+					destAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
+					destAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+							.getVenOrderPayment().getVenBank() : reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 					// Persist the CREDIT journal transaction
-					/*journalTransactionHome
-							.persistFinJournalTransaction(destAllocJournalTransaction);*/
 					if (!em.contains(destAllocJournalTransaction)) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
 						destAllocJournalTransaction = finJournalTransactionDAO.save(destAllocJournalTransaction);
@@ -2174,7 +1881,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					transactionList.add(destAllocJournalTransaction);
 
 					switch (finArFundsInAllocatePayment.getAmount().compareTo(
-							destItem.get(0).getPaymentAmount())) {
+							destItem.getPaymentAmount())) {
 					case -1:
 						FinJournalTransaction destDebitDevAllocJournalTransaction = new FinJournalTransaction();
 						StringBuffer debitDeviationMsgBuffer = new StringBuffer();
@@ -2182,51 +1889,28 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT (deviation) from WCS Order:");
 						debitDeviationMsgBuffer.append(wcsOrderId);
 						debitDeviationMsgBuffer.append(" to WCS Order:");
-						debitDeviationMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
-						destDebitDevAllocJournalTransaction
-								.setComments(debitDeviationMsgBuffer.toString());
+						debitDeviationMsgBuffer.append(destItem.getWcsOrderId());
+						destDebitDevAllocJournalTransaction.setComments(debitDeviationMsgBuffer.toString());
 
-						destDebitDevAllocJournalTransaction
-								.setCreditDebitFlag(false);
-						destDebitDevAllocJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroups);
+						destDebitDevAllocJournalTransaction.setCreditDebitFlag(false);
+						destDebitDevAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
 
-						destDebitDevAllocJournalTransaction
-								.setFinAccount(finAccount2230001);
+						destDebitDevAllocJournalTransaction.setFinAccount(finAccount2230001);
 
-						destDebitDevAllocJournalTransaction
-								.setFinArFundsInReconRecords(reconRecordList);
-						destDebitDevAllocJournalTransaction
-								.setFinJournal(finJournalAllocation);
-						destDebitDevAllocJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						destDebitDevAllocJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						destDebitDevAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+						destDebitDevAllocJournalTransaction.setFinJournal(finJournalAllocation);
+						destDebitDevAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						destDebitDevAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
+						destDebitDevAllocJournalTransaction.setFinTransactionType(finTransactionType);
 						destDebitDevAllocJournalTransaction
-								.setFinTransactionType(finTransactionType);
-						destDebitDevAllocJournalTransaction
-								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount().subtract(
-												destItem.get(0)
-														.getPaymentAmount()));
-						destDebitDevAllocJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+								.setTransactionAmount(finArFundsInAllocatePayment.getAmount().subtract(destItem.getPaymentAmount()));
+						destDebitDevAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-						destDebitDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId());
-						destDebitDevAllocJournalTransaction
-								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
-										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank());
+						destDebitDevAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
+						destDebitDevAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+										.getVenOrderPayment().getVenBank() : reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 						// Persist the DEBIT (deviation) journal transaction
-						/*journalTransactionHome
-								.persistFinJournalTransaction(destDebitDevAllocJournalTransaction);*/
 						if (!em.contains(destDebitDevAllocJournalTransaction)) {
 							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
 							destDebitDevAllocJournalTransaction = finJournalTransactionDAO.save(destDebitDevAllocJournalTransaction);
@@ -2241,52 +1925,29 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT (deviation) from WCS Order:");
 						creditDeviationMsgBuffer.append(wcsOrderId);
 						creditDeviationMsgBuffer.append(" to WCS Order:");
-						creditDeviationMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
-						destCreditDevAllocJournalTransaction
-								.setComments(creditDeviationMsgBuffer
-										.toString());
+						creditDeviationMsgBuffer.append(destItem.getWcsOrderId());
+						destCreditDevAllocJournalTransaction.setComments(creditDeviationMsgBuffer.toString());
 
-						destCreditDevAllocJournalTransaction
-								.setCreditDebitFlag(true);
-						destCreditDevAllocJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroups);
+						destCreditDevAllocJournalTransaction.setCreditDebitFlag(true);
+						destCreditDevAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
 
-						destCreditDevAllocJournalTransaction
-								.setFinAccount(finAccount2230001);
+						destCreditDevAllocJournalTransaction.setFinAccount(finAccount2230001);
 
-						destCreditDevAllocJournalTransaction
-								.setFinArFundsInReconRecords(reconRecordList);
-						destCreditDevAllocJournalTransaction
-								.setFinJournal(finJournalAllocation);
-						destCreditDevAllocJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						destCreditDevAllocJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						destCreditDevAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+						destCreditDevAllocJournalTransaction.setFinJournal(finJournalAllocation);
+						destCreditDevAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						destCreditDevAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-						destCreditDevAllocJournalTransaction
-								.setFinTransactionType(finTransactionType);
-						destCreditDevAllocJournalTransaction
-								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount().subtract(
-												destItem.get(0)
-														.getPaymentAmount()));
-						destCreditDevAllocJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						destCreditDevAllocJournalTransaction.setFinTransactionType(finTransactionType);
+						destCreditDevAllocJournalTransaction.setTransactionAmount(finArFundsInAllocatePayment
+										.getAmount().subtract(destItem.getPaymentAmount()));
+						destCreditDevAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-						destCreditDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId());
-						destCreditDevAllocJournalTransaction
-								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+						destCreditDevAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
+						destCreditDevAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank());
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 						// Persist the CREDIT (deviation) journal transaction
-						/*journalTransactionHome
-								.persistFinJournalTransaction(destCreditDevAllocJournalTransaction);*/
 						if (!em.contains(destCreditDevAllocJournalTransaction)) {
 							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
 							destCreditDevAllocJournalTransaction = finJournalTransactionDAO.save(destCreditDevAllocJournalTransaction);
@@ -2299,54 +1960,34 @@ public class FinanceJournalPosterSessionEJBBean implements
 					// end of 'payment not recognized' allocation journal
 				} else {
 					// other than 'payment not recognized' alloc journal
-					switch (finArFundsInAllocatePayment.getAmount().compareTo(
-							destItem.get(0).getPaymentAmount())) {
+					switch (finArFundsInAllocatePayment.getAmount().compareTo(destItem.getPaymentAmount())) {
 					case -1: // Partial Funds Received
 						// DEBIT the account
 						FinJournalTransaction originPartialAllocJournalTransaction = new FinJournalTransaction();
 						StringBuffer debitMsgBuffer = new StringBuffer();
-						debitMsgBuffer
-								.append("Allocation DEBIT from WCS Order:");
+						debitMsgBuffer.append("Allocation DEBIT from WCS Order:");
 						debitMsgBuffer.append(wcsOrderId);
 						debitMsgBuffer.append(" to WCS Order:");
-						debitMsgBuffer.append(destItem.get(0).getWcsOrderId());
-						originPartialAllocJournalTransaction
-								.setComments(debitMsgBuffer.toString());
-						originPartialAllocJournalTransaction
-								.setCreditDebitFlag(false);
-						originPartialAllocJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroups);
-						originPartialAllocJournalTransaction
-								.setFinAccount(finAccount2230001);
-						originPartialAllocJournalTransaction
-								.setFinArFundsInReconRecords(reconRecordList);
-						originPartialAllocJournalTransaction
-								.setFinJournal(finJournalAllocation);
-						originPartialAllocJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
+						debitMsgBuffer.append(destItem.getWcsOrderId());
+						originPartialAllocJournalTransaction.setComments(debitMsgBuffer.toString());
+						originPartialAllocJournalTransaction.setCreditDebitFlag(false);
+						originPartialAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
+						originPartialAllocJournalTransaction.setFinAccount(finAccount2230001);
+						originPartialAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+						originPartialAllocJournalTransaction.setFinJournal(finJournalAllocation);
+						originPartialAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
-						originPartialAllocJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						originPartialAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-						originPartialAllocJournalTransaction
-								.setFinTransactionType(finTransactionType);
-						originPartialAllocJournalTransaction
-								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount());
-						originPartialAllocJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						originPartialAllocJournalTransaction.setFinTransactionType(finTransactionType);
+						originPartialAllocJournalTransaction.setTransactionAmount(finArFundsInAllocatePayment.getAmount());
+						originPartialAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-						originPartialAllocJournalTransaction
-								.setWcsOrderID(reconRecord.getWcsOrderId() != null ? reconRecord
+						originPartialAllocJournalTransaction.setWcsOrderID(reconRecord.getWcsOrderId() != null ? reconRecord
 										.getWcsOrderId() : null);
-						originPartialAllocJournalTransaction
-								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+						originPartialAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank());
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 						// Persist the DEBIT journal transaction
 						/*journalTransactionHome
 								.persistFinJournalTransaction(originPartialAllocJournalTransaction);*/
@@ -2364,7 +2005,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT from WCS Order:");
 						creditMsgBuffer.append(wcsOrderId);
 						creditMsgBuffer.append(" to WCS Order:");
-						creditMsgBuffer.append(destItem.get(0).getWcsOrderId());
+						creditMsgBuffer.append(destItem.getWcsOrderId());
 						destPartialAllocJournalTransaction
 								.setComments(creditMsgBuffer.toString());
 						destPartialAllocJournalTransaction
@@ -2388,14 +2029,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destPartialAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destPartialAllocJournalTransaction
-								.setTransactionAmount(destItem.get(0)
-										.getPaymentAmount());
+								.setTransactionAmount(destItem.getPaymentAmount());
 						destPartialAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
 						destPartialAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId());
+								.setWcsOrderID(destItem.getWcsOrderId());
 						destPartialAllocJournalTransaction
 								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
@@ -2419,8 +2059,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT (deviation) from WCS Order:");
 						debitDevMsgBuffer.append(wcsOrderId);
 						debitDevMsgBuffer.append(" to WCS Order:");
-						debitDevMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						debitDevMsgBuffer.append(destItem.getWcsOrderId());
 						destPartialDevAllocJournalTransaction
 								.setComments(debitDevMsgBuffer.toString());
 						destPartialDevAllocJournalTransaction
@@ -2443,19 +2082,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destPartialDevAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destPartialDevAllocJournalTransaction
-								.setTransactionAmount(destItem
-										.get(0)
-										.getPaymentAmount()
-										.subtract(
-												finArFundsInAllocatePayment
-														.getAmount()));
+								.setTransactionAmount(destItem.getPaymentAmount()
+										.subtract(finArFundsInAllocatePayment.getAmount()));
 						destPartialDevAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
 						destPartialDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId() != null ? destItem
-										.get(0).getWcsOrderId() : null);
+								.setWcsOrderID(destItem.getWcsOrderId() != null ? destItem.getWcsOrderId() : null);
 						destPartialDevAllocJournalTransaction
 								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
@@ -2481,8 +2115,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT from WCS Order:");
 						debitAllFundsMsgBuffer.append(wcsOrderId);
 						debitAllFundsMsgBuffer.append(" to WCS Order:");
-						debitAllFundsMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						debitAllFundsMsgBuffer.append(destItem.getWcsOrderId());
 						originAllAllocJournalTransaction
 								.setComments(debitAllFundsMsgBuffer.toString());
 						originAllAllocJournalTransaction
@@ -2537,8 +2170,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT from WCS Order:");
 						creditAllMsgBuffer.append(wcsOrderId);
 						creditAllMsgBuffer.append(" to WCS Order:");
-						creditAllMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						creditAllMsgBuffer.append(destItem.getWcsOrderId());
 						destAllAllocJournalTransaction
 								.setComments(creditAllMsgBuffer.toString());
 						destAllAllocJournalTransaction.setCreditDebitFlag(true);
@@ -2561,14 +2193,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destAllAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destAllAllocJournalTransaction
-								.setTransactionAmount(destItem.get(0)
-										.getPaymentAmount());
+								.setTransactionAmount(destItem.getPaymentAmount());
 						destAllAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
-						destAllAllocJournalTransaction.setWcsOrderID(destItem
-								.get(0).getWcsOrderId());
+						destAllAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
 						destAllAllocJournalTransaction.setVenBank(reconRecord
 								.getVenOrderPayment() != null ? reconRecord
 								.getVenOrderPayment().getVenBank()
@@ -2592,8 +2222,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT from WCS Order:");
 						debitOverMsgBuffer.append(wcsOrderId);
 						debitOverMsgBuffer.append(" to WCS Order:");
-						debitOverMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						debitOverMsgBuffer.append(destItem.getWcsOrderId());
 						originOverAllocJournalTransaction
 								.setComments(debitOverMsgBuffer.toString());
 						originOverAllocJournalTransaction
@@ -2647,8 +2276,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT from WCS Order:");
 						creditOverMsgBuffer.append(wcsOrderId);
 						creditOverMsgBuffer.append(" to WCS Order:");
-						creditOverMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						creditOverMsgBuffer.append(destItem.getWcsOrderId());
 						destOverAllocJournalTransaction
 								.setComments(creditOverMsgBuffer.toString());
 						destOverAllocJournalTransaction
@@ -2672,14 +2300,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destOverAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destOverAllocJournalTransaction
-								.setTransactionAmount(destItem.get(0)
-										.getPaymentAmount());
+								.setTransactionAmount(destItem.getPaymentAmount());
 						destOverAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
-						destOverAllocJournalTransaction.setWcsOrderID(destItem
-								.get(0).getWcsOrderId());
+						destOverAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
 						destOverAllocJournalTransaction.setVenBank(reconRecord
 								.getVenOrderPayment() != null ? reconRecord
 								.getVenOrderPayment().getVenBank()
@@ -2703,8 +2329,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT (deviation) from WCS Order:");
 						creditOverDevMsgBuffer.append(wcsOrderId);
 						creditOverDevMsgBuffer.append(" to WCS Order:");
-						creditOverDevMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						creditOverDevMsgBuffer.append(destItem.getWcsOrderId());
 						destOverDevAllocJournalTransaction
 								.setComments(creditOverDevMsgBuffer.toString());
 						destOverDevAllocJournalTransaction
@@ -2728,16 +2353,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.setFinTransactionType(finTransactionType);
 						destOverDevAllocJournalTransaction
 								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount().subtract(
-												destItem.get(0)
-														.getPaymentAmount()));
+										.getAmount().subtract(destItem.getPaymentAmount()));
 						destOverDevAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
 						destOverDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId() != null ? destItem
-										.get(0).getWcsOrderId() : null);
+								.setWcsOrderID(destItem.getWcsOrderId() != null ? destItem.getWcsOrderId() : null);
 						destOverDevAllocJournalTransaction
 								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
@@ -5054,60 +4676,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
-			/*
-			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
-							"FinArFundsInReconRecordSessionEJBBeanLocal");
-
-			VenOrderPaymentAllocationSessionEJBLocal orderPaymentAllocationHome = (VenOrderPaymentAllocationSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							VenOrderPaymentAllocationSessionEJBLocal.class,
-							"VenOrderPaymentAllocationSessionEJBBeanLocal");
-
-			VenOrderPaymentSessionEJBLocal orderPaymentHome = (VenOrderPaymentSessionEJBLocal) this._genericLocator
-					.lookupLocal(VenOrderPaymentSessionEJBLocal.class,
-							"VenOrderPaymentSessionEJBBeanLocal");
-
-			VenOrderSessionEJBLocal orderHome = (VenOrderSessionEJBLocal) this._genericLocator
-					.lookupLocal(VenOrderSessionEJBLocal.class,
-							"VenOrderSessionEJBBeanLocal");
-
-			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
-							"FinJournalTransactionSessionEJBBeanLocal");
-
-			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
-							"FinJournalApprovalGroupSessionEJBBeanLocal");
-
-			FinArFundsInRefundSessionEJBLocal refundRecordHome = (FinArFundsInRefundSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInRefundSessionEJBLocal.class,
-							"FinArFundsInRefundSessionEJBBeanLocal");
-            */
 
 			/*
 			 * Read all the relevant funds in records from the database and
 			 * determine how much has been paid as well as the remaining balance
 			 * according to the reconciliation
 			 */
-			/*
-			List<FinArFundsInReconRecord> reconRecordList = fundsInReconRecordHome
-					.queryByRange(
-							"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-									+ reconciliationRecordId
-									+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-							0, 0);
-			*/
-			List<FinArFundsInReconRecord> reconRecordList = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
+			FinArFundsInReconRecord reconciliationRecord = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
 			
-			if (reconRecordList.isEmpty()) {
-				throw new EJBException("Reconciliation record not found:"
-						+ reconciliationRecordId);
+			if (reconciliationRecord == null) {
+				throw new EJBException("Reconciliation record not found:" + reconciliationRecordId);
 			}
-			FinArFundsInReconRecord reconciliationRecord = reconRecordList
-					.get(0);
-
+		
 			VenOrderPayment venOrderPayment = null;
 
 			/*
@@ -5115,23 +4695,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * VenOrderPayment
 			 */
 			if (reconciliationRecord.getVenOrderPayment() != null) {
-				/*
-				List<VenOrderPayment> venOrderPaymentList = orderPaymentHome
-						.queryByRange(
-								"select o from VenOrderPayment o where o.orderPaymentId = "
-										+ reconciliationRecord
-												.getVenOrderPayment()
-												.getOrderPaymentId(), 0, 0);
-				if (!venOrderPaymentList.isEmpty()) {
-					venOrderPayment = venOrderPaymentList.get(0);
-				}
-				*/
 				venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(reconciliationRecord.getVenOrderPayment().getOrderPaymentId());
 			}
 
 			BigDecimal remainingUnallocatedAmount = null;
-			remainingUnallocatedAmount = reconciliationRecord
-					.getProviderReportPaidAmount();
+			remainingUnallocatedAmount = reconciliationRecord.getProviderReportPaidAmount();
 			/*
 			 * If there is a VenOrderPayment record then... Ascertain how much
 			 * of the payment has been allocated to orders already and throw an
@@ -5139,13 +4707,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 */
 
 			if (venOrderPayment != null) {
-				/*
-				List<VenOrderPaymentAllocation> orderPaymentAllocationList = orderPaymentAllocationHome
-						.queryByRange(
-								"select o from VenOrderPaymentAllocation o where o.venOrderPayment.orderPaymentId = "
-										+ venOrderPayment.getOrderPaymentId(),
-								0, 0);
-				*/
 				List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findByOrderPaymentId(
 						venOrderPayment.getOrderPaymentId());
 				BigDecimal allocatedAmount = new BigDecimal(0);
@@ -5161,14 +4722,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.subtract(allocatedAmount);
 				if (orderPaymentAllocationList != null) {
 					for (VenOrderPaymentAllocation allocation : orderPaymentAllocationList) {
-						/*
-						List<VenOrder> allocatedOrderList = orderHome
-								.queryByRange(
-										"select o from VenOrder o where o.orderId = "
-												+ allocation.getId()
-														.getOrderId(), 0, 0);
-						VenOrder allocatedOrder = allocatedOrderList.get(0);
-						*/
 						VenOrder allocatedOrder = venOrderDAO.findByOrderId(allocation.getId().getOrderId());
 						if (allocatedOrder.getVenOrderStatus()
 								.getOrderStatusId() != VenOrderStatusConstants.VEN_ORDER_STATUS_X.code()) {
@@ -5203,24 +4756,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 				break;
 			default:
 				break;
-			// no action. should produce an error later because of the empty
-			// account id
+			// no action. should produce an error later because of the empty account id
 			}
-
-			/*
-			 * switch-case is better for performance in this particular problem
-			 * (yauri @Sep 18, 2013 10:06AM) if (refundType ==
-			 * VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
-			 * } else if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK; }
-			 */
 
 			if (printjournal) {
 				/*
@@ -5241,15 +4778,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 					finJournalApprovalGroup = new FinJournalApprovalGroup();
 					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 					finApprovalStatus.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
-					finJournalApprovalGroup
-							.setFinApprovalStatus(finApprovalStatus);
+					finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 					finJournalApprovalGroup.setFinJournal(finJournalRefund);
-					finJournalApprovalGroup
-							.setJournalGroupDesc("Refund Journal for:"
-									+ sdf.format(new Date()));
-					finJournalApprovalGroup
-							.setJournalGroupTimestamp(new Timestamp(System
-									.currentTimeMillis()));
+					finJournalApprovalGroup.setJournalGroupDesc("Refund Journal for:" + sdf.format(new Date()));
+					finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(System.currentTimeMillis()));
 
 					// Persist the journal group
 					//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
@@ -5265,24 +4797,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 				String wcsOrderId = reconciliationRecord.getWcsOrderId() != null ? reconciliationRecord
 						.getWcsOrderId() : "";
 
-				// Create the DEBIT journal transaction for REFUND against UANG
-				// MUKA
-				// PELANGGAN
+				// Create the DEBIT journal transaction for REFUND against UANG MUKA PELANGGAN
 				FinJournalTransaction refundJournalTransaction = new FinJournalTransaction();
-				/*
-				 * refundJournalTransaction.setComments("Refund DEBIT for Order:"
-				 * +
-				 * reconciliationRecord.getWcsOrderId()!=null?reconciliationRecord
-				 * .getWcsOrderId():"" + " Payment:" +
-				 * reconciliationRecord.getProviderReportPaymentId());
-				 */// replaces with the following line (yauri @ Sep 18, 2013
-					// 7:25AM) due to the bug found in previous comment
-				refundJournalTransaction
-						.setComments("Refund Pelanggan DEBIT for Order:"
-								+ wcsOrderId
-								+ " Payment:"
-								+ reconciliationRecord
-										.getProviderReportPaymentId());
+				refundJournalTransaction.setComments("Refund Pelanggan DEBIT for Order:" + wcsOrderId
+								+ " Payment:" + reconciliationRecord.getProviderReportPaymentId());
 				refundJournalTransaction.setCreditDebitFlag(false);
 				refundJournalTransaction
 						.setFinJournalApprovalGroup(finJournalApprovalGroup);
@@ -5290,21 +4808,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 				FinAccount finAccountUangMukaPelanggan = new FinAccount();
 				if (reconciliationRecord.getFinArReconResult()
 						.getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()) {
-					finAccountUangMukaPelanggan
-							.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id());
+					finAccountUangMukaPelanggan.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id());
 				} else {
-					finAccountUangMukaPelanggan
-							.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
+					finAccountUangMukaPelanggan.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 				}
-				refundJournalTransaction
-						.setFinAccount(finAccountUangMukaPelanggan);
+				refundJournalTransaction.setFinAccount(finAccountUangMukaPelanggan);
 
-				refundJournalTransaction
-						.setFinArFundsInReconRecords(reconRecordList);
+				List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
+				reconRecordList.add(reconciliationRecord);
+				
+				refundJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
 
 				refundJournalTransaction.setFinJournal(finJournalRefund);
-				refundJournalTransaction.setFinPeriod(FinancePeriodUtil
-						.getCurrentPeriod());
+				refundJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
 				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 				finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
@@ -10381,22 +9897,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * according to the reconciliation
 			 *
 			 */
-			/*
-			List<FinArFundsInReconRecord> reconRecordList = fundsInReconRecordHome
-					.queryByRange(
-							"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-									+ reconciliationRecordId
-									+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-							0, 0);
-			*/
-			List<FinArFundsInReconRecord> reconRecordList = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
-			if (reconRecordList.isEmpty()) {
-				throw new EJBException("Reconciliation record not found:"
-						+ reconciliationRecordId);
+			FinArFundsInReconRecord reconciliationRecord = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
+			if (reconciliationRecord == null) {
+				throw new EJBException("Reconciliation record not found:" + reconciliationRecordId);
 			}
-			FinArFundsInReconRecord reconciliationRecord = reconRecordList
-					.get(0);
 
 			VenOrderPayment venOrderPayment = null;
 
@@ -10405,21 +9909,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * VenOrderPayment
 			 */
 			if (reconciliationRecord.getVenOrderPayment() != null) {
-				/*
-				List<VenOrderPayment> venOrderPaymentList = orderPaymentHome
-						.queryByRange(
-								"select o from VenOrderPayment o where o.orderPaymentId = "
-										+ reconciliationRecord
-												.getVenOrderPayment()
-												.getOrderPaymentId(), 0, 0);
-				*/
 				venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(
 						reconciliationRecord.getVenOrderPayment().getOrderPaymentId());
-				/*
-				if (!venOrderPaymentList.isEmpty()) {
-					venOrderPayment = venOrderPaymentList.get(0);
-				}
-				*/
 			}
 
 			BigDecimal remainingUnallocatedAmount = null;
@@ -10432,13 +9923,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 */
 
 			if (venOrderPayment != null) {
-				/*
-				List<VenOrderPaymentAllocation> orderPaymentAllocationList = orderPaymentAllocationHome
-						.queryByRange(
-								"select o from VenOrderPaymentAllocation o where o.venOrderPayment.orderPaymentId = "
-										+ venOrderPayment.getOrderPaymentId(),
-								0, 0);
-				*/
 				List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findByOrderPaymentId(
 						venOrderPayment.getOrderPaymentId());
 				BigDecimal allocatedAmount = new BigDecimal(0);
@@ -10454,14 +9938,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.subtract(allocatedAmount);
 				if (orderPaymentAllocationList != null) {
 					for (VenOrderPaymentAllocation allocation : orderPaymentAllocationList) {
-						/*
-						List<VenOrder> allocatedOrderList = orderHome
-								.queryByRange(
-										"select o from VenOrder o where o.orderId = "
-												+ allocation.getId()
-														.getOrderId(), 0, 0);
-						*/
-						//VenOrder allocatedOrder = allocatedOrderList.get(0);
 						VenOrder allocatedOrder = venOrderDAO.findByOrderId(allocation.getId().getOrderId());												
 						if (allocatedOrder != null && allocatedOrder.getVenOrderStatus()
 								.getOrderStatusId() != VenOrderStatusConstants.VEN_ORDER_STATUS_X.code()) {
@@ -10485,14 +9961,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			long accountRefund = 0;
 
 			switch (refundType) {
-			case VeniceConstants.FIN_REFUND_TYPE_BANK:
-				finAccountRefund
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
+			case FinRefundTypeConstants.Constants.BANK_ID:
+				finAccountRefund.setAccountId(FinAccountConstants.FIN_ACCOUNT_2170002.id());
 				accountRefund = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id();
 				break;
-			case VeniceConstants.FIN_REFUND_TYPE_CUSTOMER:
-				finAccountRefund
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
+			case FinRefundTypeConstants.Constants.CUSTOMER_ID:
+				finAccountRefund.setAccountId(FinAccountConstants.FIN_ACCOUNT_2170001.id());
 				accountRefund = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER.id();
 				break;
 			default:
@@ -10500,21 +9974,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 			// no action. should produce an error later because of the empty
 			// account id
 			}
-
-			/*
-			 * switch-case is better for performance in this particular problem
-			 * (yauri @Sep 18, 2013 10:06AM) if (refundType ==
-			 * VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
-			 * } else if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK; }
-			 */
 
 			if (printjournal) {
 				/*
@@ -10566,20 +10025,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 				// MUKA
 				// PELANGGAN
 				FinJournalTransaction cancelRefundJournalTransaction = new FinJournalTransaction();
-				/*
-				 * refundJournalTransaction.setComments("Refund DEBIT for Order:"
-				 * +
-				 * reconciliationRecord.getWcsOrderId()!=null?reconciliationRecord
-				 * .getWcsOrderId():"" + " Payment:" +
-				 * reconciliationRecord.getProviderReportPaymentId());
-				 */// replaces with the following line (yauri @ Sep 18, 2013
-					// 7:25AM) due to the bug found in previous comment
-				cancelRefundJournalTransaction
-						.setComments("Cancel Refund Pelanggan DEBIT for Order:"
-								+ wcsOrderId
-								+ " Payment:"
-								+ reconciliationRecord
-										.getProviderReportPaymentId());
+				cancelRefundJournalTransaction.setComments("Cancel Refund Pelanggan DEBIT for Order:" + wcsOrderId + " Payment:"
+								+ reconciliationRecord.getProviderReportPaymentId());
 				cancelRefundJournalTransaction.setCreditDebitFlag(true);//
 				cancelRefundJournalTransaction
 						.setFinJournalApprovalGroup(finJournalApprovalGroup);
@@ -10596,18 +10043,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 				cancelRefundJournalTransaction
 						.setFinAccount(finAccountUangMukaPelanggan);
 
-				cancelRefundJournalTransaction
-						.setFinArFundsInReconRecords(reconRecordList);
+				List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
+				reconRecordList.add(reconciliationRecord);
+				cancelRefundJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
 
 				cancelRefundJournalTransaction.setFinJournal(finJournalRefund);
-				cancelRefundJournalTransaction.setFinPeriod(FinancePeriodUtil
-						.getCurrentPeriod());
+				cancelRefundJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
 				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
-				finTransactionStatus
-						.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
-				cancelRefundJournalTransaction
-						.setFinTransactionStatus(finTransactionStatus);
+				finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
+				cancelRefundJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 				FinTransactionType finTransactionType = new FinTransactionType();
 				if (reconciliationRecord.getFinArReconResult()

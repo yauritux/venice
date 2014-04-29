@@ -95,10 +95,7 @@ public interface FinArFundsInReconRecordDAO extends JpaRepository<FinArFundsInRe
 	public int countByNomorReffAndPaymentReportTypeId(String paymentConfirmationNumber, Long reportTypeId);
 	
 	@Query(FIND_BY_RECONRECORDID_ACTIONAPPLIEDNOTREMOVED)
-	public List<FinArFundsInReconRecord> findByReconRecordIdActionAppliedNotRemoved(Long reconciliationRecordId);
-	
-	@Query(FIND_BY_RECONRECORDID_ACTIONAPPLIEDNOTREMOVED)
-	public FinArFundsInReconRecord findActiveRecordById(Long reconciliationRecordId);	
+	public FinArFundsInReconRecord findByReconRecordIdActionAppliedNotRemoved(Long reconciliationRecordId);
 	
 	@Query(FIND_BY_NOMORREFF_UNIQUEPAYMENT_REPORTTIMEID)
 	public List<FinArFundsInReconRecord> findByNomorReffUniquePaymentAndRealTimeId(String paymentConfirmationNumber,String uniquePayment);
