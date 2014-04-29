@@ -286,7 +286,7 @@ public abstract class AbstractFundInService implements FundInService{
 			totalPaidAmount = totalPaidAmount.add(paymentAmount);
 		}
 		
-		remainingBalanceAmount = remainingBalanceAmount.subtract(totalPaidAmount);
+		remainingBalanceAmount = remainingBalanceAmount.subtract(paymentAmount);
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "Paid Amount: "+ totalPaidAmount);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "Remaining Balance: "+ remainingBalanceAmount);
