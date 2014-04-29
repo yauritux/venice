@@ -393,9 +393,9 @@ public interface VeniceConstants {
 	public static final long VEN_BANK_ID_XLAXIATA = 3;
 	public static final long VEN_BANK_ID_BII = 4;
 	public static final long VEN_BANK_ID_BRI = 5;
-	public static final long VEN_BANK_ID_TELKOMSEL= 6;	
-	public static final long VEN_BANK_ID_ANZ= 7;
-	public static final long VEN_BANK_ID_Danamon= 8;
+	public static final long VEN_BANK_ID_TELKOMSEL = 6;
+	public static final long VEN_BANK_ID_ANZ = 7;
+	public static final long VEN_BANK_ID_Danamon = 8;
 	
 	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_BANK_MEGA="Bank Mega";
 	public static final String VEN_BIN_CREDIT_LIMIT_ESTIMATE_BANK_NAME_MEGA="Mega";
