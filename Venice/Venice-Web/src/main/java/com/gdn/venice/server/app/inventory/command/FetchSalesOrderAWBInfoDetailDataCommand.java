@@ -49,7 +49,9 @@ public class FetchSalesOrderAWBInfoDetailDataCommand implements RafDsCommand {
                         map.put(DataNameTokens.INV_SO_ITEMDESC, awbInfo.getSalesOrder().getAssignedItem().getDescription());
                         map.put(DataNameTokens.INV_SO_QUANTITY, awbInfo.getSalesOrder().getQuantity() + "");
                         map.put(DataNameTokens.INV_SO_ITEMUOM, awbInfo.getSalesOrder().getAssignedItem().getItemUnit());
-                        map.put(DataNameTokens.INV_SO_ITEMPHOTO, awbInfo.getSalesOrder().getAssignedItem().getItemUnit());
+                        map.put(DataNameTokens.INV_SO_ITEMPHOTO, awbInfo.getSalesOrder().getAssignedItem().getImageUrl()==null
+                                ?"http://www.blibli.com/wcsstore/Indraprastha/images/gdn/images/logo-blibli.png.pagespeed.ce.atR54FCIld.png"
+                                :awbInfo.getSalesOrder().getAssignedItem().getImageUrl());
                         map.put(DataNameTokens.INV_SO_ITEMHASATTRIBUTE, awbInfo.getSalesOrder().getAssignedItem().isHasAttribute() + "");
                         map.put(DataNameTokens.INV_SO_ATTRIBUTE, "");
                         map.put(DataNameTokens.INV_AWB_CLAIMEDBY, wrapper.getHeader());

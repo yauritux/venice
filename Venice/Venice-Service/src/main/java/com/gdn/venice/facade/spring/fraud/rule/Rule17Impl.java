@@ -20,7 +20,9 @@ public class Rule17Impl implements Rule{
 	public int getRiskPoint(VenOrder order){
 		int totalRiskPoint = 0;
 		
-		totalRiskPoint = frdParameterRule17DAO.sumBlacklistedCityRiskPointByVenOrder(order);
+		Integer riskPoint = frdParameterRule17DAO.sumBlacklistedCityRiskPointByVenOrder(order);
+		
+		totalRiskPoint = riskPoint != null ? riskPoint : 0;
 		
 		CommonUtil.logInfo(CLASS_NAME, "Order : " + order.getWcsOrderId() + ", Total Risk Point : " + totalRiskPoint);
 		

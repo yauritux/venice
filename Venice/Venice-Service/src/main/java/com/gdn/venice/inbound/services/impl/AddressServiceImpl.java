@@ -222,7 +222,7 @@ public class AddressServiceImpl implements AddressService {
 							, "persistAddress::attaching venAddress");					
 					venAddress = venAddressDAO.save(venAddress);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistAddress::venAddress is attached");					
+							, "persistAddress::venAddress is attached now");					
 				}				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistAddress::successfully merged venAddress");				

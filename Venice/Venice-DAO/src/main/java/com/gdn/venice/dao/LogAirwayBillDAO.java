@@ -13,10 +13,15 @@ public interface LogAirwayBillDAO extends JpaRepository<LogAirwayBill, Long>{
 	
 	public static final String FIND_BY_ORDERITEMID = "SELECT ab FROM LogAirwayBill AS ab INNER JOIN ab.venOrderItem oi WHERE oi.orderItemId = ?1";
 	
+	public static final String FIND_BY_AIRWAYBILLID="SELECT ab FROM LogAirwayBill AS ab INNER JOIN ab.logInvoiceAirwaybillRecord ac WHERE ab.airwayBillId = ?1";
+	
 	@Query(COUNT_BY_GDN_REF)
     public int countByGdnReference(String gdnReference);
 	
 	@Query(FIND_BY_ORDERITEMID)
 	public List<LogAirwayBill> findByOrderItemId(long orderItemId);
+	
+	@Query(FIND_BY_AIRWAYBILLID)
+	public LogAirwayBill findByAirwayBillId(long airwayBillId);
 	
 }

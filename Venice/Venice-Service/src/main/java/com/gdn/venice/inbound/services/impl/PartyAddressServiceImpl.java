@@ -136,8 +136,15 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 			try {
 				for (VenPartyAddress venPartyAddress : venPartyAddressList) {
 
-					//ensure that VenAddress is saved before going to persist the party address				
-					VenAddress address = addressService.persistAddress(venPartyAddress.getVenAddress());
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistPartyAddresses::venPartyAddress.id=" + venPartyAddress.getId());
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistPartyAddresses::venPartyAddress.venAddress.addressId=" + venPartyAddress.getVenAddress().getAddressId());
+					
+					//ensure that VenAddress is saved before going to persist the party address	
+					VenAddress address = (venPartyAddress.getVenAddress().getAddressId() != null 
+							? venPartyAddress.getVenAddress() : addressService.persistAddress(venPartyAddress.getVenAddress()));
+					//VenAddress address = addressService.persistAddress(venPartyAddress.getVenAddress());
 					if (address != null) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName()
 								, "persistPartyAddresses::address is not NULL, assign to venPartyAddress");
@@ -149,7 +156,8 @@ public class PartyAddressServiceImpl implements PartyAddressService {
 					        (venPartyAddress.getVenAddress() != null ? venPartyAddress.getVenAddress().getAddressId() : 0));
 
 					// Set up the primary key object
-					VenPartyAddressPK id = new VenPartyAddressPK();
+					VenPartyAddressPK id = (venPartyAddress.getId() != null ? venPartyAddress.getId() : new VenPartyAddressPK());
+					//VenPartyAddressPK id = new VenPartyAddressPK();
 					/*
 					id.setAddressId(next.getVenAddress().getAddressId());
 					id.setPartyId(next.getVenParty().getPartyId());

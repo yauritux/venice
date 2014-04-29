@@ -73,8 +73,6 @@ public class DataNameTokens {
 	public static String FRDCUSTOMERWHITELIST_REMARK="FrdCustomerWhitelist.remark";
 	public static String FRDCUSTOMERWHITELIST_CREATEDBY="FrdCustomerWhitelist.createdby";
 	public static String FRDCUSTOMERWHITELIST_CREATED="FrdCustomerWhitelist.created";
-
-
 	
 	public static String FRDFRAUDPOINT_FRAUDPOINTSREFERENCEID="FrdFraudPointsReference.fraudPointsReferenceId";
 	public static String FRDFRAUDPOINT_FRAUDREFERENCEDESCRIPTION="FrdFraudPointsReference.fraudReferenceDescription";
@@ -141,7 +139,7 @@ public class DataNameTokens {
 	public static String FRDPARAMETERRULE31_ID="FrdParameterRule31.id";
 	public static String FRDPARAMETERRULE31_EMAIL="FrdParameterRule31.email";
 	public static String FRDPARAMETERRULE31_CCNUMBER="FrdParameterRule31.noCc";
-	
+
 	//for fraud parameter 35 (grey list)
 	public static String FRDPARAMETERRULE35_ID="FrdParameterRule35.id";
 	public static String FRDPARAMETERRULE35_ORDERID="FrdParameterRule35.orderId";
@@ -1000,7 +998,6 @@ public class DataNameTokens {
 	public static String TASKTYPE = "taskType";
 	//Added in to support passing of task type to enable differentiation between tasks
 	public static final String TASKTYPEID = "taskTypeId";
-
 	public static String TASKDESCRIPTION = "taskDescription";
 	public static String TASKASSIGNEE = "taskAssignee";
 	public static String TASKCREATEDDATE = "taskCreatedDate";
@@ -1443,7 +1440,6 @@ public class DataNameTokens {
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_GENUINEDATE, "java.sql.Timestamp");
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_REMARK, "java.lang.String");
 		fieldClassMap.put(FRDCUSTOMERWHITELIST_CREATED, "java.sql.Timestamp");
-		
 		
 		fieldClassMap.put(FRDFRAUDPOINT_FRAUDPOINTSREFERENCEID, "java.lang.Long");
 		fieldClassMap.put(FRDFRAUDPOINT_FRAUDREFERENCEDESCRIPTION, "java.lang.String");
@@ -2137,6 +2133,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINSALESRECORD_JUMLAH, "java.math.BigDecimal");
 		fieldClassMap.put(FINSALESRECORD_FINAPPAYMENT_FINAPPROVALSTATUS_APPROVALID, "java.lang.Long");
 		
+		
 		fieldClassMap.put(FINSALESRECORD_MCX_DATE, "java.sql.Timestamp");
 		fieldClassMap.put(FINSALESRECORD_CXF_DATE, "java.sql.Timestamp");
 		fieldClassMap.put(FINSALESRECORD_MERCHANTPAYMENTAMOUNT, "java.math.BigDecimal");
@@ -2182,8 +2179,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINAPMANUALJOURNALTRANSACTION_FINJOURNALTRANSACTION_COMMENTS, "java.lang.String");
 		fieldClassMap.put(FINAPPAYMENT_FINAPPROVALSTATUS_APPROVALSTATUSDESC,"java.lang.String");
 		fieldClassMap.put(FINAPPAYMENT_FINAPPROVALSTATUS_APPROVALSTATUSID, "java.lang.Long");
-		
-		
+
 		fieldClassMap.put(FINJOURNALAPPROVALGROUP_JOURNALGROUPID, "java.lang.Long");
 		fieldClassMap.put(FINJOURNALAPPROVALGROUP_FINJOURNAL_JOURNALID, "java.lang.Long");
 		fieldClassMap.put(FINJOURNALAPPROVALGROUP_FINJOURNAL_JOURNALDESC, "java.lang.String");
@@ -2201,9 +2197,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINJOURNALTRANSACTION_COMMENTS, "java.lang.String");
 		fieldClassMap.put(FINJOURNALTRANSACTION_REFF, "java.lang.String");
 		fieldClassMap.put(FINJOURNALTRANSACTION_GROUP_JOURNAL, "java.lang.String");		
-		fieldClassMap.put(FINJOURNALTRANSACTION_PAYMENT_TYPE, "java.lang.String");
-
-		fieldClassMap.put(FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, "java.lang.String");	
+		fieldClassMap.put(FINJOURNALTRANSACTION_PAYMENT_TYPE, "java.lang.String");			
 		
 		fieldClassMap.put(FINJOURNALTRANSACTION_FINJOURNALAPPROVALGROUP_JOURNALGROUPID, "java.lang.Long");				
 		
@@ -2453,7 +2447,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_FINARFUNDSINRECONRECORD_NOMORREFF,"java.lang.String");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_DATE,"java.sql.Timestamp");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT,"java.math.BigDecimal");
-		
+							
 		fieldClassMap.put(INV_ITEM_ATTRIBUTE_ID,"java.lang.Long");
 		fieldClassMap.put(INV_ITEM_ATTRIBUTE_NAME,"java.lang.String");
 		fieldClassMap.put(INV_ITEM_ATTRIBUTE_VALUE,"java.lang.String");		

@@ -95,7 +95,7 @@ public class LogInvoiceReportMDB implements MessageListener {
             if (fileUploadLog.getFileUploadFormat().equals("JNE")) {
                 processJNEFormat(fileUploadLog);
             }
-
+            
             if (fileUploadLog.getFileUploadFormat().equals("NCS")) {
                 processNCSFormat(fileUploadLog);
             }
@@ -244,7 +244,7 @@ public class LogInvoiceReportMDB implements MessageListener {
 
                 ActivityInvoiceFailedToUploadExport activityInvoiceFailedToUploadExport = new ActivityInvoiceFailedToUploadExport(wb);
 
-                wb = activityInvoiceFailedToUploadExport.ExportExcel(new HashMap<String, String>(), failedRecord, new ArrayList<FailedStatusUpdate>(), sheet, ACTIVITY_OR_INVOICE);
+			    wb  =  activityInvoiceFailedToUploadExport.ExportExcel(new HashMap<String, String>(), failedRecord, new ArrayList<FailedStatusUpdate>(),new HashMap<String, String>(),sheet, ACTIVITY_OR_INVOICE);     
                 wb.write(fos);
                 _log.debug("done export excel");
 

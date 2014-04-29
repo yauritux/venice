@@ -766,7 +766,11 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                                 venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
                                 venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
                                 venOrderPayment.setVenPaymentType(venPaymentType);
-                            }                            
+                            }else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VEN_WCS_PAYMENT_TYPE_VISA)) {
+                                venPaymentType.setPaymentTypeCode(VEN_PAYMENT_TYPE_CC);
+                                venPaymentType.setPaymentTypeId(VEN_PAYMENT_TYPE_ID_CC);
+                                venOrderPayment.setVenPaymentType(venPaymentType);
+                            }               
                             venOrderPaymentList.add(venOrderPayment);
                         }
                     }
@@ -1304,9 +1308,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         //adjust the quantity and the related price fields for the PF item.
         _log.info("the order item in update order is found, check if it is in PF status in venice");
         if (venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF) {
-            _log.info("the order item found, is in PF status, so update it");
-            // Set the status of the adjusted order to FP
-            venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
+	    	_log.info("the order item found, is in PF status, so update it");
+	        // Set the status of the adjusted order to FP
+	        venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
 
             mapExistingOrderItemWithNewOrderItem(venOrderItem, orderItem);
 
@@ -1785,8 +1789,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 		                if(!venOrder.getVenOrderStatus().getOrderStatusCode().equals("VA")){
 			                for (VenOrderItem item : venOrderItemList) {
 			                    _log.debug("set new order item: " + item.getWcsOrderItemId() + ", status: " + venOrder.getVenOrderStatus().getOrderStatusCode());
-			                   if (item.getVenOrderStatus().getOrderStatusCode().equals("PF") || item.getVenOrderStatus().getOrderStatusCode().equals("OS") || item.getVenOrderStatus().getOrderStatusCode().equals("FC")) {
-			                    	
+			                   if (item.getVenOrderStatus().getOrderStatusCode().equals("PF") || item.getVenOrderStatus().getOrderStatusCode().equals("OS") || item.getVenOrderStatus().getOrderStatusCode().equals("FC")) {			                    	
 			                    	VenOrderStatus venOrderItemStatusNew = new VenOrderStatus();
 			                    	venOrderItemStatusNew.setOrderStatusCode(venOrderStatusList.get(0).getOrderStatusCode());
 			                    	venOrderItemStatusNew.setOrderStatusId(venOrderStatusList.get(0).getOrderStatusId());

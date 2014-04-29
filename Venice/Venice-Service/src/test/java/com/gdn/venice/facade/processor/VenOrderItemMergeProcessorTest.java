@@ -83,7 +83,7 @@ public class VenOrderItemMergeProcessorTest {
 		
 		orderItemWithStatusFP = new VenOrderItem();
 		orderItemWithStatusFP.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
-		
+
 		orderItemWithStatusPF = new VenOrderItem();
 		orderItemWithStatusPF.setVenOrderStatus(VenOrderStatusPF.createVenOrderStatus());
 		

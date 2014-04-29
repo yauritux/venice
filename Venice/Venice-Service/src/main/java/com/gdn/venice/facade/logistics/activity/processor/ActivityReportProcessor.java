@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.djarum.raf.utilities.Locator;
+import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.djarum.raf.utilities.SQLDateUtility;
 import com.gdn.awb.exchange.model.AirwayBillTransactionResource;
 import com.gdn.venice.constants.VenOrderStatusConstants;
@@ -24,6 +26,7 @@ import com.gdn.venice.dao.LogFileUploadLogDAO;
 import com.gdn.venice.dao.VenOrderItemStatusHistoryDAO;
 import com.gdn.venice.facade.LogActivityReconRecordSessionEJBRemote;
 import com.gdn.venice.facade.LogAirwayBillSessionEJBRemote;
+import com.gdn.venice.facade.LogInvoiceAirwaybillRecordSessionEJBRemote;
 import com.gdn.venice.facade.logistics.activity.ActivityReportData;
 import com.gdn.venice.facade.spring.FinSalesRecordService;
 import com.gdn.venice.facade.spring.VenOrderItemService;
@@ -38,6 +41,7 @@ import com.gdn.venice.persistence.LogActivityReportUpload;
 import com.gdn.venice.persistence.LogAirwayBill;
 import com.gdn.venice.persistence.LogApprovalStatus;
 import com.gdn.venice.persistence.LogFileUploadLog;
+import com.gdn.venice.persistence.LogInvoiceAirwaybillRecord;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.LogReconActivityRecordResult;
 import com.gdn.venice.persistence.LogReportStatus;
@@ -57,6 +61,8 @@ import com.gdn.venice.util.VeniceConstants;
 public abstract class ActivityReportProcessor {
 	public static final SimpleDateFormat formatDate = new SimpleDateFormat(LogisticsConstants.DATE_FORMAT_STRING);
 	public static final SimpleDateFormat fileDateTimeFormat = new SimpleDateFormat(LogisticsConstants.FILE_DATE_TIME_FORMAT);
+
+    protected static Logger _log = null;
 	
 	@Autowired
 	LogFileUploadLogDAO logFileUploadLogDAO;
@@ -74,6 +80,7 @@ public abstract class ActivityReportProcessor {
 	VenOrderItemService venOrderItemService;
 	
 	AirwayBillEngineConnector awbConn;
+	
 	
 	private String activityReportFailFilePath;
 	
@@ -181,10 +188,15 @@ public abstract class ActivityReportProcessor {
 													            String logProviderCode,
 													            LogAirwayBill logAirwayBill, 
 													            ActivityReportData activityReportData) {
-
+	    Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
+	    _log = loggerFactory.getLog4JLogger("com.gdn.venice.facade.logistics.activity.processor.ActivityReportProcessor");
+	    
+		Locator<Object> locator = null;
+	    
         boolean isOverrideSuccess = true;
         String errorMessage = "";
         if (airwayBillNoFromEngine.equals(airwayBillNoFromLogistic)) {
+        	_log.debug("Airway Bill Engine & Logistic are matched");
             getLogger().debug("Airway Bill Engine & Logistic are matched");
             try {
                 errorMessage = updateOrderItemAndAirwayBillTransactionStatus(uploadUsername, venOrderItem, airwayBillTransaction, existingOrderItemStatus , newOrderItemStatus, existingAirwayBillTransactionStatus, newAirwayBillTransactionStatus, true);
@@ -200,20 +212,42 @@ public abstract class ActivityReportProcessor {
             getLogger().debug("Airway Bill Engine & Logistic are NOT matched");
             getLogger().debug("Airway Bill Engine : " + airwayBillNoFromEngine);
             getLogger().debug("Airway Bill Logistics : " + airwayBillNoFromLogistic);
+            getLogger().debug("airwaybill number (venice):"+logAirwayBill.getAirwayBillNumber());
             
-            if (existingAirwayBillTransactionStatus.equals(AirwayBillTransaction.STATUS_SETTLED)
-                    || existingAirwayBillTransactionStatus.equals(AirwayBillTransaction.STATUS_CLOSED)) {
-
-                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " status is CX or D, not allowed to override");
-
-                isOverrideSuccess = false;
-            } else {
-                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, uploadUsername, logProviderCode);
-
-                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
+            try{
+    			locator = new Locator<Object>();
+	        	LogInvoiceAirwaybillRecordSessionEJBRemote awbRecordHome = (LogInvoiceAirwaybillRecordSessionEJBRemote) locator
+				.lookup(LogInvoiceAirwaybillRecordSessionEJBRemote.class, "LogInvoiceAirwaybillRecordSessionEJBBean");
+	        	LogInvoiceAirwaybillRecord awbRecord= awbRecordHome.queryByRange("select o from LogInvoiceAirwaybillRecord o where o.airwayBillNumber ='" + logAirwayBill.getAirwayBillNumber() + "'" , 0, 1).get(0);
+	            
+	        	if(awbRecord!=null){
+		            if (awbRecord.getInvoiceResultStatus().equals(VeniceConstants.LOG_AIRWAYBILL_ACTIVITY_RESULT_OK)) {
+		
+		                getLogger().debug("Airway Bill from engine " + airwayBillNoFromEngine + " activity status is OK, not allowed to override");
+		
+		                isOverrideSuccess = false;
+		            	}else {
+		            		getLogger().debug(awbRecord.getInvoiceResultStatus());
+		            		getLogger().debug("activity is not null");
+			                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, logProviderCode,uploadUsername);
+			                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
+			            } 
+		           	}else {
+		                isOverrideSuccess = overrideAirwayBillNumber(airwayBillTransaction.getGdnRef(), airwayBillNoFromLogistic, logProviderCode,uploadUsername);
+		                getLogger().debug("Airway Bill override result from engine " + isOverrideSuccess);
+		            }
+            
+            }catch(Exception e){
+            	e.printStackTrace();
+            }finally{
+    			try{
+    				if(locator!=null){
+    					locator.close();
+    				}
+    			}catch(Exception e){
+    				e.printStackTrace();
+    			}
             }
-
-            airwayBillTransaction.setAirwayBillNo(airwayBillNoFromLogistic);
 
             try {
                 errorMessage = updateOrderItemAndAirwayBillTransactionStatus(uploadUsername, venOrderItem, airwayBillTransaction, existingOrderItemStatus , newOrderItemStatus, existingAirwayBillTransactionStatus, newAirwayBillTransactionStatus, isOverrideSuccess);
@@ -267,6 +301,8 @@ public abstract class ActivityReportProcessor {
             activityReportData.getFailedStatusUpdateList().add(failedStatusUpdate);
 
             createProblemExistAwbNumber(airwayBillNoFromLogistic, airwayBillNoFromEngine, logAirwayBill, activityReportData.getActivityReportUpload());
+        }else{
+        	
         }
         return errorMessage;
     }
@@ -499,11 +535,11 @@ public abstract class ActivityReportProcessor {
         }
     }
 	
-	public Boolean overrideAirwayBillNumber(String gdnRefNo, String newAirwayBillNo, String uploadUsername, String logProviderCode) {
+	public Boolean overrideAirwayBillNumber(String gdnRefNo, String newAirwayBillNo, String logProviderCode,String uploadUsername) {
         getLogger().debug("GDN Ref No : " + gdnRefNo);
         getLogger().debug("New Airway Bill No : " + newAirwayBillNo);
 
-        return awbConn.overrideAirwayBillNumber(gdnRefNo, newAirwayBillNo, uploadUsername, logProviderCode);
+        return awbConn.overrideAirwayBillNumber(gdnRefNo, newAirwayBillNo, logProviderCode,uploadUsername );
     }
 	
 	public void saveCXFinanceHistory(LogAirwayBill logAirwayBill) {    
@@ -557,7 +593,6 @@ public abstract class ActivityReportProcessor {
 	
 	public void generateUploadFailData(ActivityReportData activityReportData, LogFileUploadLog fileUploadLog) throws Exception{
 		if(isFailReportAvailable(activityReportData)){
-			
 			if(activityReportFailFilePath == null)
 				activityReportFailFilePath = System.getenv("VENICE_HOME") + LogisticsConstants.ACTIVITY_REPORT_FOLDER;
 			
@@ -566,9 +601,8 @@ public abstract class ActivityReportProcessor {
 
             HSSFWorkbook wb = new HSSFWorkbook();
             HSSFSheet sheet = wb.createSheet("ActivityReportFailedToUpload");
-
             ActivityInvoiceFailedToUploadExport activityInvoiceFailedToUploadExport = new ActivityInvoiceFailedToUploadExport(wb);
-            wb = activityInvoiceFailedToUploadExport.ExportExcel(activityReportData.getGdnRefNotFoundList(), activityReportData.getFailedItemList(), activityReportData.getFailedStatusUpdateList(), sheet, "activity");
+            wb = activityInvoiceFailedToUploadExport.ExportExcel(activityReportData.getGdnRefNotFoundList(), activityReportData.getFailedItemList(), activityReportData.getFailedStatusUpdateList(),activityReportData.getFailedProviderForGdnReff(),sheet, "activity");
             wb.write(fos);
             
             getLogger().debug("done export excel");
@@ -584,10 +618,12 @@ public abstract class ActivityReportProcessor {
 	}
 	
 	public boolean isFailReportAvailable(ActivityReportData activityReportData){
-		if (activityReportData.getGdnRefNotFoundList().size() > 0 || activityReportData.getFailedItemList().size() > 0 || activityReportData.getFailedStatusUpdateList().size() > 0) {
+		if (activityReportData.getGdnRefNotFoundList().size() > 0 || activityReportData.getFailedItemList().size() > 0 || activityReportData.getFailedStatusUpdateList().size() > 0
+				|| activityReportData.getFailedProviderForGdnReff().size() > 0) {
             getLogger().info(activityReportData.getGdnRefNotFoundList().size() + " row(s) was not uploaded");
             getLogger().info(activityReportData.getFailedItemList().size() + " row(s) has problem when being processed");
             getLogger().info(activityReportData.getFailedStatusUpdateList().size() + " row(s) has fail status update");
+            getLogger().info(activityReportData.getFailedProviderForGdnReff().size() + " row(s) has different logistic provider");
           
             return true;
 		}else{

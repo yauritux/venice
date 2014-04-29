@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,6 +32,9 @@ public class WcsPaymentTypeServiceImpl implements WcsPaymentTypeService {
 	@Autowired
 	private VenWcsPaymentTypeDAO venWcsPaymentTypeDAO;
 	
+	@PersistenceContext
+	private EntityManager em;
+	
 	@Override
 	public VenWcsPaymentType synchronizeVenWcsPaymentType(VenWcsPaymentType venWcsPaymentType)
 	  throws VeniceInternalException {
@@ -36,8 +42,11 @@ public class WcsPaymentTypeServiceImpl implements WcsPaymentTypeService {
 		
 		VenWcsPaymentType synchWcsPaymentType = venWcsPaymentType;
 		
+		em.detach(venWcsPaymentType);
+		
 		if (venWcsPaymentType != null && venWcsPaymentType.getWcsPaymentTypeCode() != null) {
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenWcsPaymentType::wcsPaymentTypeCode =  " + venWcsPaymentType.getWcsPaymentTypeCode());
+			
 			synchWcsPaymentType = venWcsPaymentTypeDAO.findByWcsPaymentTypeCode(venWcsPaymentType.getWcsPaymentTypeCode());
 			if (synchWcsPaymentType == null) {
 				throw CommonUtil.logAndReturnException(new WcsPaymentTypeNotFoundException(

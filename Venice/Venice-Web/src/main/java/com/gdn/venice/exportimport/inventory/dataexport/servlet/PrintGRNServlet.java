@@ -21,6 +21,7 @@ import net.sf.jxls.exception.ParsePropertyException;
 import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  *
@@ -58,6 +59,8 @@ public class PrintGRNServlet extends HttpServlet {
             response.setHeader("Content-Disposition", "attachment; filename=" + filename + ".xls");
             Map<String, Object> beans = new HashMap<String, Object>();
             beans.put("grn", grn);
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println(mapper.writeValueAsString(grn));
             XLSTransformer transformer = new XLSTransformer();
             FileInputStream is = new FileInputStream("/home/software/venice_home/files/template/inventory/grn-template.xls");
             try {

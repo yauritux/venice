@@ -197,9 +197,9 @@ public class FraudCalculationSessionEJBBean implements FraudCalculationSessionEJ
 	@Qualifier("Rule40")
 	Rule rule40;
 	
-	@Autowired
+	/*@Autowired
 	@Qualifier("Rule41")
-	Rule rule41;
+	Rule rule41;*/
 	
 	@Autowired
 	@Qualifier("Rule42")
@@ -370,7 +370,7 @@ public class FraudCalculationSessionEJBBean implements FraudCalculationSessionEJ
 			pointRule40=rule40.getRiskPoint(venOrder);
 			
 			//attempt rule
-			 pointRule41=rule41.getRiskPoint(venOrder);
+		//	 pointRule41=rule41.getRiskPoint(venOrder);
 			 
 			 //status approve >1
 			 pointRule42=rule42.getRiskPoint(venOrder);
@@ -673,10 +673,10 @@ public class FraudCalculationSessionEJBBean implements FraudCalculationSessionEJ
 						fraudPoint.setRiskPoints(pointRule40);
 						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
 						
-						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
+						/*fraudPoint.setFrdFraudSuspicionCase(fraudCase);
 						fraudPoint.setFraudRuleName(FraudRuleConstants.FRAUD_RULE_41.title());
 						fraudPoint.setRiskPoints(pointRule41);
-						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
+						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);*/
 						
 						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
 						fraudPoint.setFraudRuleName(FraudRuleConstants.FRAUD_RULE_42.title());
@@ -686,6 +686,11 @@ public class FraudCalculationSessionEJBBean implements FraudCalculationSessionEJ
 						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
 						fraudPoint.setFraudRuleName(FraudRuleConstants.FRAUD_RULE_43.title());
 						fraudPoint.setRiskPoints(pointRule43);
+						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
+						
+						fraudPoint.setFrdFraudSuspicionCase(fraudCase);
+						fraudPoint.setFraudRuleName(FraudRuleConstants.FRAUD_RULE_44.title());
+						fraudPoint.setRiskPoints(pointRule44);
 						fraudPointSessionHome.persistFrdFraudSuspicionPoint(fraudPoint);
 						
 						fraudPoint.setFrdFraudSuspicionCase(fraudCase);

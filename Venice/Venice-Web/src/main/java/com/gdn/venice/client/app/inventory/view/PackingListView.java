@@ -22,6 +22,7 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.Autofit;
+import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.TitleOrientation;
 import com.smartgwt.client.util.EventHandler;
 import com.smartgwt.client.util.SC;
@@ -67,6 +68,8 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
     DynamicForm warehouseSelectionForm;
     ComboBoxItem cbWarehouse;
     ToolStripButton toolstrip;
+    TextItem claimedBy;
+    String claimer;
 
     @Inject
     public PackingListView() {
@@ -128,6 +131,8 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
             @Override
             public void onCellClick(CellClickEvent event) {
                 ListGridRecord record = salesOrderGrid.getSelectedRecord();
+                claimer = record.getAttribute(DataNameTokens.INV_AWB_CLAIMEDBY);
+                claimedBy.setValue(claimer);
                 if (event.getColNum() == 8) {
                     getUiHandlers().onRejectPacking(record.getAttribute(DataNameTokens.INV_SO_ID));
                 } else {
@@ -144,8 +149,8 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
 
     private Window buildPackingDetailWindow(final ListGridRecord record) {
         packingDetailWindow = new Window();
-        packingDetailWindow.setWidth(600);
-        packingDetailWindow.setHeight(450);
+        packingDetailWindow.setWidth(1200);
+        packingDetailWindow.setHeight(550);
         packingDetailWindow.setCanDragResize(true);
         packingDetailWindow.setTitle("Packing List");
         packingDetailWindow.setShowMinimizeButton(false);
@@ -196,7 +201,7 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         TextItem logistic = new TextItem(DataNameTokens.INV_AWB_LOGNAME, "Logistic Name");
         logistic.setValue(record.getAttribute(DataNameTokens.INV_AWB_LOGNAME));
 
-        TextItem claimedBy = new TextItem(DataNameTokens.INV_AWB_CLAIMEDBY, "Claimed By");
+        claimedBy = new TextItem(DataNameTokens.INV_AWB_CLAIMEDBY, "Claimed By");
 
         packingInfoForm.setFields(packingNo, awbNo, puDate, logistic, claimedBy);
         packingInfoForm.setDisabled(true);
@@ -214,11 +219,10 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         salesOrderGrid.getField(DataNameTokens.INV_SO_ATTRIBUTE).setHidden(Boolean.TRUE);
         salesOrderGrid.getField(DataNameTokens.INV_AWB_CLAIMEDBY).setHidden(Boolean.TRUE);
         salesOrderGrid.getField(DataNameTokens.INV_SO_ITEMID).setHidden(Boolean.TRUE);
+        salesOrderGrid.getField(DataNameTokens.INV_SO_ITEMPHOTO).setAlign(Alignment.CENTER);
+        salesOrderGrid.getField(DataNameTokens.INV_SO_ITEMPHOTO).setType(ListGridFieldType.IMAGE);
+        salesOrderGrid.getField(DataNameTokens.INV_SO_ITEMPHOTO).setImageSize(72);
         salesOrderGrid.setAutoFitData(Autofit.BOTH);
-
-        String claimer = salesOrderGrid.getRecord(0).getAttribute(DataNameTokens.INV_AWB_CLAIMEDBY);
-        SC.say(claimer);
-//        claimedBy.setValue(claimer);
 
         ToolStrip packingToolStrip = new ToolStrip();
         packingToolStrip.setWidth100();
@@ -418,6 +422,17 @@ public class PackingListView extends ViewWithUiHandlers<PackingListUiHandler> im
         };
 
         packingListGrid.getDataSource().fetchData(packingListGrid.getFilterEditorCriteria(), callBack);
+    }
+
+    public void refreshSalesOrderData() {
+        DSCallback callBack = new DSCallback() {
+            @Override
+            public void execute(DSResponse response, Object rawData, DSRequest request) {
+                salesOrderGrid.setData(response.getData());
+            }
+        };
+
+        salesOrderGrid.getDataSource().fetchData(salesOrderGrid.getFilterEditorCriteria(), callBack);
     }
 
     @Override

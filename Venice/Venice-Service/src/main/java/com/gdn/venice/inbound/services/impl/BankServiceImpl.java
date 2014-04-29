@@ -3,6 +3,9 @@ package com.gdn.venice.inbound.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,6 +32,9 @@ public class BankServiceImpl implements BankService {
 	@Autowired
 	private VenBankDAO venBankDAO;
 	
+	@PersistenceContext
+	private EntityManager em;
+	
 	@Override
 	public VenBank synchronizeVenBank(VenBank venBank) throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -36,7 +42,8 @@ public class BankServiceImpl implements BankService {
 		VenBank synchBank = null;
 		if (venBank != null && venBank.getBankCode() != null) {
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "synchronizeVenBank::venBank code = " + venBank.getBankCode());			
+					, "synchronizeVenBank::venBank code = " + venBank.getBankCode());
+			em.detach(venBank);
 			synchBank = venBankDAO.findByBankCode(venBank.getBankCode());
 			if (synchBank == null) {
 				throw CommonUtil.logAndReturnException(new BankNotFoundException(
