@@ -140,6 +140,16 @@ public class DataNameTokens {
 	public static String FRDPARAMETERRULE31_EMAIL="FrdParameterRule31.email";
 	public static String FRDPARAMETERRULE31_CCNUMBER="FrdParameterRule31.noCc";
 
+	//for fraud parameter 35 (grey list)
+	public static String FRDPARAMETERRULE35_ID="FrdParameterRule35.id";
+	public static String FRDPARAMETERRULE35_ORDERID="FrdParameterRule35.orderId";
+	public static String FRDPARAMETERRULE35_NOSURAT="FrdParameterRule35.noSurat";
+	public static String FRDPARAMETERRULE35_ORDERDATE="FrdParameterRule35.orderDate";
+	public static String FRDPARAMETERRULE35_CUSTOMERNAME="FrdParameterRule35.customerName";
+	public static String FRDPARAMETERRULE35_EMAIL="FrdParameterRule35.email";
+	public static String FRDPARAMETERRULE35_CCNUMBER="FrdParameterRule35.ccNumber";
+	public static String FRDPARAMETERRULE35_REMARKS="FrdParameterRule35.remarks";
+
 	public static String MIGSUPLOAD_MIGSID = "VenMigsUploadTemporary.migsId";
 	public static String MIGSUPLOAD_TRANSACTIONID = "VenMigsUploadTemporary.transactionId";
 	public static String MIGSUPLOAD_TRANSACTIONDATE = "VenMigsUploadTemporary.transactionDate";
@@ -922,7 +932,7 @@ public class DataNameTokens {
 	public static String FINARFUNDSINREFUND_REFUNDTIMESTAMP = "FinArFundsInRefund.refundTimestamp";	
 	public static String FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME = "FinArFundsInRefund.venOrder.venCustomer.venParty.fullOrLegalName";
 	public static String FINARFUNDSINREFUND_ACTION_TAKEN = "FinArFundsInRefund.refundType";
-	public static String FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE = "FinArFundsInRefund.finArFundsInReconRecord.providerReportFeeAmount";
+	public static String FINARFUNDSINREFUND_BANKFEE = "FinArFundsInRefund.feeAmount";
 	public static String FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON = "FinArFundsInRefund.finArFundsInReconRecord.comment";
 	public static String FINARFUNDSINREFUND_FEEAMOUNT= "FinArFundsInRefund.feeAmount";
 	//This is handled in the client/server side by code
@@ -964,6 +974,8 @@ public class DataNameTokens {
 	public static String FINJOURNALTRANSACTION_REFF = "FinJournalTransaction.wcsOrderID";
 	public static String FINJOURNALTRANSACTION_PAYMENT_TYPE = "FinJournalTransaction.paymenttype";
 	public static String FINJOURNALTRANSACTION_GROUP_JOURNAL = "FinJournalTransaction.groupJournal";
+	
+	public static String FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS= "FinJournalTransaction.finArFundsInReconRecords.comment";
 	
 	//Manual Journal Screen - Manual Journal Detail
 	public static String FINAPMANUALJOURNALTRANSACTION_VENORDER_ORDERID = "FinApManualJournalTransaction.venOrder.orderId";
@@ -1021,6 +1033,7 @@ public class DataNameTokens {
 	public static String RAFROLE_ROLENAME = "RafRole.roleName";
 	public static String RAFROLE_ROLEDESC = "RafRole.roleDesc";
 	public static String RAFROLE_PARENTROLE = "RafRole.rafRole.roleId";
+	public static String RAFROLE_ADDTOSTOCKHOLM = "RafRole.addToStockholm";
 	
 	//Administration - Role User Detail
 	public static String RAFROLE_RAFUSERROLES_USERID = "RafRole.rafUserRoles.userId";
@@ -1034,6 +1047,9 @@ public class DataNameTokens {
 	//Administration - User
 	public static String RAFUSER_USERID = "RafUser.userId";
 	public static String RAFUSER_LOGINNAME = "RafUser.loginName";
+	public static String RAFUSER_NAME = "RafUser.name";
+	public static String RAFUSER_ADDTOSTOCKHOLM = "RafUser.addToStockholm";
+	public static String RAFUSER_DEPARTMENT = "RafUser.department";
 	
 	//Administration - User Role Detail
 	public static String RAFUSERROLE_RAFUSERROLEID = "RafUserRole.rafUserRoleId";
@@ -1168,6 +1184,216 @@ public class DataNameTokens {
 	public static String FINARFUNDSINACTIONAPPLIEDHISTORY_DATE="FinArFundsInActionAppliedHistory.actionTakenTimestamp";
 	public static String FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT="FinArFundsInActionAppliedHistory.amount";
 	
+        
+        //Inventory Warehouse
+        public static String INV_WAREHOUSE_ID="warehouseId";
+        public static String INV_WAREHOUSE_CODE="code";
+        public static String INV_WAREHOUSE_NAME="name";
+        public static String INV_WAREHOUSE_DESCRIPTION="description";
+        public static String INV_WAREHOUSE_ADDRESS="address";
+        public static String INV_WAREHOUSE_CITY="city";
+        public static String INV_WAREHOUSE_ZIPCODE="zipcode";
+        public static String INV_WAREHOUSE_ACTIVESTATUS="activeStatus";
+        public static String INV_WAREHOUSE_APPROVALTYPE="approvalType";
+        public static String INV_WAREHOUSE_APPROVALSTATUS="approvalStatus";
+        public static String INV_WAREHOUSE_APPROVAL_IN_PROCESS="approvalInProcess";
+        public static String INV_WAREHOUSE_ORIGINALID="originId";
+        public static String INV_WAREHOUSE_CONTACT_PERSON="contactPerson";
+        public static String INV_WAREHOUSE_CONTACT_PHONE="contactPhone";
+        public static String INV_WAREHOUSE_SPACE="space";
+        public static String INV_WAREHOUSE_AVAILABLE_SPACE="availableSpace";
+        
+        public static String INV_SHELF_ID="shelfId";
+        public static String INV_SHELF_CODE="code";
+        public static String INV_SHELF_DESCRIPTION="description";
+        public static String INV_SHELF_ACTIVESTATUS="activeStatus";
+        public static String INV_SHELF_APPROVALTYPE="approvalType";
+        public static String INV_SHELF_APPROVALSTATUS="approvalStatus";
+        public static String INV_SHELF_APPROVAL_IN_PROCESS="approvalInProcess";
+        public static String INV_SHELF_ORIGINID="originId";
+        
+        public static String INV_STORAGE_ID="storageId";
+        public static String INV_STORAGE_CODE="code";
+        public static String INV_STORAGE_DESCRIPTION="description";
+        public static String INV_STORAGE_TYPE="type";
+                
+        //Inventory Currency
+        public static String INV_CURRENCY_ID="currencyId";
+        public static String INV_CURRENCY_CURRENCY="currency";
+        public static String INV_CURRENCY_RATE="rate";
+        public static String INV_CURRENCY_UPDATE_DATE="updateDate";
+        public static String INV_CURRENCY_UPDATED_BY="updatedBy";
+        
+    	public static String INV_ASN_ID = "asnId";
+    	public static String INV_ASN_NUMBER = "asnNumber";
+    	public static String INV_ASN_CREATED_DATE = "createdDate";
+    	public static String INV_ASN_REFF_DATE = "referenceDate";
+    	public static String INV_ASN_EST_DATE = "estimatedDate";
+    	public static String INV_ASN_INVENTORY_TYPE = "referenceType";
+    	public static String INV_ASN_SUPPLIER_CODE = "supplier.code";
+    	public static String INV_ASN_SUPPLIER_NAME = "supplier.name";
+    	public static String INV_ASN_DESTINATION = "destinationWarehouse.name";
+    	public static String INV_ASN_DESTINATIONCODE = "destinationWarehouse.code";
+    	public static String INV_ASN_STATUS = "currentStatus";
+    	public static String INV_ASN_SPECIAL_NOTES = "specialNotes";
+    	public static String INV_ASN_REFF_TYPE = "referenceType";
+    	public static String INV_ASN_REFF_NUMBER = "referenceNumber";
+    	public static String INV_DO_NUMBER = "doNumber";
+    	    	
+    	public static String INV_ASN_ITEM_ID = "asnItemId";
+    	public static String INV_ASN_ITEM_QTY = "quantity";
+    	
+    	public static String INV_PO_NUMBER = "poNumber";
+    	public static String INV_CFF_NUMBER = "cffNumber";
+
+    	public static String INV_POCFF_ITEMID = "itemId";
+    	public static String INV_POCFF_ITEMCODE = "code";
+    	public static String INV_POCFF_ITEMDESC = "description";
+    	public static String INV_POCFF_QTY = "quantity";
+    	public static String INV_POCFF_ITEMUNIT = "unit";
+    	public static String INV_POCFF_ITEMLENGTH = "length";
+    	public static String INV_POCFF_ITEMWIDTH = "width";
+    	public static String INV_POCFF_ITEMHEIGHT = "height";
+    	public static String INV_POCFF_ITEMWEIGHT = "weight";
+    	public static String INV_POCFF_VOLUME = "volume";
+    	public static String INV_POCFF_QTYGRN = "grnQuantity";
+    	
+    	public static String INV_GRN_ID = "grnId";
+    	public static String INV_GRN_NUMBER = "grnNumber";
+    	public static String INV_GRN_ITEM_ID = "grnItemId";
+    	
+    	public static String INV_ITEM_ATTRIBUTE_ID = "attributeId";
+    	public static String INV_ITEM_ATTRIBUTE_NAME = "name";
+    	public static String INV_ITEM_ATTRIBUTE_VALUE = "value";
+    	
+    	public static String INV_PICKINGLIST_WAREHOUSEITEMID = "warehouseItemId";
+    	public static String INV_PICKINGLIST_ITEMID = "itemId";
+    	public static String INV_PICKINGLIST_WAREHOUSEITEMSKU = "warehouseItemSKU";
+    	public static String INV_PICKINGLIST_ITEMSKUNAME = "warehouseItemSKUName";
+    	public static String INV_PICKINGLIST_STOCKTYPE = "stockType";
+    	public static String INV_PICKINGLIST_MERCHANT = "merchant";
+    	public static String INV_PICKINGLIST_QTY = "qty";
+    	public static String INV_PICKINGLIST_QTYPICKED = "qtyPicked";
+    	public static String INV_PICKINGLIST_DIMENSION = "dimension";
+    	public static String INV_PICKINGLIST_WEIGHT = "weight";
+    	public static String INV_PICKINGLIST_UOM = "uom";
+    	public static String INV_PICKINGLIST_ATTRIBUTE = "attribute";
+    	public static String INV_PICKINGLIST_SALESORDERID = "salesOrderId";
+    	public static String INV_PICKINGLIST_SALESORDERNUMBER = "salesOrderNumber";
+    	public static String INV_PICKINGLIST_SALESORDERQTY = "salesOrderQty";
+    	public static String INV_PICKINGLIST_SALESORDERTIPEPENANGANAN = "tipePenanganan";
+    	public static String INV_PICKINGLIST_SHELFCODE = "shelfCode";
+    	public static String INV_PICKINGLIST_WAREHOUSESTORAGEID = "shelfStorageId";
+    	
+    	public static String INV_PICKINGLISTIR_PACKAGEID = "packageId";
+    	public static String INV_PICKINGLISTIR_DETAIL = "Detail";
+    	public static String INV_PICKINGLISTIR_PACKAGECODE = "packageCode";
+    	public static String INV_PICKINGLISTIR_INVENTORYTYPE = "inventoryType";
+    	public static String INV_PICKINGLISTIR_IRTYPE = "irType";
+    	public static String INV_PICKINGLISTIR_PICKERID = "pickerId";
+    	public static String INV_PICKINGLISTIR_PICKERNAME = "pickerName";    	
+    	public static String INV_PICKINGLISTIR_INVENTORYREQUESTCODE = "inventoryRequestCode";
+    	public static String INV_PICKINGLISTIR_WAREHOUSESKUID = "warehouseItemSKU";
+    	public static String INV_PICKINGLISTIR_WAREHOUSESKUNAME = "warehouseItemSKUName";
+    	public static String INV_PICKINGLISTIR_QTY = "qty";
+    	public static String INV_PICKINGLISTIR_SHELFCODE = "shelfCode";
+    	
+    	public static String INV_PICKINGLISTSO_PACKAGEID = "packageId";
+    	public static String INV_PICKINGLISTSO_DETAIL = "Detail";
+    	public static String INV_PICKINGLISTSO_PACKAGECODE = "packageCode";
+    	public static String INV_PICKINGLISTSO_MERCHANTNAME = "merchantName";
+    	public static String INV_PICKINGLISTSO_PICKERID = "pickerId";
+    	public static String INV_PICKINGLISTSO_PICKERNAME = "pickerName";    	
+    	public static String INV_PICKINGLISTSO_SALESORDERCODE = "salesOrderCode";
+    	public static String INV_PICKINGLISTSO_WAREHOUSESKUID = "warehouseItemSKU";
+    	public static String INV_PICKINGLISTSO_WAREHOUSESKUNAME = "warehouseItemSKUName";
+    	public static String INV_PICKINGLISTSO_QTY = "qty";
+    	public static String INV_PICKINGLISTSO_SHELFCODE = "shelfCode";
+    	
+    	public static String INV_PUTAWAY_GRN_ITEMID = "grnItemId";
+    	public static String INV_PUTAWAY_GRN_GRNNUMBER = "grnNumber";
+    	public static String INV_PUTAWAY_GRN_ITEMCODE = "itemCode";
+    	public static String INV_PUTAWAY_GRN_ITEMDESC = "itemDescription";
+    	public static String INV_PUTAWAY_GRN_SHELFCODE = "shelfCode";
+    	public static String INV_PUTAWAY_GRN_QTY = "quantity";
+    	public static String INV_PUTAWAY_GRN_TYPE = "type";
+    	public static String INV_PUTAWAY_GRN_WAREHOUSEITEMID = "warehouseItemId";
+    	
+    	public static String INV_PUTAWAY_GRN_SHELFCODE_INPUT = "shelfCodeInput";
+    	public static String INV_PUTAWAY_GRN_QTY_INPUT = "quantityInput";
+
+    	public static String INV_PUTAWAY_ID = "putawayId";
+    	public static String INV_PUTAWAY_CREATEDDATE = "createdDate";
+    	public static String INV_PUTAWAY_NUMBER = "putawayNumber";
+    	public static String INV_PUTAWAY_STATUS = "putawayStatus";
+    	public static String INV_PUTAWAY_TYPE = "putawayType";
+    	public static String INV_PUTAWAY_GRN_ID = "grnId";
+                
+        //Inventory Packing List
+        public static String INV_AWB_ID = "awbId";
+        public static String INV_AWB_NO = "awbNo";
+        public static String INV_AWB_PUDATE = "puDate";
+        public static String INV_AWB_LOGNAME = "logisticName";
+        public static String INV_AWB_STATUS = "status";
+        public static String INV_AWB_OFFLINE = "awbOffline";
+        public static String INV_AWB_CLAIMEDBY = "claimedBy";
+        
+        //Inventory Sales Order
+        public static String INV_SO_ID = "soId";
+        public static String INV_SO_ORDERID = "orderId";
+        public static String INV_SO_ORDERITEMID = "orderItemId";
+        public static String INV_SO_MERCHANTSKU = "merchantSKU";
+        public static String INV_SO_QUANTITY = "quantity";
+        public static String INV_SO_DISCRIMINATOR = "discriminator";
+        public static String INV_SO_ITEMID = "itemId";
+        public static String INV_SO_ITEMDESC = "itemDesc";
+        public static String INV_SO_ITEMUOM = "itemUom";
+        public static String INV_SO_ITEMPHOTO = "itemPhoto";
+        public static String INV_SO_ITEMHASATTRIBUTE = "itemHasAttribute";
+        public static String INV_SO_ATTRIBUTE = "attribute";
+        
+        //Inventory GIN
+        public static String INV_GIN_ID = "ginId";
+        public static String INV_GIN_NO = "ginNo";
+        public static String INV_GIN_DATE = "ginDate";
+        public static String INV_GIN_NOTE = "ginNote";
+        public static String INV_GIN_WAREHOUSEID = "ginWarehouseId";
+        public static String INV_GIN_WAREHOUSECODE = "ginWarehouseCode";
+        public static String INV_GIN_WAREHOUSENAME = "ginWarehouseName";
+        public static String INV_GIN_LOGISTIC = "ginLogistic";
+        public static String INV_GIN_AWB_ID = "ginAwbId";
+        public static String INV_GIN_AWB_NO = "ginAwbNo";
+        
+        //Inventory Opname
+        public static String INV_OPNAME_ID = "opnameId";
+        public static String INV_OPNAME_NO = "opnameNo";
+        public static String INV_OPNAME_CREATEDBY = "createdBy";
+        public static String INV_OPNAME_CREATEDDATE = "createdDate";
+        public static String INV_OPNAME_UPDATEDBY = "updatedBy";
+        public static String INV_OPNAME_UPDATEDDATE = "updatedDate";
+        public static String INV_OPNAME_ITEMSTORAGE_ID = "itemStorageId";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMSKU = "itemSku";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMNAME = "itemName";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY = "category";
+        public static String INV_OPNAME_ITEMSTORAGE_ITEMUOM = "itemUom";
+        public static String INV_OPNAME_ITEMSTORAGE_SHELFCODE = "itemShelfCode";
+        public static String INV_OPNAME_ITEMSTORAGE_STORAGECODE = "itemStorageCode";
+        public static String INV_OPNAME_ITEMSTORAGE_QTY = "itemStorageQty";
+        public static String INV_OPNAME_ITEMSTORAGE_NEWQTY = "itemStorageNewQty";
+        public static String INV_OPNAME_ITEMSTORAGE_NOTE = "itemStorageNote";
+        public static String INV_OPNAME_SUPPLIERCODE = "supplierCode";
+        public static String INV_OPNAME_SUPPLIERNAME = "supplierName";
+        public static String INV_OPNAME_WAREHOUSECODE = "warehouseCode";
+        public static String INV_OPNAME_STOCKTYPE = "stockType";
+            
+        //Inventory Picker
+        public static String INV_PICKER_ID = "pickerId";
+        public static String INV_PICKER_CODE = "pickerCode";
+        public static String INV_PICKER_NAME = "pickerName";
+        public static String INV_PICKER_WAREHOUSECODE = "pickerWarehouseCode";
+        public static String INV_PICKER_WAREHOUSENAME = "pickerWarehouseName";
+        public static String INV_PICKER_STATUS = "pickerStatus";
+        
 	/**
 	 * This constructor adds all of the name token and the wrapper type
 	 * definitions into the Map. This should really be removed so that the 
@@ -1279,6 +1505,16 @@ public class DataNameTokens {
 		fieldClassMap.put(FRDPARAMETERRULE31_EMAIL, "java.lang.String");
 		fieldClassMap.put(FRDPARAMETERRULE31_CCNUMBER, "java.lang.String");
 
+
+		fieldClassMap.put(FRDPARAMETERRULE35_ID, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_ORDERID, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_NOSURAT, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_ORDERDATE, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_CUSTOMERNAME, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_EMAIL, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_CCNUMBER, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_REMARKS, "java.lang.String");
+		
 		fieldClassMap.put(MIGSUPLOAD_TRANSACTIONID, "java.lang.Long");
 		fieldClassMap.put(MIGSUPLOAD_MIGSID, "java.lang.Long");
 		fieldClassMap.put(MIGSUPLOAD_TRANSACTIONDATE, "java.sql.Timestamp");
@@ -1932,7 +2168,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINREFUND_REFUNDTIMESTAMP, "java.sql.Timestamp");		
 		fieldClassMap.put(FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME, "java.lang.String");
 		fieldClassMap.put(FINARFUNDSINREFUND_ACTION_TAKEN, "java.lang.String");
-		fieldClassMap.put(FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE, "java.math.BigDecimal");
+		fieldClassMap.put(FINARFUNDSINREFUND_BANKFEE, "java.math.BigDecimal");
 		fieldClassMap.put(FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON, "java.lang.String");
 		fieldClassMap.put(FINARFUNDSINREFUND_FEEAMOUNT, "java.math.BigDecimal");		
 		
@@ -2068,6 +2304,7 @@ public class DataNameTokens {
 		fieldClassMap.put(RAFROLE_ROLENAME, "java.lang.String");
 		fieldClassMap.put(RAFROLE_ROLEDESC, "java.lang.String");
 		fieldClassMap.put(RAFROLE_PARENTROLE, "java.lang.Long");
+		fieldClassMap.put(RAFROLE_ADDTOSTOCKHOLM, "java.lang.Boolean");
 		
 		fieldClassMap.put(RAFROLE_RAFUSERROLES_USERID, "java.lang.Long");
 		fieldClassMap.put(RAFROLE_RAFUSERROLES_ROLEID, "java.lang.Long");
@@ -2090,6 +2327,9 @@ public class DataNameTokens {
 		//Administration - User Field Class Mapping
 		fieldClassMap.put(RAFUSER_USERID, "java.lang.Long");
 		fieldClassMap.put(RAFUSER_LOGINNAME, "java.lang.String");
+		fieldClassMap.put(RAFUSER_NAME, "java.lang.String");
+		fieldClassMap.put(RAFUSER_ADDTOSTOCKHOLM, "java.lang.Boolean");
+		fieldClassMap.put(RAFUSER_DEPARTMENT, "java.lang.String");
 		
 		//Administration - User Role Detail Field Class Mapping
 		fieldClassMap.put(RAFUSERROLE_RAFUSERROLEID, "java.lang.Long");
@@ -2208,6 +2448,9 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_DATE,"java.sql.Timestamp");
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT,"java.math.BigDecimal");
 							
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_ID,"java.lang.Long");
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_NAME,"java.lang.String");
+		fieldClassMap.put(INV_ITEM_ATTRIBUTE_VALUE,"java.lang.String");		
 	}
 	
 	/**

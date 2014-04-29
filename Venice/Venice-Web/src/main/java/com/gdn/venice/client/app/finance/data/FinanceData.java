@@ -19,6 +19,7 @@ import com.smartgwt.client.data.fields.DataSourceFloatField;
 import com.smartgwt.client.data.fields.DataSourceIntegerField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 import com.smartgwt.client.types.DSOperationType;
+import com.smartgwt.client.types.FieldType;
 
 public class FinanceData {
 
@@ -625,11 +626,11 @@ public class FinanceData {
             new DataSourceIntegerField(DataNameTokens.FINARFUNDSINREFUND_REFUNDRECORDID, "ID"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_WCSORDERID, "Order ID"),
             new DataSourceDateField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_ORDERDATE, "Order Date"),
-            new DataSourceDateField(DataNameTokens.FINARFUNDSINREFUND_REFUNDTIMESTAMP, "Refund Date"),
+            new DataSourceField(DataNameTokens.FINARFUNDSINREFUND_REFUNDTIMESTAMP, FieldType.DATETIME, "Refund Date"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_VENORDER_VENCUSTOMER_VENPARTY_FULLORLEGALNAME, "Customer Name"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_ACTION_TAKEN, "Action Taken"),
             new DataSourceFloatField(DataNameTokens.FINARFUNDSINREFUND_APAMOUNT, "A/P Amount"),
-            new DataSourceFloatField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_BANKFEE, "Bank Fee"),
+            new DataSourceFloatField(DataNameTokens.FINARFUNDSINREFUND_BANKFEE, "Bank Fee"),
             new DataSourceTextField(DataNameTokens.FINARFUNDSINREFUND_FINARFUNDSINRECONRECORD_REASON, "Reason")
         };
         dataSourceFields[0].setPrimaryKey(true);
@@ -638,7 +639,7 @@ public class FinanceData {
                 "/response/data/*",
                 GWT.getHostPageBaseURL() + PaymentProcessingPresenter.paymentProcessingPresenterServlet + "?method=fetchRefundPaymentProcessingData&type=DataSource",
                 null,
-                null,
+                GWT.getHostPageBaseURL() + PaymentProcessingPresenter.paymentProcessingPresenterServlet + "?method=UpdateRefundPaymentProcessingData&type=DataSource",
                 null,
                 dataSourceFields);
 
