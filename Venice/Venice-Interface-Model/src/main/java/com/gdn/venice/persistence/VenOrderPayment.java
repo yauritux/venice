@@ -81,9 +81,12 @@ public class VenOrderPayment implements Serializable {
 	
 	@Column(name="installment_cancel_flag", nullable=true)
 	private Boolean installmentCancelFlag;
-	
+
 	@Column(name="installment_cancel_date", nullable=true)
 	private Timestamp installmentCancelDate;
+	
+	@Column(name="card_number", length=100)
+	private String cardNumber;
 
 	//bi-directional many-to-one association to FinArFundsInReconRecord
 	@OneToMany(mappedBy="venOrderPayment")
@@ -418,6 +421,16 @@ public class VenOrderPayment implements Serializable {
 
 	public void setInstallmentCancelDate(Timestamp installmentCancelDate) {
 		this.installmentCancelDate = installmentCancelDate;
+	}
+
+
+	public void setCardNumber(String cardNumber) {
+		this.cardNumber = cardNumber;
+	}
+
+
+	public String getCardNumber() {
+		return cardNumber;
 	}
 
 	

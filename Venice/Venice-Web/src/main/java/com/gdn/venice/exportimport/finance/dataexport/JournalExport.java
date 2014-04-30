@@ -196,7 +196,7 @@ public class JournalExport {
 					
 					
 					nameCell = row.createCell(startCol + 7);
-					if(finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Cash Receive Journal")) {
+					if(finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Cash Receive Journal") || finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Refund Journal") || finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Allocation Journal")) {
 						if((finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Payment Not Recognized") || finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Refunded"))) {
 							if(i==0) {
 								nameCell.setCellValue(new HSSFRichTextString(
