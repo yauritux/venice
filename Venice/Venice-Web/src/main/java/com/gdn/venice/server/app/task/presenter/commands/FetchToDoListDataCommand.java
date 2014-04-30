@@ -169,25 +169,35 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 									map = createHashMapEntry(task, desc);						
 								} else if (task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSINVOICEAPPROVAL)) {
 									_log.debug("'"+ProcessNameTokens.LOGISTICSINVOICEAPPROVAL+"'");
-									String invoiceNumberAll = bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.INVOICERENUMBER);
-									
-									Pattern p = Pattern.compile("[\\{\\}\\=\\,]++");
-									String[] split = p.split(invoiceNumberAll);
+									String invoiceNumberAll = bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.INVOICERENUMBER)!=null?bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.INVOICERENUMBER):"";
 
-									HashMap<String, String> invoiceNumbers;
-									invoiceNumbers = new HashMap<String, String>();
-									for (int j = 1; j < split.length; j += 2) {
-										invoiceNumbers.put((split[j]).trim(), (split[j + 1]).trim());
-									}	
-									String invoiceNumber="";
-									for (String invoiceNo : invoiceNumbers.values()) {
-										invoiceNumber += invoiceNo + ",";
-									}			
+									if(invoiceNumberAll!=""){
+										Pattern p = Pattern.compile("[\\{\\}\\=\\,]++");
+										String[] split = p.split(invoiceNumberAll);
 									
-									invoiceNumber = invoiceNumber.substring(0, invoiceNumber.length()-1);
-									desc=task.getActivityName()==null?"":task.getActivityName()+" (" + invoiceNumber + ")";
-									_log.debug("desc = '"+desc+"'");
-									map = createHashMapEntry(task, desc);		
+									
+										HashMap<String, String> invoiceNumbers;
+										invoiceNumbers = new HashMap<String, String>();
+										for (int j = 1; j < split.length; j += 2) {
+											invoiceNumbers.put((split[j]).trim(), (split[j + 1]).trim());
+										}	
+										
+										String invoiceNumber="";
+										for (String invoiceNo : invoiceNumbers.values()) {
+											invoiceNumber += invoiceNo + ",";
+										}			
+										
+										invoiceNumber = invoiceNumber.substring(0, invoiceNumber.length()-1);
+										desc=task.getActivityName()==null?"":task.getActivityName()+" (" + invoiceNumber + ")";
+										_log.debug("desc = '"+desc+"'");
+										map = createHashMapEntry(task, desc);
+									}
+									else{
+										desc=task.getActivityName()==null?"":task.getActivityName()+" (" + invoiceNumberAll + ")";
+										_log.debug("desc = '"+desc+"'");
+										map = createHashMapEntry(task, desc);
+									}
+
 								} else if (task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSMTADATAACTIVITYRECONCILIATION) || 
 										task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSMTADATAINVOICERECONCILIATION)) {
 									String wcsOrderIdWcsOrderItemId="";
