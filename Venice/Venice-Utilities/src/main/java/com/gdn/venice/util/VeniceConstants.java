@@ -117,7 +117,6 @@ public interface VeniceConstants {
 	public static final long VEN_ORDER_STATUS_RF = 21;
 	public static final long VEN_ORDER_STATUS_TS = 22;
 	public static final long VEN_ORDER_STATUS_S = 23;
-
 	public static final long VEN_ORDER_STATUS_CR = 24;
 
 	public static final long VEN_ACTIVITY_RECON_RESULT_0 = 0;
