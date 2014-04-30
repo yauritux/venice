@@ -109,41 +109,40 @@ public class OrderUtil {
 		} else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_MandiriDebit.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
-		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+		} else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
 				VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_TelkomselPoin.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_IB.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_IB.id());
-		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+		} else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
 				VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_BCACreditCard.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
             venOrderPayment.setInstallmentSentFlag(false);
             venOrderPayment.setInstallmentCancelFlag(false);
-		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+		} else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
 				VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_ANZ.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
             venOrderPayment.setInstallmentSentFlag(false);
             venOrderPayment.setInstallmentCancelFlag(false);
-		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+		} else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
 				VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_CIMBCreditCard.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
             venOrderPayment.setInstallmentSentFlag(false);
             venOrderPayment.setInstallmentCancelFlag(false);
-		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+		} else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
 				VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_DanamonCreditCard.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
             venOrderPayment.setInstallmentSentFlag(false);
             venOrderPayment.setInstallmentCancelFlag(false);
-		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+		} else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
 			VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_VISACreditCard.desc())){
 			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
 		} 	 	 
 		
-
 		venOrderPayment.setVenPaymentType(venPaymentType);
 		
 		return venOrderPayment;
