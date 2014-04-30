@@ -172,7 +172,6 @@ public class MandiriVAFundInServiceImpl extends AbstractFundInService {
 					j = 0;
 					
 					currentRecord.setPaymentAmount(currentRecord.getPaymentAmount() + otherRecord.getPaymentAmount());
-					currentRecord.setBankFee(currentRecord.getBankFee() + otherRecord.getBankFee());
 				}
 			}
 			
