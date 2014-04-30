@@ -2484,7 +2484,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * destinationVenOrderPaymentId, Double allocationAmount, Long
 	 * destinationVenOrderId)
 	 */
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionAttribute(TransactionAttributeType.REQUIRED) 
 	public Boolean allocatePaymentAndpostAllocationJournalTransaction(
 			Long sourceVenWCSOrderId, Long sourceVenOrderPaymentId,
 			Long fundsInReconRecordId, Long destinationVenOrderPaymentId,
@@ -2640,6 +2640,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord.setNomorReff(payment.getNomorReff());
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(
 							System.currentTimeMillis()));
+					
+					if(destinationVenOrderPayment.getCardNumber()!=null)
+					{
+						String cardNumber = destinationVenOrderPayment.getCardNumber();
+						VenOrderPayment venOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
+						venOrderPayment.setCardNumber(cardNumber);
+						destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
+					}
+					
 					newRecord.setVenOrderPayment(destinationVenOrderPayment
 							.getVenOrderPayment());
 					newRecord.setFinArFundsInReport(payment
@@ -2913,6 +2922,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 					Date d = new Date();
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(d
 							.getTime()));
+					
+					if(newRecord.getCardNumber()!=null)
+					{
+						String cardNumber = newRecord.getCardNumber();
+						VenOrderPayment venOrderPayment = newRecord.getVenOrderPayment();
+						venOrderPayment.setCardNumber(cardNumber);
+						newRecord.setVenOrderPayment(venOrderPayment);
+					}
+					
 					newRecord.setVenOrderPayment(tempRecord
 							.getVenOrderPayment());
 					newRecord.setFinArFundsInReport(payment
