@@ -197,11 +197,13 @@ public class VenOrderSessionEJBBean implements VenOrderSessionEJBRemote,
 		for (VenOrder venOrder : returnList) {
 			Hibernate.initialize(venOrder.getVenOrderPaymentAllocations());
 		}
+		
+		em.clear();
+		
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
 		_log.debug("queryByRange() duration:" + duration + "ms");
-		if(duration > 100)
-			_log.warn("this query runs too long " + duration + "ms : " + jpqlStmt);
+		
 		return returnList;
 	}
 
