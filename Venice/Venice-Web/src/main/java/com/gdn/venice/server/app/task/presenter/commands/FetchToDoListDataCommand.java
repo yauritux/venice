@@ -170,7 +170,7 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 								} else if (task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSINVOICEAPPROVAL)) {
 									_log.debug("'"+ProcessNameTokens.LOGISTICSINVOICEAPPROVAL+"'");
 									String invoiceNumberAll = bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.INVOICERENUMBER)!=null?bpmAdapter.getExternalDataVariableAsString(new Long(task.getId()), ProcessNameTokens.INVOICERENUMBER):"";
-									
+
 									if(invoiceNumberAll!=""){
 										Pattern p = Pattern.compile("[\\{\\}\\=\\,]++");
 										String[] split = p.split(invoiceNumberAll);
@@ -197,6 +197,7 @@ public class FetchToDoListDataCommand implements RafDsCommand {
 										_log.debug("desc = '"+desc+"'");
 										map = createHashMapEntry(task, desc);
 									}
+
 								} else if (task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSMTADATAACTIVITYRECONCILIATION) || 
 										task.getProcessInstance().getProcess().getName().equals(ProcessNameTokens.LOGISTICSMTADATAINVOICERECONCILIATION)) {
 									String wcsOrderIdWcsOrderItemId="";

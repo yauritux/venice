@@ -183,8 +183,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
-			FinJournal finJournalCashReceive = journalCashRecieveHome.queryByRange("select o from FinJournal o where o.journalId='"+VeniceConstants.FIN_JOURNAL_CASH_RECEIVE+"'", 0, 1).get(0);
-;
+			FinJournal finJournalCashReceive = new FinJournal ();
+			
 			// FinJournalApprovalGroup finJournalApprovalGroups = null;
 			int count = 0;
 			
@@ -240,7 +240,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							&& finArFundsInJournalTransactionList.isEmpty()) {
 		/*				finJournalCashReceive
 								.setJournalId(VeniceConstants.FIN_JOURNAL_CASH_RECEIVE);*/
-						
+						finJournalCashReceive=journalCashRecieveHome.queryByRange("select o from FinJournal o where o.journalId='"+VeniceConstants.FIN_JOURNAL_CASH_RECEIVE+"'", 0, 1).get(0);
 					
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyy-MMM-dd");

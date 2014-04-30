@@ -137,6 +137,10 @@ public class OrderUtil {
 			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
             venOrderPayment.setInstallmentSentFlag(false);
             venOrderPayment.setInstallmentCancelFlag(false);
+		}else if (venOrderPayment.getVenWcsPaymentType().getWcsPaymentTypeCode().equals(
+			VenWCSPaymentTypeConstants.VEN_WCS_PAYMENT_TYPE_VISACreditCard.desc())){
+			venPaymentType.setPaymentTypeCode(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.desc());
+			venPaymentType.setPaymentTypeId(VenPaymentTypeConstants.VEN_PAYMENT_TYPE_CC.id());
 		} 	 	 
 		
 
