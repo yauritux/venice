@@ -499,6 +499,35 @@ public class ShelfManagementService {
             return null;
         }
     }
+    
+    public InventoryPagingWrapper<StorageWIP> getStorageInProcessData(RafDsRequest request, Long shelfId) throws HttpException, IOException {
+        System.out.println("getStorageInProcessData");
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "shelf/findStorageInProcessByShelf?username=" + request.getParams().get("username")
+                + "&shelfId=" + shelfId
+                + "&page=" + request.getParams().get("page")
+                + "&limit=" + request.getParams().get("limit");
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println("url: " + url);
+
+        httpClient = new HttpClient();
+        int httpCode = httpClient.executeMethod(httpPost);
+        System.out.println("response code: " + httpCode);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            System.out.println(sb.toString());
+            is.close();
+            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<StorageWIP>>() {
+            });
+        } else {
+            return null;
+        }
+    }
 
     /*
      * Added by Maria Olivia - 20140414

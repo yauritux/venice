@@ -14,12 +14,13 @@ import com.gdn.venice.server.command.RafRpcCommand;
  */
 public class SaveGrnAttributeDataCommand implements RafRpcCommand {
 
-    String asnItemId, username, attributes;
+    String itemId, asnItemId, username, attributes;
     GRNManagementService grnService;
 
-    public SaveGrnAttributeDataCommand(String username, String asnItemId, String attributes) {
+    public SaveGrnAttributeDataCommand(String username, String itemId, String asnItemId, String attributes) {
         this.attributes = attributes;
         this.username = username;
+        this.itemId = itemId;
         this.asnItemId = asnItemId;
     }
 
@@ -36,7 +37,7 @@ public class SaveGrnAttributeDataCommand implements RafRpcCommand {
                 System.out.println("attribute k "+i+": " +attr[i]);
             }            
             System.out.println("start save attribute to cache");
-            wrapper = grnService.saveAttributeToCache(username, asnItemId, attribute);
+            wrapper = grnService.saveAttributeToCache(username, itemId, asnItemId, attribute);
             System.out.println("done save attribute to cache");
             if (wrapper==null || !wrapper.isSuccess()) {                
                 return wrapper.getError();

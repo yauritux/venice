@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.gdn.inventory.exchange.entity.Storage;
 import com.gdn.inventory.exchange.entity.StorageWIP;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.venice.client.app.DataNameTokens;

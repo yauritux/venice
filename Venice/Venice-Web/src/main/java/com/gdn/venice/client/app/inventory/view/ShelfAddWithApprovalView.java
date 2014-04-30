@@ -267,7 +267,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
             storageType.put("pallet", "Pallet");
             storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
     	}else{
-        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 50);
+        	DataSource storageData = ShelfData.getStorageInProcessData(shelfId, 1, 50);
     		storageListGrid.setDataSource(storageData);
     		storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
     		

@@ -264,7 +264,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 					                        for (int i = 0; i < fieldName.length; i++) {
 					                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
 					                        }
-					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields, rawData.toString()).show();
+					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields, rawData.toString()).show();
 					                    }
 					                });
 						}
@@ -298,6 +298,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		itemListGrid.getField(DataNameTokens.INV_POCFF_ITEMDESC).setCanEdit(false);
 		itemListGrid.getField(DataNameTokens.INV_POCFF_ITEMUNIT).setCanEdit(false);
 		itemListGrid.getField(DataNameTokens.INV_ASN_ITEM_ID).setHidden(true);	
+		
               				        
         return itemListGrid;
     }
@@ -317,7 +318,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     }
     
     @Override
-    public Window buildAttributeWindow(final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields, String fieldName) {
+    public Window buildAttributeWindow(final String itemId, final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields, String fieldName) {
         records = 0;
         attributeWindow = new Window();
         attributeWindow.setWidth(600);
@@ -452,7 +453,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
                 StringBuilder sb = new StringBuilder();
                 List<String> attr = new ArrayList<String>();
                 int counter = 1;
-                for (int r = 0; r < quantity; r++) {
+                for (int r = 0; r < attributeListGrid.getTotalRows(); r++) {
                     for (int c = 0; c < dataSourceFields.length; c++) {
                         attr.add(dataSourceFields[c].getName() + ":" + attributeListGrid.getEditedRecord(r).getAttributeAsString(dataSourceFields[c].getName()) + ":" + counter);
                         counter++;
@@ -466,7 +467,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
                     sb.append(string);
                 }
 
-                getUiHandlers().onSaveAttribute(MainPagePresenter.signedInUser,sb.toString(), asnItemId);
+                getUiHandlers().onSaveAttribute(MainPagePresenter.signedInUser,sb.toString(), itemId, asnItemId);
             }
         });
 

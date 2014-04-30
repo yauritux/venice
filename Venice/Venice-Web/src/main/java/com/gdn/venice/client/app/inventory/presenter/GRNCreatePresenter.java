@@ -58,7 +58,7 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
 		public Window getGrnCreateWindow();
 		public ListGrid getAttributeGrid();
 		public Window getAttributeWindow();
-		public Window buildAttributeWindow(String asnItemId, int quantity, DataSourceField[] dataSourceFields, String fieldName);
+		public Window buildAttributeWindow(String itemId, String asnItemId, int quantity, DataSourceField[] dataSourceFields, String fieldName);
 	}
 
 	@Inject
@@ -94,8 +94,7 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
 		RPCManager.setShowPrompt(true);
 		
 		RPCManager.sendRequest(request, new RPCCallback () {
-					public void execute(RPCResponse response,
-							Object rawData, RPCRequest request) {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						
 						if (rpcResponse.startsWith("0")) {
@@ -110,12 +109,12 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
 	}
     
     @Override
-    public void onSaveAttribute(String username, String attributes, String asnItemId) {
+    public void onSaveAttribute(String username, String attributes, String itemId, String asnItemId) {
         try {
             RPCRequest request = new RPCRequest();
             request.setData(attributes);
             request.setActionURL(GWT.getHostPageBaseURL() + grnManagementPresenterServlet
-                    + "?method=saveGrnAttributeData&type=RPC&username=" + username + "&asnItemId=" + asnItemId);
+                    + "?method=saveGrnAttributeData&type=RPC&username=" + username + "&itemId=" + itemId+ "&asnItemId=" + asnItemId);
             request.setHttpMethod("POST");
             request.setUseSimpleHttp(true);
             request.setWillHandleError(true);
