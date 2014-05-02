@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.gdn.venice.constants.FinApprovalStatusConstants;
 import com.gdn.venice.constants.FinArFundsInActionAppliedConstants;
 import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
+import com.gdn.venice.constants.FinArReconResultConstants;
 import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.exception.FundInFileAlreadyUploadedException;
 import com.gdn.venice.exception.FundInFileParserException;
@@ -81,33 +82,36 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 				try
 				{
 					CommonUtil.logDebug(CLASS_NAME, "status adalah : "+fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultDesc());
-					if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultDesc().equals("")))
+					if(fundInReconReadyToPersistList.get(i).getFinArReconResult()!=null)
 					{
-						CommonUtil.logDebug(CLASS_NAME, "A");
-						Long orderPaymentId = fundInReconReadyToPersistList.get(i).getVenOrderPayment().getOrderPaymentId();
-						CommonUtil.logDebug(CLASS_NAME, "B");
-						VenOrderPayment venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(orderPaymentId);
-
-						CommonUtil.logDebug(CLASS_NAME, "C");
-						if(venOrderPayment.getCardNumber()!=null)
-						{
-							CommonUtil.logDebug(CLASS_NAME, "1car number dari ven order adalah : "+venOrderPayment.getCardNumber());
+							if(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId().equals(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()))
+							{
+							CommonUtil.logDebug(CLASS_NAME, "A");
+							Long orderPaymentId = fundInReconReadyToPersistList.get(i).getVenOrderPayment().getOrderPaymentId();
+							CommonUtil.logDebug(CLASS_NAME, "B");
+							VenOrderPayment venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(orderPaymentId);
+	
+							CommonUtil.logDebug(CLASS_NAME, "C");
+							if(venOrderPayment.getCardNumber()!=null)
+							{
+								CommonUtil.logDebug(CLASS_NAME, "1car number dari ven order adalah : "+venOrderPayment.getCardNumber());
+							}
+							CommonUtil.logDebug(CLASS_NAME, "D");
+							CommonUtil.logDebug(CLASS_NAME, "1amount dari ven orderadalah : "+venOrderPayment.getAmount());
+							CommonUtil.logDebug(CLASS_NAME, "E");
+							CommonUtil.logDebug(CLASS_NAME, "1wcs payment id dari ven order adalah : "+venOrderPayment.getWcsPaymentId());
+							CommonUtil.logDebug(CLASS_NAME, "F");
+							
+							venOrderPayment.setCardNumber(fundInReconReadyToPersistList.get(i).getCardNumber());
+							CommonUtil.logDebug(CLASS_NAME, "G");
+							venOrderPaymentDAO.save(venOrderPayment);
+							CommonUtil.logDebug(CLASS_NAME, "H");
+	
+							CommonUtil.logDebug(CLASS_NAME, "order payment id dari ven order adalah : "+orderPaymentId);
+							CommonUtil.logDebug(CLASS_NAME, "car number dari ven order adalah : "+venOrderPayment.getCardNumber());
+							CommonUtil.logDebug(CLASS_NAME, "amount dari ven orderadalah : "+venOrderPayment.getAmount());
+							CommonUtil.logDebug(CLASS_NAME, "wcs payment id dari ven order adalah : "+venOrderPayment.getWcsPaymentId());
 						}
-						CommonUtil.logDebug(CLASS_NAME, "D");
-						CommonUtil.logDebug(CLASS_NAME, "1amount dari ven orderadalah : "+venOrderPayment.getAmount());
-						CommonUtil.logDebug(CLASS_NAME, "E");
-						CommonUtil.logDebug(CLASS_NAME, "1wcs payment id dari ven order adalah : "+venOrderPayment.getWcsPaymentId());
-						CommonUtil.logDebug(CLASS_NAME, "F");
-						
-						venOrderPayment.setCardNumber(fundInReconReadyToPersistList.get(i).getCardNumber());
-						CommonUtil.logDebug(CLASS_NAME, "G");
-						venOrderPaymentDAO.save(venOrderPayment);
-						CommonUtil.logDebug(CLASS_NAME, "H");
-
-						CommonUtil.logDebug(CLASS_NAME, "order payment id dari ven order adalah : "+orderPaymentId);
-						CommonUtil.logDebug(CLASS_NAME, "car number dari ven order adalah : "+venOrderPayment.getCardNumber());
-						CommonUtil.logDebug(CLASS_NAME, "amount dari ven orderadalah : "+venOrderPayment.getAmount());
-						CommonUtil.logDebug(CLASS_NAME, "wcs payment id dari ven order adalah : "+venOrderPayment.getWcsPaymentId());
 					}
 				}
 				catch(Exception e)
