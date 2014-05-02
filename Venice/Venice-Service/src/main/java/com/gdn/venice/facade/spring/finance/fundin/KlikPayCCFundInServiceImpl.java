@@ -51,12 +51,21 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 			
 			FundInData fundInData = mergeAndSumDuplicate(fundInList);
 			
+			
+			CommonUtil.logDebug(CLASS_NAME, "fund in pojo : "+fundInData.getVoidFundInList().toString());
+			
+			
 			FinArFundsInReconRecord fundInRecon = null;
 			List<FinArFundsInReconRecord> fundInReconReadyToPersistList = new ArrayList<FinArFundsInReconRecord>(fundInData.getFundInList().size());
 			List<VenOrderPayment> venOrderPaymentToMergeList = new ArrayList<VenOrderPayment>(fundInData.getFundInList().size());
 			
 			for(PojoInterface pojo : fundInData.getFundInList()){
 				fundInRecon = processEachFundIn(pojo, finArFundsInReport);
+				
+				CommonUtil.logDebug(CLASS_NAME, "fund in record adalah  : "+fundInRecon.getCardNumber());
+				
+				
+				
 				if(fundInRecon != null){
 					fundInReconReadyToPersistList.add(fundInRecon);
 					fundInData.getProcessedFundInList().add(fundInRecon.getNomorReff());
@@ -65,52 +74,58 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 
 			finArFundsInReconRecordDAO.save(fundInReconReadyToPersistList);
 
+
+			CommonUtil.logDebug(CLASS_NAME, "size 1 adalah : "+fundInReconReadyToPersistList.size());
+			CommonUtil.logDebug(CLASS_NAME, "card number 0 adalah : "+fundInReconReadyToPersistList.get(0).getCardNumber());
+			CommonUtil.logDebug(CLASS_NAME, "card number 1 adalah : "+fundInReconReadyToPersistList.get(1).getCardNumber());
+			CommonUtil.logDebug(CLASS_NAME, "card number 2 adalah : "+fundInReconReadyToPersistList.get(2).getCardNumber());
+			CommonUtil.logDebug(CLASS_NAME, "card number 3 adalah : "+fundInReconReadyToPersistList.get(3).getCardNumber());
+			CommonUtil.logDebug(CLASS_NAME, "card number 4 adalah : "+fundInReconReadyToPersistList.get(4).getCardNumber());
+			
 			
 			for(int i=0;i<fundInReconReadyToPersistList.size();i++)
 			{
-				CommonUtil.logDebug(CLASS_NAME, "order payment id dari fundin adalah : "+fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultDesc());
-				if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultDesc().equals("Payment Not Recognized")))
+				CommonUtil.logDebug(CLASS_NAME, "i  adalah : "+i);
+				try
 				{
-					Long orderPaymentId = fundInReconReadyToPersistList.get(i).getVenOrderPayment().getOrderPaymentId();
-					VenOrderPayment venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(orderPaymentId);
-					venOrderPayment.setCardNumber(fundInReconReadyToPersistList.get(i).getCardNumber());
-					venOrderPaymentDAO.save(venOrderPayment);
-					
-					
-					CommonUtil.logDebug(CLASS_NAME, "order payment id dari fundin adalah : "+orderPaymentId);
-					CommonUtil.logDebug(CLASS_NAME, "card number adalah : "+venOrderPayment.getCardNumber());
-					CommonUtil.logDebug(CLASS_NAME, "order payment id dari venorderpayment adalah : "+venOrderPayment.getOrderPaymentId());
-					CommonUtil.logDebug(CLASS_NAME, "adalah : "+fundInReconReadyToPersistList.get(i).getCardNumber());
+					CommonUtil.logDebug(CLASS_NAME, "status adalah : "+fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultDesc());
+					if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultDesc().equals("")))
+					{
+						CommonUtil.logDebug(CLASS_NAME, "A");
+						Long orderPaymentId = fundInReconReadyToPersistList.get(i).getVenOrderPayment().getOrderPaymentId();
+						CommonUtil.logDebug(CLASS_NAME, "B");
+						VenOrderPayment venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(orderPaymentId);
+
+						CommonUtil.logDebug(CLASS_NAME, "C");
+						if(venOrderPayment.getCardNumber()!=null)
+						{
+							CommonUtil.logDebug(CLASS_NAME, "1car number dari ven order adalah : "+venOrderPayment.getCardNumber());
+						}
+						CommonUtil.logDebug(CLASS_NAME, "D");
+						CommonUtil.logDebug(CLASS_NAME, "1amount dari ven orderadalah : "+venOrderPayment.getAmount());
+						CommonUtil.logDebug(CLASS_NAME, "E");
+						CommonUtil.logDebug(CLASS_NAME, "1wcs payment id dari ven order adalah : "+venOrderPayment.getWcsPaymentId());
+						CommonUtil.logDebug(CLASS_NAME, "F");
+						
+						venOrderPayment.setCardNumber(fundInReconReadyToPersistList.get(i).getCardNumber());
+						CommonUtil.logDebug(CLASS_NAME, "G");
+						venOrderPaymentDAO.save(venOrderPayment);
+						CommonUtil.logDebug(CLASS_NAME, "H");
+
+						CommonUtil.logDebug(CLASS_NAME, "order payment id dari ven order adalah : "+orderPaymentId);
+						CommonUtil.logDebug(CLASS_NAME, "car number dari ven order adalah : "+venOrderPayment.getCardNumber());
+						CommonUtil.logDebug(CLASS_NAME, "amount dari ven orderadalah : "+venOrderPayment.getAmount());
+						CommonUtil.logDebug(CLASS_NAME, "wcs payment id dari ven order adalah : "+venOrderPayment.getWcsPaymentId());
+					}
+				}
+				catch(Exception e)
+				{
+					CommonUtil.logError(CLASS_NAME, "Error nih !"+i);
+					CommonUtil.logError(CLASS_NAME, e);
+					e.printStackTrace();
+					return e.getMessage();
 				}
 
-			}
-			
-			/*
-			VenOrderPayment orderPayment = new VenOrderPayment();
-			orderPayment.setWcsPaymentId(fundInRecon.getWcsOrderId());
-			orderPayment.setFinArFundsInReconRecords(fundInReconReadyToPersistList);
-			
-			venOrderPaymentToMergeList.add(orderPayment);
-			*/
-			
-			for(int j=0;j<fundInReconReadyToPersistList.size();j++)
-			{
-				CommonUtil.logDebug(CLASS_NAME, "adalah : "+venOrderPaymentToMergeList.get(j).getFinArFundsInReconRecords().get(j).getCardNumber());
-				CommonUtil.logDebug("Card Number adalah : ", "adalah : "+venOrderPaymentToMergeList.get(j).getFinArFundsInReconRecords().get(j).getCardNumber());
-				CommonUtil.logDebug(CLASS_NAME, "adalah : "+venOrderPaymentToMergeList.get(j).toString());
-				CommonUtil.logDebug("Ven Order Payment adalah : ", "adalah : "+venOrderPaymentToMergeList.get(j).toString());
-				CommonUtil.logDebug(CLASS_NAME, "adalah : "+venOrderPaymentToMergeList.get(j).getWcsPaymentId());
-				CommonUtil.logDebug("WCS Payment adalah : ", "adalah : "+venOrderPaymentToMergeList.get(j).getWcsPaymentId());
-			}
-			
-			for(int j=0;j<venOrderPaymentToMergeList.size();j++)
-			{
-				CommonUtil.logDebug(CLASS_NAME, "adalah : "+venOrderPaymentToMergeList.get(j).getFinArFundsInReconRecords().get(j).getCardNumber());
-				CommonUtil.logDebug("Card Number adalah : ", "adalah : "+venOrderPaymentToMergeList.get(j).getFinArFundsInReconRecords().get(j).getCardNumber());
-				CommonUtil.logDebug(CLASS_NAME, "adalah : "+venOrderPaymentToMergeList.get(j).toString());
-				CommonUtil.logDebug("Ven Order Payment adalah : ", "adalah : "+venOrderPaymentToMergeList.get(j).toString());
-				CommonUtil.logDebug(CLASS_NAME, "adalah : "+venOrderPaymentToMergeList.get(j).getWcsPaymentId());
-				CommonUtil.logDebug("WCS Payment adalah : ", "adalah : "+venOrderPaymentToMergeList.get(j).getWcsPaymentId());
 			}
 			
 			
@@ -213,6 +228,16 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 		
 		String cardNumber = rec.getCardNo();
 		
+		
+		
+		
+		
+		CommonUtil.logDebug(CLASS_NAME, "Card number 1 masuk adalah : " + cardNumber);
+		
+		
+		
+		
+		
 		if(!isFundInOkToContinue(referenceId, new java.sql.Timestamp(tgl.getTime())+"", paymentAmount, REPORT_TYPE)) {
 			return null;
 		}
@@ -265,7 +290,14 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 		fundInRecon.setReconcilliationRecordTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
 		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(tgl.getTime()));
 		fundInRecon.setRefundAmount(new BigDecimal(0));
-		fundInRecon.setCardNumber(cardNumber);
+		fundInRecon.setCardNumber(cardNumber!=null?cardNumber:"");
+		
+		
+		
+
+		CommonUtil.logDebug(CLASS_NAME, "Card number 2 masuk adalah : " + fundInRecon.getCardNumber());
+		
+		
 		
 		fundInRecon.setFinArReconResult(getReconResult(fundInRecon));
 		
