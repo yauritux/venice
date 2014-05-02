@@ -23,6 +23,12 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		       "FROM VenOrderPaymentAllocation o " +
 		       "WHERE o.venOrder = ?1";
 	
+	public static final String FIND_BY_VEN_ORDER_AND_VENORDERPAYMENT_THREEDSSECURITYLEVELAUTHISNOT = 
+	       "SELECT o " +
+	       "FROM VenOrderPaymentAllocation o " +
+	       "WHERE o.venOrder = ?1 " +
+	       "AND venOrderPayment.threeDsSecurityLevelAuth != ?2";
+
 	public static final String FIND_BY_CREDITCARD_DETAIL = 
 	       "SELECT o " +
 		   "FROM VenOrderPaymentAllocation AS o " +
@@ -129,4 +135,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(FIND_WITH_VENADDRESS_VENCITY_BY_VENORDER)
 	public List<VenOrderPaymentAllocation> findWithVenAddressVenCityByVenOrder(VenOrder order);
+	
+	@Query(FIND_BY_VEN_ORDER_AND_VENORDERPAYMENT_THREEDSSECURITYLEVELAUTHISNOT)
+	public List<VenOrderPaymentAllocation> findByVenOrderAndVenOrderPaymentThreeDsSecurityAuthIsNot(VenOrder venOrder, String threeDsSecurityLevelAuth);	
 }
