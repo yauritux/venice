@@ -12,33 +12,55 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.interceptor.Interceptors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
-import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.djarum.raf.utilities.Locator;
-import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.awb.exchange.model.LogisticProviderResource;
 import com.gdn.awb.exchange.response.GetLogisticProviderListResponse;
-import com.gdn.venice.facade.FinApManualJournalTransactionSessionEJBLocal;
-import com.gdn.venice.facade.FinApPaymentSessionEJBLocal;
-import com.gdn.venice.facade.FinArFundsInAllocatePaymentSessionEJBLocal;
-import com.gdn.venice.facade.FinArFundsInJournalTransactionSessionEJBLocal;
-import com.gdn.venice.facade.FinArFundsInReconRecordSessionEJBLocal;
-import com.gdn.venice.facade.FinArFundsInRefundSessionEJBLocal;
-import com.gdn.venice.facade.FinJournalApprovalGroupSessionEJBLocal;
-import com.gdn.venice.facade.FinJournalSessionEJBLocal;
-import com.gdn.venice.facade.FinJournalTransactionSessionEJBLocal;
-import com.gdn.venice.facade.FinSalesRecordSessionEJBLocal;
-import com.gdn.venice.facade.LogProviderAgreementSessionEJBLocal;
-import com.gdn.venice.facade.VenOrderItemAdjustmentSessionEJBLocal;
-import com.gdn.venice.facade.VenOrderItemSessionEJBLocal;
-import com.gdn.venice.facade.VenOrderPaymentAllocationSessionEJBLocal;
-import com.gdn.venice.facade.VenOrderPaymentSessionEJBLocal;
-import com.gdn.venice.facade.VenOrderSessionEJBLocal;
-import com.gdn.venice.facade.VenPartySessionEJBLocal;
-import com.gdn.venice.facade.VenPromotionSessionEJBLocal;
+import com.gdn.venice.constants.FinAccountConstants;
+import com.gdn.venice.constants.FinApprovalStatusConstants;
+import com.gdn.venice.constants.FinArFundsInActionAppliedConstants;
+import com.gdn.venice.constants.FinArFundsInReportTimeConstants;
+import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
+import com.gdn.venice.constants.FinArReconResultConstants;
+import com.gdn.venice.constants.FinJournalConstants;
+import com.gdn.venice.constants.FinRefundTypeConstants;
+import com.gdn.venice.constants.FinTransactionStatusConstants;
+import com.gdn.venice.constants.FinTransactionTypeConstants;
+import com.gdn.venice.constants.VenLogisticsProviderConstants;
+import com.gdn.venice.constants.VenOrderStatusConstants;
+import com.gdn.venice.constants.VenPartyTypeConstants;
+import com.gdn.venice.constants.VenPromotionTypeConstants;
+import com.gdn.venice.constants.VenSettlementRecordCommissionTypeConstants;
+import com.gdn.venice.dao.FinApManualJournalTransactionDAO;
+import com.gdn.venice.dao.FinApPaymentDAO;
+import com.gdn.venice.dao.FinArFundsInAllocatePaymentDAO;
+import com.gdn.venice.dao.FinArFundsInJournalTransactionDAO;
+import com.gdn.venice.dao.FinArFundsInReconRecordDAO;
+import com.gdn.venice.dao.FinArFundsInRefundDAO;
+import com.gdn.venice.dao.FinJournalApprovalGroupDAO;
+import com.gdn.venice.dao.FinJournalTransactionDAO;
+import com.gdn.venice.dao.FinSalesRecordDAO;
+import com.gdn.venice.dao.LogProviderAgreementDAO;
+import com.gdn.venice.dao.VenOrderDAO;
+import com.gdn.venice.dao.VenOrderItemAdjustmentDAO;
+import com.gdn.venice.dao.VenOrderItemDAO;
+import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
+import com.gdn.venice.dao.VenOrderPaymentDAO;
+import com.gdn.venice.dao.VenPartyDAO;
+import com.gdn.venice.dao.VenPromotionDAO;
+import com.gdn.venice.dao.VenSettlementRecordDAO;
+import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.facade.VenSettlementRecordSessionEJBLocal;
 import com.gdn.venice.facade.util.FinancePeriodUtil;
+import com.gdn.venice.finance.services.FinAccountService;
 import com.gdn.venice.logistics.integration.AirwayBillEngineClientConnector;
 import com.gdn.venice.logistics.integration.AirwayBillEngineConnector;
 import com.gdn.venice.logistics.integration.bean.AirwayBillTransaction;
@@ -71,6 +93,7 @@ import com.gdn.venice.persistence.VenOrderPaymentAllocation;
 import com.gdn.venice.persistence.VenParty;
 import com.gdn.venice.persistence.VenPromotion;
 import com.gdn.venice.persistence.VenSettlementRecord;
+import com.gdn.venice.util.CommonUtil;
 import com.gdn.venice.util.VeniceConstants;
 
 /**
@@ -84,13 +107,72 @@ import com.gdn.venice.util.VeniceConstants;
  * <b>since:</b> 2011
  * 
  */
+@Interceptors(SpringBeanAutowiringInterceptor.class)
 @Stateless(mappedName = "FinanceJournalPosterSessionEJBBean")
 public class FinanceJournalPosterSessionEJBBean implements
 		FinanceJournalPosterSessionEJBRemote,
 		FinanceJournalPosterSessionEJBLocal {
+	
+	@PersistenceContext
+	private EntityManager em;
+	
+	@Autowired
+	private FinAccountService finAccountService;
+	
+	@Autowired
+	private FinApManualJournalTransactionDAO finApManualJournalTransactionDAO;
+	
+	@Autowired
+	private FinApPaymentDAO finApPaymentDAO;
 
-	protected static Logger _log = null;
-	protected Locator<Object> _genericLocator = null;
+	@Autowired
+	private FinArFundsInAllocatePaymentDAO finArFundsInAllocatePaymentDAO;
+	
+	@Autowired
+	private FinArFundsInJournalTransactionDAO finArFundsInJournalTransactionDAO;
+	
+	@Autowired
+	private FinArFundsInReconRecordDAO finArFundsInReconRecordDAO;
+	
+	@Autowired
+	private FinArFundsInRefundDAO finArFundsInRefundDAO;
+	
+	@Autowired
+	private FinJournalApprovalGroupDAO finJournalApprovalGroupDAO;
+	
+	@Autowired
+	private FinJournalTransactionDAO finJournalTransactionDAO;
+	
+	@Autowired
+	private FinSalesRecordDAO finSalesRecordDAO;
+	
+	@Autowired
+	private LogProviderAgreementDAO logProviderAgreementDAO;
+	
+	@Autowired
+	private VenOrderDAO venOrderDAO;
+	
+	@Autowired
+	private VenOrderItemDAO venOrderItemDAO;
+	
+	@Autowired
+	private VenOrderItemAdjustmentDAO venOrderItemAdjustmentDAO;
+	
+	@Autowired
+	private VenOrderPaymentDAO venOrderPaymentDAO;
+	
+	@Autowired
+	private VenOrderPaymentAllocationDAO venOrderPaymentAllocationDAO;
+	
+	@Autowired
+	private VenPartyDAO venPartyDAO;
+	
+	@Autowired
+	private VenPromotionDAO venPromotionDAO;
+	
+	@Autowired
+	private VenSettlementRecordDAO venSettlementRecordDAO;
+	
 	private static BigDecimal GDNPPN_DIVISOR = new BigDecimal(
 			VeniceConstants.VEN_GDN_PPN_RATE).divide(new BigDecimal(100), 2,
 			RoundingMode.HALF_UP).add(new BigDecimal(1));
@@ -100,18 +182,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 */
 	public FinanceJournalPosterSessionEJBBean() {
 		super();
-		Log4jLoggerFactory loggerFactory = new Log4jLoggerFactory();
-		_log = loggerFactory
-				.getLog4JLogger("com.gdn.venice.facade.finance.journal.FinanceJournalPosterSessionEJBBean");
-
-		try {
-			// Establish a JNDI connection when the bean is started
-			this._genericLocator = new Locator<Object>();
-		} catch (Exception e) {
-			_log.error("An exception occured when looking instantiating the generic locator"
-					+ e.getMessage());
-			e.printStackTrace();
-		}
 	}
 
 	/*
@@ -123,42 +193,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * finArFundsInReconRecordIdList)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postCashReceiveJournalTransactions(
 			ArrayList<Long> finArFundsInReconRecordIdList) {
-		_log.debug("postCashReceiveJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		try {
-			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
-							"FinArFundsInReconRecordSessionEJBBeanLocal");
-
-			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
-							"FinJournalTransactionSessionEJBBeanLocal");
-
-			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
-							"FinJournalApprovalGroupSessionEJBBeanLocal");
-
-			FinArFundsInAllocatePaymentSessionEJBLocal finArFundsInAllocateHome = (FinArFundsInAllocatePaymentSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							FinArFundsInAllocatePaymentSessionEJBLocal.class,
-							"FinArFundsInAllocatePaymentSessionEJBBeanLocal");
-
-			FinArFundsInJournalTransactionSessionEJBLocal finArFundsInJournalTransactionHome = (FinArFundsInJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							FinArFundsInJournalTransactionSessionEJBLocal.class,
-							"FinArFundsInJournalTransactionSessionEJBBeanLocal");
-
-			FinArFundsInRefundSessionEJBLocal refundRecordHome = (FinArFundsInRefundSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInRefundSessionEJBLocal.class,
-							"FinArFundsInRefundSessionEJBBeanLocal");
-			
-			FinJournalSessionEJBLocal journalCashRecieveHome = (FinJournalSessionEJBLocal) this._genericLocator
-			.lookupLocal(FinJournalSessionEJBLocal.class,
-					"FinJournalSessionEJBBeanLocal");
-
 			if (finArFundsInReconRecordIdList.isEmpty()) {
 				throw new EJBException(
 						"Empty list passed to postCashReceiveJournalTransaction. The reconciliation record list must contain entries");
@@ -167,15 +208,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			// Read all the relevant funds in records from the database
 			List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
 			for (Long reconciliationRecordId : finArFundsInReconRecordIdList) {
-				List<FinArFundsInReconRecord> reconRecordListTemp = fundsInReconRecordHome
-						.queryByRange(
-								"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-										+ reconciliationRecordId
-										+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-										+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-								0, 0);
-				if (!reconRecordListTemp.isEmpty()) {
-					reconRecordList.add(reconRecordListTemp.get(0));
+				FinArFundsInReconRecord reconRecord = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
+				if (reconRecord != null) {
+					reconRecordList.add(reconRecord);
 				} else {
 					throw new EJBException(
 							"List passed to postCashReceiveJournalTransaction contains no valid keys. The reconciliation record list must contain valid keys for existing reconciliation records");
@@ -183,11 +218,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
-			FinJournal finJournalCashReceive = new FinJournal ();
-			
+			FinJournal finJournalCashReceive = new FinJournal();
 			// FinJournalApprovalGroup finJournalApprovalGroups = null;
 			int count = 0;
-			
+
 			/*
 			 * Process the list: o create the grouping record o create the
 			 * funds-in journal transactions as credits o create bank account
@@ -210,44 +244,34 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.getFinArFundsInActionApplied()
 						.getActionAppliedId()
 						.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
-					itemsAllocate = finArFundsInAllocateHome.queryByRange(
-							"select o from FinArFundsInAllocatePayment o where o.idReconRecordSource="
-									+ reconRecord.getReconciliationRecordId()
-									+ " and o.isactive=true", 0, 0);
+					itemsAllocate = finArFundsInAllocatePaymentDAO.findByIdReconRecordSourceIsActive(reconRecord.getReconciliationRecordId());
 				}
 
-				finArFundsInJournalTransactionList = finArFundsInJournalTransactionHome
-						.queryByRange(
-								"select o from FinArFundsInJournalTransaction o where o.finArFundsInReconRecords.reconciliationRecordId="
-										+ reconRecord
-												.getReconciliationRecordId(),
-								0, 0);
+				finArFundsInJournalTransactionList = finArFundsInJournalTransactionDAO.findByReconcilicationRecordId(
+						reconRecord.getReconciliationRecordId());
 
 				if (!finArFundsInJournalTransactionList.isEmpty()
 						&& itemsAllocate != null
-						&& reconRecord
+						&& (reconRecord
 								.getFinArFundsInActionApplied()
-								.getActionAppliedId()
-								.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
+								.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 					// BLOCK FOR ALLOCATION JOURNAL
-					postAllocationJournal(reconRecord, fundsInReconRecordHome,
-							journalApprovalGroupHome, journalTransactionHome,
-							finArFundsInAllocateHome, itemsAllocate.get(0),
+					postAllocationJournal(reconRecord,
+							itemsAllocate.get(0),
 							reconRecordList);
 				} else { // CASH RECEIVE JOURNAL
 
 					if (finJournalApprovalGroup == null
 							&& finArFundsInJournalTransactionList.isEmpty()) {
-		/*				finJournalCashReceive
-								.setJournalId(VeniceConstants.FIN_JOURNAL_CASH_RECEIVE);*/
-						finJournalCashReceive=journalCashRecieveHome.queryByRange("select o from FinJournal o where o.journalId='"+VeniceConstants.FIN_JOURNAL_CASH_RECEIVE+"'", 0, 1).get(0);
-					
+						finJournalCashReceive
+								.setJournalId(FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id());
+
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyy-MMM-dd");
 						finJournalApprovalGroup = new FinJournalApprovalGroup();
 						FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 						finApprovalStatus
-								.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+								.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 						finJournalApprovalGroup
 								.setFinApprovalStatus(finApprovalStatus);
 
@@ -262,8 +286,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.currentTimeMillis()));
 
 						// Persist the journal group
-						finJournalApprovalGroup = journalApprovalGroupHome
-								.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+						if (!em.contains(finJournalApprovalGroup)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
+							finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+						}
 
 					}
 
@@ -289,74 +315,27 @@ public class FinanceJournalPosterSessionEJBBean implements
 									: new BigDecimal(0));
 
 					long accountNumberBank = 0;
-					if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120104;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120102;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120105;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120301;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB
-							|| reconRecord.getFinArFundsInReport()
-									.getFinArFundsInReportType()
-									.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120302;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120402;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120888;
-					} else if (reconRecord.getFinArFundsInReport()
-							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1121001;
-					} else {
-						throw new EJBException(
-								"Account number not available for the payment, please add account number to fin account and venice constants");
+					try {
+						accountNumberBank = finAccountService.getAccountNumberBank(reconRecord.getFinArFundsInReport()
+								.getFinArFundsInReportType().getPaymentReportTypeId());
+					} catch (VeniceInternalException e) {
+						throw new EJBException(e.getMessage());						
 					}
-
+					
 					FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 					finTransactionStatus
-							.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
+							.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
 
 					FinTransactionType finTransactionType = new FinTransactionType();
 					finTransactionType
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 
-					List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocateHome
-							.queryByRange(
-									"select o from FinArFundsInAllocatePayment o where o.idReconRecordDest="
-											+ reconRecord
-													.getReconciliationRecordId(),
-									0, 1);
+					List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocatePaymentDAO.findByIdReconRecordDest(
+							reconRecord.getReconciliationRecordId());
 					if (!cekIdRecordDest.isEmpty()
-							&& reconRecord
+							&& (reconRecord
 									.getFinArFundsInActionApplied()
-									.getActionAppliedId()
-									.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE)) {
+									.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE.id())) {
 						createJournal = false;
 					}
 					if (createJournal) {
@@ -409,9 +388,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 							bankAccountJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the bank account journal entry
-							_log.debug("Save ( BANK )");
-							journalTransactionHome
-									.persistFinJournalTransaction(bankAccountJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( BANK )");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(bankAccountJournalTransaction);*/
+							if (!em.contains(bankAccountJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName()
+										, "postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								bankAccountJournalTransaction = finJournalTransactionDAO.save(bankAccountJournalTransaction);
+							}
 							bankTransactionList
 									.add(bankAccountJournalTransaction);
 							transactionList.add(bankAccountJournalTransaction);
@@ -432,7 +416,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// bank FIN_ACCOUNT_5110003
 							FinAccount finAccountBankFee = new FinAccount();
 							finAccountBankFee
-									.setAccountId(VeniceConstants.FIN_ACCOUNT_5110003);
+									.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110003.id());
 							bankFeeJournalTransaction
 									.setFinAccount(finAccountBankFee);
 
@@ -464,9 +448,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 							bankFeeJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the fee journal transaction
-							_log.debug("Save ( HPP BIAYA Bank)");
-							journalTransactionHome
-									.persistFinJournalTransaction(bankFeeJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( HPP BIAYA Bank)");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(bankFeeJournalTransaction);*/
+							if (!em.contains(bankFeeJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Calling finJournalTransactionDAO.save explicitly");
+								finJournalTransactionDAO.save(bankFeeJournalTransaction);
+							}
 							bankFeeTransactionList
 									.add(bankFeeJournalTransaction);
 							transactionList.add(bankFeeJournalTransaction);
@@ -474,21 +462,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 						if ((reconRecord.getFinArFundsIdReportTime() != null ? reconRecord
 								.getFinArFundsIdReportTime().getReportTimeId()
 								: new Long(0))
-								.equals(VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TIME_REAL_TIME)) {
+								.equals(FinArFundsInReportTimeConstants.FIN_AR_FUNDS_IN_REPORT_TIME_REAL_TIME.id())) {
 							/**
 							 * Journal untuk report realtime Post the journal
 							 * transaction for Ayat-Ayat Silang Bank
 							 */
-							_log.debug("Save ( Ayat-Ayat Silang Bank) ::BEGIN");
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Ayat-Ayat Silang Bank) ::BEGIN");
 							FinJournalTransaction ayatSilangBankJournalTransaction = new FinJournalTransaction();
 							ayatSilangBankJournalTransaction = setJournalTransaction(
 									reconRecord,
 									wcsOrderId,
 									finJournalApprovalGroup,
-									VeniceConstants.FIN_ACCOUNT_1120999,
-									VeniceConstants.FIN_JOURNAL_CASH_RECEIVE,
-									VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
-									VeniceConstants.FIN_TRANSACTION_TYPE_AYAT_AYAT_SILANG_PADA_BANK,
+									FinAccountConstants.FIN_ACCOUNT_1120999.id(),
+									FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id(),
+									FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
+									FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_AYAT_AYAT_SILANG_PADA_BANK.id(),
 									time,
 									reconRecord.getVenOrderPayment() != null ? reconRecord
 											.getVenOrderPayment().getVenBank()
@@ -496,12 +484,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 													.getFinArFundsInReport()
 													.getFinArFundsInReportType()
 													.getVenBank(),
-									journalTransactionHome, accountNumberBank,
+									//journalTransactionHome, accountNumberBank,
+													accountNumberBank,
 									reconRecord.getProviderReportPaidAmount(),
 									true,
 									"System Credit Ayat-Ayat Silang Bank :"
 											+ wcsOrderId);
-							_log.debug("Save ( Ayat-Ayat Silang Bank)::END");
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Ayat-Ayat Silang Bank)::END");
 							bankFeeTransactionList
 									.add(ayatSilangBankJournalTransaction);
 							transactionList
@@ -514,7 +503,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							 */
 							FinApprovalStatus finApprovalStatuss = new FinApprovalStatus();
 							finApprovalStatuss
-									.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_SUBMITTED);
+									.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
 							finJournalApprovalGroup
 									.setFinApprovalStatus(finApprovalStatuss);
 							SimpleDateFormat sdf = new SimpleDateFormat(
@@ -522,29 +511,36 @@ public class FinanceJournalPosterSessionEJBBean implements
 							finJournalApprovalGroup
 									.setJournalGroupDesc("VA Real Time - Cash Received Journal for :"
 											+ sdf.format(new Date()));
-							finJournalApprovalGroup = journalApprovalGroupHome
-									.mergeFinJournalApprovalGroup(finJournalApprovalGroup);
+							/*finJournalApprovalGroup = journalApprovalGroupHome
+									.mergeFinJournalApprovalGroup(finJournalApprovalGroup);*/
+							if (!em.contains(finJournalApprovalGroup)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
+								finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+							}
 
 						} else if (reconRecord
 								.getFinArFundsInActionApplied()
 								.getActionAppliedId()
-								.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK)
+								.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id())
 								|| reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId()
-										.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER)) {
+										.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER.id())) {
 							Long type = reconRecord
 									.getFinArFundsInActionApplied()
 									.getActionAppliedId()
-									.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK) ? VeniceConstants.FIN_ACCOUNT_2170002
-									: VeniceConstants.FIN_ACCOUNT_2170001;
+									.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id()) ? FinAccountConstants.FIN_ACCOUNT_2170002.id()
+									: FinAccountConstants.FIN_ACCOUNT_2170001.id();
 							if (!finArFundsInJournalTransactionList.isEmpty()) {
+								/*
 								List<FinArFundsInRefund> refundAmountList = refundRecordHome
 										.queryByRange(
 												"select o from FinArFundsInRefund o where o.finArFundsInReconRecord.reconciliationRecordId="
 														+ reconRecord
 																.getReconciliationRecordId(),
 												0, 0);
+								*/
+								List<FinArFundsInRefund> refundAmountList = finArFundsInRefundDAO.findByReconciliationRecordId(reconRecord.getReconciliationRecordId());
 								Double refundAmount = new Double(
 										reconRecord.getRefundAmount() != null ? reconRecord
 												.getRefundAmount() + ""
@@ -568,7 +564,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 									 * Post the CREDIT for UANG jaminan
 									 * transaksi
 									 */
-									_log.debug("Start Create Journal order : "
+									CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Start Create Journal order : "
 											+ wcsOrderId);
 									FinJournalTransaction cashReceiveJournalTransaction = new FinJournalTransaction();
 									cashReceiveJournalTransaction
@@ -581,7 +577,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 									FinAccount finAccountUangMukaPelanggan = new FinAccount();
 									finAccountUangMukaPelanggan
-											.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+											.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 
 									cashReceiveJournalTransaction
 											.setFinAccount(finAccountUangMukaPelanggan);
@@ -626,9 +622,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 											.setGroupJournal(accountNumberBank);
 									// Persist the cash received journal
 									// transaction
-									_log.debug("Save ( FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI )");
-									journalTransactionHome
-											.persistFinJournalTransaction(cashReceiveJournalTransaction);
+									CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI )");
+									/*journalTransactionHome
+											.persistFinJournalTransaction(cashReceiveJournalTransaction);*/
+									if (!em.contains(cashReceiveJournalTransaction)) {
+										CommonUtil.logDebug(this.getClass().getCanonicalName()
+												, "postCashReceiveJournalTransactions::Calling finJournalTransactionDAO.save explicitly");
+										cashReceiveJournalTransaction = finJournalTransactionDAO.save(cashReceiveJournalTransaction);
+									}
 									transactionList
 											.add(cashReceiveJournalTransaction);
 								}
@@ -682,9 +683,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 								refundJournalTransaction
 										.setGroupJournal(accountNumberBank);
 								// Persist the fee journal transaction
-								_log.debug("Save ( REFUND)");
-								journalTransactionHome
-										.persistFinJournalTransaction(refundJournalTransaction);
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( REFUND)");
+								/*journalTransactionHome
+										.persistFinJournalTransaction(refundJournalTransaction);*/
+								if (!em.contains(refundJournalTransaction)) {
+									CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Calling finJournalTransactionDAO.save explicitly");
+									refundJournalTransaction = finJournalTransactionDAO.save(refundJournalTransaction);
+								}
 								transactionList.add(refundJournalTransaction);
 
 								// Create a refund record
@@ -697,22 +702,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 								finArFundsInRefund.setRefundType(reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedDesc());
-								refundRecordHome
-										.persistFinArFundsInRefund(finArFundsInRefund);
+								//refundRecordHome.persistFinArFundsInRefund(finArFundsInRefund);
+								if (!em.contains(finArFundsInRefund)) {
+									CommonUtil.logDebug(this.getClass().getCanonicalName(),
+											"postCashReceiveJournalTransactions:: finArFundsInRefund not attached, calling save.");
+									finArFundsInRefund = finArFundsInRefundDAO.save(finArFundsInRefund);
+								}
 
 							}
-						} else if (reconRecord
+						} else if ((reconRecord
 								.getFinArReconResult()
-								.getReconResultId()
-								.equals(VeniceConstants.FIN_AR_RECON_RESULT_ALL)
-								&& !reconRecord
+								.getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id())
+								&& (reconRecord
 										.getFinArFundsInActionApplied()
-										.getActionAppliedId()
-										.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
+										.getActionAppliedId() != FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 							/*
 							 * Post the CREDIT for UANG jaminan transaksi
 							 */
-							_log.debug("Start Create Journal order : "
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Start Create Journal order : "
 									+ wcsOrderId);
 							FinJournalTransaction cashReceiveJournalTransaction = new FinJournalTransaction();
 							cashReceiveJournalTransaction
@@ -725,7 +732,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 							FinAccount finAccountUangMukaPelanggan = new FinAccount();
 							finAccountUangMukaPelanggan
-									.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+									.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 
 							cashReceiveJournalTransaction
 									.setFinAccount(finAccountUangMukaPelanggan);
@@ -763,9 +770,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							cashReceiveJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the cash received journal transaction
-							_log.debug("Save ( FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI )");
-							journalTransactionHome
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI )");
+							/*journalTransactionHome
 									.persistFinJournalTransaction(cashReceiveJournalTransaction);
+							*/
+							if (!em.contains(cashReceiveJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+										"postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								cashReceiveJournalTransaction = finJournalTransactionDAO.save(cashReceiveJournalTransaction);
+							}
 							cashReceivedTransactionList
 									.add(cashReceiveJournalTransaction);
 							transactionList.add(cashReceiveJournalTransaction);
@@ -791,7 +804,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// bank FIN_ACCOUNT_5110003
 							FinAccount finAccountPenghasilan = new FinAccount();
 							finAccountPenghasilan
-									.setAccountId(VeniceConstants.FIN_ACCOUNT_7140001);
+									.setAccountId(FinAccountConstants.FIN_ACCOUNT_7140001.id());
 							penghasilanJournalTransaction
 									.setFinAccount(finAccountPenghasilan);
 
@@ -827,19 +840,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 							penghasilanJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the fee journal transaction
-							_log.debug("Save ( HPP BIAYA BARANG)");
-							journalTransactionHome
-									.persistFinJournalTransaction(penghasilanJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( HPP BIAYA BARANG)");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(penghasilanJournalTransaction);*/
+							if (!em.contains(penghasilanJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								penghasilanJournalTransaction = finJournalTransactionDAO.save(penghasilanJournalTransaction);
+							}
 							transactionList.add(penghasilanJournalTransaction);
 
-						} else if (reconRecord
+						} else if ((reconRecord
 								.getFinArReconResult()
-								.getReconResultId()
-								.equals(VeniceConstants.FIN_AR_RECON_RESULT_ALL)
-								&& reconRecord
+								.getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id())
+								&& (reconRecord
 										.getFinArFundsInActionApplied()
-										.getActionAppliedId()
-										.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
+										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 							/*
 							 * Post the journal transaction for uang jaminan
 							 * transaksi
@@ -857,7 +872,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// FIN_ACCOUNT_2230002
 							FinAccount finAccountPenghasilan = new FinAccount();
 							finAccountPenghasilan
-									.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+									.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 							belumTerindetifikasiJournalTransaction
 									.setFinAccount(finAccountPenghasilan);
 
@@ -896,9 +911,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 							belumTerindetifikasiJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the fee journal transaction
-							_log.debug("Save ( Uang jaminan transaksi )");
-							journalTransactionHome
-									.persistFinJournalTransaction(belumTerindetifikasiJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi )");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(belumTerindetifikasiJournalTransaction);*/
+							if (!em.contains(belumTerindetifikasiJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								belumTerindetifikasiJournalTransaction = finJournalTransactionDAO.save(belumTerindetifikasiJournalTransaction);
+							}
 							transactionList
 									.add(belumTerindetifikasiJournalTransaction);
 
@@ -943,9 +962,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 							belumTerindetifikasiJournalTransactions
 									.setGroupJournal(accountNumberBank);
 							// Persist the fee journal transaction
-							_log.debug("Save ( Uang jaminan transaksi)");
-							journalTransactionHome
-									.persistFinJournalTransaction(belumTerindetifikasiJournalTransactions);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi)");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(belumTerindetifikasiJournalTransactions);*/
+							if (!em.contains(belumTerindetifikasiJournalTransactions)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName()
+										, "postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								belumTerindetifikasiJournalTransactions = finJournalTransactionDAO.save(belumTerindetifikasiJournalTransactions);
+							}
 							transactionList
 									.add(belumTerindetifikasiJournalTransactions);
 
@@ -978,6 +1002,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// set WCSOrderID
 							if (!itemsAllocate.isEmpty()
 									&& itemsAllocate != null) {
+								/*
 								List<FinArFundsInReconRecord> destItems = fundsInReconRecordHome
 										.queryByRange(
 												"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
@@ -987,10 +1012,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 														+ " and o.finArFundsInActionApplied.actionAppliedId<>"
 														+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
 												0, 0);
-								if (!destItems.isEmpty()
-										&& destItems.size() > 0) {
-									wcsOrderId = destItems.get(0)
-											.getWcsOrderId();
+								*/
+								FinArFundsInReconRecord destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+										itemsAllocate.get(0).getIdReconRecordDest());
+									
+								if (destItem != null) {
+									wcsOrderId = destItem.getWcsOrderId();
 								}
 							}
 							cashReceiveJournalTransaction
@@ -1006,18 +1033,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 							cashReceiveJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the cash received journal transaction
-							_log.debug("Save ( Uang jaminan transaksi )");
-							journalTransactionHome
-									.persistFinJournalTransaction(cashReceiveJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi )");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(cashReceiveJournalTransaction);*/
+							if (!em.contains(cashReceiveJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								cashReceiveJournalTransaction = finJournalTransactionDAO.save(cashReceiveJournalTransaction);
+							}
 							transactionList.add(cashReceiveJournalTransaction);
-						} else if (!reconRecord
+						} else if ((reconRecord
 								.getFinArReconResult()
-								.getReconResultId()
-								.equals(VeniceConstants.FIN_AR_RECON_RESULT_ALL)
-								&& reconRecord
+								.getReconResultId() != FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id())
+								&& (reconRecord
 										.getFinArFundsInActionApplied()
-										.getActionAppliedId()
-										.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
+										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 							/*
 							 * Post the journal transaction for uang jaminan
 							 * transaksi
@@ -1035,7 +1064,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// FIN_ACCOUNT_2230002
 							FinAccount finAccountPenghasilan = new FinAccount();
 							finAccountPenghasilan
-									.setAccountId(VeniceConstants.FIN_ACCOUNT_2230002);
+									.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id());
 							belumTerindetifikasiJournalTransaction
 									.setFinAccount(finAccountPenghasilan);
 
@@ -1073,9 +1102,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 							belumTerindetifikasiJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the fee journal transaction
-							_log.debug("Save ( Uang jaminan transaksi )");
-							journalTransactionHome
-									.persistFinJournalTransaction(belumTerindetifikasiJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi )");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(belumTerindetifikasiJournalTransaction);*/
+							if (!em.contains(belumTerindetifikasiJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+										"postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								belumTerindetifikasiJournalTransaction = finJournalTransactionDAO.save(belumTerindetifikasiJournalTransaction);
+							}
 							transactionList
 									.add(belumTerindetifikasiJournalTransaction);
 
@@ -1120,9 +1154,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 							belumTerindetifikasiJournalTransactions
 									.setGroupJournal(accountNumberBank);
 							// Persist the fee journal transaction
-							_log.debug("Save ( Uang jaminan transaksi)");
-							journalTransactionHome
-									.persistFinJournalTransaction(belumTerindetifikasiJournalTransactions);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi)");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(belumTerindetifikasiJournalTransactions);*/
+							if (!em.contains(belumTerindetifikasiJournalTransactions)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+										"postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								belumTerindetifikasiJournalTransactions = finJournalTransactionDAO.save(belumTerindetifikasiJournalTransactions);
+							}
 							transactionList
 									.add(belumTerindetifikasiJournalTransactions);
 
@@ -1135,7 +1174,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 							FinAccount finAccountPenghasilannew = new FinAccount();
 							finAccountPenghasilannew
-									.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+									.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 
 							cashReceiveJournalTransaction
 									.setFinAccount(finAccountPenghasilannew);
@@ -1160,6 +1199,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// set WCSOrderID
 							if (!itemsAllocate.isEmpty()
 									&& itemsAllocate != null) {
+								/*
 								List<FinArFundsInReconRecord> destItems = fundsInReconRecordHome
 										.queryByRange(
 												"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
@@ -1169,28 +1209,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 														+ " and o.finArFundsInActionApplied.actionAppliedId<>"
 														+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
 												0, 0);
-								if (!destItems.isEmpty()
-										&& destItems.size() > 0) {
-									wcsOrderId = destItems.get(0)
-											.getWcsOrderId();
+								*/
+								FinArFundsInReconRecord destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+										itemsAllocate.get(0).getIdReconRecordDest());
+								if (destItem != null) {
+									wcsOrderId = destItem.getWcsOrderId();
 								}
 							}
-							cashReceiveJournalTransaction
-									.setWcsOrderID(wcsOrderId);
-							cashReceiveJournalTransaction
-									.setVenBank(reconRecord
-											.getVenOrderPayment() != null ? reconRecord
-											.getVenOrderPayment().getVenBank()
-											: reconRecord
-													.getFinArFundsInReport()
-													.getFinArFundsInReportType()
-													.getVenBank());
-							cashReceiveJournalTransaction
-									.setGroupJournal(accountNumberBank);
+							cashReceiveJournalTransaction.setWcsOrderID(wcsOrderId);
+							cashReceiveJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord.getVenOrderPayment().getVenBank()
+											: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
+							cashReceiveJournalTransaction.setGroupJournal(accountNumberBank);
 							// Persist the cash received journal transaction
-							_log.debug("Save ( Uang jaminan transaksi )");
-							journalTransactionHome
-									.persistFinJournalTransaction(cashReceiveJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi )");
+							if (!em.contains(cashReceiveJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+										"postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								cashReceiveJournalTransaction = finJournalTransactionDAO.save(cashReceiveJournalTransaction);
+							}
 							transactionList.add(cashReceiveJournalTransaction);
 						} else {
 							/*
@@ -1211,20 +1247,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// bank FIN_ACCOUNT_5110003
 							FinAccount finAccountPenghasilan = new FinAccount();
 							finAccountPenghasilan
-									.setAccountId(VeniceConstants.FIN_ACCOUNT_2230002);
+									.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id());
 							belumTerindetifikasiJournalTransaction
 									.setFinAccount(finAccountPenghasilan);
 
 							List<FinArFundsInReconRecord> belumTerindetifikasiFundsInRecordList = new ArrayList<FinArFundsInReconRecord>();
-							belumTerindetifikasiFundsInRecordList
-									.add(reconRecord);
-							belumTerindetifikasiJournalTransaction
-									.setFinArFundsInReconRecords(belumTerindetifikasiFundsInRecordList);
-							belumTerindetifikasiJournalTransaction
-									.setFinJournal(finJournalCashReceive);
-							belumTerindetifikasiJournalTransaction
-									.setFinPeriod(FinancePeriodUtil
-											.getCurrentPeriod());
+							belumTerindetifikasiFundsInRecordList.add(reconRecord);
+							belumTerindetifikasiJournalTransaction.setFinArFundsInReconRecords(belumTerindetifikasiFundsInRecordList);
+							belumTerindetifikasiJournalTransaction.setFinJournal(finJournalCashReceive);
+							belumTerindetifikasiJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 							belumTerindetifikasiJournalTransaction
 									.setFinTransactionStatus(finTransactionStatus);
 							belumTerindetifikasiJournalTransaction
@@ -1250,28 +1281,43 @@ public class FinanceJournalPosterSessionEJBBean implements
 							belumTerindetifikasiJournalTransaction
 									.setGroupJournal(accountNumberBank);
 							// Persist the fee journal transaction
-							_log.debug("Save ( Uang jaminan transaksi belum terindentifikasi)");
-							journalTransactionHome
-									.persistFinJournalTransaction(belumTerindetifikasiJournalTransaction);
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( Uang jaminan transaksi belum terindentifikasi)");
+							/*journalTransactionHome
+									.persistFinJournalTransaction(belumTerindetifikasiJournalTransaction);*/
+							if (!em.contains(belumTerindetifikasiJournalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalTransactionDAO.save explicitly");
+								belumTerindetifikasiJournalTransaction = finJournalTransactionDAO.save(belumTerindetifikasiJournalTransaction);								
+							}
+								
 							transactionList
 									.add(belumTerindetifikasiJournalTransaction);
 						}
 
 						if (itemsAllocate != null
-								&& reconRecord
+								&& (reconRecord
 										.getFinArFundsInActionApplied()
-										.getActionAppliedId()
-										.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
+										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 							FinArFundsInAllocatePayment finallocate = itemsAllocate
 									.get(0);
 							finallocate.setIsactive(false);
-							finArFundsInAllocateHome
-									.mergeFinArFundsInAllocatePayment(finallocate);
+							//finArFundsInAllocateHome.mergeFinArFundsInAllocatePayment(finallocate);
+							if (!em.contains(finallocate)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finArFundsInAllocatePaymentDAO.save explicitly.");
+								finallocate = finArFundsInAllocatePaymentDAO.save(finallocate);
+							}
 						}
 						// merge the recon record with the list of transactions
 						reconRecord.setFinJournalTransactions(transactionList);
+						/*
 						reconRecord = fundsInReconRecordHome
 								.mergeFinArFundsInReconRecord(reconRecord);
+						*/
+						if (!em.contains(reconRecord)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "postCashReceiveJournalTransactions::calling finArFundsInReconRecordDAO.save explicitly.");
+							reconRecord = finArFundsInReconRecordDAO.save(reconRecord);
+						}
+						
 						if (transactionList.size() > 0) {
 							count++;
 						}
@@ -1279,16 +1325,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 				}
 			}
 			if (finJournalApprovalGroup != null && count == 0) {
-				journalApprovalGroupHome
-						.removeFinJournalApprovalGroup(finJournalApprovalGroup);
+				/*journalApprovalGroupHome
+						.removeFinJournalApprovalGroup(finJournalApprovalGroup);*/
+				if (!em.contains(finJournalApprovalGroup)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
+					finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+				}
 			}
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting cash receive journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -1296,37 +1347,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postCashReceiveJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransaction()" + " completed in "
 				+ duration + "ms");
 		return true;
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postVirtualAccountH1Journal(
 			ArrayList<Long> finArFundsInReconRecordIdList) {
-		_log.debug("postVirtualAccountH1Journal()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::BEGIN");
 		Long startTime = System.currentTimeMillis();
 		try {
-
-			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
-							"FinArFundsInReconRecordSessionEJBBeanLocal");
-
-			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
-							"FinJournalTransactionSessionEJBBeanLocal");
-
-			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
-							"FinJournalApprovalGroupSessionEJBBeanLocal");
-
-			FinArFundsInAllocatePaymentSessionEJBLocal finArFundsInAllocateHome = (FinArFundsInAllocatePaymentSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							FinArFundsInAllocatePaymentSessionEJBLocal.class,
-							"FinArFundsInAllocatePaymentSessionEJBBeanLocal");
 
 			if (finArFundsInReconRecordIdList.isEmpty()) {
 				throw new EJBException(
@@ -1336,15 +1372,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 			// Read all the relevant funds in records from the database
 			List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
 			for (Long reconciliationRecordId : finArFundsInReconRecordIdList) {
-				List<FinArFundsInReconRecord> reconRecordListTemp = fundsInReconRecordHome
-						.queryByRange(
-								"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-										+ reconciliationRecordId
-										+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-										+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-								0, 0);
-				if (!reconRecordListTemp.isEmpty()) {
-					reconRecordList.add(reconRecordListTemp.get(0));
+				FinArFundsInReconRecord reconRecordTemp = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+						reconciliationRecordId);
+				if (reconRecordTemp != null) {
+					reconRecordList.add(reconRecordTemp);
 				} else {
 					throw new EJBException(
 							"List passed to postCashReceiveJournalTransaction contains no valid keys. The reconciliation record list must contain valid keys for existing reconciliation records");
@@ -1358,18 +1389,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinJournalApprovalGroup finJournalApprovalGroup = new FinJournalApprovalGroup();
 			FinJournal finJournalCashReceive = new FinJournal();
 			finJournalCashReceive
-					.setJournalId(VeniceConstants.FIN_JOURNAL_CASH_RECEIVE);
+					.setJournalId(FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id());
 			FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 			finApprovalStatus
-					.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+					.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 			finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 			finJournalApprovalGroup.setFinJournal(finJournalCashReceive);
 			finJournalApprovalGroup
 					.setJournalGroupDesc("Cash Received Journal for :"
 							+ sdf.format(time));
 			finJournalApprovalGroup.setJournalGroupTimestamp(time);
-			finJournalApprovalGroup = journalApprovalGroupHome
-					.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+			//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			int count = 0;
 			for (FinArFundsInReconRecord reconRecord : reconRecordList) {
@@ -1380,64 +1410,48 @@ public class FinanceJournalPosterSessionEJBBean implements
 				Long accountNumberBank = null;
 				boolean createJournal = true;
 
-				if (reconRecord
+				if ((reconRecord
 						.getFinArFundsInActionApplied()
-						.getActionAppliedId()
-						.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
-					itemsAllocate = finArFundsInAllocateHome.queryByRange(
-							"select o from FinArFundsInAllocatePayment o where o.idReconRecordSource="
-									+ reconRecord.getReconciliationRecordId()
-									+ " and o.isactive=true", 0, 0);
+						.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
+					itemsAllocate = finArFundsInAllocatePaymentDAO.findByIdReconRecordSourceIsActive(
+							reconRecord.getReconciliationRecordId());
 				}
-				List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocateHome
-						.queryByRange(
-								"select o from FinArFundsInAllocatePayment o where o.idReconRecordDest="
-										+ reconRecord
-												.getReconciliationRecordId(),
-								0, 0);
+				List<FinArFundsInAllocatePayment> cekIdRecordDest = finArFundsInAllocatePaymentDAO.findByIdReconRecordDest(
+						reconRecord.getReconciliationRecordId());
 				if (!cekIdRecordDest.isEmpty()
-						&& reconRecord
+						&& (reconRecord
 								.getFinArFundsInActionApplied()
-								.getActionAppliedId()
-								.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE)) {
+								.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE.id())) {
 					createJournal = false;
 				}
 				if (createJournal) {
 					if (reconRecord.getFinArFundsInReport()
 							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120102;
+							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA.id()) {
+						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120102.id();
 					} else if (reconRecord.getFinArFundsInReport()
 							.getFinArFundsInReportType()
-							.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA) {
-						accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120301;
+							.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA.id()) {
+						accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120301.id();
 					}
 
 					BigDecimal paidAmount = reconRecord
 							.getProviderReportPaidAmount() != null ? reconRecord
 							.getProviderReportPaidAmount() : new BigDecimal(0);
 					BigDecimal paymentAmountOrderDestination = new BigDecimal(0);
-					List<FinArFundsInReconRecord> destItems = null;
-					if (reconRecord
+					FinArFundsInReconRecord destItem = null;
+					if ((reconRecord
 							.getFinArFundsInActionApplied()
-							.getActionAppliedId()
-							.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)
+							.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())
 							&& itemsAllocate != null
 							&& !itemsAllocate.isEmpty()) {
 						paidAmount = itemsAllocate.get(0).getAmount() != null ? itemsAllocate
 								.get(0).getAmount() : new BigDecimal(0);
 
-						destItems = fundsInReconRecordHome
-								.queryByRange(
-										"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-												+ itemsAllocate.get(0)
-														.getIdReconRecordDest()
-												+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-												+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-										0, 0);
-						if (!destItems.isEmpty() && destItems.size() > 0) {
-							paymentAmountOrderDestination = destItems.get(0)
-									.getPaymentAmount();
+						destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+								itemsAllocate.get(0).getIdReconRecordDest());
+						if (destItem != null) {
+							paymentAmountOrderDestination = destItem.getPaymentAmount();
 						}
 
 					}
@@ -1445,26 +1459,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 					 * Journal untuk report realtime Post the journal
 					 * transaction for Ayat-Ayat Silang Bank
 					 */
-					_log.debug("Save ( Ayat-Ayat Silang Bank) ::BEGIN");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( Ayat-Ayat Silang Bank) ::BEGIN");
 					FinJournalTransaction ayatSilangBankJournalTransaction = new FinJournalTransaction();
 					ayatSilangBankJournalTransaction = setJournalTransaction(
 							reconRecord,
 							wcsOrderId,
 							finJournalApprovalGroup,
-							VeniceConstants.FIN_ACCOUNT_1120999,
-							VeniceConstants.FIN_JOURNAL_CASH_RECEIVE,
-							VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
-							VeniceConstants.FIN_TRANSACTION_TYPE_AYAT_AYAT_SILANG_PADA_BANK,
+							FinAccountConstants.FIN_ACCOUNT_1120999.id(),
+							FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id(),
+							FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
+							FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_AYAT_AYAT_SILANG_PADA_BANK.id(),
 							time,
 							reconRecord.getVenOrderPayment() != null ? reconRecord
 									.getVenOrderPayment().getVenBank()
-									: reconRecord.getFinArFundsInReport()
-											.getFinArFundsInReportType()
-											.getVenBank(),
-							journalTransactionHome, accountNumberBank,
+									: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(), 
+							accountNumberBank, 
 							paidAmount, false,
 							"System Debit Ayat-Ayat Silang Bank :" + wcsOrderId);
-					_log.debug("Save ( Ayat-Ayat Silang Bank)::END");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( Ayat-Ayat Silang Bank)::END");
 					transactionList.add(ayatSilangBankJournalTransaction);
 
 					boolean debetOrCredit = true;
@@ -1473,54 +1485,48 @@ public class FinanceJournalPosterSessionEJBBean implements
 									.getPaymentAmount() : new BigDecimal(0));
 					BigDecimal paymentAmount = reconRecord.getPaymentAmount() != null ? reconRecord
 							.getPaymentAmount() : new BigDecimal(0);
-					if (reconRecord
+					if ((reconRecord
 							.getFinArFundsInActionApplied()
-							.getActionAppliedId()
-							.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED)) {
+							.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
 						remainingBalanceAmount = paidAmount
 								.subtract(paymentAmountOrderDestination);
-						if (!destItems.isEmpty() && destItems.size() > 0) {
-							paymentAmount = destItems.get(0).getPaymentAmount();
-							wcsOrderId = destItems.get(0).getWcsOrderId();
+						if (destItem != null) {
+							paymentAmount = destItem.getPaymentAmount();
+							wcsOrderId = destItem.getWcsOrderId();
 						}
 					}
 					if (remainingBalanceAmount.compareTo(new BigDecimal(0)) < 1) {
 						debetOrCredit = false;
 					}
 
-					if (reconRecord.getFinArReconResult().getReconResultId()
-							.equals(VeniceConstants.FIN_AR_RECON_RESULT_ALL)
+					if ((reconRecord.getFinArReconResult().getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id())
 							|| (reconRecord
 									.getFinArFundsInActionApplied()
-									.getActionAppliedId()
-									.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED) && paidAmount
+									.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id()) && (paidAmount
 									.subtract(paymentAmountOrderDestination)
 									.abs().compareTo(new BigDecimal(5000)) <= 0)) {
 						/**
 						 * Post the journal transaction for Uang Jaminan
 						 * Transaksi
 						 */
-						_log.debug("Save ( Uang Jaminan Transaksi) ::BEGIN");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( Uang Jaminan Transaksi) ::BEGIN");
 						FinJournalTransaction uangJaminanTransaksiJournalTransaction = new FinJournalTransaction();
 						uangJaminanTransaksiJournalTransaction = setJournalTransaction(
 								reconRecord,
 								wcsOrderId,
 								finJournalApprovalGroup,
-								VeniceConstants.FIN_ACCOUNT_2230001,
-								VeniceConstants.FIN_JOURNAL_CASH_RECEIVE,
-								VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
-								VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI,
+								FinAccountConstants.FIN_ACCOUNT_2230001.id(),
+								FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id(),
+								FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
+								FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id(),
 								time,
-								reconRecord.getVenOrderPayment() != null ? reconRecord
-										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank(),
-								journalTransactionHome, accountNumberBank,
+								reconRecord.getVenOrderPayment() != null ? reconRecord.getVenOrderPayment().getVenBank()
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(),
+								accountNumberBank,
 								paymentAmount, true,
 								"System Credit Uang Jaminan Transaksi :"
 										+ wcsOrderId);
-						_log.debug("Save ( Uang Jaminan Transaksi)::END");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( Uang Jaminan Transaksi)::END");
 						transactionList
 								.add(uangJaminanTransaksiJournalTransaction);
 
@@ -1529,29 +1535,26 @@ public class FinanceJournalPosterSessionEJBBean implements
 							 * Post the journal transaction for lebih/kurang
 							 * bayar
 							 */
-							_log.debug("Save ( lebih/kurang bayar) ::BEGIN");
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( lebih/kurang bayar) ::BEGIN");
 							FinJournalTransaction lebihKurangBayarJournalTransaction = new FinJournalTransaction();
 							lebihKurangBayarJournalTransaction = setJournalTransaction(
 									reconRecord,
 									wcsOrderId,
 									finJournalApprovalGroup,
-									VeniceConstants.FIN_ACCOUNT_7140001,
-									VeniceConstants.FIN_JOURNAL_CASH_RECEIVE,
-									VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
-									VeniceConstants.FIN_TRANSACTION_TYPE_LEBIH_ATAU_KURANG_BAYAR,
+									FinAccountConstants.FIN_ACCOUNT_7140001.id(),
+									FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id(),
+									FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
+									FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_LEBIH_ATAU_KURANG_BAYAR.id(),
 									time,
 									reconRecord.getVenOrderPayment() != null ? reconRecord
 											.getVenOrderPayment().getVenBank()
-											: reconRecord
-													.getFinArFundsInReport()
-													.getFinArFundsInReportType()
-													.getVenBank(),
-									journalTransactionHome, accountNumberBank,
+											: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(),
+									accountNumberBank,
 									remainingBalanceAmount.abs(),
 									debetOrCredit,
 									"System Lebih / Kurang Bayar :"
 											+ wcsOrderId);
-							_log.debug("Save (lebih/kurang bayar)::END");
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save (lebih/kurang bayar)::END");
 							transactionList
 									.add(lebihKurangBayarJournalTransaction);
 						}
@@ -1561,27 +1564,25 @@ public class FinanceJournalPosterSessionEJBBean implements
 						 * Post the journal transaction for Uang Jaminan
 						 * Transaksi Belum Teridentifikasi
 						 */
-						_log.debug("Save ( Uang Jaminan Transaksi Belum Teridentifikasi) ::BEGIN");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( Uang Jaminan Transaksi Belum Teridentifikasi) ::BEGIN");
 						FinJournalTransaction uangJaminanTransaksiBelumTeridentifikasiJournalTransaction = new FinJournalTransaction();
 						uangJaminanTransaksiBelumTeridentifikasiJournalTransaction = setJournalTransaction(
 								reconRecord,
 								wcsOrderId,
 								finJournalApprovalGroup,
-								VeniceConstants.FIN_ACCOUNT_2230002,
-								VeniceConstants.FIN_JOURNAL_CASH_RECEIVE,
-								VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
-								VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI,
+								FinAccountConstants.FIN_ACCOUNT_2230002.id(),
+								FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id(),
+								FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
+								FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI.id(),
 								time,
 								reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank(),
-								journalTransactionHome, accountNumberBank,
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank(),
+								accountNumberBank,
 								paymentAmount, true,
 								"System Credit Uang Jaminan Transaksi Belum Teridentifikasi :"
 										+ wcsOrderId);
-						_log.debug("Save ( Uang Jaminan Transaksi Belum Teridentifikasi)::END");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::Save ( Uang Jaminan Transaksi Belum Teridentifikasi)::END");
 						transactionList
 								.add(uangJaminanTransaksiBelumTeridentifikasiJournalTransaction);
 					}
@@ -1594,14 +1595,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 						FinArFundsInAllocatePayment finallocate = itemsAllocate
 								.get(0);
 						finallocate.setIsactive(false);
-						finArFundsInAllocateHome
-								.mergeFinArFundsInAllocatePayment(finallocate);
+						if (!em.contains(finallocate)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::calling finArFundsInAllocatePaymentDAO.save explicitly.");
+							finallocate = finArFundsInAllocatePaymentDAO.save(finallocate);
+						}
 					}
 					// merge the recon record with the list of transactions
 					reconRecord.setFinJournalTransactions(transactionList);
 					reconRecord.setFinApprovalStatus(finApprovalStatus);
-					reconRecord = fundsInReconRecordHome
-							.mergeFinArFundsInReconRecord(reconRecord);
+					if (!em.contains(reconRecord)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualaccountH1Journal::calling finArFundsInReconRecordDAO.save explicitly.");
+						reconRecord = finArFundsInReconRecordDAO.save(reconRecord);
+					}
 					count++;
 				}
 			}
@@ -1609,28 +1614,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * remove group journal jika tidak ada journal detail yang terbentuk
 			 */
 			if (finJournalApprovalGroup != null && count == 0) {
-				journalApprovalGroupHome
-						.removeFinJournalApprovalGroup(finJournalApprovalGroup);
+				//journalApprovalGroupHome.removeFinJournalApprovalGroup(finJournalApprovalGroup);
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::removing group journal if there's no detail");
+				finJournalApprovalGroupDAO.delete(finJournalApprovalGroup);
 			}
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting Virtual Account H1 journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
-		} finally {
-			try {
-				if (_genericLocator != null) {
-					_genericLocator.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postVirtualAccountH1Journal()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postVirtualAccountH1Journal::" + " completed in "
 				+ duration + "ms");
 		return true;
 	}
@@ -1666,16 +1664,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * @return
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public FinJournalTransaction setJournalTransaction(
 			FinArFundsInReconRecord reconRecord, String wcsOrderId,
 			FinJournalApprovalGroup finJournalApprovalGroup, Long accountId,
 			Long finJournalID, Long finTransactionStatusID,
 			Long finTransactionTypeID, Timestamp time, VenBank bank,
-			FinJournalTransactionSessionEJBLocal journalTransactionHome,
+			//FinJournalTransactionSessionEJBLocal journalTransactionHome,
 			Long accountNumberBankForGroup, BigDecimal amount,
 			boolean creditDebitFlag, String Comment) {
 
-		_log.debug("setJournalTransaction()::BEGIN => ");
+	    CommonUtil.logDebug(this.getClass().getCanonicalName(), "setJournalTransaction::BEGIN => ");
 		Long startTime = System.currentTimeMillis();
 
 		FinJournalTransaction journalTransaction = null;
@@ -1716,15 +1715,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 			journalTransaction.setWcsOrderID(wcsOrderId);
 			journalTransaction.setVenBank(bank);
 			journalTransaction.setGroupJournal(accountNumberBankForGroup);
-			_log.debug("Save ( Journal Transaction)");
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "setJournalTransaction::Save ( Journal Transaction)");
+			/*
 			journalTransaction = journalTransactionHome
 					.persistFinJournalTransaction(journalTransaction);
+			*/
+			if (!em.contains(journalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "setJournalTransaction::calling finJournalTransactionDAO.save explicitly");
+				journalTransaction = finJournalTransactionDAO.save(journalTransaction);
+			}
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -1732,54 +1738,46 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("setJournalTransaction()" + " completed in " + duration
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "setJournalTransaction::" + " completed in " + duration
 				+ "ms");
 		return journalTransaction;
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postAllocationJournal(
 			FinArFundsInReconRecord reconRecord,
-			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome,
-			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome,
-			FinJournalTransactionSessionEJBLocal journalTransactionHome,
-			FinArFundsInAllocatePaymentSessionEJBLocal finArFundsInAllocateHome,
 			FinArFundsInAllocatePayment finArFundsInAllocatePayment,
 			List<FinArFundsInReconRecord> reconRecordList) {
 
-		_log.debug("postAllocationJournal()::BEGIN");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		try {
 			String wcsOrderId = reconRecord.getWcsOrderId() != null ? reconRecord
 					.getWcsOrderId() : reconRecord.getWcsOrderId();
 
-			List<FinArFundsInReconRecord> destItem = fundsInReconRecordHome
-					.queryByRange(
-							"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-									+ finArFundsInAllocatePayment
-											.getIdReconRecordDest()
-									+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-							0, 0);
+			FinArFundsInReconRecord destItem = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(
+					finArFundsInAllocatePayment.getIdReconRecordDest());
 
 			ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
-			if (!destItem.isEmpty() && destItem.size() > 0) {
+			if (destItem != null) {
 
 				FinJournal finJournalAllocation = new FinJournal();
 				finJournalAllocation
-						.setJournalId(VeniceConstants.FIN_JOURNAL_ALLOCATION);
+						.setJournalId(FinJournalConstants.FIN_JOURNAL_ALLOCATION.id());
 
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
 				FinJournalApprovalGroup finJournalApprovalGroups = new FinJournalApprovalGroup();
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+						.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 				finJournalApprovalGroups
 						.setFinApprovalStatus(finApprovalStatus);
 				finJournalApprovalGroups.setFinJournal(finJournalAllocation);
@@ -1793,31 +1791,27 @@ public class FinanceJournalPosterSessionEJBBean implements
 				// initialize journal account
 				FinAccount finAccount2230001 = new FinAccount();
 				finAccount2230001
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001); // UANG
-																			// JAMINAN
-																			// TRANSAKSI
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id()); // UANG JAMINAN TRANSAKSI
 				FinAccount finAccount2230002 = new FinAccount();
 				finAccount2230002
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2230002); // UANG
-																			// JAMINAN
-																			// TRANSAKSI
-																			// BELUM
-																			// TERIDENTIFIKASI
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id()); // UANG JAMINAN TRANSAKSI BELUM TERIDENTIFIKASI
 
 				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 				finTransactionStatus
-						.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
+						.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
 				FinTransactionType finTransactionType = new FinTransactionType();
 				finTransactionType
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 
 				// Persist the journal group
-				finJournalApprovalGroups = journalApprovalGroupHome
-						.persistFinJournalApprovalGroup(finJournalApprovalGroups);
+				if (!em.contains(finJournalApprovalGroups)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalApprovalGroupDAO.save explicitly.");
+					finJournalApprovalGroups = finJournalApprovalGroupDAO.save(finJournalApprovalGroups);
+				}
 
 				// decide which journal allocation type belongs to, based on the
 				// calculation between payment amt and allocation amt
-				if (reconRecord.getFinArReconResult().getReconResultId() == VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED) {
+				if (reconRecord.getFinArReconResult().getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()) {
 					// recon's source is considered as 'Not Recognized', create
 					// Journal allocation for Payment Not Recognized
 
@@ -1827,47 +1821,31 @@ public class FinanceJournalPosterSessionEJBBean implements
 					debitMsgBuffer.append("Allocation DEBIT from WCS Order:");
 					debitMsgBuffer.append(wcsOrderId);
 					debitMsgBuffer.append(" to WCS Order:");
-					debitMsgBuffer.append(destItem.get(0).getWcsOrderId());
-					originAllocJournalTransaction.setComments(debitMsgBuffer
-							.toString());
+					debitMsgBuffer.append(destItem.getWcsOrderId());
+					originAllocJournalTransaction.setComments(debitMsgBuffer.toString());
 					originAllocJournalTransaction.setCreditDebitFlag(false);
-					originAllocJournalTransaction
-							.setFinJournalApprovalGroup(finJournalApprovalGroups);
-					originAllocJournalTransaction
-							.setFinAccount(finAccount2230002);
-					originAllocJournalTransaction
-							.setFinArFundsInReconRecords(reconRecordList);
-					originAllocJournalTransaction
-							.setFinJournal(finJournalAllocation);
-					originAllocJournalTransaction
-							.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+					originAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
+					originAllocJournalTransaction.setFinAccount(finAccount2230002);
+					originAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+					originAllocJournalTransaction.setFinJournal(finJournalAllocation);
+					originAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
-					originAllocJournalTransaction
-							.setFinTransactionStatus(finTransactionStatus);
+					originAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 					FinTransactionType finTransactionTypeNotRecognized = new FinTransactionType();
-					finTransactionTypeNotRecognized
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI);
-					originAllocJournalTransaction
-							.setFinTransactionType(finTransactionTypeNotRecognized);
-					originAllocJournalTransaction
-							.setTransactionAmount(finArFundsInAllocatePayment
-									.getAmount());
-					originAllocJournalTransaction
-							.setTransactionTimestamp(new Timestamp(System
-									.currentTimeMillis()));
+					finTransactionTypeNotRecognized.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI.id());
+					originAllocJournalTransaction.setFinTransactionType(finTransactionTypeNotRecognized);
+					originAllocJournalTransaction.setTransactionAmount(finArFundsInAllocatePayment.getAmount());
+					originAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-					originAllocJournalTransaction.setWcsOrderID(reconRecord
-							.getWcsOrderId() != null ? reconRecord
-							.getWcsOrderId() : null);
-					originAllocJournalTransaction.setVenBank(reconRecord
-							.getVenOrderPayment() != null ? reconRecord
-							.getVenOrderPayment().getVenBank() : reconRecord
-							.getFinArFundsInReport()
-							.getFinArFundsInReportType().getVenBank());
+					originAllocJournalTransaction.setWcsOrderID(reconRecord.getWcsOrderId() != null ? reconRecord.getWcsOrderId() : null);
+					originAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+							.getVenOrderPayment().getVenBank() : reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 					// Persist the DEBIT journal transaction
-					journalTransactionHome
-							.persistFinJournalTransaction(originAllocJournalTransaction);
+					if (!em.contains(originAllocJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+						originAllocJournalTransaction = finJournalTransactionDAO.save(originAllocJournalTransaction);
+					}
 					transactionList.add(originAllocJournalTransaction);
 
 					// CREDIT the account
@@ -1876,47 +1854,34 @@ public class FinanceJournalPosterSessionEJBBean implements
 					creditMsgBuffer.append("Allocation CREDIT from WCS Order:");
 					creditMsgBuffer.append(wcsOrderId);
 					creditMsgBuffer.append(" to WCS Order:");
-					creditMsgBuffer.append(destItem.get(0).getWcsOrderId());
-					destAllocJournalTransaction.setComments(creditMsgBuffer
-							.toString());
+					creditMsgBuffer.append(destItem.getWcsOrderId());
+					destAllocJournalTransaction.setComments(creditMsgBuffer.toString());
 					destAllocJournalTransaction.setCreditDebitFlag(true);
-					destAllocJournalTransaction
-							.setFinJournalApprovalGroup(finJournalApprovalGroups);
+					destAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
 
-					destAllocJournalTransaction
-							.setFinAccount(finAccount2230001);
+					destAllocJournalTransaction.setFinAccount(finAccount2230001);
 
-					destAllocJournalTransaction
-							.setFinArFundsInReconRecords(reconRecordList);
-					destAllocJournalTransaction
-							.setFinJournal(finJournalAllocation);
-					destAllocJournalTransaction.setFinPeriod(FinancePeriodUtil
-							.getCurrentPeriod());
-					destAllocJournalTransaction
-							.setFinTransactionStatus(finTransactionStatus);
+					destAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+					destAllocJournalTransaction.setFinJournal(finJournalAllocation);
+					destAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+					destAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-					destAllocJournalTransaction
-							.setFinTransactionType(finTransactionType);
-					destAllocJournalTransaction.setTransactionAmount(destItem
-							.get(0).getPaymentAmount());
-					destAllocJournalTransaction
-							.setTransactionTimestamp(new Timestamp(System
-									.currentTimeMillis()));
+					destAllocJournalTransaction.setFinTransactionType(finTransactionType);
+					destAllocJournalTransaction.setTransactionAmount(destItem.getPaymentAmount());
+					destAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-					destAllocJournalTransaction.setWcsOrderID(destItem.get(0)
-							.getWcsOrderId());
-					destAllocJournalTransaction.setVenBank(reconRecord
-							.getVenOrderPayment() != null ? reconRecord
-							.getVenOrderPayment().getVenBank() : reconRecord
-							.getFinArFundsInReport()
-							.getFinArFundsInReportType().getVenBank());
+					destAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
+					destAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+							.getVenOrderPayment().getVenBank() : reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 					// Persist the CREDIT journal transaction
-					journalTransactionHome
-							.persistFinJournalTransaction(destAllocJournalTransaction);
+					if (!em.contains(destAllocJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+						destAllocJournalTransaction = finJournalTransactionDAO.save(destAllocJournalTransaction);
+					}
 					transactionList.add(destAllocJournalTransaction);
 
 					switch (finArFundsInAllocatePayment.getAmount().compareTo(
-							destItem.get(0).getPaymentAmount())) {
+							destItem.getPaymentAmount())) {
 					case -1:
 						FinJournalTransaction destDebitDevAllocJournalTransaction = new FinJournalTransaction();
 						StringBuffer debitDeviationMsgBuffer = new StringBuffer();
@@ -1924,51 +1889,32 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT (deviation) from WCS Order:");
 						debitDeviationMsgBuffer.append(wcsOrderId);
 						debitDeviationMsgBuffer.append(" to WCS Order:");
-						debitDeviationMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
-						destDebitDevAllocJournalTransaction
-								.setComments(debitDeviationMsgBuffer.toString());
+						debitDeviationMsgBuffer.append(destItem.getWcsOrderId());
+						destDebitDevAllocJournalTransaction.setComments(debitDeviationMsgBuffer.toString());
 
-						destDebitDevAllocJournalTransaction
-								.setCreditDebitFlag(false);
-						destDebitDevAllocJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroups);
+						destDebitDevAllocJournalTransaction.setCreditDebitFlag(false);
+						destDebitDevAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
 
-						destDebitDevAllocJournalTransaction
-								.setFinAccount(finAccount2230001);
+						destDebitDevAllocJournalTransaction.setFinAccount(finAccount2230001);
 
-						destDebitDevAllocJournalTransaction
-								.setFinArFundsInReconRecords(reconRecordList);
-						destDebitDevAllocJournalTransaction
-								.setFinJournal(finJournalAllocation);
-						destDebitDevAllocJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						destDebitDevAllocJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						destDebitDevAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+						destDebitDevAllocJournalTransaction.setFinJournal(finJournalAllocation);
+						destDebitDevAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						destDebitDevAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
+						destDebitDevAllocJournalTransaction.setFinTransactionType(finTransactionType);
 						destDebitDevAllocJournalTransaction
-								.setFinTransactionType(finTransactionType);
-						destDebitDevAllocJournalTransaction
-								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount().subtract(
-												destItem.get(0)
-														.getPaymentAmount()));
-						destDebitDevAllocJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+								.setTransactionAmount(finArFundsInAllocatePayment.getAmount().subtract(destItem.getPaymentAmount()));
+						destDebitDevAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-						destDebitDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId());
-						destDebitDevAllocJournalTransaction
-								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
-										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank());
+						destDebitDevAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
+						destDebitDevAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+										.getVenOrderPayment().getVenBank() : reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 						// Persist the DEBIT (deviation) journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(destDebitDevAllocJournalTransaction);
+						if (!em.contains(destDebitDevAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							destDebitDevAllocJournalTransaction = finJournalTransactionDAO.save(destDebitDevAllocJournalTransaction);
+						}
 						transactionList
 								.add(destDebitDevAllocJournalTransaction);
 						break;
@@ -1979,52 +1925,33 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT (deviation) from WCS Order:");
 						creditDeviationMsgBuffer.append(wcsOrderId);
 						creditDeviationMsgBuffer.append(" to WCS Order:");
-						creditDeviationMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
-						destCreditDevAllocJournalTransaction
-								.setComments(creditDeviationMsgBuffer
-										.toString());
+						creditDeviationMsgBuffer.append(destItem.getWcsOrderId());
+						destCreditDevAllocJournalTransaction.setComments(creditDeviationMsgBuffer.toString());
 
-						destCreditDevAllocJournalTransaction
-								.setCreditDebitFlag(true);
-						destCreditDevAllocJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroups);
+						destCreditDevAllocJournalTransaction.setCreditDebitFlag(true);
+						destCreditDevAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
 
-						destCreditDevAllocJournalTransaction
-								.setFinAccount(finAccount2230001);
+						destCreditDevAllocJournalTransaction.setFinAccount(finAccount2230001);
 
-						destCreditDevAllocJournalTransaction
-								.setFinArFundsInReconRecords(reconRecordList);
-						destCreditDevAllocJournalTransaction
-								.setFinJournal(finJournalAllocation);
-						destCreditDevAllocJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						destCreditDevAllocJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						destCreditDevAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+						destCreditDevAllocJournalTransaction.setFinJournal(finJournalAllocation);
+						destCreditDevAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						destCreditDevAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-						destCreditDevAllocJournalTransaction
-								.setFinTransactionType(finTransactionType);
-						destCreditDevAllocJournalTransaction
-								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount().subtract(
-												destItem.get(0)
-														.getPaymentAmount()));
-						destCreditDevAllocJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						destCreditDevAllocJournalTransaction.setFinTransactionType(finTransactionType);
+						destCreditDevAllocJournalTransaction.setTransactionAmount(finArFundsInAllocatePayment
+										.getAmount().subtract(destItem.getPaymentAmount()));
+						destCreditDevAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-						destCreditDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId());
-						destCreditDevAllocJournalTransaction
-								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+						destCreditDevAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
+						destCreditDevAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank());
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 						// Persist the CREDIT (deviation) journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(destCreditDevAllocJournalTransaction);
+						if (!em.contains(destCreditDevAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							destCreditDevAllocJournalTransaction = finJournalTransactionDAO.save(destCreditDevAllocJournalTransaction);
+						}
 						transactionList
 								.add(destCreditDevAllocJournalTransaction);
 						break;
@@ -2033,57 +1960,41 @@ public class FinanceJournalPosterSessionEJBBean implements
 					// end of 'payment not recognized' allocation journal
 				} else {
 					// other than 'payment not recognized' alloc journal
-					switch (finArFundsInAllocatePayment.getAmount().compareTo(
-							destItem.get(0).getPaymentAmount())) {
+					switch (finArFundsInAllocatePayment.getAmount().compareTo(destItem.getPaymentAmount())) {
 					case -1: // Partial Funds Received
 						// DEBIT the account
 						FinJournalTransaction originPartialAllocJournalTransaction = new FinJournalTransaction();
 						StringBuffer debitMsgBuffer = new StringBuffer();
-						debitMsgBuffer
-								.append("Allocation DEBIT from WCS Order:");
+						debitMsgBuffer.append("Allocation DEBIT from WCS Order:");
 						debitMsgBuffer.append(wcsOrderId);
 						debitMsgBuffer.append(" to WCS Order:");
-						debitMsgBuffer.append(destItem.get(0).getWcsOrderId());
-						originPartialAllocJournalTransaction
-								.setComments(debitMsgBuffer.toString());
-						originPartialAllocJournalTransaction
-								.setCreditDebitFlag(false);
-						originPartialAllocJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroups);
-						originPartialAllocJournalTransaction
-								.setFinAccount(finAccount2230001);
-						originPartialAllocJournalTransaction
-								.setFinArFundsInReconRecords(reconRecordList);
-						originPartialAllocJournalTransaction
-								.setFinJournal(finJournalAllocation);
-						originPartialAllocJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
+						debitMsgBuffer.append(destItem.getWcsOrderId());
+						originPartialAllocJournalTransaction.setComments(debitMsgBuffer.toString());
+						originPartialAllocJournalTransaction.setCreditDebitFlag(false);
+						originPartialAllocJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroups);
+						originPartialAllocJournalTransaction.setFinAccount(finAccount2230001);
+						originPartialAllocJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
+						originPartialAllocJournalTransaction.setFinJournal(finJournalAllocation);
+						originPartialAllocJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
-						originPartialAllocJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						originPartialAllocJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-						originPartialAllocJournalTransaction
-								.setFinTransactionType(finTransactionType);
-						originPartialAllocJournalTransaction
-								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount());
-						originPartialAllocJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						originPartialAllocJournalTransaction.setFinTransactionType(finTransactionType);
+						originPartialAllocJournalTransaction.setTransactionAmount(finArFundsInAllocatePayment.getAmount());
+						originPartialAllocJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
-						originPartialAllocJournalTransaction
-								.setWcsOrderID(reconRecord.getWcsOrderId() != null ? reconRecord
+						originPartialAllocJournalTransaction.setWcsOrderID(reconRecord.getWcsOrderId() != null ? reconRecord
 										.getWcsOrderId() : null);
-						originPartialAllocJournalTransaction
-								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
+						originPartialAllocJournalTransaction.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
-										: reconRecord.getFinArFundsInReport()
-												.getFinArFundsInReportType()
-												.getVenBank());
+										: reconRecord.getFinArFundsInReport().getFinArFundsInReportType().getVenBank());
 						// Persist the DEBIT journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(originPartialAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(originPartialAllocJournalTransaction);*/
+						if (!em.contains(originPartialAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocaitonJournal::calling finJournalTransactionDAO.save explicitly");
+							originPartialAllocJournalTransaction = finJournalTransactionDAO.save(originPartialAllocJournalTransaction);
+						}
 						transactionList
 								.add(originPartialAllocJournalTransaction);
 
@@ -2094,7 +2005,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT from WCS Order:");
 						creditMsgBuffer.append(wcsOrderId);
 						creditMsgBuffer.append(" to WCS Order:");
-						creditMsgBuffer.append(destItem.get(0).getWcsOrderId());
+						creditMsgBuffer.append(destItem.getWcsOrderId());
 						destPartialAllocJournalTransaction
 								.setComments(creditMsgBuffer.toString());
 						destPartialAllocJournalTransaction
@@ -2118,14 +2029,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destPartialAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destPartialAllocJournalTransaction
-								.setTransactionAmount(destItem.get(0)
-										.getPaymentAmount());
+								.setTransactionAmount(destItem.getPaymentAmount());
 						destPartialAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
 						destPartialAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId());
+								.setWcsOrderID(destItem.getWcsOrderId());
 						destPartialAllocJournalTransaction
 								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
@@ -2133,8 +2043,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 												.getFinArFundsInReportType()
 												.getVenBank());
 						// Persist the CREDIT journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(destPartialAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(destPartialAllocJournalTransaction);*/
+						if (!em.contains(destPartialAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							destPartialAllocJournalTransaction = finJournalTransactionDAO.save(destPartialAllocJournalTransaction);
+						}
 						transactionList.add(destPartialAllocJournalTransaction);
 
 						// DEBIT (deviation) the account
@@ -2144,8 +2059,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT (deviation) from WCS Order:");
 						debitDevMsgBuffer.append(wcsOrderId);
 						debitDevMsgBuffer.append(" to WCS Order:");
-						debitDevMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						debitDevMsgBuffer.append(destItem.getWcsOrderId());
 						destPartialDevAllocJournalTransaction
 								.setComments(debitDevMsgBuffer.toString());
 						destPartialDevAllocJournalTransaction
@@ -2168,19 +2082,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destPartialDevAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destPartialDevAllocJournalTransaction
-								.setTransactionAmount(destItem
-										.get(0)
-										.getPaymentAmount()
-										.subtract(
-												finArFundsInAllocatePayment
-														.getAmount()));
+								.setTransactionAmount(destItem.getPaymentAmount()
+										.subtract(finArFundsInAllocatePayment.getAmount()));
 						destPartialDevAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
 						destPartialDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId() != null ? destItem
-										.get(0).getWcsOrderId() : null);
+								.setWcsOrderID(destItem.getWcsOrderId() != null ? destItem.getWcsOrderId() : null);
 						destPartialDevAllocJournalTransaction
 								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
@@ -2188,8 +2097,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 												.getFinArFundsInReportType()
 												.getVenBank());
 						// Persist the DEBIT (deviation) journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(destPartialDevAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(destPartialDevAllocJournalTransaction);*/
+						if (!em.contains(destPartialDevAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							destPartialDevAllocJournalTransaction = finJournalTransactionDAO.save(destPartialDevAllocJournalTransaction);
+						}
 						transactionList
 								.add(destPartialDevAllocJournalTransaction);
 						break;
@@ -2201,8 +2115,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT from WCS Order:");
 						debitAllFundsMsgBuffer.append(wcsOrderId);
 						debitAllFundsMsgBuffer.append(" to WCS Order:");
-						debitAllFundsMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						debitAllFundsMsgBuffer.append(destItem.getWcsOrderId());
 						originAllAllocJournalTransaction
 								.setComments(debitAllFundsMsgBuffer.toString());
 						originAllAllocJournalTransaction
@@ -2241,8 +2154,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.getFinArFundsInReportType()
 										.getVenBank());
 						// Persist the DEBIT journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(originAllAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(originAllAllocJournalTransaction);*/
+						if (!em.contains(originAllAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							originAllAllocJournalTransaction = finJournalTransactionDAO.save(originAllAllocJournalTransaction);
+						}
 						transactionList.add(originAllAllocJournalTransaction);
 
 						// CREDIT the account
@@ -2252,8 +2170,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT from WCS Order:");
 						creditAllMsgBuffer.append(wcsOrderId);
 						creditAllMsgBuffer.append(" to WCS Order:");
-						creditAllMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						creditAllMsgBuffer.append(destItem.getWcsOrderId());
 						destAllAllocJournalTransaction
 								.setComments(creditAllMsgBuffer.toString());
 						destAllAllocJournalTransaction.setCreditDebitFlag(true);
@@ -2276,14 +2193,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destAllAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destAllAllocJournalTransaction
-								.setTransactionAmount(destItem.get(0)
-										.getPaymentAmount());
+								.setTransactionAmount(destItem.getPaymentAmount());
 						destAllAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
-						destAllAllocJournalTransaction.setWcsOrderID(destItem
-								.get(0).getWcsOrderId());
+						destAllAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
 						destAllAllocJournalTransaction.setVenBank(reconRecord
 								.getVenOrderPayment() != null ? reconRecord
 								.getVenOrderPayment().getVenBank()
@@ -2291,8 +2206,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.getFinArFundsInReportType()
 										.getVenBank());
 						// Persist the CREDIT journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(destAllAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(destAllAllocJournalTransaction);*/
+						if (!em.contains(destAllAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							destAllAllocJournalTransaction = finJournalTransactionDAO.save(destAllAllocJournalTransaction);
+						}
 						transactionList.add(destAllAllocJournalTransaction);
 						break;
 					case 1: // Over paid
@@ -2303,8 +2222,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation DEBIT from WCS Order:");
 						debitOverMsgBuffer.append(wcsOrderId);
 						debitOverMsgBuffer.append(" to WCS Order:");
-						debitOverMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						debitOverMsgBuffer.append(destItem.getWcsOrderId());
 						originOverAllocJournalTransaction
 								.setComments(debitOverMsgBuffer.toString());
 						originOverAllocJournalTransaction
@@ -2343,8 +2261,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 												.getFinArFundsInReportType()
 												.getVenBank());
 						// Persist the DEBIT journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(originOverAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(originOverAllocJournalTransaction);*/
+						if (!em.contains(originOverAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							originOverAllocJournalTransaction = finJournalTransactionDAO.save(originOverAllocJournalTransaction);
+						}
 						transactionList.add(originOverAllocJournalTransaction);
 
 						// CREDIT the account
@@ -2354,8 +2276,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT from WCS Order:");
 						creditOverMsgBuffer.append(wcsOrderId);
 						creditOverMsgBuffer.append(" to WCS Order:");
-						creditOverMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						creditOverMsgBuffer.append(destItem.getWcsOrderId());
 						destOverAllocJournalTransaction
 								.setComments(creditOverMsgBuffer.toString());
 						destOverAllocJournalTransaction
@@ -2379,14 +2300,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						destOverAllocJournalTransaction
 								.setFinTransactionType(finTransactionType);
 						destOverAllocJournalTransaction
-								.setTransactionAmount(destItem.get(0)
-										.getPaymentAmount());
+								.setTransactionAmount(destItem.getPaymentAmount());
 						destOverAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
-						destOverAllocJournalTransaction.setWcsOrderID(destItem
-								.get(0).getWcsOrderId());
+						destOverAllocJournalTransaction.setWcsOrderID(destItem.getWcsOrderId());
 						destOverAllocJournalTransaction.setVenBank(reconRecord
 								.getVenOrderPayment() != null ? reconRecord
 								.getVenOrderPayment().getVenBank()
@@ -2394,8 +2313,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.getFinArFundsInReportType()
 										.getVenBank());
 						// Persist the CREDIT journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(destOverAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(destOverAllocJournalTransaction);*/
+						if (!em.contains(destOverAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							destOverAllocJournalTransaction = finJournalTransactionDAO.save(destOverAllocJournalTransaction);
+						}
 						transactionList.add(destOverAllocJournalTransaction);
 
 						// CREDIT (deviation) the account
@@ -2405,8 +2329,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.append("Allocation CREDIT (deviation) from WCS Order:");
 						creditOverDevMsgBuffer.append(wcsOrderId);
 						creditOverDevMsgBuffer.append(" to WCS Order:");
-						creditOverDevMsgBuffer.append(destItem.get(0)
-								.getWcsOrderId());
+						creditOverDevMsgBuffer.append(destItem.getWcsOrderId());
 						destOverDevAllocJournalTransaction
 								.setComments(creditOverDevMsgBuffer.toString());
 						destOverDevAllocJournalTransaction
@@ -2430,16 +2353,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.setFinTransactionType(finTransactionType);
 						destOverDevAllocJournalTransaction
 								.setTransactionAmount(finArFundsInAllocatePayment
-										.getAmount().subtract(
-												destItem.get(0)
-														.getPaymentAmount()));
+										.getAmount().subtract(destItem.getPaymentAmount()));
 						destOverDevAllocJournalTransaction
 								.setTransactionTimestamp(new Timestamp(System
 										.currentTimeMillis()));
 
 						destOverDevAllocJournalTransaction
-								.setWcsOrderID(destItem.get(0).getWcsOrderId() != null ? destItem
-										.get(0).getWcsOrderId() : null);
+								.setWcsOrderID(destItem.getWcsOrderId() != null ? destItem.getWcsOrderId() : null);
 						destOverDevAllocJournalTransaction
 								.setVenBank(reconRecord.getVenOrderPayment() != null ? reconRecord
 										.getVenOrderPayment().getVenBank()
@@ -2447,24 +2367,33 @@ public class FinanceJournalPosterSessionEJBBean implements
 												.getFinArFundsInReportType()
 												.getVenBank());
 						// Persist the DEBIT journal transaction
-						journalTransactionHome
-								.persistFinJournalTransaction(destOverDevAllocJournalTransaction);
+						/*journalTransactionHome
+								.persistFinJournalTransaction(destOverDevAllocJournalTransaction);*/
+						if (!em.contains(destOverDevAllocJournalTransaction)) {
+							CommonUtil.logDebug(this.getClass().getCanonicalName()
+									, "postAllocationJournal::calling finJournalTransactionDAO.save explicitly");
+							destOverDevAllocJournalTransaction = finJournalTransactionDAO.save(destOverDevAllocJournalTransaction);
+						}
 						transactionList.add(destOverDevAllocJournalTransaction);
 						break;
 					}
 				} // end of other then 'Payment Not Recognized' alloc journal
 
 				finArFundsInAllocatePayment.setIsactive(false);
-				finArFundsInAllocateHome
-						.mergeFinArFundsInAllocatePayment(finArFundsInAllocatePayment);
+				//finArFundsInAllocateHome.mergeFinArFundsInAllocatePayment(finArFundsInAllocatePayment);
+				if (!em.contains(finArFundsInAllocatePayment)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::calling finArFundsInAllocatePaymentDAO.save explicitly.");
+					finArFundsInAllocatePayment = finArFundsInAllocatePaymentDAO.save(finArFundsInAllocatePayment);
+				}
 			}
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting allocation journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -2472,11 +2401,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postAllocationJournal()" + " completed in " + duration
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournal::" + " completed in " + duration
 				+ "ms");
 		return true;
 	} // end of postAllocationJournal
@@ -2492,18 +2422,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * destinationVenOrderId)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean allocatePaymentAndpostAllocationJournalTransaction(
 			Long sourceVenWCSOrderId, Long sourceVenOrderPaymentId,
 			Long fundsInReconRecordId, Long destinationVenOrderPaymentId,
 			Double allocationAmount, Long destinationVenOrderId) {
-		_log.debug("postAllocationJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		try {
+			/*
 			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
 							"FinArFundsInReconRecordSessionEJBBeanLocal");
+			*/
 
+			/*
 			VenOrderPaymentSessionEJBLocal orderPaymentHome = (VenOrderPaymentSessionEJBLocal) this._genericLocator
 					.lookupLocal(VenOrderPaymentSessionEJBLocal.class,
 							"VenOrderPaymentSessionEJBBeanLocal");
@@ -2511,11 +2445,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 			VenOrderSessionEJBLocal orderHome = (VenOrderSessionEJBLocal) this._genericLocator
 					.lookupLocal(VenOrderSessionEJBLocal.class,
 							"VenOrderSessionEJBBeanLocal");
-
+			*/
+			/*
 			FinArFundsInAllocatePaymentSessionEJBLocal finArFundsInAllocateHome = (FinArFundsInAllocatePaymentSessionEJBLocal) this._genericLocator
 					.lookupLocal(
 							FinArFundsInAllocatePaymentSessionEJBLocal.class,
 							"FinArFundsInAllocatePaymentSessionEJBBeanLocal");
+            */
 
 			if (sourceVenOrderPaymentId != null && fundsInReconRecordId != null) {
 				throw new EJBException(
@@ -2532,6 +2468,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						"Allocation Amount is Null! Please contact your admin");
 			}
 
+			/*
 			List<VenOrder> destinationOrderList = orderHome.queryByRange(
 					"select o from VenOrder o where o.orderId = "
 							+ destinationVenOrderId, 0, 0);
@@ -2539,6 +2476,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 				throw new EJBException(
 						"The identifier provided for the destination order is not valid - no order exists!");
 			}
+			*/
+		    VenOrder destinationOrder = venOrderDAO.findByOrderId(destinationVenOrderId);
+		    if (destinationOrder == null) {
+				throw new EJBException(
+						"The identifier provided for the destination order is not valid - no order exists!");		    	
+		    }
 
 			FinArFundsInReconRecord destinationVenOrderPayment = null;
 
@@ -2550,6 +2493,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 				 * determine how much has been paid as well as the remaining
 				 * balance according to the reconciliation.
 				 */
+				/*
 				reconRecordList = fundsInReconRecordHome
 						.queryByRange(
 								"select o from FinArFundsInReconRecord o where o.venOrderPayment.orderPaymentId = "
@@ -2559,6 +2503,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 										+ "' and o.finArFundsInActionApplied.actionAppliedId<>"
 										+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
 								0, 0);
+				*/
+				reconRecordList = finArFundsInReconRecordDAO.findByOrderPaymentAndWcsOrderAndActionAppliedNotRemoved(
+						sourceVenOrderPaymentId, sourceVenWCSOrderId.toString().trim());
 				if (reconRecordList.isEmpty()) {
 					throw new EJBException(
 							"No payments have been reconciled for payment id:"
@@ -2571,10 +2518,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 				 * This case is for where a funds in with no corresponding
 				 * VenOrderPayment is allocated to an existing order
 				 */
+				/*
 				List<FinArFundsInReconRecord> paymentList = fundsInReconRecordHome
 						.queryByRange(
 								"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
 										+ fundsInReconRecordId, 0, 0);
+				*/
+				List<FinArFundsInReconRecord> paymentList = finArFundsInReconRecordDAO.findByReconciliationRecordId(fundsInReconRecordId);
 				if (paymentList.isEmpty()) {
 					throw new EJBException(
 							"The funds in reconciliation record ID provided is invalid. Funds in record does not exist!");
@@ -2586,8 +2536,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 				 * so then update the payment confirmation number to the new
 				 * payment confirmation number.
 				 */
-				_log.debug("Start Allocation");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Start Allocation");
 				List<FinArFundsInReconRecord> funReconRecordList = null;
+				/*
 				funReconRecordList = fundsInReconRecordHome
 						.queryByRange(
 								"select o from FinArFundsInReconRecord o where o.venOrderPayment.orderPaymentId="
@@ -2597,17 +2548,23 @@ public class FinanceJournalPosterSessionEJBBean implements
 										+ ") and o.finArFundsInActionApplied.actionAppliedId<>"
 										+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
 								0, 0);
-
+				*/
+				funReconRecordList = finArFundsInReconRecordDAO.findByDestOrderPaymentAndDestWcsOrderAndActionAppliedNotRemoved(
+						destinationVenOrderPaymentId, destinationVenOrderId);
 				if (funReconRecordList.isEmpty()) {
 					throw new EJBException(
 							"The destination order payment ID provided is invalid. Order payment does not exist!");
 				}
 
+				/*
 				List<FinArFundsInAllocatePayment> allocateAmount = finArFundsInAllocateHome
 						.queryByRange(
 								"select o from FinArFundsInAllocatePayment o where o.idReconRecordDest="
 										+ payment.getReconciliationRecordId()
 										+ " and o.isactive=true", 0, 0);
+				*/
+				List<FinArFundsInAllocatePayment> allocateAmount = finArFundsInAllocatePaymentDAO.findByIdReconRecordDestinationIsActive(
+						payment.getReconciliationRecordId());
 				if (!allocateAmount.isEmpty()) {
 					throw new EJBException(
 							"Payment Dari Order : "
@@ -2620,22 +2577,26 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				destinationVenOrderPayment = funReconRecordList.get(0);
 
-				_log.debug("from Id Record Recon = " + fundsInReconRecordId);
-				_log.debug("to Destination paymentID  = "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::from Id Record Recon = " + fundsInReconRecordId);
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::to Destination paymentID  = "
 						+ destinationVenOrderPayment.getVenOrderPayment()
 								.getOrderPaymentId());
 
+				/*
 				List<FinArFundsInAllocatePayment> itemAllocate = finArFundsInAllocateHome
 						.queryByRange(
 								"select o from FinArFundsInAllocatePayment o where o.idReconRecordDest="
 										+ destinationVenOrderPayment
 												.getReconciliationRecordId(),
 								0, 0);
+			    */
+				List<FinArFundsInAllocatePayment> itemAllocate = finArFundsInAllocatePaymentDAO
+						.findByIdReconRecordDest(destinationVenOrderPayment.getReconciliationRecordId());
 				FinArFundsInReconRecord newRecord = new FinArFundsInReconRecord();
 
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+						.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 
 				if (itemAllocate.isEmpty()) {
 					newRecord
@@ -2684,7 +2645,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();
 					finArFundsInActionApplied
-							.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
+							.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE.id());
 					newRecord
 							.setFinArFundsInActionApplied(finArFundsInActionApplied);
 
@@ -2697,27 +2658,36 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_ALL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
 					} else if (remainingBalanceAmoun
 							.compareTo(new BigDecimal(0)) > 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_PARTIAL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_PARTIAL.id());
 					} else {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_OVERPAID);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id());
 					}
 					newRecord.setFinArReconResult(finArReconResult);
-					newRecord = fundsInReconRecordHome
-							.persistFinArFundsInReconRecord(newRecord);
+					//newRecord = fundsInReconRecordHome.persistFinArFundsInReconRecord(newRecord);
+					if (!em.contains(newRecord)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::newRecord is not in attach mode");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::calling finArFundsInReconRecordDAO.save explicitly.");
+						newRecord = finArFundsInReconRecordDAO.save(newRecord);
+					}
+					
 
 					FinArFundsInActionApplied finArFundsInActionAppliedss = new FinArFundsInActionApplied();
 					finArFundsInActionAppliedss
-							.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED);
+							.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED.id());
 					destinationVenOrderPayment
 							.setFinArFundsInActionApplied(finArFundsInActionAppliedss);
 
-					destinationVenOrderPayment = fundsInReconRecordHome
-							.mergeFinArFundsInReconRecord(destinationVenOrderPayment);
+					//destinationVenOrderPayment = fundsInReconRecordHome.mergeFinArFundsInReconRecord(destinationVenOrderPayment);
+					if (!em.contains(destinationVenOrderPayment)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::destinationVenOrderPayment is not in attach mode");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::calling finArFundsInReconRecordDAO.save explicitly");
+						destinationVenOrderPayment = finArFundsInReconRecordDAO.save(destinationVenOrderPayment);
+					}
 				} else {
 					newRecord = destinationVenOrderPayment;
 
@@ -2736,7 +2706,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord.setFinApprovalStatus(finApprovalStatus);
 					FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();
 					finArFundsInActionApplied
-							.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
+							.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE.id());
 					newRecord
 							.setFinArFundsInActionApplied(finArFundsInActionApplied);
 
@@ -2766,18 +2736,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_ALL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
 					} else if (remainingBalanceAmoun
 							.compareTo(new BigDecimal(0)) > 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_PARTIAL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_PARTIAL.id());
 					} else {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_OVERPAID);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id());
 					}
 					newRecord.setFinArReconResult(finArReconResult);
-					newRecord = fundsInReconRecordHome
-							.mergeFinArFundsInReconRecord(newRecord);
+					//newRecord = fundsInReconRecordHome.mergeFinArFundsInReconRecord(newRecord);
+					if (!em.contains(newRecord)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::newRecord is not in attach mode");
+						newRecord = finArFundsInReconRecordDAO.save(newRecord);
+					}
 				}
 
 				FinArFundsInAllocatePayment finArFundsInAllocates = new FinArFundsInAllocatePayment();
@@ -2795,8 +2768,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 				finArFundsInAllocates.setIsactive(true);
 				finArFundsInAllocates.setAllocationTimestamp(new Timestamp(
 						System.currentTimeMillis()));
-				finArFundsInAllocates = finArFundsInAllocateHome
-						.persistFinArFundsInAllocatePayment(finArFundsInAllocates);
+				//finArFundsInAllocates = finArFundsInAllocateHome.persistFinArFundsInAllocatePayment(finArFundsInAllocates);
+				if (!em.contains(finArFundsInAllocates)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::finArFundsInAllocates is not in attach mode");
+					finArFundsInAllocates = finArFundsInAllocatePaymentDAO.save(finArFundsInAllocates);
+				}
 
 				/*
 				 * Now we need to update the funds-in record with the new order
@@ -2804,8 +2780,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 				 * destination VenOrderPayment and the reconciliation record
 				 */
 				FinArFundsInActionApplied finArFundsInActionApplieds = new FinArFundsInActionApplied();
-				finArFundsInActionApplieds
-						.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED);
+				//finArFundsInActionApplieds.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED);
+				finArFundsInActionApplieds.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id());
 				payment.setFinArFundsInActionApplied(finArFundsInActionApplieds);
 
 				payment.setProviderReportPaidAmount(payment
@@ -2818,10 +2794,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinArReconResult finArReconResults = new FinArReconResult();
 				finArReconResults
-						.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED);
+						.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id());
 				payment.setFinArReconResult(finArReconResults);
 
-				fundsInReconRecordHome.mergeFinArFundsInReconRecord(payment);
+				//fundsInReconRecordHome.mergeFinArFundsInReconRecord(payment);
+				if (!em.contains(payment)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postAllocationJournalTransaction::payment is not in attach mode, hence calling save explicitly.");
+					payment = finArFundsInReconRecordDAO.save(payment);
+				}
 
 				return true;
 			}
@@ -2862,17 +2843,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 						"Selected order payment has a remaining paid Amount for the order and cannot be allocated");
 			}
 
+			/*
 			List<VenOrderPayment> venOrderPaymentList = orderPaymentHome
 					.queryByRange(
 							"select o from VenOrderPayment o where o.orderPaymentId = "
 									+ sourceVenOrderPaymentId, 0, 0);
-			if (venOrderPaymentList.isEmpty()) {
+			*/
+			VenOrderPayment venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(sourceVenOrderPaymentId);
+			//if (venOrderPaymentList.isEmpty()) {
+			if (venOrderPayment == null) {
 				throw new EJBException(
 						"The identifier provided for the payment is not valid - no payment exists!");
 			}
 			List<FinArFundsInReconRecord> funReconRecordList = null;
 			FinArFundsInReconRecord tempRecord = new FinArFundsInReconRecord();
 			FinArFundsInReconRecord newRecord = null;
+			/*
 			funReconRecordList = fundsInReconRecordHome
 					.queryByRange(
 							"select o from FinArFundsInReconRecord o where o.venOrderPayment.orderPaymentId="
@@ -2882,35 +2868,48 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ ") and o.finArFundsInActionApplied.actionAppliedId<>"
 									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
 							0, 0);
-			_log.debug("Start Allocation");
+			*/
+			funReconRecordList = finArFundsInReconRecordDAO.findByDestOrderPaymentAndDestWcsOrderAndActionAppliedNotRemoved(
+					destinationVenOrderPaymentId, destinationVenOrderId);
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Start Allocation");
 			if (!funReconRecordList.isEmpty()) {
 				tempRecord = funReconRecordList.get(0);
+				/*
 				List<FinArFundsInAllocatePayment> itemAllocate = finArFundsInAllocateHome
 						.queryByRange(
 								"select o from FinArFundsInAllocatePayment o where  o.idReconRecordDest="
 										+ funReconRecordList.get(0)
 												.getReconciliationRecordId(),
 								0, 0);
+				*/
+				List<FinArFundsInAllocatePayment> itemAllocate = finArFundsInAllocatePaymentDAO.findByIdReconRecordDest(
+						funReconRecordList.get(0).getReconciliationRecordId());
+				/*
 				List<FinArFundsInAllocatePayment> itemAllocateSrc = finArFundsInAllocateHome
 						.queryByRange(
 								"select o from FinArFundsInAllocatePayment o where  o.idReconRecordSource="
 										+ funReconRecordList.get(0)
 												.getReconciliationRecordId(),
 								0, 0);
+				*/
+				List<FinArFundsInAllocatePayment> itemAllocateSrc = finArFundsInAllocatePaymentDAO.findByIdReconRecordSource(
+						funReconRecordList.get(0).getReconciliationRecordId());
 
 				if (itemAllocate.isEmpty() && itemAllocateSrc.isEmpty()) {
 
 					FinArFundsInActionApplied tempFinArFundsInActionApplied = new FinArFundsInActionApplied();
-					tempFinArFundsInActionApplied
-							.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED);
-					tempRecord
-							.setFinArFundsInActionApplied(tempFinArFundsInActionApplied);
-					_log.debug("cancel Old destination Payment ");
-					tempRecord = fundsInReconRecordHome
-							.mergeFinArFundsInReconRecord(tempRecord);
-					_log.debug("Update  Old destination Payment");
+					//tempFinArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED);
+					tempFinArFundsInActionApplied.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED.id());
+					tempRecord.setFinArFundsInActionApplied(tempFinArFundsInActionApplied);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::cancel Old destination Payment ");
+					//tempRecord = fundsInReconRecordHome.mergeFinArFundsInReconRecord(tempRecord);
+					if (!em.contains(tempRecord)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::tempRecord is not in attached, hence call save explicitly.");
+						tempRecord = finArFundsInReconRecordDAO.save(tempRecord);
+					}
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Update  Old destination Payment");
 
-					_log.debug("Start Create Payment Allocation");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Start Create Payment Allocation");
 					newRecord = new FinArFundsInReconRecord();
 					newRecord
 							.setWcsOrderId(tempRecord.getWcsOrderId() != null ? tempRecord
@@ -2937,13 +2936,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getProviderReportPaidAmount() : new BigDecimal(0))
 							.add(new BigDecimal(allocationAmount));
 					newRecord.setProviderReportPaidAmount(paidAmount);
-					_log.debug("set Paid Amount record =  "
-							+ tempRecord.getProviderReportPaidAmount() != null ? tempRecord
-							.getProviderReportPaidAmount() : new BigDecimal(0));
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::set Paid Amount record =  "
+							+ (tempRecord.getProviderReportPaidAmount() != null ? tempRecord
+							.getProviderReportPaidAmount() : new BigDecimal(0)));
 					newRecord.setRemainingBalanceAmount(tempRecord
 							.getPaymentAmount().subtract(paidAmount));
-					_log.debug("set Paid Amountt =  " + paidAmount);
-					_log.debug("set Remaining Balance Amount =  "
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::set Paid Amountt =  " + paidAmount);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::set Remaining Balance Amount =  "
 							+ newRecord.getRemainingBalanceAmount());
 					newRecord.setUserLogonName("System");
 
@@ -2957,12 +2956,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 					finApprovalStatus
-							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+							.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 					newRecord.setFinApprovalStatus(finApprovalStatus);
 
 					FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();
 					finArFundsInActionApplied
-							.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
+							.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE.id());
 					newRecord
 							.setFinArFundsInActionApplied(finArFundsInActionApplied);
 
@@ -2975,21 +2974,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_ALL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
 					} else if (remainingBalanceAmoun
 							.compareTo(new BigDecimal(0)) > 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_PARTIAL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_PARTIAL.id());
 					} else {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_OVERPAID);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id());
 					}
 
 					newRecord.setFinArReconResult(finArReconResult);
 
-					newRecord = fundsInReconRecordHome
-							.persistFinArFundsInReconRecord(newRecord);
-					_log.debug("Allocate and  reconciliation record persisted id:"
+					//newRecord = fundsInReconRecordHome.persistFinArFundsInReconRecord(newRecord);
+					if (!em.contains(newRecord)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::newRecord is detached, calling save explicitly.");
+						newRecord = finArFundsInReconRecordDAO.save(newRecord);
+					}
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Allocate and  reconciliation record persisted id:"
 							+ newRecord.getReconciliationRecordId());
 				} else {
 					BigDecimal paidAmount = (tempRecord
@@ -3004,7 +3006,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 					finApprovalStatus
-							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+							.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 					tempRecord.setFinApprovalStatus(finApprovalStatus);
 
 					tempRecord.setFinArFundsInReport(payment
@@ -3029,7 +3031,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					if (itemAllocateSrc.isEmpty()) {
 						FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();
 						finArFundsInActionApplied
-								.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
+								.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE.id());
 						tempRecord
 								.setFinArFundsInActionApplied(finArFundsInActionApplied);
 					}
@@ -3043,21 +3045,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_ALL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
 					} else if (remainingBalanceAmoun
 							.compareTo(new BigDecimal(0)) > 0) {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_PARTIAL);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_PARTIAL.id());
 					} else {
 						finArReconResult
-								.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_OVERPAID);
+								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id());
 					}
 
 					tempRecord.setFinArReconResult(finArReconResult);
 
-					tempRecord = fundsInReconRecordHome
-							.mergeFinArFundsInReconRecord(tempRecord);
-					_log.debug("Allocate and  reconciliation record merge id:"
+					//tempRecord = fundsInReconRecordHome.mergeFinArFundsInReconRecord(tempRecord);
+					if (!em.contains(tempRecord)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::tempRecord is detached, calling save explicitly.");
+						tempRecord = finArFundsInReconRecordDAO.save(tempRecord);
+					}
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Allocate and  reconciliation record merge id:"
 							+ tempRecord.getReconciliationRecordId());
 
 				}
@@ -3074,15 +3079,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getReconciliationRecordId() : tempRecord
 							.getReconciliationRecordId());
 			finArFundsInAllocate.setAmount(new BigDecimal(allocationAmount));
-			finArFundsInAllocate.setPaidamount(payment
-					.getProviderReportPaidAmount());
-			finArFundsInAllocate.setBankfee(payment
-					.getProviderReportFeeAmount());
+			finArFundsInAllocate.setPaidamount(payment.getProviderReportPaidAmount());
+			finArFundsInAllocate.setBankfee(payment.getProviderReportFeeAmount());
 			finArFundsInAllocate.setIsactive(true);
-			finArFundsInAllocate.setAllocationTimestamp(new Timestamp(System
-					.currentTimeMillis()));
-			finArFundsInAllocate = finArFundsInAllocateHome
-					.persistFinArFundsInAllocatePayment(finArFundsInAllocate);
+			finArFundsInAllocate.setAllocationTimestamp(new Timestamp(System.currentTimeMillis()));
+			//finArFundsInAllocate = finArFundsInAllocateHome.persistFinArFundsInAllocatePayment(finArFundsInAllocate);
+			if (!em.contains(finArFundsInAllocate)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::finArFundsInAllocate is in detached, calling save explicitly.");
+				finArFundsInAllocate = finArFundsInAllocatePaymentDAO.save(finArFundsInAllocate);
+			}
 
 			BigDecimal oldRemainingBalanceAmount = payment
 					.getProviderReportPaidAmount().subtract(
@@ -3106,23 +3111,29 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 			FinArFundsInActionApplied newFinArFundsInActionApplied = new FinArFundsInActionApplied();
 			newFinArFundsInActionApplied
-					.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED);
+					.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id());
 			payment.setFinArFundsInActionApplied(newFinArFundsInActionApplied);
 
 			FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 			finApprovalStatus
-					.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+					.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 			payment.setFinApprovalStatus(finApprovalStatus);
 
-			fundsInReconRecordHome.mergeFinArFundsInReconRecord(payment);
-			_log.debug("Update Fund In Source  ");
+			//fundsInReconRecordHome.mergeFinArFundsInReconRecord(payment);
+			if (!em.contains(payment)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postAllocationJournalTransaction::payment is not attached, calling save explicitly.");
+				payment = finArFundsInReconRecordDAO.save(payment);
+			}
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Update Fund In Source  ");
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting allocation journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -3130,11 +3141,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postAllocationJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::" + " completed in "
 				+ duration + "ms");
 		return true;
 	}
@@ -3148,13 +3160,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * pkp)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postRefundJournalTransaction(Long finSalesRecordId,
 			Boolean pkp) {
-		_log.debug("postRefundJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
+			/*
 			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
 							"FinJournalTransactionSessionEJBBeanLocal");
@@ -3162,7 +3176,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
 							"FinJournalApprovalGroupSessionEJBBeanLocal");
+			*/
 
+			/*
 			FinSalesRecordSessionEJBLocal salesRecordHome = (FinSalesRecordSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinSalesRecordSessionEJBLocal.class,
 							"FinSalesRecordSessionEJBBeanLocal");
@@ -3170,14 +3186,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 			VenOrderItemSessionEJBLocal orderItemHome = (VenOrderItemSessionEJBLocal) this._genericLocator
 					.lookupLocal(VenOrderItemSessionEJBLocal.class,
 							"VenOrderItemSessionEJBBeanLocal");
+			*/
 
 			FinPeriod finPeriod = FinancePeriodUtil.getCurrentPeriod();
 
 			// join with ven_orderItem_adjustments
+			/*
 			List<FinSalesRecord> finSalesRecordList = salesRecordHome
 					.queryByRange(
 							"select o from FinSalesRecord o left join fetch o.venOrderItem left join fetch o.venOrderItem.venOrderItemAdjustments where o.salesRecordId = "
 									+ finSalesRecordId, 0, 0);
+			*/
+			List<FinSalesRecord> finSalesRecordList = finSalesRecordDAO.findBySalesRecordIdInnerJoinOrderItemLeftJoinOrderItemAdjustment(finSalesRecordId);
+					
 			if (finSalesRecordList.isEmpty()) {
 				throw new EJBException(
 						"Invalid finSalesRecordId passed to postRefundJournalTransaction. The sales record does not exist!");
@@ -3192,19 +3213,32 @@ public class FinanceJournalPosterSessionEJBBean implements
 			/**
 			 * Set Order Item status to returned
 			 */
+			/*
 			List<VenOrderItem> venOrderItemList = orderItemHome
 					.queryByRange(
 							"select o from VenOrderItem o where o.orderItemId = "
 									+ finSalesRecord.getVenOrderItem()
 											.getOrderItemId(), 0, 0);
+
 			if (venOrderItemList.isEmpty()) {
 				throw new EJBException(
 						"Invalid finSalesRecordId passed to postRefundJournalTransaction. The VenOrderItem does not exist!");
 			}
 
 			VenOrderItem venOrderItem = venOrderItemList.get(0);
-
-			orderItemHome.mergeVenOrderItem(venOrderItem);
+			*/
+			VenOrderItem venOrderItem = venOrderItemDAO.findByOrderItemId(finSalesRecord.getVenOrderItem().getOrderItemId());
+			if (venOrderItem == null) {
+				throw new EJBException(
+						"Invalid finSalesRecordId passed to postRefundJournalTransaction. The VenOrderItem does not exist!");				
+			}
+			
+			//orderItemHome.mergeVenOrderItem(venOrderItem);
+			if (!em.contains(venOrderItem)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "postRefundJournalTransaction:: venOrderItem not attached, calling save explicitly to attach.");
+				venOrderItem = venOrderItemDAO.save(venOrderItem);
+			}
 
 			/*
 			 * Process the list of Refund Journal Transactions: o create the
@@ -3239,9 +3273,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinJournal finJournalSales = new FinJournal();
 			finJournalSales
-					.setJournalId(VeniceConstants.FIN_JOURNAL_REFUND_OTHERS);
+					.setJournalId(FinJournalConstants.FIN_JOURNAL_REFUND_OTHERS.id());
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
+			/*
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = journalApprovalGroupHome
 					.queryByRange(
 							"select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Refund Journal for :"
@@ -3250,11 +3285,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ " and o.finApprovalStatus.approvalStatusId = "
 									+ VeniceConstants.FIN_APPROVAL_STATUS_APPROVED,
 							0, 0);
+			*/
+			List<FinJournalApprovalGroup> finJournalApprovalGroupList = finJournalApprovalGroupDAO.findByDescriptionAndApprovalStatusId(
+					"Refund Journal for :" + sdf.format(new Date()), FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+						.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 				finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 				finJournalApprovalGroup.setFinJournal(finJournalSales);
 				finJournalApprovalGroup
@@ -3264,8 +3302,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 						System.currentTimeMillis()));
 
 				// Persist the journal group
+				/*
 				finJournalApprovalGroup = journalApprovalGroupHome
 						.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+			    */
+				if (!em.contains(finJournalApprovalGroup)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions::finJournalApprovalGroup not in attach mode, calling save explicitly.");
+					finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+				}
 			} else {
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
 			}
@@ -3273,10 +3317,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 			/*
 			 * query to get settlement record id
 			 */
-			Locator<Object> locator = null;
+			//Locator<Object> locator = null;
 			VenSettlementRecord venSettlementRecord = null;
 			try {
-				locator = new Locator<Object>();
+				//locator = new Locator<Object>();
+				/*
 				VenSettlementRecordSessionEJBLocal VenSettlementRecordHome = (VenSettlementRecordSessionEJBLocal) locator
 						.lookupLocal(VenSettlementRecordSessionEJBLocal.class,
 								"VenSettlementRecordSessionEJBBeanLocal");
@@ -3285,9 +3330,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 								"select o from VenSettlementRecord o where o.venOrderItem.orderItemId = "
 										+ finSalesRecord.getVenOrderItem()
 												.getOrderItemId(), 0, 0);
-				if (VenSettlementRecordList.size() > 0) {
-					_log.debug("\n\n VenSettlementRecord found");
-					venSettlementRecord = VenSettlementRecordList.get(0);
+				*/
+				List<VenSettlementRecord> venSettlementRecordList = venSettlementRecordDAO.findByOrderItemId(
+						finSalesRecord.getVenOrderItem().getOrderItemId());
+				//if (VenSettlementRecordList.size() > 0) {
+				if (venSettlementRecordList != null && (!venSettlementRecordList.isEmpty())) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: VenSettlementRecord found");
+					//venSettlementRecord = VenSettlementRecordList.get(0);
+					venSettlementRecord = venSettlementRecordList.get(0);
 
 					if (venSettlementRecord == null) {
 						throw new Exception("Settlement record not found");
@@ -3295,14 +3345,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 				}
 			} catch (Exception e) {
 				String errMsg = "Settlement record not found";
-				_log.error(errMsg);
+				CommonUtil.logError(this.getClass().getCanonicalName(), errMsg);
 				e.printStackTrace();
 			}
 
 			String merchantCommisionType = venSettlementRecord
 					.getCommissionType();
 
-			_log.debug("\n\n settlement record id: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: settlement record id: "
 					+ venSettlementRecord.getSettlementRecordId());
 
 			BigDecimal incomeForPPNCalculation = new BigDecimal(0);
@@ -3320,7 +3370,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountUangJaminanTransaksi = new FinAccount();
 			finAccountUangJaminanTransaksi
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 			ujtJournalTransaction.setFinAccount(finAccountUangJaminanTransaksi);
 
 			ujtJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -3329,12 +3379,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 			finTransactionStatus
-					.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
+					.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
 			ujtJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 			FinTransactionType finTransactionTypeUangJaminanTransaksi = new FinTransactionType();
 			finTransactionTypeUangJaminanTransaksi
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 			ujtJournalTransaction
 					.setFinTransactionType(finTransactionTypeUangJaminanTransaksi);
 
@@ -3360,11 +3410,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
 			// Persist the UANG JAMINAN TRANSAKSI journal transaction
-			ujtJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(ujtJournalTransaction);
+			//ujtJournalTransaction = journalTransactionHome.persistFinJournalTransaction(ujtJournalTransaction);
+			if (!em.contains(ujtJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions::ujtJournalTransaction not in attach mode, calling save explicitly.");
+				ujtJournalTransaction = finJournalTransactionDAO.save(ujtJournalTransaction);
+			}
 
-			_log.debug("\n\n Set Uang Jaminan Transaksi AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_2230001 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Uang Jaminan Transaksi AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_2230001.id() + " Amount: "
 					+ ujtJournalTransaction.getTransactionAmount());
 
 			/*
@@ -3383,9 +3436,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 */
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)) {
+							.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())) {
 
 				FinJournalTransaction smPromoJournalTransaction = new FinJournalTransaction();
 				smPromoJournalTransaction
@@ -3398,7 +3451,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountSMPromo = new FinAccount();
 				finAccountSMPromo
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_6133010);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_6133010.id());
 				smPromoJournalTransaction.setFinAccount(finAccountSMPromo);
 				smPromoJournalTransaction
 						.setFinSalesRecords(finSalesRecordList);
@@ -3409,7 +3462,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypePromo = new FinTransactionType();
 				finTransactionTypePromo
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_SM_PROMOSI_KONSUMEN);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_SM_PROMOSI_KONSUMEN.id());
 
 				smPromoJournalTransaction
 						.setFinTransactionType(finTransactionTypePromo);
@@ -3444,11 +3497,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the SM PROMO journal transaction
-				smPromoJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(smPromoJournalTransaction);
+				//smPromoJournalTransaction = journalTransactionHome.persistFinJournalTransaction(smPromoJournalTransaction);
+				if (!em.contains(smPromoJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions::smPromoJournalTransaction not attached, calling save explicitly.");
+					smPromoJournalTransaction = finJournalTransactionDAO.save(smPromoJournalTransaction);
+				}
 
-				_log.debug("\n\n Set Promosi Konsumen AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_6133010 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Promosi Konsumen AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_6133010.id() + " Amount: "
 						+ smPromoJournalTransaction.getTransactionAmount());
 
 			}
@@ -3456,9 +3512,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinJournalTransaction potPenjualanJournalTransaction = new FinJournalTransaction();
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)) {
+							.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())) {
 
 				/*
 				 * Post the CREDIT for Acc no : 5110003, Desc : HPP Biaya Barang
@@ -3477,7 +3533,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finBiayaBarang = new FinAccount();
 				finBiayaBarang
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_5110003);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110003.id());
 				biayaBarangJournalTransaction.setFinAccount(finBiayaBarang);
 				biayaBarangJournalTransaction
 						.setFinSalesRecords(finSalesRecordList);
@@ -3488,7 +3544,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeBiayaBarang = new FinTransactionType();
 				finTransactionTypeBiayaBarang
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_HPP_BIAYA_BARANG);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_HPP_BIAYA_BARANG.id());
 
 				biayaBarangJournalTransaction
 						.setFinTransactionType(finTransactionTypeBiayaBarang);
@@ -3518,11 +3574,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the HPP biaya barang journal transaction
-				biayaBarangJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(biayaBarangJournalTransaction);
+				//biayaBarangJournalTransaction = journalTransactionHome.persistFinJournalTransaction(biayaBarangJournalTransaction);
+				if (!em.contains(biayaBarangJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions::biayaBarangJournalTransaction not in attach mode, calling save explicitly.");
+					biayaBarangJournalTransaction = finJournalTransactionDAO.save(biayaBarangJournalTransaction);
+				}
 
-				_log.debug("\n\n Set HPP Biaya Barang AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_5110003 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set HPP Biaya Barang AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_5110003.id() + " Amount: "
 						+ biayaBarangJournalTransaction.getTransactionAmount());
 
 				/**
@@ -3540,7 +3599,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finPotPenjualan = new FinAccount();
 				finPotPenjualan
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_4900000);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_4900000.id());
 				potPenjualanJournalTransaction.setFinAccount(finPotPenjualan);
 				potPenjualanJournalTransaction
 						.setFinSalesRecords(finSalesRecordList);
@@ -3551,7 +3610,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypePotPenjualan = new FinTransactionType();
 				finTransactionTypePotPenjualan
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_POT_PENJUALAN);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_POT_PENJUALAN.id());
 				potPenjualanJournalTransaction
 						.setFinTransactionType(finTransactionTypePotPenjualan);
 				/**
@@ -3588,11 +3647,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the Pot Penjualan journal transaction
-				potPenjualanJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(potPenjualanJournalTransaction);
+				//potPenjualanJournalTransaction = journalTransactionHome.persistFinJournalTransaction(potPenjualanJournalTransaction);
+				if (!em.contains(potPenjualanJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions::potPenjualanJournalTransaction not in attach, calling save.");
+					potPenjualanJournalTransaction = finJournalTransactionDAO.save(potPenjualanJournalTransaction);
+				}
 
-				_log.debug("\n\n Set Pot Penjualan AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_4900000 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Pot Penjualan AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_4900000.id() + " Amount: "
 						+ potPenjualanJournalTransaction.getTransactionAmount());
 
 			}
@@ -3611,7 +3673,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finAccountVoucher = new FinAccount();
-			finAccountVoucher.setAccountId(VeniceConstants.FIN_ACCOUNT_2220001);
+			finAccountVoucher.setAccountId(FinAccountConstants.FIN_ACCOUNT_2220001.id());
 			voucherJournalTransaction.setFinAccount(finAccountVoucher);
 
 			voucherJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -3622,7 +3684,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeVoucher = new FinTransactionType();
 			finTransactionTypeVoucher
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_VOUCHER_YANG_BELUM_DIREALISASI);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_VOUCHER_YANG_BELUM_DIREALISASI.id());
 			voucherJournalTransaction
 					.setFinTransactionType(finTransactionTypeVoucher);
 			/**
@@ -3633,15 +3695,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * uploaded from "Promotion" menu on FInance Module
 			 * 
 			 */
-			List<VenOrderItemAdjustment> venOrderItemAdjustments = finSalesRecord
-					.getVenOrderItem().getVenOrderItemAdjustments();
+			List<VenOrderItemAdjustment> venOrderItemAdjustments = finSalesRecord.getVenOrderItem().getVenOrderItemAdjustments();
 
 			BigDecimal voucherAmount = getVoucherAmount(venOrderItemAdjustments);
 
 			voucherJournalTransaction.setTransactionAmount(voucherAmount);
 
-			voucherJournalTransaction.setTransactionTimestamp(new Timestamp(
-					System.currentTimeMillis()));
+			voucherJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
 			transactionList.add(voucherJournalTransaction);
 
@@ -3656,11 +3716,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
 
-			voucherJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(voucherJournalTransaction);
+			//voucherJournalTransaction = journalTransactionHome.persistFinJournalTransaction(voucherJournalTransaction);
+			if (!em.contains(voucherJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: voucherJournalTransaction not in attach mode, calling save explicitly.");
+				voucherJournalTransaction = finJournalTransactionDAO.save(voucherJournalTransaction);
+			}
 
-			_log.debug("\n\n Set Voucher AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_2220001 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Voucher AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_2220001.id() + " Amount: "
 					+ voucherJournalTransaction.getTransactionAmount());
 
 			/**
@@ -3679,7 +3742,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountVoucherCS = new FinAccount();
 			finAccountVoucherCS
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_6133020);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_6133020.id());
 			voucherCSJournalTransaction.setFinAccount(finAccountVoucherCS);
 
 			voucherCSJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -3690,7 +3753,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeVoucherCS = new FinTransactionType();
 			finTransactionTypeVoucherCS
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_SM_VOUCHER_CUSTOMER_SERVICE);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_SM_VOUCHER_CUSTOMER_SERVICE.id());
 			voucherCSJournalTransaction
 					.setFinTransactionType(finTransactionTypeVoucherCS);
 			/**
@@ -3724,11 +3787,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
 
-			voucherCSJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(voucherCSJournalTransaction);
+			//voucherCSJournalTransaction = journalTransactionHome.persistFinJournalTransaction(voucherCSJournalTransaction);
+			if (!em.contains(voucherCSJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: voucherCSJournalTransaction not attached, calling save explicitly");
+				voucherCSJournalTransaction = finJournalTransactionDAO.save(voucherCSJournalTransaction);
+			}
 
-			_log.debug("\n\n Set Voucher Customer Service AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_6133020 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Voucher Customer Service AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_6133020.id() + " Amount: "
 					+ voucherCSJournalTransaction.getTransactionAmount());
 
 			/**
@@ -3736,9 +3802,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * Commision and Rebate
 			 */
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)) {
+							.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())) {
 
 				FinJournalTransaction hutangMerchantJournalTransaction = new FinJournalTransaction();
 				hutangMerchantJournalTransaction
@@ -3751,7 +3817,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountHutangMerchant = new FinAccount();
 				finAccountHutangMerchant
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2130001);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2130001.id());
 
 				hutangMerchantJournalTransaction
 						.setFinAccount(finAccountHutangMerchant);
@@ -3764,21 +3830,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeHutangMerchant = new FinTransactionType();
 				finTransactionTypeHutangMerchant
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_HUTANG_MERCHANT);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_HUTANG_MERCHANT.id());
 				hutangMerchantJournalTransaction
 						.setFinTransactionType(finTransactionTypeHutangMerchant);
 
 				if (venSettlementRecord != null) {
 
 					if (merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)) {
+							.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())) {
 						hutangMerchantJournalTransaction
 								.setTransactionAmount(finSalesRecord
 										.getVenOrderItem().getTotal());
 					}
 
 					if (merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)) {
+							.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())) {
 						hutangMerchantJournalTransaction
 								.setTransactionAmount(finSalesRecord
 										.getMerchantPaymentAmount());
@@ -3809,20 +3875,23 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getWcsOrderId()
 								: null);
 				// Persist the HUTANG MERCHANT journal transaction
-				hutangMerchantJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(hutangMerchantJournalTransaction);
+				//hutangMerchantJournalTransaction = journalTransactionHome.persistFinJournalTransaction(hutangMerchantJournalTransaction);
+				if (!em.contains(hutangMerchantJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: hutangMerchantJournalTransaction not attached, calling save.");
+					hutangMerchantJournalTransaction = finJournalTransactionDAO.save(hutangMerchantJournalTransaction);
+				}
 
-				_log.debug("\n\n Set Hutang Merchant AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_2130001
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Hutang Merchant AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_2130001.id()
 						+ " Amount: "
 						+ hutangMerchantJournalTransaction
 								.getTransactionAmount());
 			}
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)) {
+							.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())) {
 
 				/**
 				 * POST DEBIT of Acc No : 4110007, Desc : Penjualan
@@ -3838,7 +3907,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountPenjualan = new FinAccount();
 				finAccountPenjualan
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_4110007);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110007.id());
 
 				penjualanJournalTransaction.setFinAccount(finAccountPenjualan);
 				penjualanJournalTransaction
@@ -3851,12 +3920,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypePenjualan = new FinTransactionType();
 				finTransactionTypePenjualan
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENJUALAN);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENJUALAN.id());
 				penjualanJournalTransaction
 						.setFinTransactionType(finTransactionTypePenjualan);
 
 				if (merchantCommisionType
-						.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)) {
+						.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())) {
 					penjualanJournalTransaction
 							.setTransactionAmount(finSalesRecord
 									.getVenOrderItem()
@@ -3899,14 +3968,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the Penjualan journal transaction
-				penjualanJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(penjualanJournalTransaction);
+				//penjualanJournalTransaction = journalTransactionHome.persistFinJournalTransaction(penjualanJournalTransaction);
+				if (!em.contains(penjualanJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: penjualanJournalTransaction not attached, calling save.");
+					penjualanJournalTransaction = finJournalTransactionDAO.save(penjualanJournalTransaction);
+				}
 
 				incomeForPPNCalculation = incomeForPPNCalculation
 						.add(penjualanJournalTransaction.getTransactionAmount());
 
-				_log.debug("\n\n Set Penjualan AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_4110007 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Penjualan AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_4110007.id() + " Amount: "
 						+ penjualanJournalTransaction.getTransactionAmount());
 
 			}
@@ -3917,7 +3989,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * 
 			 */
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)) {
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())) {
 
 				FinJournalTransaction komisiJournalTransaction = new FinJournalTransaction();
 				komisiJournalTransaction
@@ -3930,7 +4002,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountKomisi = new FinAccount();
 				finAccountKomisi
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_4110001);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110001.id());
 
 				komisiJournalTransaction.setFinAccount(finAccountKomisi);
 				komisiJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -3942,7 +4014,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeKomisi = new FinTransactionType();
 				finTransactionTypeKomisi
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_KOMISI);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_KOMISI.id());
 				komisiJournalTransaction
 						.setFinTransactionType(finTransactionTypeKomisi);
 
@@ -3971,14 +4043,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the KOMISI journal transaction
-				komisiJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(komisiJournalTransaction);
+				//komisiJournalTransaction = journalTransactionHome.persistFinJournalTransaction(komisiJournalTransaction);
+				if (!em.contains(komisiJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions::komisiJournalTransaction not attached, calling save.");
+					komisiJournalTransaction = finJournalTransactionDAO.save(komisiJournalTransaction);
+				}
 
 				incomeForPPNCalculation = incomeForPPNCalculation
 						.add(komisiJournalTransaction.getTransactionAmount());
 
-				_log.debug("\n\n Set Pendapatan Komisi AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_4110001 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Pendapatan Komisi AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_4110001.id() + " Amount: "
 						+ komisiJournalTransaction.getTransactionAmount());
 
 			}
@@ -3992,7 +4067,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 				if (venOrderItemAdjustment.getVenPromotion().getPromotionName()
 						.toLowerCase().contains("free shipping")) {
 					freeShipping = true;
-					_log.debug("\n\n this item is free shipping");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: this item is free shipping");
 					break;
 				}
 			}
@@ -4015,7 +4090,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountPendapatanLogistics = new FinAccount();
 				finAccountPendapatanLogistics
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_4110004);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110004.id());
 
 				pendapatanLogisticsJournalTransaction
 						.setFinAccount(finAccountPendapatanLogistics);
@@ -4029,7 +4104,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypePendapatanLogistics = new FinTransactionType();
 				finTransactionTypePendapatanLogistics
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_LOGISTIK);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_LOGISTIK.id());
 				pendapatanLogisticsJournalTransaction
 						.setFinTransactionType(finTransactionTypePendapatanLogistics);
 
@@ -4062,15 +4137,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the PENDAPATAN LOGISTICS journal transaction
-				pendapatanLogisticsJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(pendapatanLogisticsJournalTransaction);
+				//pendapatanLogisticsJournalTransaction = journalTransactionHome.persistFinJournalTransaction(pendapatanLogisticsJournalTransaction);
+				if (!em.contains(pendapatanLogisticsJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: pendapatanLogisticsJournalTransaction not attached, calling save.");
+					pendapatanLogisticsJournalTransaction = finJournalTransactionDAO.save(pendapatanLogisticsJournalTransaction);
+				}
 
 				incomeForPPNCalculation = incomeForPPNCalculation
 						.add(pendapatanLogisticsJournalTransaction
 								.getTransactionAmount());
 
-				_log.debug("\n\n Set Pendapatan Logistik AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_4110004
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Pendapatan Logistik AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_4110004.id()
 						+ " Amount: "
 						+ pendapatanLogisticsJournalTransaction
 								.getTransactionAmount());
@@ -4078,7 +4156,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)) {
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())) {
 				/**
 				 * 
 				 * Post the DEBIT Acc No: 4110003 , Desc: JASA TRANSAKSI
@@ -4095,7 +4173,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountJasaTransaksi = new FinAccount();
 				finAccountJasaTransaksi
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_4110003);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110003.id());
 
 				jasaTransaksiJournalTransaction
 						.setFinAccount(finAccountJasaTransaksi);
@@ -4108,7 +4186,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeProcessFee = new FinTransactionType();
 				finTransactionTypeProcessFee
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_TRANSAKSI);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_TRANSAKSI.id());
 				jasaTransaksiJournalTransaction
 						.setFinTransactionType(finTransactionTypeProcessFee);
 
@@ -4140,16 +4218,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the JASA TRANSAKSI journal transaction
-				jasaTransaksiJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(jasaTransaksiJournalTransaction);
+				//jasaTransaksiJournalTransaction = journalTransactionHome.persistFinJournalTransaction(jasaTransaksiJournalTransaction);
+				if (!em.contains(jasaTransaksiJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postRefundJournalTransactions:: jasaTransaksiJournalTransaction not attached, calling save explicitly.");
+					jasaTransaksiJournalTransaction = finJournalTransactionDAO.save(jasaTransaksiJournalTransaction);
+				}
 				// transactionList.add(jasaTransaksiJournalTransaction);
 
 				incomeForPPNCalculation = incomeForPPNCalculation
 						.add(jasaTransaksiJournalTransaction
 								.getTransactionAmount());
 
-				_log.debug("\n\n Set Pendapatan Jasa Transaksi AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_4110003
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Pendapatan Jasa Transaksi AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_4110003.id()
 						+ " Amount: "
 						+ jasaTransaksiJournalTransaction
 								.getTransactionAmount());
@@ -4170,7 +4252,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountJasaHandling = new FinAccount();
 			finAccountJasaHandling
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_4110005);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110005.id());
 
 			jasaHandlingJournalTransaction
 					.setFinAccount(finAccountJasaHandling);
@@ -4183,7 +4265,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeProcessFee = new FinTransactionType();
 			finTransactionTypeProcessFee
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_HANDLING);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_HANDLING.id());
 
 			jasaHandlingJournalTransaction
 					.setFinTransactionType(finTransactionTypeProcessFee);
@@ -4215,14 +4297,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 							: null);
 
 			// Persist the JASA HANDLING journal transaction
-			jasaHandlingJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(jasaHandlingJournalTransaction);
+			//jasaHandlingJournalTransaction = journalTransactionHome.persistFinJournalTransaction(jasaHandlingJournalTransaction);
+			if (!em.contains(jasaHandlingJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: jasaHandlingJournalTransaction not attached, calling save.");
+				jasaHandlingJournalTransaction = finJournalTransactionDAO.save(jasaHandlingJournalTransaction);
+			}
 
 			incomeForPPNCalculation = incomeForPPNCalculation
 					.add(jasaHandlingJournalTransaction.getTransactionAmount());
 
-			_log.debug("\n\n Set Pendapatan Jasa Handling AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_4110005 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Pendapatan Jasa Handling AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_4110005.id() + " Amount: "
 					+ jasaHandlingJournalTransaction.getTransactionAmount());
 
 			if (pkp) {
@@ -4239,7 +4324,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 				FinAccount finAccountPPN = new FinAccount();
-				finAccountPPN.setAccountId(VeniceConstants.FIN_ACCOUNT_2180008);
+				finAccountPPN.setAccountId(FinAccountConstants.FIN_ACCOUNT_2180008.id());
 
 				ppnJournalTransaction.setFinAccount(finAccountPPN);
 				ppnJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -4250,14 +4335,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypePPN = new FinTransactionType();
 				finTransactionTypePPN
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PPN);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PPN.id());
 				ppnJournalTransaction
 						.setFinTransactionType(finTransactionTypePPN);
 
 				if (merchantCommisionType
-						.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)
+						.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())
 						|| merchantCommisionType
-								.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)) {
+								.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())) {
 					ppnJournalTransaction
 							.setTransactionAmount(incomeForPPNCalculation
 									.multiply(new BigDecimal(0.1)).setScale(2,
@@ -4265,9 +4350,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 				}
 
 				if (merchantCommisionType
-						.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+						.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 						|| merchantCommisionType
-								.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)) {
+								.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())) {
 					ppnJournalTransaction
 							.setTransactionAmount(incomeForPPNCalculation
 									.subtract(
@@ -4299,17 +4384,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the PPN journal transaction
-				ppnJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(ppnJournalTransaction);
-				_log.debug("\n\n set PPN, amount: "
+				//ppnJournalTransaction = journalTransactionHome.persistFinJournalTransaction(ppnJournalTransaction);
+				if (!em.contains(ppnJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postRefundJournalTransactions::ppnJournalTransaction not attached, hence calling save.explicitly.");
+					ppnJournalTransaction = finJournalTransactionDAO.save(ppnJournalTransaction);
+				}
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: set PPN, amount: "
 						+ ppnJournalTransaction.getTransactionAmount());
 
 			}
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)) {
+							.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())) {
 
 				/*
 				 * Post the DEBIT for Acc no : 1180007, Desc : Inventory Over
@@ -4330,7 +4419,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finInventoryOverVoucher = new FinAccount();
 				finInventoryOverVoucher
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_1180001);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_1180001.id());
 				inventoryOverVoucherJournalTransaction
 						.setFinAccount(finInventoryOverVoucher);
 				inventoryOverVoucherJournalTransaction
@@ -4343,7 +4432,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeInventoryOverVoucher = new FinTransactionType();
 				finTransactionTypeInventoryOverVoucher
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_INVENTORY_OVER_VOUCHER);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_INVENTORY_OVER_VOUCHER.id());
 
 				inventoryOverVoucherJournalTransaction
 						.setFinTransactionType(finTransactionTypeInventoryOverVoucher);
@@ -4373,11 +4462,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the Inventory Over Voucher journal transaction
-				inventoryOverVoucherJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(inventoryOverVoucherJournalTransaction);
+				//inventoryOverVoucherJournalTransaction = journalTransactionHome.persistFinJournalTransaction(inventoryOverVoucherJournalTransaction);
+				if (!em.contains(inventoryOverVoucherJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postRefundJournalTransactions::inventoryOverVoucherJournalTransaction not attached, calling save explicitly.");
+					inventoryOverVoucherJournalTransaction = finJournalTransactionDAO.save(inventoryOverVoucherJournalTransaction);
+				}
 
-				_log.debug("\n\n Set Inventory Over Voucher AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_1180001
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Inventory Over Voucher AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_1180001.id()
 						+ " Amount: "
 						+ inventoryOverVoucherJournalTransaction
 								.getTransactionAmount());
@@ -4385,7 +4478,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)) {
+					.equalsIgnoreCase(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())) {
 
 				/*
 				 * Post the CREDIT for Acc no : 1180001, Desc : Inventory
@@ -4403,7 +4496,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 				FinAccount finInventory = new FinAccount();
-				finInventory.setAccountId(VeniceConstants.FIN_ACCOUNT_1180001);
+				finInventory.setAccountId(FinAccountConstants.FIN_ACCOUNT_1180001.id());
 				inventoryJournalTransaction.setFinAccount(finInventory);
 				inventoryJournalTransaction
 						.setFinSalesRecords(finSalesRecordList);
@@ -4414,7 +4507,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeInventory = new FinTransactionType();
 				finTransactionTypeInventory
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_INVENTORY);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_INVENTORY.id());
 
 				inventoryJournalTransaction
 						.setFinTransactionType(finTransactionTypeInventory);
@@ -4444,11 +4537,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the Inventory journal transaction
-				inventoryJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(inventoryJournalTransaction);
+				//inventoryJournalTransaction = journalTransactionHome.persistFinJournalTransaction(inventoryJournalTransaction);
+				if (!em.contains(inventoryJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: inventoryJournalTransaction not attached, calling save.");
+					inventoryJournalTransaction = finJournalTransactionDAO.save(inventoryJournalTransaction);
+				}
 
-				_log.debug("\n\n Set Inventory AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_1180001 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Inventory AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_1180001.id() + " Amount: "
 						+ inventoryJournalTransaction.getTransactionAmount());
 
 				/*
@@ -4470,7 +4566,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finBarangDiterimaDimuka = new FinAccount();
 				finBarangDiterimaDimuka
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2150099);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2150099.id());
 				barangDiterimaDimukaJournalTransaction
 						.setFinAccount(finBarangDiterimaDimuka);
 				barangDiterimaDimukaJournalTransaction
@@ -4483,7 +4579,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeBarangDiterimaDimuka = new FinTransactionType();
 				finTransactionTypeBarangDiterimaDimuka
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BARANG_DITERIMA_DIMUKA);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BARANG_DITERIMA_DIMUKA.id());
 
 				barangDiterimaDimukaJournalTransaction
 						.setFinTransactionType(finTransactionTypeBarangDiterimaDimuka);
@@ -4513,11 +4609,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the Inventory journal transaction
-				barangDiterimaDimukaJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(barangDiterimaDimukaJournalTransaction);
+				//barangDiterimaDimukaJournalTransaction = journalTransactionHome.persistFinJournalTransaction(barangDiterimaDimukaJournalTransaction);
+				if (!em.contains(barangDiterimaDimukaJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: barangDiterimaDimukaJournalTransaction not attached, calling save.");
+					barangDiterimaDimukaJournalTransaction = finJournalTransactionDAO.save(barangDiterimaDimukaJournalTransaction);
+				}
 
-				_log.debug("\n\n Set Barang Diterima Dimuka AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_2150099
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: Set Barang Diterima Dimuka AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_2150099.id()
 						+ " Amount: "
 						+ barangDiterimaDimukaJournalTransaction
 								.getTransactionAmount());
@@ -4527,14 +4626,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 			// Set the list of transactions associated with the sales record and
 			// merge
 			finSalesRecord.setFinJournalTransactions(transactionList);
-			salesRecordHome.mergeFinSalesRecord(finSalesRecord);
+			//salesRecordHome.mergeFinSalesRecord(finSalesRecord);
+			if (!em.contains(finSalesRecord)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions:: finSalesRecord not attached, calling save.");
+				finSalesRecord = finSalesRecordDAO.save(finSalesRecord);
+			}
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting refund journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -4542,11 +4646,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postRefundJournalTransactions()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransactions::" + " completed in "
 				+ duration + "ms");
 
 		return true;
@@ -4561,63 +4666,28 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * refundAmount, Double fee, , int refundType)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postRefundJournalTransaction(Long reconciliationRecordId,
 			Double refundAmount, Double fee, int refundType,
 			boolean printjournal) {
-		_log.debug("postRefundJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
-			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
-							"FinArFundsInReconRecordSessionEJBBeanLocal");
-
-			VenOrderPaymentAllocationSessionEJBLocal orderPaymentAllocationHome = (VenOrderPaymentAllocationSessionEJBLocal) this._genericLocator
-					.lookupLocal(
-							VenOrderPaymentAllocationSessionEJBLocal.class,
-							"VenOrderPaymentAllocationSessionEJBBeanLocal");
-
-			VenOrderPaymentSessionEJBLocal orderPaymentHome = (VenOrderPaymentSessionEJBLocal) this._genericLocator
-					.lookupLocal(VenOrderPaymentSessionEJBLocal.class,
-							"VenOrderPaymentSessionEJBBeanLocal");
-
-			VenOrderSessionEJBLocal orderHome = (VenOrderSessionEJBLocal) this._genericLocator
-					.lookupLocal(VenOrderSessionEJBLocal.class,
-							"VenOrderSessionEJBBeanLocal");
-
-			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
-							"FinJournalTransactionSessionEJBBeanLocal");
-
-			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
-							"FinJournalApprovalGroupSessionEJBBeanLocal");
-
-			FinArFundsInRefundSessionEJBLocal refundRecordHome = (FinArFundsInRefundSessionEJBLocal) this._genericLocator
-					.lookupLocal(FinArFundsInRefundSessionEJBLocal.class,
-							"FinArFundsInRefundSessionEJBBeanLocal");
 
 			/*
 			 * Read all the relevant funds in records from the database and
 			 * determine how much has been paid as well as the remaining balance
 			 * according to the reconciliation
 			 */
-			List<FinArFundsInReconRecord> reconRecordList = fundsInReconRecordHome
-					.queryByRange(
-							"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-									+ reconciliationRecordId
-									+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-							0, 0);
-			if (reconRecordList.isEmpty()) {
-				throw new EJBException("Reconciliation record not found:"
-						+ reconciliationRecordId);
+			FinArFundsInReconRecord reconciliationRecord = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
+			
+			if (reconciliationRecord == null) {
+				throw new EJBException("Reconciliation record not found:" + reconciliationRecordId);
 			}
-			FinArFundsInReconRecord reconciliationRecord = reconRecordList
-					.get(0);
-
+		
 			VenOrderPayment venOrderPayment = null;
 
 			/*
@@ -4625,20 +4695,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * VenOrderPayment
 			 */
 			if (reconciliationRecord.getVenOrderPayment() != null) {
-				List<VenOrderPayment> venOrderPaymentList = orderPaymentHome
-						.queryByRange(
-								"select o from VenOrderPayment o where o.orderPaymentId = "
-										+ reconciliationRecord
-												.getVenOrderPayment()
-												.getOrderPaymentId(), 0, 0);
-				if (!venOrderPaymentList.isEmpty()) {
-					venOrderPayment = venOrderPaymentList.get(0);
-				}
+				venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(reconciliationRecord.getVenOrderPayment().getOrderPaymentId());
 			}
 
 			BigDecimal remainingUnallocatedAmount = null;
-			remainingUnallocatedAmount = reconciliationRecord
-					.getProviderReportPaidAmount();
+			remainingUnallocatedAmount = reconciliationRecord.getProviderReportPaidAmount();
 			/*
 			 * If there is a VenOrderPayment record then... Ascertain how much
 			 * of the payment has been allocated to orders already and throw an
@@ -4646,11 +4707,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 */
 
 			if (venOrderPayment != null) {
-				List<VenOrderPaymentAllocation> orderPaymentAllocationList = orderPaymentAllocationHome
-						.queryByRange(
-								"select o from VenOrderPaymentAllocation o where o.venOrderPayment.orderPaymentId = "
-										+ venOrderPayment.getOrderPaymentId(),
-								0, 0);
+				List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findByOrderPaymentId(
+						venOrderPayment.getOrderPaymentId());
 				BigDecimal allocatedAmount = new BigDecimal(0);
 
 				/*
@@ -4664,14 +4722,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.subtract(allocatedAmount);
 				if (orderPaymentAllocationList != null) {
 					for (VenOrderPaymentAllocation allocation : orderPaymentAllocationList) {
-						List<VenOrder> allocatedOrderList = orderHome
-								.queryByRange(
-										"select o from VenOrder o where o.orderId = "
-												+ allocation.getId()
-														.getOrderId(), 0, 0);
-						VenOrder allocatedOrder = allocatedOrderList.get(0);
+						VenOrder allocatedOrder = venOrderDAO.findByOrderId(allocation.getId().getOrderId());
 						if (allocatedOrder.getVenOrderStatus()
-								.getOrderStatusId() != VeniceConstants.VEN_ORDER_STATUS_X) {
+								.getOrderStatusId() != VenOrderStatusConstants.VEN_ORDER_STATUS_X.code()) {
 							allocatedAmount = allocatedAmount.add(allocation
 									.getAllocationAmount());
 						}
@@ -4693,36 +4746,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 			long accountRefund = 0;
 
 			switch (refundType) {
-			case VeniceConstants.FIN_REFUND_TYPE_BANK:
-				finAccountRefund
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
-				accountRefund = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK;
+			case FinRefundTypeConstants.Constants.BANK_ID:
+				finAccountRefund.setAccountId(FinAccountConstants.FIN_ACCOUNT_2170002.id());
+				accountRefund = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id();
 				break;
-			case VeniceConstants.FIN_REFUND_TYPE_CUSTOMER:
-				finAccountRefund
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
-				accountRefund = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
+			case FinRefundTypeConstants.Constants.CUSTOMER_ID:
+				finAccountRefund.setAccountId(FinAccountConstants.FIN_ACCOUNT_2170001.id());
+				accountRefund = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER.id();
 				break;
 			default:
 				break;
-			// no action. should produce an error later because of the empty
-			// account id
+			// no action. should produce an error later because of the empty account id
 			}
-
-			/*
-			 * switch-case is better for performance in this particular problem
-			 * (yauri @Sep 18, 2013 10:06AM) if (refundType ==
-			 * VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
-			 * } else if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK; }
-			 */
 
 			if (printjournal) {
 				/*
@@ -4730,8 +4765,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 				 * is none then create it
 				 */
 				FinJournal finJournalRefund = new FinJournal();
-				finJournalRefund
-						.setJournalId(VeniceConstants.FIN_JOURNAL_REFUND_OTHERS);
+				finJournalRefund.setJournalId(FinJournalConstants.FIN_JOURNAL_REFUND_OTHERS.id());
 				FinJournalApprovalGroup finJournalApprovalGroup = null;
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
 				// List<FinJournalApprovalGroup> finJournalApprovalGroupList =
@@ -4743,21 +4777,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 				if (finJournalApprovalGroup == null) {
 					finJournalApprovalGroup = new FinJournalApprovalGroup();
 					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
-					finApprovalStatus
-							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
-					finJournalApprovalGroup
-							.setFinApprovalStatus(finApprovalStatus);
+					finApprovalStatus.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
+					finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 					finJournalApprovalGroup.setFinJournal(finJournalRefund);
-					finJournalApprovalGroup
-							.setJournalGroupDesc("Refund Journal for:"
-									+ sdf.format(new Date()));
-					finJournalApprovalGroup
-							.setJournalGroupTimestamp(new Timestamp(System
-									.currentTimeMillis()));
+					finJournalApprovalGroup.setJournalGroupDesc("Refund Journal for:" + sdf.format(new Date()));
+					finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(System.currentTimeMillis()));
 
 					// Persist the journal group
-					finJournalApprovalGroup = journalApprovalGroupHome
-							.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+					//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+					if (!em.contains(finJournalApprovalGroup)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransaction:: finJournalApprovalGroup not attached, calling save explicitly.");
+						finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+					}
 				}
 				// else {
 				// finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
@@ -4766,64 +4797,44 @@ public class FinanceJournalPosterSessionEJBBean implements
 				String wcsOrderId = reconciliationRecord.getWcsOrderId() != null ? reconciliationRecord
 						.getWcsOrderId() : "";
 
-				// Create the DEBIT journal transaction for REFUND against UANG
-				// MUKA
-				// PELANGGAN
+				// Create the DEBIT journal transaction for REFUND against UANG MUKA PELANGGAN
 				FinJournalTransaction refundJournalTransaction = new FinJournalTransaction();
-				/*
-				 * refundJournalTransaction.setComments("Refund DEBIT for Order:"
-				 * +
-				 * reconciliationRecord.getWcsOrderId()!=null?reconciliationRecord
-				 * .getWcsOrderId():"" + " Payment:" +
-				 * reconciliationRecord.getProviderReportPaymentId());
-				 */// replaces with the following line (yauri @ Sep 18, 2013
-					// 7:25AM) due to the bug found in previous comment
-				refundJournalTransaction
-						.setComments("Refund Pelanggan DEBIT for Order:"
-								+ wcsOrderId
-								+ " Payment:"
-								+ reconciliationRecord
-										.getProviderReportPaymentId());
+				refundJournalTransaction.setComments("Refund Pelanggan DEBIT for Order:" + wcsOrderId
+								+ " Payment:" + reconciliationRecord.getProviderReportPaymentId());
 				refundJournalTransaction.setCreditDebitFlag(false);
 				refundJournalTransaction
 						.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 				FinAccount finAccountUangMukaPelanggan = new FinAccount();
 				if (reconciliationRecord.getFinArReconResult()
-						.getReconResultId() == VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED) {
-					finAccountUangMukaPelanggan
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_2230002);
+						.getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()) {
+					finAccountUangMukaPelanggan.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id());
 				} else {
-					finAccountUangMukaPelanggan
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+					finAccountUangMukaPelanggan.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 				}
-				refundJournalTransaction
-						.setFinAccount(finAccountUangMukaPelanggan);
+				refundJournalTransaction.setFinAccount(finAccountUangMukaPelanggan);
 
-				refundJournalTransaction
-						.setFinArFundsInReconRecords(reconRecordList);
+				List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
+				reconRecordList.add(reconciliationRecord);
+				
+				refundJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
 
 				refundJournalTransaction.setFinJournal(finJournalRefund);
-				refundJournalTransaction.setFinPeriod(FinancePeriodUtil
-						.getCurrentPeriod());
+				refundJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
 				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
-				finTransactionStatus
-						.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
+				finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
 				refundJournalTransaction
 						.setFinTransactionStatus(finTransactionStatus);
 
 				FinTransactionType finTransactionType = new FinTransactionType();
 				if (reconciliationRecord.getFinArReconResult()
-						.getReconResultId() == VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED) {
-					finTransactionType
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI);
+						.getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()) {
+					finTransactionType.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI.id());
 				} else {
-					finTransactionType
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI);
+					finTransactionType.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 				}
-				refundJournalTransaction
-						.setFinTransactionType(finTransactionType);
+				refundJournalTransaction.setFinTransactionType(finTransactionType);
 
 				// refundJournalTransaction.setTransactionAmount(reconciliationRecord.getProviderReportPaidAmount());
 				// // replace with the following line by yauri @Sept 18, 2013
@@ -4844,14 +4855,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 				refundJournalTransaction.setWcsOrderID(wcsOrderId);
 				refundJournalTransaction.setVenBank(venBank);
 				// Persist the DEBIT journal transaction for the refund
-				refundJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(refundJournalTransaction);
+				//refundJournalTransaction = journalTransactionHome.persistFinJournalTransaction(refundJournalTransaction);
+				if (!em.contains(refundJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransaction:: refundJournalTransaction not in attach mode, calling save.");
+					refundJournalTransaction = finJournalTransactionDAO.save(refundJournalTransaction);
+				}
 				transactionList.add(refundJournalTransaction);
 
 				// Create the CREDIT journal transaction for REFUND against
 				// REFUND-------------------------------
 				// PELANGGAN
-				_log.info("FinanceJournalPosterSessionEJBBean:: Creating CREDIT Journal Transaction for REFUND CUSTOMER");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransaction:: Creating CREDIT Journal Transaction for REFUND CUSTOMER");
 				FinJournalTransaction refundPelangganJournalTransaction = new FinJournalTransaction();
 				refundPelangganJournalTransaction
 						.setComments("Refund Pelanggan CREDIT for Order:"
@@ -4889,8 +4903,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 				refundPelangganJournalTransaction.setWcsOrderID(wcsOrderId);
 				refundPelangganJournalTransaction.setVenBank(venBank);
 				// Persist the CREDIT journal transaction for the refund
-				refundPelangganJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(refundPelangganJournalTransaction);
+				//refundPelangganJournalTransaction = journalTransactionHome.persistFinJournalTransaction(refundPelangganJournalTransaction);
+				if (!em.contains(refundPelangganJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postRefundJournalTransaction:: refundPelangganJournalTransaction not attached, calling save to attach.");
+					refundPelangganJournalTransaction = finJournalTransactionDAO.save(refundPelangganJournalTransaction);
+				}
 				transactionList.add(refundPelangganJournalTransaction);
 
 				if (fee > 0) {
@@ -4912,12 +4930,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 					 * The fees are either taken from the bank or the customer
 					 * as a processing fee
 					 */
-					if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
-						finAccountProcessingFee
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_5110003);
-					} else if (refundType == VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
-						finAccountProcessingFee
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_4110007);
+					if (refundType == FinRefundTypeConstants.FIN_REFUND_TYPE_BANK.id()) {
+						finAccountProcessingFee.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110003.id());
+					} else if (refundType == FinRefundTypeConstants.FIN_REFUND_TYPE_CUSTOMER.id()) {
+						finAccountProcessingFee.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110007.id());
 					}
 					processFeeJournalTransaction
 							.setFinAccount(finAccountProcessingFee);
@@ -4934,23 +4950,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.setFinTransactionStatus(finTransactionStatus);
 
 					FinTransactionType finTransactionTypeProcessFee = new FinTransactionType();
-					finTransactionTypeProcessFee
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PROCESS_FEE);
-					processFeeJournalTransaction
-							.setFinTransactionType(finTransactionTypeProcessFee);
+					finTransactionTypeProcessFee.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PROCESS_FEE.id());
+					processFeeJournalTransaction.setFinTransactionType(finTransactionTypeProcessFee);
 
-					processFeeJournalTransaction
-							.setTransactionAmount(new BigDecimal(fee));
+					processFeeJournalTransaction.setTransactionAmount(new BigDecimal(fee));
 					processFeeJournalTransaction.setCreditDebitFlag(false);
-					processFeeJournalTransaction
-							.setTransactionTimestamp(new Timestamp(System
-									.currentTimeMillis()));
+					processFeeJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
 					processFeeJournalTransaction.setWcsOrderID(wcsOrderId);
 					processFeeJournalTransaction.setVenBank(venBank);
 					// Persist the DEBIT journal transaction for the refund
-					processFeeJournalTransaction = journalTransactionHome
-							.persistFinJournalTransaction(processFeeJournalTransaction);
+					//processFeeJournalTransaction = journalTransactionHome.persistFinJournalTransaction(processFeeJournalTransaction);
+					if (!em.contains(processFeeJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+								"postRefundJournalTransaction:: processFeeJournalTransaction not attached, calling save explicitly to attach.");
+						processFeeJournalTransaction = finJournalTransactionDAO.save(processFeeJournalTransaction);
+					}
 					transactionList.add(processFeeJournalTransaction);
 				}
 
@@ -4963,7 +4978,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.currentTimeMillis()));
 				finArFundsInRefund.setRefundType(reconciliationRecord
 						.getFinArFundsInActionApplied().getActionAppliedDesc());
-				refundRecordHome.persistFinArFundsInRefund(finArFundsInRefund);
+				//refundRecordHome.persistFinArFundsInRefund(finArFundsInRefund);
+				if (!em.contains(finArFundsInRefund)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransaction:: finArFundsInRefund not attached, calling save explicitly.");
+					finArFundsInRefund = finArFundsInRefundDAO.save(finArFundsInRefund);
+				}
 			} else {
 				reconciliationRecord.setRefundAmount(reconciliationRecord
 						.getRefundAmount().add(new BigDecimal(refundAmount)));
@@ -4974,16 +4993,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 				 */
 				FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();
 				finArFundsInActionApplied.setActionAppliedId(accountRefund);
-				reconciliationRecord
-						.setFinArFundsInActionApplied(finArFundsInActionApplied);
+				reconciliationRecord.setFinArFundsInActionApplied(finArFundsInActionApplied);
 
 				// FinArReconResult finArReconResult = new FinArReconResult();
 				// finArReconResult.setReconResultId(VeniceConstants.FIN_AR_RECON_RESULT_REFUNDED);
 				// reconciliationRecord.setFinArReconResult(finArReconResult);
 
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
-				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+				finApprovalStatus.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 				reconciliationRecord.setFinApprovalStatus(finApprovalStatus);
 
 				// reconciliationRecord.setRemainingBalanceAmount(remainingUnallocatedAmount.subtract(new
@@ -4991,8 +5008,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 				// reconciliationRecord.setRemainingBalanceAmount(new
 				// BigDecimal(refundAmount).subtract(reconciliationRecord.getProviderReportPaidAmount()).add(reconciliationRecord.getPaymentAmount()!=null?reconciliationRecord.getPaymentAmount():new
 				// BigDecimal("0")));
-				reconciliationRecord = fundsInReconRecordHome
-						.mergeFinArFundsInReconRecord(reconciliationRecord);
+				//reconciliationRecord = fundsInReconRecordHome.mergeFinArFundsInReconRecord(reconciliationRecord);
+				if (!em.contains(reconciliationRecord)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postRefundJournalTransaction:: reconciliationRecord not attached, calling save explicitly to make it attached");
+					reconciliationRecord = finArFundsInReconRecordDAO.save(reconciliationRecord);
+				}
 
 				/*
 				 * Note that we do not do anything with the transactionList here
@@ -5001,10 +5022,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting refund journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -5012,11 +5034,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postRefundJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postRefundJournalTransaction::" + " completed in "
 				+ duration + "ms");
 		return true;
 
@@ -5031,14 +5054,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * salesJournalId)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postBalancingJournalTransaction(Long cashReceivedJournalId,
 			Long salesJournalId) {
-		_log.debug("postBalancingJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postBalancingJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
+			/*
 			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
 							"FinJournalTransactionSessionEJBBeanLocal");
@@ -5046,10 +5071,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
 							"FinJournalApprovalGroupSessionEJBBeanLocal");
+			*/
 
 			/*
 			 * Check that the two journal entries for the balancing exist
 			 */
+			/*
 			List<FinJournalTransaction> cashReceivedJournalList = journalTransactionHome
 					.queryByRange(
 							"select o from FinJournalTransaction o where o.transactionId = "
@@ -5059,9 +5086,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 						"The journal transaction identifier for the cash received journal provided is invalid. No journal transaction exists");
 			}
 
-			FinJournalTransaction cashReceivedJournalTransaction = cashReceivedJournalList
-					.get(0);
+			FinJournalTransaction cashReceivedJournalTransaction = cashReceivedJournalList.get(0);
+			*/
+			FinJournalTransaction cashReceivedJournalTransaction = finJournalTransactionDAO.findByTransactionId(cashReceivedJournalId);
+			if (cashReceivedJournalTransaction == null) {
+				throw new EJBException(
+						"The journal transaction identifier for the cash received journal provided is invalid. No journal transaction exists");				
+			}
 
+			/*
 			List<FinJournalTransaction> salesJournalList = journalTransactionHome
 					.queryByRange(
 							"select o from FinJournalTransaction o where o.transactionId = "
@@ -5073,6 +5106,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinJournalTransaction salesJournalTransaction = cashReceivedJournalList
 					.get(0);
+			*/
+			FinJournalTransaction salesJournalTransaction = finJournalTransactionDAO.findByTransactionId(salesJournalId);
+			if (salesJournalTransaction == null) {
+				throw new EJBException(
+						"The journal transaction identifier for the sales journal provided is invalid. No journal transaction exists");				
+			}
 
 			/*
 			 * Lookup the balancing journal approval group for the day If there
@@ -5080,10 +5119,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 */
 
 			FinJournal finJournalRefund = new FinJournal();
-			finJournalRefund
-					.setJournalId(VeniceConstants.FIN_JOURNAL_REFUND_OTHERS);
+			finJournalRefund.setJournalId(FinJournalConstants.FIN_JOURNAL_REFUND_OTHERS.id());
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
+			/*
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = journalApprovalGroupHome
 					.queryByRange(
 							"select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Balancing Journal for:"
@@ -5092,24 +5131,26 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ " and o.finApprovalStatus.approvalStatusId = "
 									+ VeniceConstants.FIN_APPROVAL_STATUS_APPROVED,
 							0, 0);
+			*/
+			List<FinJournalApprovalGroup> finJournalApprovalGroupList = finJournalApprovalGroupDAO.findByDescriptionAndApprovalStatusId(
+					"Balancing Journal for:" + sdf.format(new Date()), FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
-				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+				finApprovalStatus.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 				finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 
 				finJournalApprovalGroup.setFinJournal(finJournalRefund);
 
-				finJournalApprovalGroup
-						.setJournalGroupDesc("Balancing Journal for:"
-								+ sdf.format(new Date()));
-				finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(
-						System.currentTimeMillis()));
+				finJournalApprovalGroup.setJournalGroupDesc("Balancing Journal for:" + sdf.format(new Date()));
+				finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(System.currentTimeMillis()));
 
 				// Persist the journal group
-				finJournalApprovalGroup = journalApprovalGroupHome
-						.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				if (!em.contains(finJournalApprovalGroup)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postBalancingJournalTransaction:: finJournalApprovalGroup not attached, calling save.");
+					finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+				}
 			} else {
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
 			}
@@ -5134,26 +5175,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finAccountOverLessPayment = new FinAccount();
-			finAccountOverLessPayment
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_7140001);
-			sjBalancingJournalTransaction
-					.setFinAccount(finAccountOverLessPayment);
+			finAccountOverLessPayment.setAccountId(FinAccountConstants.FIN_ACCOUNT_7140001.id());
+			sjBalancingJournalTransaction.setFinAccount(finAccountOverLessPayment);
 
 			sjBalancingJournalTransaction.setFinJournal(finJournalRefund);
-			sjBalancingJournalTransaction.setFinPeriod(FinancePeriodUtil
-					.getCurrentPeriod());
+			sjBalancingJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
 			FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
-			finTransactionStatus
-					.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
-			sjBalancingJournalTransaction
-					.setFinTransactionStatus(finTransactionStatus);
+			finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
+			sjBalancingJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 			FinTransactionType finTransactionType = new FinTransactionType();
-			finTransactionType
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_OVER_LESS_PAYMENT);
-			sjBalancingJournalTransaction
-					.setFinTransactionType(finTransactionType);
+			finTransactionType.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_OVER_LESS_PAYMENT.id());
+			sjBalancingJournalTransaction.setFinTransactionType(finTransactionType);
 
 			sjBalancingJournalTransaction
 					.setTransactionAmount((salesJournalTransaction
@@ -5171,8 +5205,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 			sjBalancingJournalTransaction
 					.setVenBank(cashReceivedJournalTransaction.getVenBank());
 			// Persist the SJ balancing journal transaction
-			sjBalancingJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(sjBalancingJournalTransaction);
+			//sjBalancingJournalTransaction = journalTransactionHome.persistFinJournalTransaction(sjBalancingJournalTransaction);
+			if (!em.contains(sjBalancingJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postBalancingJournalTransaction:: sjBalancingJournalTransaction not attached, calling save.");
+				sjBalancingJournalTransaction = finJournalTransactionDAO.save(sjBalancingJournalTransaction);
+			}
 			transactionList.add(sjBalancingJournalTransaction);
 
 			/*
@@ -5191,30 +5228,23 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getTransactionAmount().compareTo(
 									cashReceivedJournalTransaction
 											.getTransactionAmount()) < 0);
-			crBalancingJournalTransaction
-					.setFinJournalApprovalGroup(finJournalApprovalGroup);
+			crBalancingJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
-			crBalancingJournalTransaction
-					.setFinAccount(finAccountOverLessPayment);
+			crBalancingJournalTransaction.setFinAccount(finAccountOverLessPayment);
 
 			crBalancingJournalTransaction.setFinJournal(finJournalRefund);
-			crBalancingJournalTransaction.setFinPeriod(FinancePeriodUtil
-					.getCurrentPeriod());
+			crBalancingJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
-			crBalancingJournalTransaction
-					.setFinTransactionStatus(finTransactionStatus);
+			crBalancingJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-			crBalancingJournalTransaction
-					.setFinTransactionType(finTransactionType);
+			crBalancingJournalTransaction.setFinTransactionType(finTransactionType);
 
 			crBalancingJournalTransaction
 					.setTransactionAmount((salesJournalTransaction
 							.getTransactionAmount()
 							.subtract(cashReceivedJournalTransaction
 									.getTransactionAmount())).abs());
-			crBalancingJournalTransaction
-					.setTransactionTimestamp(new Timestamp(System
-							.currentTimeMillis()));
+			crBalancingJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
 			crBalancingJournalTransaction
 					.setWcsOrderID(cashReceivedJournalTransaction
@@ -5223,8 +5253,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			crBalancingJournalTransaction
 					.setVenBank(cashReceivedJournalTransaction.getVenBank());
 			// Persist the SJ balancing journal transaction
-			crBalancingJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(crBalancingJournalTransaction);
+			//crBalancingJournalTransaction = journalTransactionHome.persistFinJournalTransaction(crBalancingJournalTransaction);
+			if (!em.contains(crBalancingJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postBalancingJournalTransaction:: crBalancingJournalTransaction not attached, calling save explcitly.");
+				crBalancingJournalTransaction = finJournalTransactionDAO.save(crBalancingJournalTransaction);
+			}
 			transactionList.add(crBalancingJournalTransaction);
 
 			/*
@@ -5233,10 +5267,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting balancing refund/others journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -5244,11 +5279,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postBalancingJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postBalancingJournalTransaction::" + " completed in "
 				+ duration + "ms");
 		return true;
 	}
@@ -5262,14 +5298,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * logInvoiceReconRecordId)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postLogisticsDebtAcknowledgementJournalTransaction(
 			FinApInvoice finApInvoice, LogAirwayBill logAirwayBill) {
-		_log.debug("postLogisticsDebtAcknowledgementJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
-		StringBuilder sb;
+		//StringBuilder sb;
 
 		try {
+			/*
 			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
 							"FinJournalTransactionSessionEJBBeanLocal");
@@ -5285,17 +5323,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 			LogProviderAgreementSessionEJBLocal providerAgreementHome = (LogProviderAgreementSessionEJBLocal) this._genericLocator
 					.lookupLocal(LogProviderAgreementSessionEJBLocal.class,
 							"LogProviderAgreementSessionEJBBeanLocal");
+			*/
 
 			/*
 			 * Lookup the logistics debt acknowledgement journal approval group
 			 * for the day If there is none then create it
 			 */
 			FinJournal finJournalLogisticsDebtAcknowledgement = new FinJournal();
-			finJournalLogisticsDebtAcknowledgement
-					.setJournalId(VeniceConstants.FIN_JOURNAL_LOGISTICS_DEBT_ACKNOWLEDGEMENT);
+			finJournalLogisticsDebtAcknowledgement.setJournalId(FinJournalConstants.FIN_JOURNAL_LOGISTICS_DEBT_ACKNOWLEDGEMENT.id());
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
 
+			/*
 			sb = new StringBuilder();
 			sb.append(
 					"select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Logistics Debt Acknowledgement Journal for:")
@@ -5304,25 +5343,26 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.append(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = journalApprovalGroupHome
 					.queryByRange(sb.toString(), 0, 0);
+			*/
+			List<FinJournalApprovalGroup> finJournalApprovalGroupList = finJournalApprovalGroupDAO.findByDescriptionAndApprovalStatusId(
+					"Logistics Debt Acknowledgement Journal for:" + sdf.format(new Date()), FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
-				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+				finApprovalStatus.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 				finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 
-				finJournalApprovalGroup
-						.setFinJournal(finJournalLogisticsDebtAcknowledgement);
-				finJournalApprovalGroup
-						.setJournalGroupDesc("Logistics Debt Acknowledgement Journal for:"
-								+ sdf.format(new Date()));
-				finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(
-						System.currentTimeMillis()));
+				finJournalApprovalGroup.setFinJournal(finJournalLogisticsDebtAcknowledgement);
+				finJournalApprovalGroup.setJournalGroupDesc("Logistics Debt Acknowledgement Journal for:" + sdf.format(new Date()));
+				finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(System.currentTimeMillis()));
 
 				// Persist the journal group
-				finJournalApprovalGroup = journalApprovalGroupHome
-						.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				if (!em.contains(finJournalApprovalGroup)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction:: finJournalApprovalGroup not attached. calling save.");
+					finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+				}
 			} else {
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
 			}
@@ -5343,7 +5383,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 																			// penanggung=null;
 			AirwayBillEngineConnector awbConn = new AirwayBillEngineClientConnector();
 
-			_log.debug("getting airwaybill transaction from AWB engine");
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::getting airwaybill transaction from AWB engine");
 
 			/*
 			 * -buat jurnal untuk pembalik dari jurnal sales (harga yang
@@ -5357,15 +5397,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 */
 			VenOrderItem item = logAirwayBill.getVenOrderItem();
 			String wcsOrderItemId = item.getWcsOrderItemId();
-			List<AirwayBillTransaction> awbVeniceTranList = awbConn
-					.getAirwayBillTransactionByItem(wcsOrderItemId);
+			List<AirwayBillTransaction> awbVeniceTranList = awbConn.getAirwayBillTransactionByItem(wcsOrderItemId);
 
 			if (awbVeniceTranList != null && !awbVeniceTranList.isEmpty()) {
 				List<FinApInvoice> finApInvoices = new ArrayList<FinApInvoice>();
 				finApInvoices.add(finApInvoice);
 
-				awbVeniceTran = awbVeniceTranList
-						.get(awbVeniceTranList.size() - 1);
+				awbVeniceTran = awbVeniceTranList.get(awbVeniceTranList.size() - 1);
 				/*
 				 * check airwaybill level and logistic provider
 				 */
@@ -5373,13 +5411,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 				logisticProvider = awbVeniceTran.getKodeLogistik();
 				// penanggung = awbVeniceTran.getPenanggungBiaya();
 				gdnRef = awbVeniceTran.getGdnRef();
-				_log.debug("awbLevel: " + awbLevel);
-				_log.debug("logisticProvider: " + logisticProvider);
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::awbLevel: " + awbLevel);
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::logisticProvider: " + logisticProvider);
+				/*
 				List<LogProviderAgreement> provAgreement = providerAgreementHome
 						.queryByRange(
 								"select o from LogProviderAgreement o where o.logLogisticsProvider.logisticsProviderCode = '"
 										+ logisticProvider + "'", 0, 1);
-
+				*/
+				List<LogProviderAgreement> provAgreement = logProviderAgreementDAO.findByLogLogisticsProviderCode(logisticProvider);
 				if (logisticProvider != null
 						&& !logisticProvider.equalsIgnoreCase("MSG")) {
 					boolean freeShippingFlag = false;
@@ -5397,6 +5437,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					chargedPrice = logAirwayBill.getPackageWeight().multiply(
 							logAirwayBill.getPricePerKg());
 
+					/*
 					initialTotalCharge = journalTransactionHome
 							.queryByRange(
 									"select o from FinJournalTransaction o where o.comments like '%"
@@ -5404,21 +5445,33 @@ public class FinanceJournalPosterSessionEJBBean implements
 											+ "' and o.finTransactionType.transactionTypeId = "
 											+ VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK,
 									0, 1).get(0).getTransactionAmount();
+					*/
+					List<FinJournalTransaction> finJournalTransactions = finJournalTransactionDAO.findByCommentsAndTransactionTypeId(wcsOrderItemId,
+							FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
+					if (finJournalTransactions == null || finJournalTransactions.isEmpty()) {
+						throw new EJBException(
+								"The journal transaction with comment contains WCS Order Item ID '" + wcsOrderItemId + "' and Transaction Type 'Biaya Harus Dibayar Logistik' " +
+						        "cannot be found.");										
+					}
+					initialTotalCharge = finJournalTransactions.get(0).getTransactionAmount();
 
 					approvedTotalCharge = (discountMultiplier
 							.multiply(chargedPrice).multiply(vatMultiplier))
 							.add(logAirwayBill.getInsuranceCharge());
 
-					_log.debug("Total shipping cost: " + approvedTotalCharge);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Total shipping cost: " + approvedTotalCharge);
 
+					/*
 					List<VenOrderItemAdjustment> venOrderItemAdjustmentList = orderItemAdjustmentHome
 							.queryByRange(
 									"select o from VenOrderItemAdjustment o where o.venOrderItem.orderItemId = "
 											+ item.getOrderItemId(), 0, 0);
+					*/
+					List<VenOrderItemAdjustment> venOrderItemAdjustmentList = venOrderItemAdjustmentDAO.findByVenOrderItem(item);
 
 					if (venOrderItemAdjustmentList.size() > 0) {
 						for (VenOrderItemAdjustment adjustment : venOrderItemAdjustmentList) {
-							_log.debug("Adjustment: "
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Adjustment: "
 									+ adjustment.getVenPromotion()
 											.getPromotionId()
 									+ ","
@@ -5435,7 +5488,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							}
 						}
 					}
-					_log.debug("freeShippingFlag: " + freeShippingFlag);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::freeShippingFlag: " + freeShippingFlag);
 
 					/*
 					 * case 1: AWB level Shipping ============== ============
@@ -5447,51 +5500,37 @@ public class FinanceJournalPosterSessionEJBBean implements
 					 */
 					if ((awbLevel != null && awbLevel.equalsIgnoreCase("OM"))
 							&& freeShippingFlag == true) {
-						_log.info("case 1: Main Airwaybill & Free Shipping");
+						CommonUtil.logInfo(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::case 1: Main Airwaybill & Free Shipping");
 						/*
 						 * Create the DEBIT journal transaction for against
 						 * Biaya YMHD.
 						 */
-						_log.debug("Create the DEBIT journal transaction for against Biaya YMHD");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the DEBIT journal transaction for against Biaya YMHD");
 						FinJournalTransaction biayaYmhdJournalTransaction = new FinJournalTransaction();
 						biayaYmhdJournalTransaction
 								.setComments("Biaya YMHD DEBIT Amount:"
 										+ initialTotalCharge + " for Invoice:"
 										+ finApInvoice.getApInvoiceId());
 						biayaYmhdJournalTransaction.setCreditDebitFlag(false);
-						biayaYmhdJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroup);
-						biayaYmhdJournalTransaction
-								.setFinJournal(finJournalLogisticsDebtAcknowledgement);
-						biayaYmhdJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						biayaYmhdJournalTransaction
-								.setTransactionAmount(initialTotalCharge);
-						biayaYmhdJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						biayaYmhdJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroup);
+						biayaYmhdJournalTransaction.setFinJournal(finJournalLogisticsDebtAcknowledgement);
+						biayaYmhdJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						biayaYmhdJournalTransaction.setTransactionAmount(initialTotalCharge);
+						biayaYmhdJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 						biayaYmhdJournalTransaction.setWcsOrderID(gdnRef);
-						biayaYmhdJournalTransaction
-								.setFinApInvoices(finApInvoices);
+						biayaYmhdJournalTransaction.setFinApInvoices(finApInvoices);
 
 						FinAccount finAccountYMHD = new FinAccount();
-						finAccountYMHD
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_2210002);
-						biayaYmhdJournalTransaction
-								.setFinAccount(finAccountYMHD);
+						finAccountYMHD.setAccountId(FinAccountConstants.FIN_ACCOUNT_2210002.id());
+						biayaYmhdJournalTransaction.setFinAccount(finAccountYMHD);
 
 						FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
-						finTransactionStatus
-								.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
-						biayaYmhdJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
+						biayaYmhdJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 						FinTransactionType finTransactionTypeYMHD = new FinTransactionType();
-						finTransactionTypeYMHD
-								.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK);
-						biayaYmhdJournalTransaction
-								.setFinTransactionType(finTransactionTypeYMHD);
+						finTransactionTypeYMHD.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
+						biayaYmhdJournalTransaction.setFinTransactionType(finTransactionTypeYMHD);
 
 						// biayaYmhdJournalTransaction =
 						// journalTransactionHome.persistFinJournalTransaction(biayaYmhdJournalTransaction);
@@ -5500,42 +5539,30 @@ public class FinanceJournalPosterSessionEJBBean implements
 						/*
 						 * Create the CREDIT transaction for against SM Promo.
 						 */
-						_log.debug("Create the CREDIT transaction for against SM Promo");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the CREDIT transaction for against SM Promo");
 						FinJournalTransaction smPromoJournalTransaction = new FinJournalTransaction();
 						smPromoJournalTransaction
 								.setComments("SM Promo CREDIT Amount:"
 										+ initialTotalCharge + " for Invoice:"
 										+ finApInvoice.getApInvoiceId());
 						smPromoJournalTransaction.setCreditDebitFlag(true);
-						smPromoJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroup);
-						smPromoJournalTransaction
-								.setFinJournal(finJournalLogisticsDebtAcknowledgement);
-						smPromoJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						smPromoJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
-						smPromoJournalTransaction
-								.setTransactionAmount(initialTotalCharge);
-						smPromoJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						smPromoJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroup);
+						smPromoJournalTransaction.setFinJournal(finJournalLogisticsDebtAcknowledgement);
+						smPromoJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						smPromoJournalTransaction.setFinTransactionStatus(finTransactionStatus);
+						smPromoJournalTransaction.setTransactionAmount(initialTotalCharge);
+						smPromoJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 						smPromoJournalTransaction.setWcsOrderID(gdnRef);
-						smPromoJournalTransaction
-								.setFinApInvoices(finApInvoices);
+						smPromoJournalTransaction.setFinApInvoices(finApInvoices);
 
 						FinAccount finAccountSMPromo = new FinAccount();
-						finAccountSMPromo
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_6133018);
+						finAccountSMPromo.setAccountId(FinAccountConstants.FIN_ACCOUNT_6133018.id());
 						smPromoJournalTransaction
 								.setFinAccount(finAccountSMPromo);
 
 						FinTransactionType finTransactionTypeSMPromo = new FinTransactionType();
-						finTransactionTypeSMPromo
-								.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_SM_BEBAN_PROMOSI_BEBAS_BIAYA_KIRIM);
-						smPromoJournalTransaction
-								.setFinTransactionType(finTransactionTypeSMPromo);
+						finTransactionTypeSMPromo.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_SM_BEBAN_PROMOSI_BEBAS_BIAYA_KIRIM.id());
+						smPromoJournalTransaction.setFinTransactionType(finTransactionTypeSMPromo);
 
 						// smPromoJournalTransaction =
 						// journalTransactionHome.persistFinJournalTransaction(smPromoJournalTransaction);
@@ -5545,34 +5572,23 @@ public class FinanceJournalPosterSessionEJBBean implements
 						 * Create the DEBIT journal transaction for against SM
 						 * Promo.
 						 */
-						_log.debug("Create the DEBIT transaction for against SM Promo");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the DEBIT transaction for against SM Promo");
 						FinJournalTransaction smPromoJournalTransaction2 = new FinJournalTransaction();
 						smPromoJournalTransaction2
 								.setComments("SM Promo DEBIT Amount:"
 										+ approvedTotalCharge + " for Invoice:"
 										+ finApInvoice.getApInvoiceId());
 						smPromoJournalTransaction2.setCreditDebitFlag(false);
-						smPromoJournalTransaction2
-								.setFinJournalApprovalGroup(finJournalApprovalGroup);
-						smPromoJournalTransaction2
-								.setFinAccount(finAccountSMPromo);
-						smPromoJournalTransaction2
-								.setFinJournal(finJournalLogisticsDebtAcknowledgement);
-						smPromoJournalTransaction2
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						smPromoJournalTransaction2
-								.setFinTransactionStatus(finTransactionStatus);
-						smPromoJournalTransaction2
-								.setFinTransactionType(finTransactionTypeSMPromo);
-						smPromoJournalTransaction2
-								.setTransactionAmount(approvedTotalCharge);
-						smPromoJournalTransaction2
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						smPromoJournalTransaction2.setFinJournalApprovalGroup(finJournalApprovalGroup);
+						smPromoJournalTransaction2.setFinAccount(finAccountSMPromo);
+						smPromoJournalTransaction2.setFinJournal(finJournalLogisticsDebtAcknowledgement);
+						smPromoJournalTransaction2.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						smPromoJournalTransaction2.setFinTransactionStatus(finTransactionStatus);
+						smPromoJournalTransaction2.setFinTransactionType(finTransactionTypeSMPromo);
+						smPromoJournalTransaction2.setTransactionAmount(approvedTotalCharge);
+						smPromoJournalTransaction2.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 						smPromoJournalTransaction2.setWcsOrderID(gdnRef);
-						smPromoJournalTransaction2
-								.setFinApInvoices(finApInvoices);
+						smPromoJournalTransaction2.setFinApInvoices(finApInvoices);
 						// smPromoJournalTransaction2 =
 						// journalTransactionHome.persistFinJournalTransaction(smPromoJournalTransaction2);
 						transactionList.add(smPromoJournalTransaction2);
@@ -5581,7 +5597,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						 * Create the CREDIT transaction for against Hutang
 						 * Logistik.
 						 */
-						_log.debug("Create the CREDIT transaction for against Hutang Logistik");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the CREDIT transaction for against Hutang Logistik");
 						FinJournalTransaction hutangLogisticJournalTransaction = new FinJournalTransaction();
 						hutangLogisticJournalTransaction
 								.setComments("Hutang Logistik CREDIT Amount:"
@@ -5589,35 +5605,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 										+ finApInvoice.getApInvoiceId());
 						hutangLogisticJournalTransaction
 								.setCreditDebitFlag(true);
-						hutangLogisticJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroup);
-						hutangLogisticJournalTransaction
-								.setFinJournal(finJournalLogisticsDebtAcknowledgement);
-						hutangLogisticJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						hutangLogisticJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
-						hutangLogisticJournalTransaction
-								.setTransactionAmount(approvedTotalCharge);
-						hutangLogisticJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						hutangLogisticJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroup);
+						hutangLogisticJournalTransaction.setFinJournal(finJournalLogisticsDebtAcknowledgement);
+						hutangLogisticJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						hutangLogisticJournalTransaction.setFinTransactionStatus(finTransactionStatus);
+						hutangLogisticJournalTransaction.setTransactionAmount(approvedTotalCharge);
+						hutangLogisticJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 						hutangLogisticJournalTransaction.setWcsOrderID(gdnRef);
-						hutangLogisticJournalTransaction
-								.setFinApInvoices(finApInvoices);
+						hutangLogisticJournalTransaction.setFinApInvoices(finApInvoices);
 
 						FinAccount finAccountHutangLogistics = new FinAccount();
-						finAccountHutangLogistics
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_2140001);
-						hutangLogisticJournalTransaction
-								.setFinAccount(finAccountHutangLogistics);
+						finAccountHutangLogistics.setAccountId(FinAccountConstants.FIN_ACCOUNT_2140001.id());
+						hutangLogisticJournalTransaction.setFinAccount(finAccountHutangLogistics);
 
 						FinTransactionType finTransactionTypeHutangLogistic = new FinTransactionType();
-						finTransactionTypeHutangLogistic
-								.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_LOGISTICS_PAYMENT);
-						hutangLogisticJournalTransaction
-								.setFinTransactionType(finTransactionTypeHutangLogistic);
+						finTransactionTypeHutangLogistic.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_LOGISTICS_PAYMENT.id());
+						hutangLogisticJournalTransaction.setFinTransactionType(finTransactionTypeHutangLogistic);
 
 						// hutangLogisticJournalTransaction =
 						// journalTransactionHome.persistFinJournalTransaction(hutangLogisticJournalTransaction);
@@ -5632,96 +5635,72 @@ public class FinanceJournalPosterSessionEJBBean implements
 					 */else if ((awbLevel != null && awbLevel
 							.equalsIgnoreCase("OM"))
 							&& freeShippingFlag == false) {
-						_log.info("case 2: Main Airwaybill & Normal Shipping");
+						CommonUtil.logInfo(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::case 2: Main Airwaybill & Normal Shipping");
 						/*
 						 * Create the DEBIT journal transaction for against
 						 * Biaya YMHD.
 						 */
-						_log.debug("Create the DEBIT transaction for against Biaya YMHD");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the DEBIT transaction for against Biaya YMHD");
 						FinJournalTransaction biayaYmhdJournalTransaction = new FinJournalTransaction();
 						biayaYmhdJournalTransaction
 								.setComments("Biaya YMHD DEBIT Amount:"
 										+ initialTotalCharge + " for Invoice:"
 										+ finApInvoice.getApInvoiceId());
 						biayaYmhdJournalTransaction.setCreditDebitFlag(false);
-						biayaYmhdJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroup);
-						biayaYmhdJournalTransaction
-								.setFinJournal(finJournalLogisticsDebtAcknowledgement);
-						biayaYmhdJournalTransaction
-								.setFinPeriod(FinancePeriodUtil
-										.getCurrentPeriod());
-						biayaYmhdJournalTransaction
-								.setTransactionAmount(initialTotalCharge);
-						biayaYmhdJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						biayaYmhdJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroup);
+						biayaYmhdJournalTransaction.setFinJournal(finJournalLogisticsDebtAcknowledgement);
+						biayaYmhdJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						biayaYmhdJournalTransaction.setTransactionAmount(initialTotalCharge);
+						biayaYmhdJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 						biayaYmhdJournalTransaction.setWcsOrderID(gdnRef);
-						biayaYmhdJournalTransaction
-								.setFinApInvoices(finApInvoices);
+						biayaYmhdJournalTransaction.setFinApInvoices(finApInvoices);
 
 						FinAccount finAccountYMHD = new FinAccount();
-						finAccountYMHD
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_2210002);
-						biayaYmhdJournalTransaction
-								.setFinAccount(finAccountYMHD);
+						finAccountYMHD.setAccountId(FinAccountConstants.FIN_ACCOUNT_2210002.id());
+						biayaYmhdJournalTransaction.setFinAccount(finAccountYMHD);
 
 						FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
-						finTransactionStatus
-								.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
-						biayaYmhdJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
+						finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
+						biayaYmhdJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 						FinTransactionType finTransactionTypeYMHD = new FinTransactionType();
-						finTransactionTypeYMHD
-								.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK);
-						biayaYmhdJournalTransaction
-								.setFinTransactionType(finTransactionTypeYMHD);
+						finTransactionTypeYMHD.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
+						biayaYmhdJournalTransaction.setFinTransactionType(finTransactionTypeYMHD);
 
 						transactionList.add(biayaYmhdJournalTransaction);
 
 						/*
 						 * Create the CREDIT transaction for against HPP.
 						 */
-						_log.debug("Create the CREDIT transaction for against HPP");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the CREDIT transaction for against HPP");
 						FinJournalTransaction hppJournalTransaction = new FinJournalTransaction();
 						hppJournalTransaction.setComments("HPP CREDIT Amount:"
 								+ initialTotalCharge + "  for Invoice:"
 								+ finApInvoice.getApInvoiceId());
 						hppJournalTransaction.setCreditDebitFlag(true);
-						hppJournalTransaction
-								.setFinJournalApprovalGroup(finJournalApprovalGroup);
-						hppJournalTransaction
-								.setFinJournal(finJournalLogisticsDebtAcknowledgement);
-						hppJournalTransaction.setFinPeriod(FinancePeriodUtil
-								.getCurrentPeriod());
-						hppJournalTransaction
-								.setFinTransactionStatus(finTransactionStatus);
-						hppJournalTransaction
-								.setTransactionAmount(initialTotalCharge);
-						hppJournalTransaction
-								.setTransactionTimestamp(new Timestamp(System
-										.currentTimeMillis()));
+						hppJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroup);
+						hppJournalTransaction.setFinJournal(finJournalLogisticsDebtAcknowledgement);
+						hppJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+						hppJournalTransaction.setFinTransactionStatus(finTransactionStatus);
+						hppJournalTransaction.setTransactionAmount(initialTotalCharge);
+						hppJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 						hppJournalTransaction.setWcsOrderID(gdnRef);
 						hppJournalTransaction.setFinApInvoices(finApInvoices);
 
 						FinAccount finAccountHpp = new FinAccount();
-						finAccountHpp
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_5110001);
+						finAccountHpp.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110001.id());
 						hppJournalTransaction.setFinAccount(finAccountHpp);
 
 						FinTransactionType finTransactionTypeHpp = new FinTransactionType();
-						finTransactionTypeHpp
-								.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_HPP_BIAYA_BARANG);
-						hppJournalTransaction
-								.setFinTransactionType(finTransactionTypeHpp);
+						finTransactionTypeHpp.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_HPP_BIAYA_BARANG.id());
+						hppJournalTransaction.setFinTransactionType(finTransactionTypeHpp);
 
 						transactionList.add(hppJournalTransaction);
 
 						/*
 						 * Create the DEBIT journal transaction for against HPP.
 						 */
-						_log.debug("Create the DEBIT transaction for against HPP");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the DEBIT transaction for against HPP");
 						FinJournalTransaction hppJournalTransaction2 = new FinJournalTransaction();
 						hppJournalTransaction2.setComments("HPP DEBIT Amount:"
 								+ approvedTotalCharge + " for Invoice:"
@@ -5752,7 +5731,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						 * Create the CREDIT transaction for against Hutang
 						 * Logistik.
 						 */
-						_log.debug("Create the CREDIT transaction for against Hutang Logistik");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::Create the CREDIT transaction for against Hutang Logistik");
 						FinJournalTransaction hutangLogisticJournalTransaction = new FinJournalTransaction();
 						hutangLogisticJournalTransaction
 								.setComments("Hutang Logistik CREDIT Amount:"
@@ -5781,13 +5760,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 						FinAccount finAccountHutangLogistics = new FinAccount();
 						finAccountHutangLogistics
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_2140001);
+								.setAccountId(FinAccountConstants.FIN_ACCOUNT_2140001.id());
 						hutangLogisticJournalTransaction
 								.setFinAccount(finAccountHutangLogistics);
 
 						FinTransactionType finTransactionTypeHutangLogistic = new FinTransactionType();
 						finTransactionTypeHutangLogistic
-								.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_LOGISTICS_PAYMENT);
+								.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_LOGISTICS_PAYMENT.id());
 						hutangLogisticJournalTransaction
 								.setFinTransactionType(finTransactionTypeHutangLogistic);
 
@@ -6292,27 +6271,33 @@ public class FinanceJournalPosterSessionEJBBean implements
 					// }
 					// }
 					// }
-					_log.debug("transactionList size: "
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::transactionList size: "
 							+ transactionList.size());
-					_log.debug("blibliMessengerFlag: " + blibliMessengerFlag);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::blibliMessengerFlag: " + blibliMessengerFlag);
 					if (!transactionList.isEmpty()) {
-						_log.debug("merging transactionList");
-						journalTransactionHome
-								.persistFinJournalTransactionList(transactionList);
-						_log.debug("done merging transactionList");
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::merging transactionList");
+						//journalTransactionHome.persistFinJournalTransactionList(transactionList);
+						for (FinJournalTransaction journalTransaction : transactionList) {
+							if (!em.contains(journalTransaction)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction:: journalTransaction not attached, calling save.");
+								finJournalTransactionDAO.save(journalTransaction);
+							}
+						}
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::done merging transactionList");
 					} else {
-						_log.info("no invoice journal created.");
+						CommonUtil.logInfo(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::no invoice journal created.");
 					}
 				} else {
-					_log.info("logistic provider is blibli messenger, no invoice journal created.");
+					CommonUtil.logInfo(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransaction::logistic provider is blibli messenger, no invoice journal created.");
 				}
 			}
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting logistics debt acknowledgement journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -6320,34 +6305,42 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postLogisticsDebtAcknowledgementJournalTransactions()"
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postLogisticsDebtAcknowledgementJournalTransactions::"
 				+ " completed in " + duration + "ms");
 
 		return true;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	private BigDecimal getNonVoucherAmount(
 			List<VenOrderItemAdjustment> venOrderItemAdjustments)
 			throws Exception {
+		/*
 		VenPromotionSessionEJBLocal promotionHome = (VenPromotionSessionEJBLocal) this._genericLocator
 				.lookupLocal(VenPromotionSessionEJBLocal.class,
 						"VenPromotionSessionEJBBeanLocal");
+		*/
 		BigDecimal nonVoucherAmount = new BigDecimal(0);
 
 		for (VenOrderItemAdjustment venOrderItemAdjustment : venOrderItemAdjustments) {
+			/*
 			List<VenPromotion> venPromotionList = promotionHome
 					.queryByRange(
 							"select o from VenPromotion o left join fetch o.venPromotionType where o.promotionId = "
 									+ venOrderItemAdjustment.getVenPromotion()
 											.getPromotionId(), 0, 1);
+			*/
+			List<VenPromotion> venPromotionList = venPromotionDAO.findByPromotionIdLeftJoinPromotionType(
+					venOrderItemAdjustment.getVenPromotion().getPromotionId());
 
-			_log.debug("Promotion Id "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "getNonVoucherAmount::Promotion Id "
 					+ venOrderItemAdjustment.getVenPromotion().getPromotionId());
-			_log.debug("Promotion Fetched " + venPromotionList.size());
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "getNonVoucherAmount::Promotion Fetched " + venPromotionList.size());
 
 			VenPromotion venPromotion = new VenPromotion();
 			if (venPromotionList.size() > 0) {
@@ -6355,7 +6348,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				// untuk promo bukan voucher, bisa diupload atau tidak diupload
 				if ((venPromotion.getVenPromotionType() != null && venPromotion
-						.getVenPromotionType().getPromotionType() == VeniceConstants.VEN_PROMOTION_TYPE_NONVOUCHER)
+						.getVenPromotionType().getPromotionType() == VenPromotionTypeConstants.VEN_PROMOTION_TYPE_NONVOUCHER.id())
 						|| venPromotion.getVenPromotionType() == null) {
 					nonVoucherAmount = nonVoucherAmount
 							.add(venOrderItemAdjustment.getAmount().abs());
@@ -6367,24 +6360,29 @@ public class FinanceJournalPosterSessionEJBBean implements
 		return nonVoucherAmount;
 	}
 
-	private BigDecimal getVoucherAmount(
-			List<VenOrderItemAdjustment> venOrderItemAdjustments)
-			throws Exception {
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	private BigDecimal getVoucherAmount(List<VenOrderItemAdjustment> venOrderItemAdjustments) throws Exception {
+		/*
 		VenPromotionSessionEJBLocal promotionHome = (VenPromotionSessionEJBLocal) this._genericLocator
 				.lookupLocal(VenPromotionSessionEJBLocal.class,
 						"VenPromotionSessionEJBBeanLocal");
+		*/
 		BigDecimal voucherAmount = new BigDecimal(0);
 
 		for (VenOrderItemAdjustment venOrderItemAdjustment : venOrderItemAdjustments) {
+			/*
 			List<VenPromotion> venPromotionList = promotionHome
 					.queryByRange(
 							"select o from VenPromotion o left join fetch o.venPromotionType where o.promotionId = "
 									+ venOrderItemAdjustment.getVenPromotion()
 											.getPromotionId(), 0, 1);
+			*/
+			List<VenPromotion> venPromotionList = venPromotionDAO.findByPromotionIdLeftJoinPromotionType(
+					venOrderItemAdjustment.getVenPromotion().getPromotionId());
 
-			_log.debug("Promotion Id "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "getVoucherAmount::Promotion Id "
 					+ venOrderItemAdjustment.getVenPromotion().getPromotionId());
-			_log.debug("Promotion Fetched " + venPromotionList.size());
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "getVoucherAmount::Promotion Fetched " + venPromotionList.size());
 
 			VenPromotion venPromotion = new VenPromotion();
 			if (venPromotionList.size() > 0) {
@@ -6392,7 +6390,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				if (venPromotion.getVenPromotionType() != null
 						&& venPromotion.getVenPromotionType()
-								.getPromotionType() == VeniceConstants.VEN_PROMOTION_TYPE_VOUCHER) {
+								.getPromotionType() == VenPromotionTypeConstants.VEN_PROMOTION_TYPE_VOUCHER.id()) {
 					voucherAmount = voucherAmount.add(venOrderItemAdjustment
 							.getAmount().abs());
 				}
@@ -6402,24 +6400,31 @@ public class FinanceJournalPosterSessionEJBBean implements
 		return voucherAmount;
 	}
 
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	private BigDecimal getVoucherCSAmount(
 			List<VenOrderItemAdjustment> venOrderItemAdjustments)
 			throws Exception {
+		/*
 		VenPromotionSessionEJBLocal promotionHome = (VenPromotionSessionEJBLocal) this._genericLocator
 				.lookupLocal(VenPromotionSessionEJBLocal.class,
 						"VenPromotionSessionEJBBeanLocal");
+	    */
 		BigDecimal voucherCSAmount = new BigDecimal(0);
 
 		for (VenOrderItemAdjustment venOrderItemAdjustment : venOrderItemAdjustments) {
+			/*
 			List<VenPromotion> venPromotionList = promotionHome
 					.queryByRange(
 							"select o from VenPromotion o left join fetch o.venPromotionType where o.promotionId = "
 									+ venOrderItemAdjustment.getVenPromotion()
 											.getPromotionId(), 0, 1);
+			*/
+			List<VenPromotion> venPromotionList = venPromotionDAO.findByPromotionIdLeftJoinPromotionType(
+					venOrderItemAdjustment.getVenPromotion().getPromotionId());
 
-			_log.debug("Promotion Id "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "getVoucherCSAmount::Promotion Id "
 					+ venOrderItemAdjustment.getVenPromotion().getPromotionId());
-			_log.debug("Promotion Fetched " + venPromotionList.size());
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "getVoucherCSAmount::Promotion Fetched " + venPromotionList.size());
 
 			VenPromotion venPromotion = new VenPromotion();
 			if (venPromotionList.size() > 0) {
@@ -6427,7 +6432,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				if (venPromotion.getVenPromotionType() != null
 						&& venPromotion.getVenPromotionType()
-								.getPromotionType() == VeniceConstants.VEN_PROMOTION_TYPE_VOUCHERCS) {
+								.getPromotionType() == VenPromotionTypeConstants.VEN_PROMOTION_TYPE_VOUCHERCS.id()) {
 					voucherCSAmount = voucherCSAmount
 							.add(venOrderItemAdjustment.getAmount().abs());
 				}
@@ -6447,13 +6452,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * pkp)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Boolean postSalesJournalTransaction(Long finSalesRecordId,
-			Boolean pkp) {
-		_log.debug("postSalesJournalTransactions()");
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Boolean postSalesJournalTransaction(Long finSalesRecordId, Boolean pkp) {
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
+			/*
 			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
 							"FinJournalTransactionSessionEJBBeanLocal");
@@ -6469,13 +6475,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 			VenOrderItemSessionEJBLocal orderItemHome = (VenOrderItemSessionEJBLocal) this._genericLocator
 					.lookupLocal(VenOrderItemSessionEJBLocal.class,
 							"VenOrderItemSessionEJBBeanLocal");
+			*/
 
 			FinPeriod finPeriod = FinancePeriodUtil.getCurrentPeriod();
 
+			/*
 			List<FinSalesRecord> finSalesRecordList = salesRecordHome
 					.queryByRange(
 							"select o from FinSalesRecord o inner join fetch o.venOrderItem i left join fetch i.venOrderItemAdjustments where o.salesRecordId = "
 									+ finSalesRecordId, 0, 0);
+			*/
+			List<FinSalesRecord> finSalesRecordList = finSalesRecordDAO.findBySalesRecordIdInnerJoinOrderItemLeftJoinOrderItemAdjustment(finSalesRecordId);
 			if (finSalesRecordList.isEmpty()) {
 				throw new EJBException(
 						"Invalid finSalesRecordId passed to postSalesJournalTransaction. The sales record does not exist!");
@@ -6519,16 +6529,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 			AirwayBillEngineConnector awbConn = new AirwayBillEngineClientConnector();
 			boolean itemLogMSG = false;
 
-			_log.info("logistic service: "
+			CommonUtil.logInfo(this.getClass().getCanonicalName(), "postSalesJournalTransaction::logistic service: "
 					+ finSalesRecord.getVenOrderItem().getLogLogisticService()
 							.getLogLogisticsProvider()
 							.getLogisticsProviderCode());
 			if (finSalesRecord.getVenOrderItem().getLogLogisticService()
-					.getLogLogisticsProvider().getLogisticsProviderId() != VeniceConstants.VEN_LOGISTICS_PROVIDER_BOPIS
+					.getLogLogisticsProvider().getLogisticsProviderId() != VenLogisticsProviderConstants.VEN_LOGISTICS_PROVIDER_BOPIS.id()
 					&& finSalesRecord.getVenOrderItem().getLogLogisticService()
-							.getLogLogisticsProvider().getLogisticsProviderId() != VeniceConstants.VEN_LOGISTICS_PROVIDER_BIGPRODUCT) {
+							.getLogLogisticsProvider().getLogisticsProviderId() != VenLogisticsProviderConstants.VEN_LOGISTICS_PROVIDER_BIGPRODUCT.id()) {
 
-				_log.info("logistic service not bopis or big product, get airwaybill transaction");
+				CommonUtil.logInfo(this.getClass().getCanonicalName(), "postSalesJournalTransaction::logistic service not bopis or big product, get airwaybill transaction");
 				List<AirwayBillTransaction> awbList = (List<AirwayBillTransaction>) awbConn
 						.getAirwayBillTransactionByItem(finSalesRecord
 								.getVenOrderItem().getWcsOrderItemId());
@@ -6551,6 +6561,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			finJournalSales.setJournalId(VeniceConstants.FIN_JOURNAL_SALES);
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
+			/*
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = journalApprovalGroupHome
 					.queryByRange(
 							"select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Sales Journal for :"
@@ -6559,6 +6570,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ " and o.finApprovalStatus.approvalStatusId = "
 									+ VeniceConstants.FIN_APPROVAL_STATUS_APPROVED,
 							0, 0);
+			*/
+			List<FinJournalApprovalGroup> finJournalApprovalGroupList = finJournalApprovalGroupDAO.findByDescriptionAndApprovalStatusId(
+					"Sales Journal for :" + sdf.format(new Date()), FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
@@ -6574,8 +6588,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						System.currentTimeMillis()));
 
 				// Persist the journal group
-				finJournalApprovalGroup = journalApprovalGroupHome
-						.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				if (!em.contains(finJournalApprovalGroup)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postSalesJournalTransaction:: finJournalApprovalGroup not attached, calling save explicitly.");
+					finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+				}
 			} else {
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
 			}
@@ -6596,7 +6614,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 										+ finSalesRecord.getVenOrderItem()
 												.getOrderItemId(), 0, 0);
 				if (VenSettlementRecordList.size() > 0) {
-					_log.debug("VenSettlementRecord found");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction::VenSettlementRecord found");
 					venSettlementRecord = VenSettlementRecordList.get(0);
 
 					if (venSettlementRecord == null) {
@@ -6605,11 +6623,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 				}
 			} catch (Exception e) {
 				String errMsg = "Settlement record not found";
-				_log.error(errMsg);
+				CommonUtil.logError(this.getClass().getCanonicalName(), errMsg);
 				e.printStackTrace();
 			}
 
-			_log.debug("settlement record id: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction::settlement record id: "
 					+ venSettlementRecord.getSettlementRecordId());
 
 			String merchantCommisionType = venSettlementRecord
@@ -6624,9 +6642,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			// get discount for logistic provider from awb engine
 			if (finSalesRecord.getVenOrderItem().getLogLogisticService()
-					.getLogLogisticsProvider().getLogisticsProviderId() != VeniceConstants.VEN_LOGISTICS_PROVIDER_BOPIS
+					.getLogLogisticsProvider().getLogisticsProviderId() != VenLogisticsProviderConstants.VEN_LOGISTICS_PROVIDER_BOPIS.id()
 					&& finSalesRecord.getVenOrderItem().getLogLogisticService()
-							.getLogLogisticsProvider().getLogisticsProviderId() != VeniceConstants.VEN_LOGISTICS_PROVIDER_BIGPRODUCT) {
+							.getLogLogisticsProvider().getLogisticsProviderId() != VenLogisticsProviderConstants.VEN_LOGISTICS_PROVIDER_BIGPRODUCT.id()) {
 
 				GetLogisticProviderListResponse response = awbConn
 						.getAllLogisticProvider(finSalesRecord
@@ -6638,7 +6656,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getList();
 					discountLogisticPercentage = new BigDecimal(
 							logisticProviderList.get(0).getDiscountPercentage());
-					_log.info("discountLogisticPercentage from awb engine: "
+					CommonUtil.logInfo(this.getClass().getCanonicalName(), "postSalesJournalTransaction::discountLogisticPercentage from awb engine: "
 							+ discountLogisticPercentage);
 
 					if (discountLogisticPercentage.compareTo(new BigDecimal(0)) > 0) {
@@ -6654,14 +6672,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					// persist discount to venOrderItem
 					VenOrderItem item = finSalesRecord.getVenOrderItem();
-					_log.info("saving discount percentage and amount for wcs_order_item_id: "
+					CommonUtil.logInfo(this.getClass().getCanonicalName(), "postSalesJournalTransaction::saving discount percentage and amount for wcs_order_item_id: "
 							+ item.getWcsOrderItemId());
 					item.setLogisticDiscountPercentage(discountLogisticPercentage);
 					item.setLogisticDiscountAmount(discountLogisticAmount);
-					orderItemHome.mergeVenOrderItem(item);
+					//orderItemHome.mergeVenOrderItem(item);
+					if (!em.contains(item)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(),
+								"postSalesJournalTransaction:: item not attached, calling save to attach.");
+						item = venOrderItemDAO.save(item);				
+					}
 				}
 			}
-			_log.debug("totalShippingCost: " + totalShippingCost);
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction::totalShippingCost: " + totalShippingCost);
 
 			/*
 			 * POST DEBIT Acc No : 2230001 , Desc : Uang Jaminan Transaksi
@@ -6677,7 +6700,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountUangJaminanTransaksi = new FinAccount();
 			finAccountUangJaminanTransaksi
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 			ujtJournalTransaction.setFinAccount(finAccountUangJaminanTransaksi);
 
 			ujtJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -6686,12 +6709,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 			finTransactionStatus
-					.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
+					.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
 			ujtJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 			FinTransactionType finTransactionTypeUangJaminanTransaksi = new FinTransactionType();
 			finTransactionTypeUangJaminanTransaksi
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 			ujtJournalTransaction
 					.setFinTransactionType(finTransactionTypeUangJaminanTransaksi);
 
@@ -6716,11 +6739,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			ujtJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(ujtJournalTransaction);
+			//ujtJournalTransaction = journalTransactionHome.persistFinJournalTransaction(ujtJournalTransaction);
+			if (!em.contains(ujtJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: ujtJournalTransaction not attached, calling save explicitly");
+				ujtJournalTransaction = finJournalTransactionDAO.save(ujtJournalTransaction);
+			}
 
-			_log.debug("\n Set Uang Jaminan Transaksi AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_2230001 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Uang Jaminan Transaksi AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_2230001.id() + " Amount: "
 					+ ujtJournalTransaction.getTransactionAmount());
 
 			/*
@@ -6736,7 +6763,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finAccountSMPromo = new FinAccount();
-			finAccountSMPromo.setAccountId(VeniceConstants.FIN_ACCOUNT_6133010);
+			finAccountSMPromo.setAccountId(FinAccountConstants.FIN_ACCOUNT_6133010.id());
 			smPromoJournalTransaction.setFinAccount(finAccountSMPromo);
 			smPromoJournalTransaction.setFinSalesRecords(finSalesRecordList);
 			smPromoJournalTransaction.setFinJournal(finJournalSales);
@@ -6746,7 +6773,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypePromo = new FinTransactionType();
 			finTransactionTypePromo
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_SM_PROMOSI_KONSUMEN);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_SM_PROMOSI_KONSUMEN.id());
 			smPromoJournalTransaction
 					.setFinTransactionType(finTransactionTypePromo);
 
@@ -6757,9 +6784,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * teraplikasi/1,1
 			 */
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())) {
 				List<VenOrderItemAdjustment> venOrderItemAdjustments = finSalesRecord
 						.getVenOrderItem().getVenOrderItemAdjustments();
 				BigDecimal smPromoAmount = getNonVoucherAmount(venOrderItemAdjustments);
@@ -6788,11 +6815,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			smPromoJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(smPromoJournalTransaction);
+			//smPromoJournalTransaction = journalTransactionHome.persistFinJournalTransaction(smPromoJournalTransaction);
+			if (!em.contains(smPromoJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+						"postSalesJournalTransaction:: smPromoJournalTransaction not attached, calling save to attach.");
+				smPromoJournalTransaction = finJournalTransactionDAO.save(smPromoJournalTransaction);
+			}
 
-			_log.debug("\n Set Promosi Konsumen AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_6133010 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Promosi Konsumen AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_6133010.id() + " Amount: "
 					+ smPromoJournalTransaction.getTransactionAmount());
 
 			/*
@@ -6811,7 +6842,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finBiayaBarang = new FinAccount();
-			finBiayaBarang.setAccountId(VeniceConstants.FIN_ACCOUNT_5110004);
+			finBiayaBarang.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110004.id());
 			biayaBarangJournalTransaction.setFinAccount(finBiayaBarang);
 			biayaBarangJournalTransaction
 					.setFinSalesRecords(finSalesRecordList);
@@ -6822,18 +6853,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeBiayaBarang = new FinTransactionType();
 			finTransactionTypeBiayaBarang
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_HPP_BIAYA_BARANG);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_HPP_BIAYA_BARANG.id());
 
 			biayaBarangJournalTransaction
 					.setFinTransactionType(finTransactionTypeBiayaBarang);
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())) {
 				biayaBarangJournalTransaction
 						.setTransactionAmount(new BigDecimal(0));
 			} else if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER)) {
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER.label())) {
 				biayaBarangJournalTransaction
 						.setTransactionAmount((finSalesRecord.getVenOrderItem()
 								.getTotal().subtract(finSalesRecord
@@ -6865,11 +6896,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			biayaBarangJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(biayaBarangJournalTransaction);
+			//biayaBarangJournalTransaction = journalTransactionHome.persistFinJournalTransaction(biayaBarangJournalTransaction);
+			if (!em.contains(biayaBarangJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+						"postSalesJournalTransaction:: biayaBarangJournalTransaction not attached, calling save explicitly.");
+				biayaBarangJournalTransaction = finJournalTransactionDAO.save(biayaBarangJournalTransaction);
+			}
 
-			_log.debug("\n Set HPP Biaya Barang AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_5110003 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set HPP Biaya Barang AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_5110003.id() + " Amount: "
 					+ biayaBarangJournalTransaction.getTransactionAmount());
 
 			/*
@@ -6886,7 +6921,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finPotPenjualan = new FinAccount();
-			finPotPenjualan.setAccountId(VeniceConstants.FIN_ACCOUNT_4900000);
+			finPotPenjualan.setAccountId(FinAccountConstants.FIN_ACCOUNT_4900000.id());
 			potPenjualanJournalTransaction.setFinAccount(finPotPenjualan);
 			potPenjualanJournalTransaction
 					.setFinSalesRecords(finSalesRecordList);
@@ -6897,7 +6932,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypePotPenjualan = new FinTransactionType();
 			finTransactionTypePotPenjualan
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_POT_PENJUALAN);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_POT_PENJUALAN.id());
 			potPenjualanJournalTransaction
 					.setFinTransactionType(finTransactionTypePotPenjualan);
 
@@ -6906,9 +6941,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * promo yang teraplikasi/1,1
 			 */
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER.label())) {
 
 				List<VenOrderItemAdjustment> venOrderItemAdjustments = finSalesRecord
 						.getVenOrderItem().getVenOrderItemAdjustments();
@@ -6948,11 +6983,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			potPenjualanJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(potPenjualanJournalTransaction);
+			//potPenjualanJournalTransaction = journalTransactionHome.persistFinJournalTransaction(potPenjualanJournalTransaction);
+			if (!em.contains(potPenjualanJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: potPenjualanJournalTransaction not attached, calling save explicitly.");
+				potPenjualanJournalTransaction = finJournalTransactionDAO.save(potPenjualanJournalTransaction);
+			}
 
-			_log.debug("\n Set Pot Penjualan AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_4900000 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Pot Penjualan AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_4900000.id() + " Amount: "
 					+ potPenjualanJournalTransaction.getTransactionAmount());
 
 			/*
@@ -6970,7 +7009,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finAccountVoucher = new FinAccount();
-			finAccountVoucher.setAccountId(VeniceConstants.FIN_ACCOUNT_2220001);
+			finAccountVoucher.setAccountId(FinAccountConstants.FIN_ACCOUNT_2220001.id());
 			voucherJournalTransaction.setFinAccount(finAccountVoucher);
 
 			voucherJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -6981,7 +7020,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeVoucher = new FinTransactionType();
 			finTransactionTypeVoucher
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_VOUCHER_YANG_BELUM_DIREALISASI);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_VOUCHER_YANG_BELUM_DIREALISASI.id());
 			voucherJournalTransaction
 					.setFinTransactionType(finTransactionTypeVoucher);
 
@@ -7017,11 +7056,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			voucherJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(voucherJournalTransaction);
+			//voucherJournalTransaction = journalTransactionHome.persistFinJournalTransaction(voucherJournalTransaction);
+			if (!em.contains(voucherJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: voucherJournalTransaction not attached, calling save to attach.");
+				voucherJournalTransaction = finJournalTransactionDAO.save(voucherJournalTransaction);
+			}
 
-			_log.debug("\n Set Voucher belum direalisasi AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_2220001 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Voucher belum direalisasi AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_2220001.id() + " Amount: "
 					+ voucherJournalTransaction.getTransactionAmount());
 
 			/*
@@ -7039,7 +7082,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountVoucherCS = new FinAccount();
 			finAccountVoucherCS
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_6133020);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_6133020.id());
 			voucherCSJournalTransaction.setFinAccount(finAccountVoucherCS);
 
 			voucherCSJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -7050,7 +7093,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeVoucherCS = new FinTransactionType();
 			finTransactionTypeVoucherCS
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_SM_VOUCHER_CUSTOMER_SERVICE);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_SM_VOUCHER_CUSTOMER_SERVICE.id());
 			voucherCSJournalTransaction
 					.setFinTransactionType(finTransactionTypeVoucherCS);
 
@@ -7070,14 +7113,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * nilai promo yang teraplikasi/1,1
 			 */
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())) {
 				voucherCSAmount = getVoucherCSAmount(venOrderItemAdjustments);
 			} else if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER.label())) {
 				voucherCSAmount = new BigDecimal(0);
 			}
 
@@ -7097,11 +7140,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
 
-			voucherCSJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(voucherCSJournalTransaction);
+			//voucherCSJournalTransaction = journalTransactionHome.persistFinJournalTransaction(voucherCSJournalTransaction);
+			if (!em.contains(voucherCSJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: voucherCSJournalTransaction not attached, calling save explicitly.");
+				voucherCSJournalTransaction = finJournalTransactionDAO.save(voucherCSJournalTransaction);
+			}
 
-			_log.debug("\n Set Voucher Customer Service AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_6133020 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Voucher Customer Service AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_6133020.id() + " Amount: "
 					+ voucherCSJournalTransaction.getTransactionAmount());
 
 			/*
@@ -7119,7 +7166,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountHutangMerchant = new FinAccount();
 			finAccountHutangMerchant
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_2130001);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_2130001.id());
 
 			hutangMerchantJournalTransaction
 					.setFinAccount(finAccountHutangMerchant);
@@ -7132,7 +7179,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeHutangMerchant = new FinTransactionType();
 			finTransactionTypeHutangMerchant
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_HUTANG_MERCHANT);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_HUTANG_MERCHANT.id());
 			hutangMerchantJournalTransaction
 					.setFinTransactionType(finTransactionTypeHutangMerchant);
 			hutangMerchantJournalTransaction
@@ -7140,9 +7187,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			if (venSettlementRecord != null) {
 				if (merchantCommisionType
-						.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)
+						.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())
 						|| merchantCommisionType
-								.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)) {
+								.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())) {
 					hutangMerchantJournalTransaction
 							.setTransactionAmount(finSalesRecord
 									.getMerchantPaymentAmount());
@@ -7170,11 +7217,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			hutangMerchantJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(hutangMerchantJournalTransaction);
+			//hutangMerchantJournalTransaction = journalTransactionHome.persistFinJournalTransaction(hutangMerchantJournalTransaction);
+			if (!em.contains(hutangMerchantJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: hutangMerchantJournalTransaction not attached, calling save to attach.");
+				hutangMerchantJournalTransaction = finJournalTransactionDAO.save(hutangMerchantJournalTransaction);
+			}
 
-			_log.debug("\n Set Hutang Merchant AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_2130001 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Hutang Merchant AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_2130001.id() + " Amount: "
 					+ hutangMerchantJournalTransaction.getTransactionAmount());
 
 			/*
@@ -7189,7 +7240,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountPenjualan = new FinAccount();
 			finAccountPenjualan
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_4110007);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110007.id());
 
 			penjualanJournalTransaction.setFinAccount(finAccountPenjualan);
 			penjualanJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -7201,16 +7252,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypePenjualan = new FinTransactionType();
 			finTransactionTypePenjualan
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENJUALAN);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENJUALAN.id());
 			penjualanJournalTransaction
 					.setFinTransactionType(finTransactionTypePenjualan);
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER.label())) {
 				penjualanJournalTransaction.setTransactionAmount(finSalesRecord
 						.getVenOrderItem().getTotal()
 						.divide(GDNPPN_DIVISOR, 2, RoundingMode.HALF_UP));
@@ -7238,14 +7289,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			penjualanJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(penjualanJournalTransaction);
+			//penjualanJournalTransaction = journalTransactionHome.persistFinJournalTransaction(penjualanJournalTransaction);
+			if (!em.contains(penjualanJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+						"postSalesJournalTransaction:: penjualanJournalTransaction not attached, calling save explicitly.");
+				penjualanJournalTransaction = finJournalTransactionDAO.save(penjualanJournalTransaction);
+			}
 
 			incomeForPPNCalculation = incomeForPPNCalculation
 					.add(penjualanJournalTransaction.getTransactionAmount());
 
-			_log.debug("\n Set Penjualan AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_4110007 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Penjualan AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_4110007.id() + " Amount: "
 					+ penjualanJournalTransaction.getTransactionAmount());
 
 			/*
@@ -7262,7 +7317,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finAccountKomisi = new FinAccount();
-			finAccountKomisi.setAccountId(VeniceConstants.FIN_ACCOUNT_4110001);
+			finAccountKomisi.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110001.id());
 
 			komisiJournalTransaction.setFinAccount(finAccountKomisi);
 			komisiJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -7274,11 +7329,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeKomisi = new FinTransactionType();
 			finTransactionTypeKomisi
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_KOMISI);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_KOMISI.id());
 			komisiJournalTransaction
 					.setFinTransactionType(finTransactionTypeKomisi);
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)) {
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())) {
 				komisiJournalTransaction.setTransactionAmount(finSalesRecord
 						.getGdnCommissionAmount().divide(GDNPPN_DIVISOR, 2,
 								RoundingMode.HALF_UP));
@@ -7306,13 +7361,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			komisiJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(komisiJournalTransaction);
+			//komisiJournalTransaction = journalTransactionHome.persistFinJournalTransaction(komisiJournalTransaction);
+			if (!em.contains(komisiJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: komisiJournalTransaction not attached, calling save explicitly.");
+				komisiJournalTransaction = finJournalTransactionDAO.save(komisiJournalTransaction);
+			}
 			incomeForPPNCalculation = incomeForPPNCalculation
 					.add(komisiJournalTransaction.getTransactionAmount());
 
-			_log.debug("\n Set Pendapatan Komisi AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_4110001 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Pendapatan Komisi AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_4110001.id() + " Amount: "
 					+ komisiJournalTransaction.getTransactionAmount());
 
 			boolean freeShipping = false;
@@ -7324,7 +7383,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 				if (venOrderItemAdjustment.getVenPromotion().getPromotionName()
 						.toLowerCase().contains("free shipping")) {
 					freeShipping = true;
-					_log.debug("\n this item is free shipping");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: this item is free shipping");
 					break;
 				}
 			}
@@ -7345,7 +7404,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountPendapatanLogistics = new FinAccount();
 				finAccountPendapatanLogistics
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_4110004);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110004.id());
 
 				pendapatanLogisticsJournalTransaction
 						.setFinAccount(finAccountPendapatanLogistics);
@@ -7359,7 +7418,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypePendapatanLogistics = new FinTransactionType();
 				finTransactionTypePendapatanLogistics
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_LOGISTIK);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_LOGISTIK.id());
 				pendapatanLogisticsJournalTransaction
 						.setFinTransactionType(finTransactionTypePendapatanLogistics);
 				pendapatanLogisticsJournalTransaction
@@ -7387,15 +7446,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				pendapatanLogisticsJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(pendapatanLogisticsJournalTransaction);
+				//pendapatanLogisticsJournalTransaction = journalTransactionHome.persistFinJournalTransaction(pendapatanLogisticsJournalTransaction);
+				if (!em.contains(pendapatanLogisticsJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postSalesJournalTransaction:: pendapatanLogisticsJournalTransaction not attached, calling save to attach.");
+					pendapatanLogisticsJournalTransaction = finJournalTransactionDAO.save(pendapatanLogisticsJournalTransaction);
+				}
 
 				incomeForPPNCalculation = incomeForPPNCalculation
 						.add(pendapatanLogisticsJournalTransaction
 								.getTransactionAmount());
 
-				_log.debug("\n Set Pendapatan Logistik AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_4110004
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Pendapatan Logistik AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_4110004.id()
 						+ " Amount: "
 						+ pendapatanLogisticsJournalTransaction
 								.getTransactionAmount());
@@ -7415,7 +7478,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountJasaTransaksi = new FinAccount();
 			finAccountJasaTransaksi
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_4110003);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110003.id());
 
 			jasaTransaksiJournalTransaction
 					.setFinAccount(finAccountJasaTransaksi);
@@ -7428,14 +7491,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeProcessFee = new FinTransactionType();
 			finTransactionTypeProcessFee
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_TRANSAKSI);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_TRANSAKSI.id());
 			jasaTransaksiJournalTransaction
 					.setFinTransactionType(finTransactionTypeProcessFee);
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_REBATE.label())) {
 				jasaTransaksiJournalTransaction
 						.setTransactionAmount(finSalesRecord
 								.getGdnTransactionFeeAmount()
@@ -7466,14 +7529,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			jasaTransaksiJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(jasaTransaksiJournalTransaction);
+			//jasaTransaksiJournalTransaction = journalTransactionHome.persistFinJournalTransaction(jasaTransaksiJournalTransaction);
+			if (!em.contains(jasaTransaksiJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: jasaTransaksiJournalTransaction not attached, calling save explicitly.");
+				jasaTransaksiJournalTransaction = finJournalTransactionDAO.save(jasaTransaksiJournalTransaction);
+			}
 
 			incomeForPPNCalculation = incomeForPPNCalculation
 					.add(jasaTransaksiJournalTransaction.getTransactionAmount());
 
-			_log.debug("\n Set Pendapatan Jasa Transaksi AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_4110003 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Pendapatan Jasa Transaksi AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_4110003.id() + " Amount: "
 					+ jasaTransaksiJournalTransaction.getTransactionAmount());
 
 			/*
@@ -7491,7 +7558,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finAccountJasaHandling = new FinAccount();
 			finAccountJasaHandling
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_4110005);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110005.id());
 
 			jasaHandlingJournalTransaction
 					.setFinAccount(finAccountJasaHandling);
@@ -7504,7 +7571,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeProcessFees = new FinTransactionType();
 			finTransactionTypeProcessFees
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_HANDLING);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PENDAPATAN_JASA_HANDLING.id());
 
 			jasaHandlingJournalTransaction
 					.setFinTransactionType(finTransactionTypeProcessFees);
@@ -7533,14 +7600,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			jasaHandlingJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(jasaHandlingJournalTransaction);
+			//jasaHandlingJournalTransaction = journalTransactionHome.persistFinJournalTransaction(jasaHandlingJournalTransaction);
+			if (!em.contains(jasaHandlingJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: jasaHandlingJournalTransaction not attached, calling save explicitly.");
+				jasaHandlingJournalTransaction = finJournalTransactionDAO.save(jasaHandlingJournalTransaction);
+			}
 
 			incomeForPPNCalculation = incomeForPPNCalculation
 					.add(jasaHandlingJournalTransaction.getTransactionAmount());
 
-			_log.debug("\n Set Pendapatan Jasa Handling AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_4110005 + " Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Pendapatan Jasa Handling AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_4110005.id() + " Amount: "
 					+ jasaHandlingJournalTransaction.getTransactionAmount());
 
 			/*
@@ -7555,7 +7626,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			FinAccount finAccountPPN = new FinAccount();
-			finAccountPPN.setAccountId(VeniceConstants.FIN_ACCOUNT_2180008);
+			finAccountPPN.setAccountId(FinAccountConstants.FIN_ACCOUNT_2180008.id());
 
 			ppnJournalTransaction.setFinAccount(finAccountPPN);
 			ppnJournalTransaction.setFinSalesRecords(finSalesRecordList);
@@ -7565,10 +7636,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypePPN = new FinTransactionType();
 			finTransactionTypePPN
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PPN);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PPN.id());
 			ppnJournalTransaction.setFinTransactionType(finTransactionTypePPN);
 
-			_log.info("pkp: " + pkp);
+			CommonUtil.logInfo(this.getClass().getCanonicalName(), "postSalesJournalTransaction::pkp: " + pkp);
 			if (pkp) {
 				if (merchantCommisionType
 						.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_COMMISSION)
@@ -7581,11 +7652,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 				}
 
 				if (merchantCommisionType
-						.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+						.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 						|| merchantCommisionType
-								.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)
+								.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())
 						|| merchantCommisionType
-								.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER)) {
+								.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER.label())) {
 					ppnJournalTransaction
 							.setTransactionAmount(incomeForPPNCalculation
 									.subtract(
@@ -7619,11 +7690,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 							: null);
 
 			// Persist the PPN journal transaction
-			ppnJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(ppnJournalTransaction);
+			//ppnJournalTransaction = journalTransactionHome.persistFinJournalTransaction(ppnJournalTransaction);
+			if (!em.contains(ppnJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: ppnJournalTransaction not attached, calling save explicitly.");
+				ppnJournalTransaction = finJournalTransactionDAO.save(ppnJournalTransaction);
+			}
 
-			_log.debug("\n set PPN Acc No "
-					+ VeniceConstants.FIN_ACCOUNT_2180008 + ", Amount: "
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: set PPN Acc No "
+					+ FinAccountConstants.FIN_ACCOUNT_2180008.id() + ", Amount: "
 					+ ppnJournalTransaction.getTransactionAmount());
 
 			/*
@@ -7644,7 +7719,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinAccount finInventoryOverVoucher = new FinAccount();
 			finInventoryOverVoucher
-					.setAccountId(VeniceConstants.FIN_ACCOUNT_1180001);
+					.setAccountId(FinAccountConstants.FIN_ACCOUNT_1180001.id());
 			inventoryOverVoucherJournalTransaction
 					.setFinAccount(finInventoryOverVoucher);
 			inventoryOverVoucherJournalTransaction
@@ -7657,18 +7732,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionType finTransactionTypeInventoryOverVoucher = new FinTransactionType();
 			finTransactionTypeInventoryOverVoucher
-					.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_INVENTORY_OVER_VOUCHER);
+					.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_INVENTORY_OVER_VOUCHER.id());
 
 			inventoryOverVoucherJournalTransaction
 					.setFinTransactionType(finTransactionTypeInventoryOverVoucher);
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING)
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_TRADING.label())
 					|| merchantCommisionType
-							.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)) {
+							.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())) {
 				inventoryOverVoucherJournalTransaction
 						.setTransactionAmount(new BigDecimal(0));
 			} else if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER)) {
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER.label())) {
 				if (pkp) {
 					inventoryOverVoucherJournalTransaction
 							.setTransactionAmount((finSalesRecord
@@ -7708,17 +7783,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getVenOrder().getWcsOrderId() != null ? finSalesRecord
 							.getVenOrderItem().getVenOrder().getWcsOrderId()
 							: null);
-			inventoryOverVoucherJournalTransaction = journalTransactionHome
-					.persistFinJournalTransaction(inventoryOverVoucherJournalTransaction);
+			//inventoryOverVoucherJournalTransaction = journalTransactionHome.persistFinJournalTransaction(inventoryOverVoucherJournalTransaction);
+			if (!em.contains(inventoryOverVoucherJournalTransaction)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postSalesJournalTransaction:: inventoryOverVoucherJournalTransaction not attached, calling save explicitly.");
+				inventoryOverVoucherJournalTransaction = finJournalTransactionDAO.save(inventoryOverVoucherJournalTransaction);
+			}
 
-			_log.debug("\n Set Inventory Over Voucher AccNo: "
-					+ VeniceConstants.FIN_ACCOUNT_1180001
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Inventory Over Voucher AccNo: "
+					+ FinAccountConstants.FIN_ACCOUNT_1180001.id()
 					+ " Amount: "
 					+ inventoryOverVoucherJournalTransaction
 							.getTransactionAmount());
 
 			if (freeShipping) {
-				_log.debug(" FREE SHIPPING: YES");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: FREE SHIPPING: YES");
 				/*
 				 * Post the DEBIT AccNo :6133018, Desc:SM BEBAN PROMOSI BEBAS
 				 * BIAYA KIRIM
@@ -7735,7 +7814,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountBebanPromosiBebasBiayaKirimLogistics = new FinAccount();
 				finAccountBebanPromosiBebasBiayaKirimLogistics
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_6133018);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_6133018.id());
 
 				bebanPromosiBebasBiayaKirimJournalTransaction
 						.setFinAccount(finAccountBebanPromosiBebasBiayaKirimLogistics);
@@ -7750,7 +7829,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeBebanPromosiBebasBiayaKirim = new FinTransactionType();
 				finTransactionTypeBebanPromosiBebasBiayaKirim
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_SM_BEBAN_PROMOSI_BEBAS_BIAYA_KIRIM);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_SM_BEBAN_PROMOSI_BEBAS_BIAYA_KIRIM.id());
 
 				bebanPromosiBebasBiayaKirimJournalTransaction
 						.setFinTransactionType(finTransactionTypeBebanPromosiBebasBiayaKirim);
@@ -7779,11 +7858,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				bebanPromosiBebasBiayaKirimJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(bebanPromosiBebasBiayaKirimJournalTransaction);
+				//bebanPromosiBebasBiayaKirimJournalTransaction = journalTransactionHome.persistFinJournalTransaction(bebanPromosiBebasBiayaKirimJournalTransaction);
+				if (!em.contains(bebanPromosiBebasBiayaKirimJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postSalesJournalTransaction:: bebanPromosiBebasBiayaKirimJournalTransaction not attached, calling save.");
+					bebanPromosiBebasBiayaKirimJournalTransaction = finJournalTransactionDAO.save(bebanPromosiBebasBiayaKirimJournalTransaction);
+				}
 
-				_log.debug("\n Set Bebas Biaya Kirim AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_6133018
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Bebas Biaya Kirim AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_6133018.id()
 						+ " Amount: "
 						+ bebanPromosiBebasBiayaKirimJournalTransaction
 								.getTransactionAmount());
@@ -7803,7 +7886,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountBiayaLogistik = new FinAccount();
 				finAccountBiayaLogistik
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2210002);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2210002.id());
 
 				biayaLogistikJournalTransaction
 						.setFinAccount(finAccountBiayaLogistik);
@@ -7816,7 +7899,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeBiayaLogistik = new FinTransactionType();
 				finTransactionTypeBiayaLogistik
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
 				biayaLogistikJournalTransaction
 						.setFinTransactionType(finTransactionTypeBiayaLogistik);
 
@@ -7844,17 +7927,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				biayaLogistikJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(biayaLogistikJournalTransaction);
+				//biayaLogistikJournalTransaction = journalTransactionHome.persistFinJournalTransaction(biayaLogistikJournalTransaction);
+				if (!em.contains(biayaLogistikJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postSalesJournaltransaction:: biayaLogistikJournalTransaction not attached, calling save.");
+					biayaLogistikJournalTransaction = finJournalTransactionDAO.save(biayaLogistikJournalTransaction);
+				}
 
-				_log.debug("\n Set Bebas Harus Dibayar Logistik AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_2210002
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Bebas Harus Dibayar Logistik AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_2210002.id()
 						+ " Amount: "
 						+ biayaLogistikJournalTransaction
 								.getTransactionAmount());
 
 				if (itemLogMSG) {
-					_log.debug("BLIBLI MESSENGER: YES");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction::BLIBLI MESSENGER: YES");
 					/*
 					 * Post the CREDIT Acc No: 2210002, Desc: BIAYA HARUS
 					 * DIBAYAR LOGISTIK
@@ -7871,7 +7958,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinAccount finAccountBiayaLogistikMSG = new FinAccount();
 					finAccountBiayaLogistikMSG
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_2210002);
+							.setAccountId(FinAccountConstants.FIN_ACCOUNT_2210002.id());
 
 					biayaLogistikMSGJournalTransaction
 							.setFinAccount(finAccountBiayaLogistikMSG);
@@ -7885,7 +7972,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinTransactionType finTransactionTypeBiayaLogistikMSG = new FinTransactionType();
 					finTransactionTypeBiayaLogistikMSG
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
 					biayaLogistikMSGJournalTransaction
 							.setFinTransactionType(finTransactionTypeBiayaLogistikMSG);
 
@@ -7914,11 +8001,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 									.getVenOrderItem().getVenOrder()
 									.getWcsOrderId()
 									: null);
-					biayaLogistikMSGJournalTransaction = journalTransactionHome
-							.persistFinJournalTransaction(biayaLogistikMSGJournalTransaction);
+					//biayaLogistikMSGJournalTransaction = journalTransactionHome.persistFinJournalTransaction(biayaLogistikMSGJournalTransaction);
+					if (!em.contains(biayaLogistikMSGJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(),
+								"postSalesJournalTransaction:: biayaLogistikMSGJournalTransaction not attached, calling save.");
+						biayaLogistikMSGJournalTransaction = finJournalTransactionDAO.save(biayaLogistikMSGJournalTransaction);
+					}
 
-					_log.debug("\n Set Biaya Harus Dibayar Logistik AccNo: "
-							+ VeniceConstants.FIN_ACCOUNT_2210002
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Biaya Harus Dibayar Logistik AccNo: "
+							+ FinAccountConstants.FIN_ACCOUNT_2210002.id()
 							+ " Amount: "
 							+ biayaLogistikMSGJournalTransaction
 									.getTransactionAmount());
@@ -7939,7 +8030,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinAccount finAccountBebanPromosiBebasBiayaKirimLogisticsMSG = new FinAccount();
 					finAccountBebanPromosiBebasBiayaKirimLogisticsMSG
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_6133018);
+							.setAccountId(FinAccountConstants.FIN_ACCOUNT_6133018.id());
 
 					bebanPromosiBebasBiayaKirimMSGJournalTransaction
 							.setFinAccount(finAccountBebanPromosiBebasBiayaKirimLogisticsMSG);
@@ -7954,7 +8045,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinTransactionType finTransactionTypeBebanPromosiBebasBiayaKirimMSG = new FinTransactionType();
 					finTransactionTypeBebanPromosiBebasBiayaKirimMSG
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_SM_BEBAN_PROMOSI_BEBAS_BIAYA_KIRIM);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_SM_BEBAN_PROMOSI_BEBAS_BIAYA_KIRIM.id());
 
 					bebanPromosiBebasBiayaKirimMSGJournalTransaction
 							.setFinTransactionType(finTransactionTypeBebanPromosiBebasBiayaKirimMSG);
@@ -7983,11 +8074,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 									.getVenOrderItem().getVenOrder()
 									.getWcsOrderId()
 									: null);
-					bebanPromosiBebasBiayaKirimMSGJournalTransaction = journalTransactionHome
-							.persistFinJournalTransaction(bebanPromosiBebasBiayaKirimMSGJournalTransaction);
+					//bebanPromosiBebasBiayaKirimMSGJournalTransaction = journalTransactionHome.persistFinJournalTransaction(bebanPromosiBebasBiayaKirimMSGJournalTransaction);
+					if (!em.contains(bebanPromosiBebasBiayaKirimMSGJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(),
+								"postSalesJournalTransaction:: bebanPromosiBebasBiayaKirimMSGJournalTransaction not attached, calling save.");
+						bebanPromosiBebasBiayaKirimMSGJournalTransaction = finJournalTransactionDAO.save(bebanPromosiBebasBiayaKirimMSGJournalTransaction);
+					}
 
-					_log.debug("\n Set Bebas Biaya Kirim AccNo: "
-							+ VeniceConstants.FIN_ACCOUNT_6133018
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Bebas Biaya Kirim AccNo: "
+							+ FinAccountConstants.FIN_ACCOUNT_6133018.id()
 							+ " Amount: "
 							+ bebanPromosiBebasBiayaKirimMSGJournalTransaction
 									.getTransactionAmount());
@@ -8010,7 +8105,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount hPPlogisticFinAccount = new FinAccount();
 				hPPlogisticFinAccount
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_5110001);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110001.id());
 				hPPlogisticJournalTransaction
 						.setFinAccount(hPPlogisticFinAccount);
 				hPPlogisticJournalTransaction
@@ -8022,7 +8117,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType hppLogistic = new FinTransactionType();
 				hppLogistic
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_HPP_LOGISTIK);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_HPP_LOGISTIK.id());
 
 				hPPlogisticJournalTransaction
 						.setFinTransactionType(hppLogistic);
@@ -8050,11 +8145,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				hPPlogisticJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(hPPlogisticJournalTransaction);
+				//hPPlogisticJournalTransaction = journalTransactionHome.persistFinJournalTransaction(hPPlogisticJournalTransaction);
+				if (!em.contains(hPPlogisticJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"posSalesJournalTransaction:: hPPlogisticJournalTransaction not attached, calling save.");
+					hPPlogisticJournalTransaction = finJournalTransactionDAO.save(hPPlogisticJournalTransaction);
+				}
 
-				_log.debug("\n Set  HPP-logistic AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_5110001 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set  HPP-logistic AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_5110001.id() + " Amount: "
 						+ hPPlogisticJournalTransaction.getTransactionAmount());
 
 				/*
@@ -8072,7 +8171,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccountBiayaLogistik = new FinAccount();
 				finAccountBiayaLogistik
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2210002);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2210002.id());
 
 				biayaLogistikJournalTransaction
 						.setFinAccount(finAccountBiayaLogistik);
@@ -8085,7 +8184,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeBiayaLogistik = new FinTransactionType();
 				finTransactionTypeBiayaLogistik
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
 				biayaLogistikJournalTransaction
 						.setFinTransactionType(finTransactionTypeBiayaLogistik);
 
@@ -8113,17 +8212,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				biayaLogistikJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(biayaLogistikJournalTransaction);
+				//biayaLogistikJournalTransaction = journalTransactionHome.persistFinJournalTransaction(biayaLogistikJournalTransaction);
+				if (!em.contains(biayaLogistikJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postSalesJournalTransaction::biayaLogistikJournalTransaction not attached, calling save.");
+					biayaLogistikJournalTransaction = finJournalTransactionDAO.save(biayaLogistikJournalTransaction);
+				}
 
-				_log.debug("\n Set Biaya Harus Dibayar Logistik AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_2210002
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Biaya Harus Dibayar Logistik AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_2210002.id()
 						+ " Amount: "
 						+ biayaLogistikJournalTransaction
 								.getTransactionAmount());
 
 				if (itemLogMSG) {
-					_log.debug("BLIBLI MESSENGER: YES");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction::BLIBLI MESSENGER: YES");
 					/*
 					 * Post the CREDIT Acc No: 2210002, Desc: BIAYA HARUS
 					 * DIBAYAR LOGISTIK
@@ -8140,7 +8243,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinAccount finAccountBiayaLogistikMSG = new FinAccount();
 					finAccountBiayaLogistikMSG
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_2210002);
+							.setAccountId(FinAccountConstants.FIN_ACCOUNT_2210002.id());
 
 					biayaLogistikMSGJournalTransaction
 							.setFinAccount(finAccountBiayaLogistikMSG);
@@ -8154,7 +8257,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinTransactionType finTransactionTypeBiayaLogistikMSG = new FinTransactionType();
 					finTransactionTypeBiayaLogistikMSG
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BIAYA_HARUS_DIBAYAR_LOGISTIK.id());
 					biayaLogistikMSGJournalTransaction
 							.setFinTransactionType(finTransactionTypeBiayaLogistikMSG);
 
@@ -8185,11 +8288,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					// Persist the BIAYA HARUS DIBAYAR LOGISTIK journal
 					// transaction
-					biayaLogistikMSGJournalTransaction = journalTransactionHome
-							.persistFinJournalTransaction(biayaLogistikMSGJournalTransaction);
+					//biayaLogistikMSGJournalTransaction = journalTransactionHome.persistFinJournalTransaction(biayaLogistikMSGJournalTransaction);
+					if (!em.contains(biayaLogistikMSGJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "postSalesJournalTransaction:: biayaLogistikMSGJournalTransaction not attached, calling save.");
+						biayaLogistikMSGJournalTransaction = finJournalTransactionDAO.save(biayaLogistikMSGJournalTransaction);
+					}
 
-					_log.debug("\n Set Biaya Harus Dibayar Logistik AccNo: "
-							+ VeniceConstants.FIN_ACCOUNT_2210002
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Biaya Harus Dibayar Logistik AccNo: "
+							+ FinAccountConstants.FIN_ACCOUNT_2210002.id()
 							+ " Amount: "
 							+ biayaLogistikMSGJournalTransaction
 									.getTransactionAmount());
@@ -8208,7 +8315,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinAccount hPPlogisticMSGFinAccount = new FinAccount();
 					hPPlogisticMSGFinAccount
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_5110001);
+							.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110001.id());
 					hPPlogisticMSGJournalTransaction
 							.setFinAccount(hPPlogisticMSGFinAccount);
 					hPPlogisticMSGJournalTransaction
@@ -8221,7 +8328,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinTransactionType hPPlogisticMSG = new FinTransactionType();
 					hPPlogisticMSG
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_HPP_LOGISTIK);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_HPP_LOGISTIK.id());
 
 					hPPlogisticMSGJournalTransaction
 							.setFinTransactionType(hPPlogisticMSG);
@@ -8249,11 +8356,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 									.getVenOrderItem().getVenOrder()
 									.getWcsOrderId()
 									: null);
-					hPPlogisticMSGJournalTransaction = journalTransactionHome
-							.persistFinJournalTransaction(hPPlogisticMSGJournalTransaction);
+					//hPPlogisticMSGJournalTransaction = journalTransactionHome.persistFinJournalTransaction(hPPlogisticMSGJournalTransaction);
+					if (!em.contains(hPPlogisticMSGJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+								"postSalesJournalTransaction:: hPPlogisticMSGJournalTransaction not attached, calling save explicitly.");
+						hPPlogisticMSGJournalTransaction = finJournalTransactionDAO.save(hPPlogisticMSGJournalTransaction);
+					}
 
-					_log.debug("\n Set  HPP-logistic AccNo: "
-							+ VeniceConstants.FIN_ACCOUNT_5110001
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set  HPP-logistic AccNo: "
+							+ FinAccountConstants.FIN_ACCOUNT_5110001.id()
 							+ " Amount: "
 							+ hPPlogisticMSGJournalTransaction
 									.getTransactionAmount());
@@ -8261,8 +8372,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT)) {
-				_log.debug("MERCHANT TYPE: CONSIGNMENT");
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_CONSIGNMENT.label())) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction::MERCHANT TYPE: CONSIGNMENT");
 
 				/*
 				 * Post the DEBIT for Acc no : 1180001, Desc : Inventory
@@ -8280,7 +8391,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 				FinAccount finInventory = new FinAccount();
-				finInventory.setAccountId(VeniceConstants.FIN_ACCOUNT_1180001);
+				finInventory.setAccountId(FinAccountConstants.FIN_ACCOUNT_1180001.id());
 				inventoryJournalTransaction.setFinAccount(finInventory);
 				inventoryJournalTransaction
 						.setFinSalesRecords(finSalesRecordList);
@@ -8291,7 +8402,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeInventory = new FinTransactionType();
 				finTransactionTypeInventory
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_INVENTORY);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_INVENTORY.id());
 
 				inventoryJournalTransaction
 						.setFinTransactionType(finTransactionTypeInventory);
@@ -8319,11 +8430,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				inventoryJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(inventoryJournalTransaction);
+				//inventoryJournalTransaction = journalTransactionHome.persistFinJournalTransaction(inventoryJournalTransaction);
+				if (!em.contains(inventoryJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postSalesJournalTransaction:: inventoryJournalTransaction not attached, calling save.");
+					inventoryJournalTransaction = finJournalTransactionDAO.save(inventoryJournalTransaction);
+				}
 
-				_log.debug("\n Set Inventory AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_1180001 + " Amount: "
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Inventory AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_1180001.id() + " Amount: "
 						+ inventoryJournalTransaction.getTransactionAmount());
 
 				/*
@@ -8344,7 +8459,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finBarangDiterimaDimuka = new FinAccount();
 				finBarangDiterimaDimuka
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2150099);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2150099.id());
 				barangDiterimaDimukaJournalTransaction
 						.setFinAccount(finBarangDiterimaDimuka);
 				barangDiterimaDimukaJournalTransaction
@@ -8357,7 +8472,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeBarangDiterimaDimuka = new FinTransactionType();
 				finTransactionTypeBarangDiterimaDimuka
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BARANG_DITERIMA_DIMUKA);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BARANG_DITERIMA_DIMUKA.id());
 
 				barangDiterimaDimukaJournalTransaction
 						.setFinTransactionType(finTransactionTypeBarangDiterimaDimuka);
@@ -8385,18 +8500,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				barangDiterimaDimukaJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(barangDiterimaDimukaJournalTransaction);
+				//barangDiterimaDimukaJournalTransaction = journalTransactionHome.persistFinJournalTransaction(barangDiterimaDimukaJournalTransaction);
+				if (!em.contains(barangDiterimaDimukaJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postsalesJournalTransaction:: barangDiterimaDimukaJournalTransaction not attached, calling save.");
+					barangDiterimaDimukaJournalTransaction = finJournalTransactionDAO.save(barangDiterimaDimukaJournalTransaction);
+				}
 
-				_log.debug("\n Set Barang Diterima Dimuka AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_2150099
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Barang Diterima Dimuka AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_2150099.id()
 						+ " Amount: "
 						+ barangDiterimaDimukaJournalTransaction
 								.getTransactionAmount());
 			}
 
 			if (merchantCommisionType
-					.equals(VeniceConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER)) {
+					.equals(VenSettlementRecordCommissionTypeConstants.VEN_SETTLEMENT_RECORD_COMMISSIONTYPE_MERCHANTPARTNER.label())) {
 				System.out.println("MERCHANT TYPE: TRADING MP");
 
 				/*
@@ -8418,7 +8537,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finPersediaanBarangDagang = new FinAccount();
 				finPersediaanBarangDagang
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_1180001);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_1180001.id());
 				persediaanBarangDagangJournalTransaction
 						.setFinAccount(finPersediaanBarangDagang);
 				persediaanBarangDagangJournalTransaction
@@ -8432,7 +8551,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypePersediaanBarangDagang = new FinTransactionType();
 				finTransactionTypePersediaanBarangDagang
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PERSEDIAAN_BARANG_DAGANG);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PERSEDIAAN_BARANG_DAGANG.id());
 
 				persediaanBarangDagangJournalTransaction
 						.setFinTransactionType(finTransactionTypePersediaanBarangDagang);
@@ -8463,11 +8582,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				persediaanBarangDagangJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(persediaanBarangDagangJournalTransaction);
+				//persediaanBarangDagangJournalTransaction = journalTransactionHome.persistFinJournalTransaction(persediaanBarangDagangJournalTransaction);
+				if (!em.contains(persediaanBarangDagangJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postSalesJournalTransaction:: persediaanBarangDagangJournalTransaction not attached, calling save.");
+					persediaanBarangDagangJournalTransaction = finJournalTransactionDAO.save(persediaanBarangDagangJournalTransaction);
+				}
 
-				_log.debug("\n Set Persediaan Barang Dagang AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_1180001
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Persediaan Barang Dagang AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_1180001.id()
 						+ " Amount: "
 						+ persediaanBarangDagangJournalTransaction
 								.getTransactionAmount());
@@ -8490,7 +8613,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finBarangDiterimaDimuka = new FinAccount();
 				finBarangDiterimaDimuka
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2150099);
+						.setAccountId(FinAccountConstants.FIN_ACCOUNT_2150099.id());
 				barangDiterimaDimukaJournalTransaction
 						.setFinAccount(finBarangDiterimaDimuka);
 				barangDiterimaDimukaJournalTransaction
@@ -8503,7 +8626,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinTransactionType finTransactionTypeBarangDiterimaDimuka = new FinTransactionType();
 				finTransactionTypeBarangDiterimaDimuka
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_BARANG_DITERIMA_DIMUKA);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_BARANG_DITERIMA_DIMUKA.id());
 
 				barangDiterimaDimukaJournalTransaction
 						.setFinTransactionType(finTransactionTypeBarangDiterimaDimuka);
@@ -8534,11 +8657,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getVenOrderItem().getVenOrder()
 								.getWcsOrderId()
 								: null);
-				barangDiterimaDimukaJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(barangDiterimaDimukaJournalTransaction);
+				//barangDiterimaDimukaJournalTransaction = journalTransactionHome.persistFinJournalTransaction(barangDiterimaDimukaJournalTransaction);
+				if (!em.contains(barangDiterimaDimukaJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postSalesJournalTransaction:: barangDiterimaDimukaJournalTransaction not attached, calling save.");
+					barangDiterimaDimukaJournalTransaction = finJournalTransactionDAO.save(barangDiterimaDimukaJournalTransaction);
+				}
 
-				_log.debug("\n Set Barang Diterima Dimuka AccNo: "
-						+ VeniceConstants.FIN_ACCOUNT_2150099
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransaction:: Set Barang Diterima Dimuka AccNo: "
+						+ FinAccountConstants.FIN_ACCOUNT_2150099.id()
 						+ " Amount: "
 						+ barangDiterimaDimukaJournalTransaction
 								.getTransactionAmount());
@@ -8547,14 +8674,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 			// Set the list of transactions associated with the sales record and
 			// merge
 			finSalesRecord.setFinJournalTransactions(transactionList);
-			salesRecordHome.mergeFinSalesRecord(finSalesRecord);
+			//salesRecordHome.mergeFinSalesRecord(finSalesRecord);
+			if (!em.contains(finSalesRecord)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+						"postSalesJournalTransaction:: finSalesRecord not attached, calling save.");
+				finSalesRecord = finSalesRecordDAO.save(finSalesRecord);
+			}
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting sales journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -8562,11 +8695,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postSalesJournalTransactions()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postSalesJournalTransactions::" + " completed in "
 				+ duration + "ms");
 
 		return true;
@@ -8580,13 +8714,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * #postPaymentJournalTransaction(Long finApPaymentId)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postPaymentJournalTransaction(Long finApPaymentId) {
-		_log.debug("postPaymentJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
+			/*
 			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
 							"FinJournalTransactionSessionEJBBeanLocal");
@@ -8606,13 +8742,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 			VenSettlementRecordSessionEJBLocal settlementHome = (VenSettlementRecordSessionEJBLocal) this._genericLocator
 					.lookupLocal(VenSettlementRecordSessionEJBLocal.class,
 							"VenSettlementRecordSessionEJBBeanLocal");
+			*/
 			/*
 			 * Get the accounts payable payment record
 			 */
+			/*
 			List<FinApPayment> finApPaymentList = finApPaymentHome
 					.queryByRange(
 							"select o from FinApPayment o join fetch o.finSalesRecords where o.apPaymentId = "
 									+ finApPaymentId, 0, 0);
+			*/
+			List<FinApPayment> finApPaymentList = finApPaymentDAO.findByApPaymentIdJoinFinSalesRecord(finApPaymentId);
 			if (finApPaymentList.isEmpty()) {
 				throw new EJBException(
 						"The payment ID passed to postPaymentJournalTransaction is invalid. No such payment exists!");
@@ -8628,6 +8768,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			finJournalPayment.setJournalId(VeniceConstants.FIN_JOURNAL_PAYMENT);
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
+			/*
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = journalApprovalGroupHome
 					.queryByRange(
 							"select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Payment Journal for:"
@@ -8635,12 +8776,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ "'"
 									+ " and o.finApprovalStatus.approvalStatusId = "
 									+ VeniceConstants.FIN_APPROVAL_STATUS_NEW,
-							0, 0);
+							0, 0);\
+			*/
+			List<FinJournalApprovalGroup> finJournalApprovalGroupList = finJournalApprovalGroupDAO.findByDescriptionAndApprovalStatusId(
+					"Payment Journal for:" + sdf.format(new Date()), FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+						.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 				finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 
 				finJournalApprovalGroup.setFinJournal(finJournalPayment);
@@ -8651,9 +8795,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 				finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(
 						System.currentTimeMillis()));
 
-				// Persist the journal group
-				finJournalApprovalGroup = journalApprovalGroupHome
-						.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				// Persist the journal group				
+				//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				if (!em.contains(finJournalApprovalGroup)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postPaymentJournalTransaction:: finJournalApprovalGroup not attached, calling save to attach.");
+					finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+				}
 			} else {
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
 			}
@@ -8680,13 +8828,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
 			finTransactionStatus
-					.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
+					.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
 			paymentJournalTransaction
 					.setFinTransactionStatus(finTransactionStatus);
 
-			if (finApPayment.getVenParty().getVenPartyType().getPartyTypeId() == VeniceConstants.VEN_PARTY_TYPE_MERCHANT) {
+			if (finApPayment.getVenParty().getVenPartyType().getPartyTypeId() == VenPartyTypeConstants.VEN_PARTY_TYPE_MERCHANT.code()) {
 
-				finTransactionTypeId = VeniceConstants.FIN_TRANSACTION_TYPE_MERCHANT_PAYMENT;
+				finTransactionTypeId = FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_MERCHANT_PAYMENT.id();
 
 				/*
 				 * Post payment journal transaction for to debit the pph23
@@ -8703,7 +8851,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finAccount = new FinAccount();
 				finAccount.setAccountId(new Long(
-						VeniceConstants.FIN_ACCOUNT_1190001));
+						FinAccountConstants.FIN_ACCOUNT_1190001.id()));
 				pph23JournalTransaction.setFinAccount(finAccount);
 
 				pph23JournalTransaction
@@ -8734,8 +8882,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the payment journal transaction
-				pph23JournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(pph23JournalTransaction);
+				//pph23JournalTransaction = journalTransactionHome.persistFinJournalTransaction(pph23JournalTransaction);
+				if (!em.contains(pph23JournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postPaymentJournalTransaction:: pph23JournalTransaction not attached, calling save.");
+					pph23JournalTransaction = finJournalTransactionDAO.save(pph23JournalTransaction);
+				}
 				transactionList.add(pph23JournalTransaction);
 
 				/*
@@ -8752,7 +8904,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinAccount finBankAccount = new FinAccount();
 				finBankAccount.setAccountId(new Long(
-						VeniceConstants.FIN_ACCOUNT_1140002));
+						FinAccountConstants.FIN_ACCOUNT_1140002.id()));
 				merchantClaimJournalTransaction.setFinAccount(finBankAccount);
 
 				merchantClaimJournalTransaction
@@ -8784,17 +8936,25 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the merchant claim journal transaction
-				merchantClaimJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(merchantClaimJournalTransaction);
+				//merchantClaimJournalTransaction = journalTransactionHome.persistFinJournalTransaction(merchantClaimJournalTransaction);
+				if (!em.contains(merchantClaimJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postPaymentJournalTransaction:: merchantClaimJournalTransaction not attached, calling save.");
+					merchantClaimJournalTransaction = finJournalTransactionDAO.save(merchantClaimJournalTransaction);
+				}
 				transactionList.add(merchantClaimJournalTransaction);
 
-				finAccountId = new Long(VeniceConstants.FIN_ACCOUNT_2130001);
+				finAccountId = new Long(FinAccountConstants.FIN_ACCOUNT_2130001.id());
+				/*
 				VenSettlementRecord settlementRecord = settlementHome
 						.queryByRange(
 								"select o from VenSettlementRecord o where o.venOrderItem.orderItemId = "
 										+ finApPayment.getFinSalesRecords()
 												.get(0).getVenOrderItem()
 												.getOrderItemId(), 0, 1).get(0);
+				*/
+				VenSettlementRecord settlementRecord = venSettlementRecordDAO.findByOrderItemId(
+						finApPayment.getFinSalesRecords().get(0).getVenOrderItem().getOrderItemId()).get(0);
 
 				if (settlementRecord.getCommissionType().equals("CM")) {
 					creditAmount = finApPayment.getAmount().add(pphAmount)
@@ -8803,21 +8963,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 					creditAmount = finApPayment.getAmount().subtract(arAmount);
 				}
 			} else if (finApPayment.getVenParty().getVenPartyType()
-					.getPartyTypeId() == VeniceConstants.VEN_PARTY_TYPE_LOGISTICS) {
-				finAccountId = new Long(VeniceConstants.FIN_ACCOUNT_2140001);
-				finTransactionTypeId = VeniceConstants.FIN_TRANSACTION_TYPE_LOGISTICS_PAYMENT;
+					.getPartyTypeId() == VenPartyTypeConstants.VEN_PARTY_TYPE_LOGISTICS.code()) {
+				finAccountId = new Long(FinAccountConstants.FIN_ACCOUNT_2140001.id());
+				finTransactionTypeId = FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_LOGISTICS_PAYMENT.id();
 				creditAmount = finApPayment.getAmount();
 			} else if (finApPayment.getVenParty().getVenPartyType()
-					.getPartyTypeId() == VeniceConstants.VEN_PARTY_TYPE_BANK
+					.getPartyTypeId() == VenPartyTypeConstants.VEN_PARTY_TYPE_BANK.code()
 					|| finApPayment.getVenParty().getVenPartyType()
-							.getPartyTypeId() == VeniceConstants.VEN_PARTY_TYPE_CUSTOMER
+							.getPartyTypeId() == VenPartyTypeConstants.VEN_PARTY_TYPE_CUSTOMER.code()
 					|| finApPayment.getVenParty().getVenPartyType()
-							.getPartyTypeId() == VeniceConstants.VEN_PARTY_TYPE_RECIPIENT) {
+							.getPartyTypeId() == VenPartyTypeConstants.VEN_PARTY_TYPE_RECIPIENT.code()) {
 				trueOrfalse = false;
+				/*
 				List<FinArFundsInRefund> finArFundsInRefundList = refundRecordHome
 						.queryByRange(
 								"select o from FinArFundsInRefund o where o.finApPayment.apPaymentId = "
 										+ finApPaymentId, 0, 0);
+				*/
+				List<FinArFundsInRefund> finArFundsInRefundList = finArFundsInRefundDAO.findByApPaymentId(finApPaymentId);
 				if (finArFundsInRefundList.isEmpty()) {
 					throw new EJBException(
 							"The finArFundsInRefundId passed to createRefundPayment is invalid. Refund entry does not exist!");
@@ -8829,14 +8992,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.getFinArFundsInReconRecord()
 						.getFinArFundsInActionApplied()
 						.getActionAppliedId()
-						.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK) ? VeniceConstants.FIN_ACCOUNT_2170002
-						: VeniceConstants.FIN_ACCOUNT_2170001;
+						.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id()) ? FinAccountConstants.FIN_ACCOUNT_2170002.id()
+						: FinAccountConstants.FIN_ACCOUNT_2170001.id();
 				Long transType = finArFundsInRefundItem
 						.getFinArFundsInReconRecord()
 						.getFinArFundsInActionApplied()
 						.getActionAppliedId()
-						.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK) ? VeniceConstants.FIN_TRANSACTION_TYPE_REFUND_BANK
-						: VeniceConstants.FIN_TRANSACTION_TYPE_REFUND_PELANGGAN;
+						.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id()) ? FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_REFUND_BANK.id()
+						: FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_REFUND_PELANGGAN.id();
 				String wcsOrderId = finArFundsInRefundItem
 						.getFinArFundsInReconRecord().getWcsOrderId() != null ? finArFundsInRefundItem
 						.getFinArFundsInReconRecord().getWcsOrderId() : "";
@@ -8892,22 +9055,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 				apPaymentJournalTransaction.setGroupJournal(finApPayment
 						.getFinAccount().getAccountId());
 				// Persist the fee journal transaction
-				_log.debug("Save ( AP Payment)");
-				journalTransactionHome
-						.persistFinJournalTransaction(apPaymentJournalTransaction);
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentJournalTransaction::Save ( AP Payment)");
+				//journalTransactionHome.persistFinJournalTransaction(apPaymentJournalTransaction);
+				if (!em.contains(apPaymentJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+							"postPaymentJournalTransaction:: apPaymentJournalTransaction not attached, calling save.");
+					apPaymentJournalTransaction = finJournalTransactionDAO.save(apPaymentJournalTransaction);
+				}
 				transactionList.add(apPaymentJournalTransaction);
 
 				if (finArFundsInRefundItem
 						.getFinArFundsInReconRecord()
 						.getFinArFundsInActionApplied()
-						.getActionAppliedId()
-						.equals(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK)) {
+						.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id()) {
 					/*
 					 * Post the journal transaction for bank fees
 					 */
 					FinJournalTransaction bankFeeJournalTransaction = new FinJournalTransaction();
-					bankFeeJournalTransaction
-							.setComments("System Credit Bank Fee:" + wcsOrderId);
+					bankFeeJournalTransaction.setComments("System Credit Bank Fee:" + wcsOrderId);
 					bankFeeJournalTransaction.setCreditDebitFlag(true);
 					bankFeeJournalTransaction
 							.setFinJournalApprovalGroup(finJournalApprovalGroup);
@@ -8916,8 +9081,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					// salah save. seharusnya save account number hpp bank
 					// FIN_ACCOUNT_5110003
 					FinAccount finAccountBankFee = new FinAccount();
-					finAccountBankFee
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_5110003);
+					finAccountBankFee.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110003.id());
 					bankFeeJournalTransaction.setFinAccount(finAccountBankFee);
 
 					List<FinArFundsInReconRecord> bankFeeFundsInRecordList = new ArrayList<FinArFundsInReconRecord>();
@@ -8955,20 +9119,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 					bankFeeJournalTransaction.setGroupJournal(finApPayment
 							.getFinAccount().getAccountId());
 					// Persist the fee journal transaction
-					_log.debug("Save ( HPP BIAYA Bank)");
-					journalTransactionHome
-							.persistFinJournalTransaction(bankFeeJournalTransaction);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentJournalTransaction::Save ( HPP BIAYA Bank)");
+					//journalTransactionHome.persistFinJournalTransaction(bankFeeJournalTransaction);
+					if (!em.contains(bankFeeJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName(), 
+								"postPaymentJournalTransaction:: bankFeeJournalTransaction not attached, calling save.");
+						bankFeeJournalTransaction = finJournalTransactionDAO.save(bankFeeJournalTransaction);
+					}
 					transactionList.add(bankFeeJournalTransaction);
 				}
 				/*
 				 * Post the journal transaction for Refund
 				 */
 				FinJournalTransaction refundJournalTransaction = new FinJournalTransaction();
-				refundJournalTransaction.setComments("System Debit:"
-						+ wcsOrderId);
+				refundJournalTransaction.setComments("System Debit:" + wcsOrderId);
 				refundJournalTransaction.setCreditDebitFlag(false);
-				refundJournalTransaction
-						.setFinJournalApprovalGroup(finJournalApprovalGroup);
+				refundJournalTransaction.setFinJournalApprovalGroup(finJournalApprovalGroup);
 				// bankFeeJournalTransaction.setFinAccount(finAccountBank);
 
 				// salah save. seharusnya save account number hpp bank
@@ -8978,22 +9144,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 				refundJournalTransaction.setFinAccount(finAccountRefrund);
 
 				List<FinArFundsInReconRecord> refundFundsInRecordList = new ArrayList<FinArFundsInReconRecord>();
-				refundFundsInRecordList.add(finArFundsInRefundItem
-						.getFinArFundsInReconRecord());
-				refundJournalTransaction
-						.setFinArFundsInReconRecords(refundFundsInRecordList);
+				refundFundsInRecordList.add(finArFundsInRefundItem.getFinArFundsInReconRecord());
+				refundJournalTransaction.setFinArFundsInReconRecords(refundFundsInRecordList);
 				refundJournalTransaction.setFinJournal(finJournalPayment);
-				refundJournalTransaction.setFinPeriod(FinancePeriodUtil
-						.getCurrentPeriod());
-				refundJournalTransaction
-						.setFinTransactionStatus(finTransactionStatus);
+				refundJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
+				refundJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
-				refundJournalTransaction
-						.setFinTransactionType(finTransactionType);
-				refundJournalTransaction.setTransactionAmount(finApPayment
-						.getAmount());
-				refundJournalTransaction.setTransactionTimestamp(new Timestamp(
-						System.currentTimeMillis()));
+				refundJournalTransaction.setFinTransactionType(finTransactionType);
+				refundJournalTransaction.setTransactionAmount(finApPayment.getAmount());
+				refundJournalTransaction.setTransactionTimestamp(new Timestamp(System.currentTimeMillis()));
 
 				refundJournalTransaction.setWcsOrderID(wcsOrderId);
 				refundJournalTransaction
@@ -9010,9 +9169,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 				refundJournalTransaction.setGroupJournal(finApPayment
 						.getFinAccount().getAccountId());
 				// Persist the fee journal transaction
-				_log.debug("Save ( REFUND)");
-				journalTransactionHome
-						.persistFinJournalTransaction(refundJournalTransaction);
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentJournalTransaction::Save ( REFUND)");
+				//journalTransactionHome.persistFinJournalTransaction(refundJournalTransaction);
+				if (!em.contains(refundJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentJournalTransaction:: refundJournalTransaction not attached, calling save.");
+					refundJournalTransaction = finJournalTransactionDAO.save(refundJournalTransaction);
+				}
 				transactionList.add(refundJournalTransaction);
 			}
 
@@ -9046,8 +9208,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the payment journal transaction
-				paymentJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(paymentJournalTransaction);
+				//paymentJournalTransaction = journalTransactionHome.persistFinJournalTransaction(paymentJournalTransaction);
+				if (!em.contains(paymentJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postPaymentJournalTransaction:: paymentJournalTransaction not attached, calling save.");
+					paymentJournalTransaction = finJournalTransactionDAO.save(paymentJournalTransaction);
+				}
 				transactionList.add(paymentJournalTransaction);
 
 				/*
@@ -9096,8 +9262,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: null);
 
 				// Persist the payment journal transaction
-				bankPaymentJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(bankPaymentJournalTransaction);
+				//bankPaymentJournalTransaction = journalTransactionHome.persistFinJournalTransaction(bankPaymentJournalTransaction);
+				if (!em.contains(bankPaymentJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postPaymentJournalTransaction:: bankPaymentJournalTransaction not attached, calling save.");
+					bankPaymentJournalTransaction = finJournalTransactionDAO.save(bankPaymentJournalTransaction);
+				}
 				transactionList.add(bankPaymentJournalTransaction);
 
 				// Set the link to the list of payment journal transactions and
@@ -9108,14 +9278,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 				FinApprovalStatus approvalStatus = new FinApprovalStatus();
 				approvalStatus.setApprovalStatusId(new Long(4));
 				finApPayment.setFinApprovalStatus(approvalStatus);
-				finApPayment = finApPaymentHome.mergeFinApPayment(finApPayment);
+				//finApPayment = finApPaymentHome.mergeFinApPayment(finApPayment);
+				if (!em.contains(finApPayment)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postPaymentJournalTransaction:: finApPayment not attached, calling save.");
+					finApPayment = finApPaymentDAO.save(finApPayment);
+				}
 			}
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting payment journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -9123,11 +9299,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postPaymentJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentJournalTransaction::" + " completed in "
 				+ duration + "ms");
 
 		return true;
@@ -9143,16 +9320,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * creditOrDebit, String comments)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postManualJournalTransaction(
 			String journalApprovalGroupDesc,
 			Date journalApprovalGroupTimestamp,
 			ArrayList<ManualJournalEntryDTO> journalEntryList) {
-		_log.debug("postManualJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postManualJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
+			/*
 			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
 							"FinJournalTransactionSessionEJBBeanLocal");
@@ -9173,6 +9352,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			VenPartySessionEJBLocal venPartyHome = (VenPartySessionEJBLocal) this._genericLocator
 					.lookupLocal(VenPartySessionEJBLocal.class,
 							"VenPartySessionEJBBeanLocal");
+			*/
 
 			// Removed this because manual journals need to be treated as
 			// individual vouchers
@@ -9216,12 +9396,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 			FinJournalApprovalGroup finJournalApprovalGroup = new FinJournalApprovalGroup();
 			FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
-			finApprovalStatus
-					.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+			finApprovalStatus.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 			finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 
 			FinJournal finJournalManual = new FinJournal();
-			finJournalManual.setJournalId(VeniceConstants.FIN_JOURNAL_MANUAL);
+			finJournalManual.setJournalId(FinJournalConstants.FIN_JOURNAL_MANUAL.id());
 			finJournalApprovalGroup.setFinJournal(finJournalManual);
 
 			finJournalApprovalGroup
@@ -9230,8 +9409,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 					journalApprovalGroupTimestamp.getTime()));
 
 			// Persist the journal group
-			finJournalApprovalGroup = journalApprovalGroupHome
-					.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+			//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+			if (!em.contains(finJournalApprovalGroup)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "postManualJournalTransaction:: finJournalApprovalGroup not attached, calling save.");
+				finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+			}
 
 			for (ManualJournalEntryDTO journalEntry : journalEntryList) {
 
@@ -9255,14 +9438,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.getCurrentPeriod());
 
 				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
-				finTransactionStatus
-						.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
-				manualJournalTransaction
-						.setFinTransactionStatus(finTransactionStatus);
+				finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
+				manualJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 				FinTransactionType finTransactionType = new FinTransactionType();
 				finTransactionType
-						.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_MANUAL_ADJUSTMENT_JOURNAL);
+						.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_MANUAL_ADJUSTMENT_JOURNAL.id());
 				manualJournalTransaction
 						.setFinTransactionType(finTransactionType);
 
@@ -9277,8 +9458,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						: null);
 
 				// Persist the manual journal transaction
-				manualJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(manualJournalTransaction);
+				//manualJournalTransaction = journalTransactionHome.persistFinJournalTransaction(manualJournalTransaction);
+				if (!em.contains(manualJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postManualJournalTransaction:: manualJournalTransaction not attached, calling save.");
+					manualJournalTransaction = finJournalTransactionDAO.save(manualJournalTransaction);
+				}
 				transactionList.add(manualJournalTransaction);
 
 				// Create the FinApManualJournalTransaction record if a party or
@@ -9291,14 +9476,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 					VenOrder venOrder = null;
 					if (journalEntry.getWcsOrderId() != null
 							&& !journalEntry.getWcsOrderId().isEmpty()) {
+						/*
 						List<VenOrder> venOrderList = venOrderHome
 								.queryByRange(
 										"select o from VenOrder o where o.wcsOrderId = '"
 												+ journalEntry.getWcsOrderId()
 												+ "'", 0, 0);
+						*/
+						venOrder = venOrderDAO.findByWcsOrderId(
+								journalEntry.getWcsOrderId());
+						/*
 						if (!venOrderList.isEmpty()) {
 							venOrder = venOrderList.get(0);
 						}
+						*/
 					}
 					if (venOrder != null) {
 						finApManualJournalTransaction.setVenOrder(venOrder);
@@ -9307,33 +9498,44 @@ public class FinanceJournalPosterSessionEJBBean implements
 					VenParty venParty = null;
 
 					if (journalEntry.getVenPartyId() != null) {
+						/*
 						List<VenParty> venPartyList = venPartyHome
 								.queryByRange(
 										"select o from VenParty o where o.partyId = "
 												+ journalEntry.getVenPartyId(),
 										0, 0);
+						*/
+						venParty = venPartyDAO.findByPartyId(journalEntry.getVenPartyId());
+						/*
 						if (!venPartyList.isEmpty()) {
 							venParty = venPartyList.get(0);
 						} else {
+						*/
+						if (venParty == null) {
 							String errMsg = "The party id passed to create the manual journal transaction is not valid";
-							_log.error(errMsg);
+							CommonUtil.logError(this.getClass().getCanonicalName(), errMsg);
 							throw new EJBException(errMsg);
 						}
 						finApManualJournalTransaction.setVenParty(venParty);
 					}
 					// Persist the manual journal transaction record linking the
 					// party and order
-					manualJournalTransactionHome
-							.persistFinApManualJournalTransaction(finApManualJournalTransaction);
+					//manualJournalTransactionHome.persistFinApManualJournalTransaction(finApManualJournalTransaction);
+					if (!em.contains(finApManualJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "postManualJournalTransaction:: finApManualJournalTransaction not attached, calling save.");
+						finApManualJournalTransaction = finApManualJournalTransactionDAO.save(finApManualJournalTransaction);
+					}
 				}
 			}
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting manual journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -9341,11 +9543,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postManualJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postManualJournalTransaction::" + " completed in "
 				+ duration + "ms");
 		return true;
 	}
@@ -9358,19 +9561,23 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 *      finArFundsInRefund)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postPaymentRefundJournalTransaction(
 			List<FinArFundsInRefund> finArFundsInRefundList) {
-		_log.debug("postPaymentRefundJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
 
+			/*
 			FinJournalTransactionSessionEJBLocal journalTransactionHome = (FinJournalTransactionSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalTransactionSessionEJBLocal.class,
 							"FinJournalTransactionSessionEJBBeanLocal");
+			*/
 
+			/*
 			FinJournalApprovalGroupSessionEJBLocal journalApprovalGroupHome = (FinJournalApprovalGroupSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinJournalApprovalGroupSessionEJBLocal.class,
 							"FinJournalApprovalGroupSessionEJBBeanLocal");
@@ -9378,6 +9585,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinApPaymentSessionEJBLocal finApPaymentHome = (FinApPaymentSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinApPaymentSessionEJBLocal.class,
 							"FinApPaymentSessionEJBBeanLocal");
+			*/
 
 			/*
 			 * Lookup the payment journal approval group for the day If there is
@@ -9387,6 +9595,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			finJournalPayment.setJournalId(VeniceConstants.FIN_JOURNAL_PAYMENT);
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
+			/*
 			List<FinJournalApprovalGroup> finJournalApprovalGroupList = journalApprovalGroupHome
 					.queryByRange(
 							"select o from FinJournalApprovalGroup o where o.journalGroupDesc = 'Payment Journal for:"
@@ -9395,11 +9604,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ " and o.finApprovalStatus.approvalStatusId = "
 									+ VeniceConstants.FIN_APPROVAL_STATUS_NEW,
 							0, 0);
+			*/
+			List<FinJournalApprovalGroup> finJournalApprovalGroupList = finJournalApprovalGroupDAO.findByDescriptionAndApprovalStatusId(
+					"Payment Journal for:" + sdf.format(new Date()), FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 			if (finJournalApprovalGroupList.isEmpty()) {
 				finJournalApprovalGroup = new FinJournalApprovalGroup();
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+						.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 				finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
 
 				finJournalApprovalGroup.setFinJournal(finJournalPayment);
@@ -9411,8 +9623,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						System.currentTimeMillis()));
 
 				// Persist the journal group
-				finJournalApprovalGroup = journalApprovalGroupHome
-						.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+				if (!em.contains(finJournalApprovalGroup)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postPaymentRefundJournalTransaction:: finJournalApprovalGroup not attached, calling save.");
+					finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+				}
 			} else {
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
 			}
@@ -9427,76 +9643,76 @@ public class FinanceJournalPosterSessionEJBBean implements
 				long accountNumberBank = 0;
 				if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
-								.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB) {
-					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120104;
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB.id()) {
+					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120104.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA) {
-					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120102;
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA.id()) {
+					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120102.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
-								.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
-								.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC) {
-					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120105;
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC.id()) {
+					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120105.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA) {
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA.id()) {
 					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120301;
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
-								.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC) {
-					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120302;
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC.id()) {
+					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120302.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB) {
-					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120402;
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB.id()) {
+					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120402.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB) {
-					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120888;
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB.id()) {
+					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120888.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB) {
-					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1121001;
+						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB.id()) {
+					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1121001.id();
 				} else {
 					throw new EJBException(
 							"Account number not available for the payment, please add account number to fin account and venice constants");
 				}
 
 				if (finArFundsInRefund.getRefundType().contains("Bank")) {
-					accountIdRefund = VeniceConstants.FIN_ACCOUNT_2170002;
-					finTransactionTypeID = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK;
-					accountIdForBiaya = VeniceConstants.FIN_ACCOUNT_5110003;
+					accountIdRefund = FinAccountConstants.FIN_ACCOUNT_2170002.id();
+					finTransactionTypeID = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id();
+					accountIdForBiaya = FinAccountConstants.FIN_ACCOUNT_5110003.id();
 					amountBiaya = finArFundsInRefund
 							.getFinArFundsInReconRecord()
 							.getProviderReportFeeAmount() != null ? finArFundsInRefund
 							.getFinArFundsInReconRecord()
 							.getProviderReportFeeAmount() : new BigDecimal(0);
 				} else {
-					accountIdRefund = VeniceConstants.FIN_ACCOUNT_2170001;
-					finTransactionTypeID = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
-					accountIdForBiaya = VeniceConstants.FIN_ACCOUNT_7160003;
+					accountIdRefund = FinAccountConstants.FIN_ACCOUNT_2170001.id();
+					finTransactionTypeID = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER.id();
+					accountIdForBiaya = FinAccountConstants.FIN_ACCOUNT_7160003.id();
 					amountBiaya = finArFundsInRefund.getFeeAmount();
 				}
 				/**
 				 * Post the journal transaction for Refund Transaksi
 				 */
-				_log.debug("Save ( Refund Bank Transaksi) ::BEGIN");
+			    CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::Save ( Refund Bank Transaksi) ::BEGIN");
 				FinJournalTransaction refundBankJournalTransaction = new FinJournalTransaction();
 				refundBankJournalTransaction = setJournalTransaction(
 						finArFundsInRefund.getFinArFundsInReconRecord(),
@@ -9506,8 +9722,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: ""),
 						finJournalApprovalGroup,
 						accountIdRefund,
-						VeniceConstants.FIN_JOURNAL_PAYMENT,
-						VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
+						FinJournalConstants.FIN_JOURNAL_PAYMENT.id(),
+						FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
 						finTransactionTypeID,
 						time,
 						finArFundsInRefund.getFinArFundsInReconRecord()
@@ -9517,17 +9733,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: finArFundsInRefund
 										.getFinArFundsInReconRecord()
 										.getFinArFundsInReport()
-										.getFinArFundsInReportType()
-										.getVenBank(), journalTransactionHome,
+										.getFinArFundsInReportType().getVenBank(),
+										//.getVenBank(), journalTransactionHome,
 						accountNumberBank, finArFundsInRefund.getApAmount(),
 						false, "");
-				_log.debug("Save ( Refund Bank Transaks)::END");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::Save ( Refund Bank Transaks)::END");
 				transactionList.add(refundBankJournalTransaction);
 
 				/**
 				 * Post the journal transaction for Biaya Transaksi
 				 */
-				_log.debug("Save ( Biaya Transaksi) ::BEGIN");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::Save ( Biaya Transaksi) ::BEGIN");
 				FinJournalTransaction biayaJournalTransaction = new FinJournalTransaction();
 				biayaJournalTransaction = setJournalTransaction(
 						finArFundsInRefund.getFinArFundsInReconRecord(),
@@ -9537,8 +9753,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: ""),
 						finJournalApprovalGroup,
 						accountIdForBiaya,
-						VeniceConstants.FIN_JOURNAL_PAYMENT,
-						VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
+						FinJournalConstants.FIN_JOURNAL_PAYMENT.id(),
+						FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
 						finTransactionTypeID,
 						time,
 						finArFundsInRefund.getFinArFundsInReconRecord()
@@ -9548,16 +9764,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: finArFundsInRefund
 										.getFinArFundsInReconRecord()
 										.getFinArFundsInReport()
-										.getFinArFundsInReportType()
-										.getVenBank(), journalTransactionHome,
+										.getFinArFundsInReportType().getVenBank(),
+										//.getVenBank(), journalTransactionHome,
 						accountNumberBank, amountBiaya, false, "");
-				_log.debug("Save ( Biaya Transaks)::END");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::Save ( Biaya Transaks)::END");
 				transactionList.add(biayaJournalTransaction);
 
 				/**
 				 * Post the journal transaction for Bank Transaksi
 				 */
-				_log.debug("Save (  Bank Transaksi) ::BEGIN");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::Save (  Bank Transaksi) ::BEGIN");
 				FinJournalTransaction bankJournalTransaction = new FinJournalTransaction();
 				bankJournalTransaction = setJournalTransaction(
 						finArFundsInRefund.getFinArFundsInReconRecord(),
@@ -9567,8 +9783,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: ""),
 						finJournalApprovalGroup,
 						accountNumberBank,
-						VeniceConstants.FIN_JOURNAL_PAYMENT,
-						VeniceConstants.FIN_TRANSACTION_STATUS_NEW,
+						FinJournalConstants.FIN_JOURNAL_PAYMENT.id(),
+						FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id(),
 						finTransactionTypeID,
 						time,
 						finArFundsInRefund.getFinArFundsInReconRecord()
@@ -9578,11 +9794,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 								: finArFundsInRefund
 										.getFinArFundsInReconRecord()
 										.getFinArFundsInReport()
-										.getFinArFundsInReportType()
-										.getVenBank(), journalTransactionHome,
+										.getFinArFundsInReportType().getVenBank(),
+										//.getVenBank(), journalTransactionHome,
 						accountNumberBank, amountBiaya.add(finArFundsInRefund
 								.getApAmount()), true, "");
-				_log.debug("Save ( Bank Transaks)::END");
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::Save ( Bank Transaks)::END");
 				transactionList.add(bankJournalTransaction);
 
 			}
@@ -9594,14 +9810,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinApprovalStatus approvalStatus = new FinApprovalStatus();
 			approvalStatus.setApprovalStatusId(new Long(4));
 			finApPayment.setFinApprovalStatus(approvalStatus);
-			finApPayment = finApPaymentHome.mergeFinApPayment(finApPayment);
+			//finApPayment = finApPaymentHome.mergeFinApPayment(finApPayment);
+			if (!em.contains(finApPayment)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "postPaymentRefundJournalTransaction:: finApPayment not attached, calling save.");
+				finApPayment = finApPaymentDAO.save(finApPayment);
+			}
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting Payment Refund Journal Transaction:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -9609,21 +9831,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postPaymentRefundJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postPaymentRefundJournalTransaction::" + " completed in "
 				+ duration + "ms");
 		return true;
 	}
 	
-	
-	
-	
-	
-	
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -9633,15 +9850,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 * refundAmount, Double fee, , int refundType)
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Boolean postCancelRefundJournalTransaction(Long reconciliationRecordId,
 			Double cancelRefundAmount, Double cancelFee, int refundType,
 			boolean printjournal) {
-		_log.debug("postCancelRefundJournalTransaction()");
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCancelRefundJournalTransaction::BEGIN");
 		Long startTime = System.currentTimeMillis();
 
 		ArrayList<FinJournalTransaction> transactionList = new ArrayList<FinJournalTransaction>();
 
 		try {
+			/*
 			FinArFundsInReconRecordSessionEJBLocal fundsInReconRecordHome = (FinArFundsInReconRecordSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinArFundsInReconRecordSessionEJBLocal.class,
 							"FinArFundsInReconRecordSessionEJBBeanLocal");
@@ -9670,25 +9889,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 			FinArFundsInRefundSessionEJBLocal refundRecordHome = (FinArFundsInRefundSessionEJBLocal) this._genericLocator
 					.lookupLocal(FinArFundsInRefundSessionEJBLocal.class,
 							"FinArFundsInRefundSessionEJBBeanLocal");
+			*/
 
 			/*
 			 * Read all the relevant funds in records from the database and
 			 * determine how much has been paid as well as the remaining balance
 			 * according to the reconciliation
+			 *
 			 */
-			List<FinArFundsInReconRecord> reconRecordList = fundsInReconRecordHome
-					.queryByRange(
-							"select o from FinArFundsInReconRecord o where o.reconciliationRecordId = "
-									+ reconciliationRecordId
-									+ " and o.finArFundsInActionApplied.actionAppliedId<>"
-									+ VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED,
-							0, 0);
-			if (reconRecordList.isEmpty()) {
-				throw new EJBException("Reconciliation record not found:"
-						+ reconciliationRecordId);
+			FinArFundsInReconRecord reconciliationRecord = finArFundsInReconRecordDAO.findByReconRecordIdActionAppliedNotRemoved(reconciliationRecordId);
+			if (reconciliationRecord == null) {
+				throw new EJBException("Reconciliation record not found:" + reconciliationRecordId);
 			}
-			FinArFundsInReconRecord reconciliationRecord = reconRecordList
-					.get(0);
 
 			VenOrderPayment venOrderPayment = null;
 
@@ -9697,15 +9909,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 * VenOrderPayment
 			 */
 			if (reconciliationRecord.getVenOrderPayment() != null) {
-				List<VenOrderPayment> venOrderPaymentList = orderPaymentHome
-						.queryByRange(
-								"select o from VenOrderPayment o where o.orderPaymentId = "
-										+ reconciliationRecord
-												.getVenOrderPayment()
-												.getOrderPaymentId(), 0, 0);
-				if (!venOrderPaymentList.isEmpty()) {
-					venOrderPayment = venOrderPaymentList.get(0);
-				}
+				venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(
+						reconciliationRecord.getVenOrderPayment().getOrderPaymentId());
 			}
 
 			BigDecimal remainingUnallocatedAmount = null;
@@ -9718,11 +9923,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 			 */
 
 			if (venOrderPayment != null) {
-				List<VenOrderPaymentAllocation> orderPaymentAllocationList = orderPaymentAllocationHome
-						.queryByRange(
-								"select o from VenOrderPaymentAllocation o where o.venOrderPayment.orderPaymentId = "
-										+ venOrderPayment.getOrderPaymentId(),
-								0, 0);
+				List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findByOrderPaymentId(
+						venOrderPayment.getOrderPaymentId());
 				BigDecimal allocatedAmount = new BigDecimal(0);
 
 				/*
@@ -9736,16 +9938,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.subtract(allocatedAmount);
 				if (orderPaymentAllocationList != null) {
 					for (VenOrderPaymentAllocation allocation : orderPaymentAllocationList) {
-						List<VenOrder> allocatedOrderList = orderHome
-								.queryByRange(
-										"select o from VenOrder o where o.orderId = "
-												+ allocation.getId()
-														.getOrderId(), 0, 0);
-						VenOrder allocatedOrder = allocatedOrderList.get(0);
-						if (allocatedOrder.getVenOrderStatus()
-								.getOrderStatusId() != VeniceConstants.VEN_ORDER_STATUS_X) {
-							allocatedAmount = allocatedAmount.add(allocation
-									.getAllocationAmount());
+						VenOrder allocatedOrder = venOrderDAO.findByOrderId(allocation.getId().getOrderId());												
+						if (allocatedOrder != null && allocatedOrder.getVenOrderStatus()
+								.getOrderStatusId() != VenOrderStatusConstants.VEN_ORDER_STATUS_X.code()) {
+							allocatedAmount = allocatedAmount.add(allocation.getAllocationAmount());
 						}
 					}
 
@@ -9765,36 +9961,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 			long accountRefund = 0;
 
 			switch (refundType) {
-			case VeniceConstants.FIN_REFUND_TYPE_BANK:
-				finAccountRefund
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
-				accountRefund = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK;
+			case FinRefundTypeConstants.Constants.BANK_ID:
+				finAccountRefund.setAccountId(FinAccountConstants.FIN_ACCOUNT_2170002.id());
+				accountRefund = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id();
 				break;
-			case VeniceConstants.FIN_REFUND_TYPE_CUSTOMER:
-				finAccountRefund
-						.setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
-				accountRefund = VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
+			case FinRefundTypeConstants.Constants.CUSTOMER_ID:
+				finAccountRefund.setAccountId(FinAccountConstants.FIN_ACCOUNT_2170001.id());
+				accountRefund = FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER.id();
 				break;
 			default:
 				break;
 			// no action. should produce an error later because of the empty
 			// account id
 			}
-
-			/*
-			 * switch-case is better for performance in this particular problem
-			 * (yauri @Sep 18, 2013 10:06AM) if (refundType ==
-			 * VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170001);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER;
-			 * } else if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
-			 * finAccountRefundPelanggan
-			 * .setAccountId(VeniceConstants.FIN_ACCOUNT_2170002);
-			 * accountRefund=
-			 * VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK; }
-			 */
 
 			if (printjournal) {
 				/*
@@ -9803,7 +9982,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 				 */
 				FinJournal finJournalRefund = new FinJournal();
 				finJournalRefund
-						.setJournalId(VeniceConstants.FIN_JOURNAL_CANCEL_REFUND_OTHERS);
+						.setJournalId(FinJournalConstants.FIN_JOURNAL_CANCEL_REFUND_OTHERS.id());
 				FinJournalApprovalGroup finJournalApprovalGroup = null;
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd");
 				// List<FinJournalApprovalGroup> finJournalApprovalGroupList =
@@ -9816,7 +9995,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					finJournalApprovalGroup = new FinJournalApprovalGroup();
 					FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 					finApprovalStatus
-							.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_APPROVED);
+							.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 					finJournalApprovalGroup
 							.setFinApprovalStatus(finApprovalStatus);
 					finJournalApprovalGroup.setFinJournal(finJournalRefund);
@@ -9828,8 +10007,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 									.currentTimeMillis()));
 
 					// Persist the journal group
-					finJournalApprovalGroup = journalApprovalGroupHome
-							.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+					//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
+					if (!em.contains(finJournalApprovalGroup)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "postCancelRefundJournalTransaction:: finJournalApprovalGroup not attached, calling save.");
+						finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+					}
 				}
 				// else {
 				// finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
@@ -9842,57 +10025,43 @@ public class FinanceJournalPosterSessionEJBBean implements
 				// MUKA
 				// PELANGGAN
 				FinJournalTransaction cancelRefundJournalTransaction = new FinJournalTransaction();
-				/*
-				 * refundJournalTransaction.setComments("Refund DEBIT for Order:"
-				 * +
-				 * reconciliationRecord.getWcsOrderId()!=null?reconciliationRecord
-				 * .getWcsOrderId():"" + " Payment:" +
-				 * reconciliationRecord.getProviderReportPaymentId());
-				 */// replaces with the following line (yauri @ Sep 18, 2013
-					// 7:25AM) due to the bug found in previous comment
-				cancelRefundJournalTransaction
-						.setComments("Cancel Refund Pelanggan DEBIT for Order:"
-								+ wcsOrderId
-								+ " Payment:"
-								+ reconciliationRecord
-										.getProviderReportPaymentId());
+				cancelRefundJournalTransaction.setComments("Cancel Refund Pelanggan DEBIT for Order:" + wcsOrderId + " Payment:"
+								+ reconciliationRecord.getProviderReportPaymentId());
 				cancelRefundJournalTransaction.setCreditDebitFlag(true);//
 				cancelRefundJournalTransaction
 						.setFinJournalApprovalGroup(finJournalApprovalGroup);
 
 				FinAccount finAccountUangMukaPelanggan = new FinAccount();
 				if (reconciliationRecord.getFinArReconResult()
-						.getReconResultId() == VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED) {
+						.getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()) {
 					finAccountUangMukaPelanggan
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_2230002);
+							.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230002.id());
 				} else {
 					finAccountUangMukaPelanggan
-							.setAccountId(VeniceConstants.FIN_ACCOUNT_2230001);
+							.setAccountId(FinAccountConstants.FIN_ACCOUNT_2230001.id());
 				}
 				cancelRefundJournalTransaction
 						.setFinAccount(finAccountUangMukaPelanggan);
 
-				cancelRefundJournalTransaction
-						.setFinArFundsInReconRecords(reconRecordList);
+				List<FinArFundsInReconRecord> reconRecordList = new ArrayList<FinArFundsInReconRecord>();
+				reconRecordList.add(reconciliationRecord);
+				cancelRefundJournalTransaction.setFinArFundsInReconRecords(reconRecordList);
 
 				cancelRefundJournalTransaction.setFinJournal(finJournalRefund);
-				cancelRefundJournalTransaction.setFinPeriod(FinancePeriodUtil
-						.getCurrentPeriod());
+				cancelRefundJournalTransaction.setFinPeriod(FinancePeriodUtil.getCurrentPeriod());
 
 				FinTransactionStatus finTransactionStatus = new FinTransactionStatus();
-				finTransactionStatus
-						.setTransactionStatusId(VeniceConstants.FIN_TRANSACTION_STATUS_NEW);
-				cancelRefundJournalTransaction
-						.setFinTransactionStatus(finTransactionStatus);
+				finTransactionStatus.setTransactionStatusId(FinTransactionStatusConstants.FIN_TRANSACTION_STATUS_NEW.id());
+				cancelRefundJournalTransaction.setFinTransactionStatus(finTransactionStatus);
 
 				FinTransactionType finTransactionType = new FinTransactionType();
 				if (reconciliationRecord.getFinArReconResult()
-						.getReconResultId() == VeniceConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED) {
+						.getReconResultId() == FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()) {
 					finTransactionType
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_BELUM_TERIDENTIFIKASI.id());
 				} else {
 					finTransactionType
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI.id());
 				}
 				cancelRefundJournalTransaction
 						.setFinTransactionType(finTransactionType);
@@ -9916,14 +10085,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 						cancelRefundJournalTransaction.setWcsOrderID(wcsOrderId);
 						cancelRefundJournalTransaction.setVenBank(venBank);
 				// Persist the DEBIT journal transaction for the refund
-						cancelRefundJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(cancelRefundJournalTransaction);
+				//cancelRefundJournalTransaction = journalTransactionHome.persistFinJournalTransaction(cancelRefundJournalTransaction);
+				if (!em.contains(cancelRefundJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postCancelRefundJournalTransaction:: cancelRefundJournalTransaction not attached, calling save.");
+					cancelRefundJournalTransaction = finJournalTransactionDAO.save(cancelRefundJournalTransaction);
+				}
 				transactionList.add(cancelRefundJournalTransaction);
 
 				// Create the CREDIT journal transaction for REFUND against
 				// REFUND-------------------------------
 				// PELANGGAN
-				_log.info("FinanceJournalPosterSessionEJBBean:: Creating CREDIT Journal Transaction for CANCEL REFUND CUSTOMER");
+				CommonUtil.logInfo(this.getClass().getCanonicalName(), "postCancelRefundJournalTransaction:: Creating CREDIT Journal Transaction for CANCEL REFUND CUSTOMER");
 				FinJournalTransaction cancelRefundPelangganJournalTransaction = new FinJournalTransaction();
 				cancelRefundPelangganJournalTransaction
 						.setComments("Cancel Refund Pelanggan CREDIT for Order:"
@@ -9960,8 +10133,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 				cancelRefundPelangganJournalTransaction.setWcsOrderID(wcsOrderId);
 				cancelRefundPelangganJournalTransaction.setVenBank(venBank);
 				// Persist the CREDIT journal transaction for the refund
-				cancelRefundPelangganJournalTransaction = journalTransactionHome
-						.persistFinJournalTransaction(cancelRefundPelangganJournalTransaction);
+				//cancelRefundPelangganJournalTransaction = journalTransactionHome.persistFinJournalTransaction(cancelRefundPelangganJournalTransaction);
+				if (!em.contains(cancelRefundPelangganJournalTransaction)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postCancelRefundJournalTransaction:: cancelRefundPelangganJournalTransaction not attached, calling save.");
+					cancelRefundPelangganJournalTransaction = finJournalTransactionDAO.save(cancelRefundPelangganJournalTransaction);
+				}
 				transactionList.add(cancelRefundPelangganJournalTransaction);
 
 				if (cancelFee > 0) {
@@ -9983,12 +10160,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 					 * The fees are either taken from the bank or the customer
 					 * as a processing fee
 					 */
-					if (refundType == VeniceConstants.FIN_REFUND_TYPE_BANK) {
+					if (refundType == FinRefundTypeConstants.FIN_REFUND_TYPE_BANK.id()) {
 						finAccountProcessingFee
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_5110003);
-					} else if (refundType == VeniceConstants.FIN_REFUND_TYPE_CUSTOMER) {
+								.setAccountId(FinAccountConstants.FIN_ACCOUNT_5110003.id());
+					} else if (refundType == FinRefundTypeConstants.FIN_REFUND_TYPE_CUSTOMER.id()) {
 						finAccountProcessingFee
-								.setAccountId(VeniceConstants.FIN_ACCOUNT_4110007);
+								.setAccountId(FinAccountConstants.FIN_ACCOUNT_4110007.id());
 					}
 					processFeeJournalTransaction
 							.setFinAccount(finAccountProcessingFee);
@@ -10006,7 +10183,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					FinTransactionType finTransactionTypeProcessFee = new FinTransactionType();
 					finTransactionTypeProcessFee
-							.setTransactionTypeId(VeniceConstants.FIN_TRANSACTION_TYPE_PROCESS_FEE);
+							.setTransactionTypeId(FinTransactionTypeConstants.FIN_TRANSACTION_TYPE_PROCESS_FEE.id());
 					processFeeJournalTransaction
 							.setFinTransactionType(finTransactionTypeProcessFee);
 
@@ -10020,8 +10197,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 					processFeeJournalTransaction.setWcsOrderID(wcsOrderId);
 					processFeeJournalTransaction.setVenBank(venBank);
 					// Persist the DEBIT journal transaction for the refund
-					processFeeJournalTransaction = journalTransactionHome
-							.persistFinJournalTransaction(processFeeJournalTransaction);
+					//processFeeJournalTransaction = journalTransactionHome.persistFinJournalTransaction(processFeeJournalTransaction);
+					if (!em.contains(processFeeJournalTransaction)) {
+						CommonUtil.logDebug(this.getClass().getCanonicalName()
+								, "postCancelRefundJournalTransaction:: processFeeJournalTransaction not attached, calling save.");
+						processFeeJournalTransaction = finJournalTransactionDAO.save(processFeeJournalTransaction);
+					}
 					transactionList.add(processFeeJournalTransaction);
 				}
 
@@ -10034,7 +10215,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.currentTimeMillis()));
 				finArFundsInRefund.setRefundType(reconciliationRecord
 						.getFinArFundsInActionApplied().getActionAppliedDesc());
-				refundRecordHome.persistFinArFundsInRefund(finArFundsInRefund);
+				//refundRecordHome.persistFinArFundsInRefund(finArFundsInRefund);
+				if (!em.contains(finArFundsInRefund)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "postCancelRefundJournalTransaction:: finArFundsInRefund not attached, calling save.");
+					finArFundsInRefund = finArFundsInRefundDAO.save(finArFundsInRefund);
+				}
 			} else {
 				reconciliationRecord.setRefundAmount(reconciliationRecord
 						.getRefundAmount().add(new BigDecimal(cancelRefundAmount)));
@@ -10054,7 +10240,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 				FinApprovalStatus finApprovalStatus = new FinApprovalStatus();
 				finApprovalStatus
-						.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
+						.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_NEW.id());
 				reconciliationRecord.setFinApprovalStatus(finApprovalStatus);
 
 				// reconciliationRecord.setRemainingBalanceAmount(remainingUnallocatedAmount.subtract(new
@@ -10062,8 +10248,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 				// reconciliationRecord.setRemainingBalanceAmount(new
 				// BigDecimal(refundAmount).subtract(reconciliationRecord.getProviderReportPaidAmount()).add(reconciliationRecord.getPaymentAmount()!=null?reconciliationRecord.getPaymentAmount():new
 				// BigDecimal("0")));
-				reconciliationRecord = fundsInReconRecordHome
-						.mergeFinArFundsInReconRecord(reconciliationRecord);
+				//reconciliationRecord = fundsInReconRecordHome.mergeFinArFundsInReconRecord(reconciliationRecord);
+				if (!em.contains(reconciliationRecord)) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),
+							"postCancelRefundJournalTransaction:: reconciliationRecord not attached, calling save.");
+					reconciliationRecord = finArFundsInReconRecordDAO.save(reconciliationRecord);
+				}
 
 				/*
 				 * Note that we do not do anything with the transactionList here
@@ -10072,10 +10262,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 		} catch (Exception e) {
 			String errMsg = "An Exception occured when posting cancel refund journal transactions:";
-			_log.error(errMsg + e.getMessage());
+			CommonUtil.logError(this.getClass().getCanonicalName(), errMsg + e.getMessage());
 			e.printStackTrace();
 			throw new EJBException(errMsg + e.getMessage());
 		} finally {
+			/*
 			try {
 				if (_genericLocator != null) {
 					_genericLocator.close();
@@ -10083,14 +10274,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			*/
 		}
 
 		Long endTime = System.currentTimeMillis();
 		Long duration = endTime - startTime;
-		_log.debug("postCancelRefundJournalTransaction()" + " completed in "
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCancelRefundJournalTransaction::" + " completed in "
 				+ duration + "ms");
 		return true;
 
-	}
-	
+	}	
 }

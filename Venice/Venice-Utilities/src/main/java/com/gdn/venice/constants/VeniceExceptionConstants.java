@@ -62,6 +62,7 @@ public enum VeniceExceptionConstants {
 	VEN_EX_400002("Payment Type does not exist"),
 	VEN_EX_400003("WCS Payment Type does not exist"),
 	VEN_EX_400004("Payment processing failed"),
+	VEN_EX_400005("Account number N/A for the Payment."),
 	VEN_EX_500001("LogLogisticService does not exist"),
 	VEN_EX_600001("Product Category does not exist"),
 	VEN_EX_800001("Error occured while persisting FinArFundsInReconRecord"),

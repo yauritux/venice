@@ -52,6 +52,8 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 	
 	public VenOrder findByWcsOrderId(String wcsOrderId);
 	
+	public VenOrder findByOrderId(Long orderId);
+	
 	@Query(FIND_PAID_BY_CREDITCARD_AND_STATUS_C)
 	public List<VenOrder> findPaidByCreditCardAndStatusC(String startDate);
 	
