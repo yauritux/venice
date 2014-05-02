@@ -187,7 +187,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
     }
 
     private ListGrid buildItemListGrid(String grnId) {
-        DataSource grnItemData = GRNData.getGRNItemData(grnId, 1, 20);
+        DataSource grnItemData = GRNData.getGRNItemData(grnId, 1, 100);
 
         final ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
         ListGridField attributeField = new ListGridField("ATTRIBUTEFIELD", "View Attribute");

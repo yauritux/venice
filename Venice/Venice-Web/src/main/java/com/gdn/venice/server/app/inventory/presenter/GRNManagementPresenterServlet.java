@@ -82,7 +82,7 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 			
 			String method = request.getParameter("method");
 			
-			if(method.equals("fetchGRNData")){			
+			if(method.equals("fetchGRNData")){
 				RafDsCommand fetchGRNDataCommand = new FetchGRNDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchGRNDataCommand.execute();
 				try{
