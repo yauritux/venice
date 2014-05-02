@@ -3122,9 +3122,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                     // Synchronize the reference data then merge the status
                     venOrderItem = this.synchronizeVenOrderItemReferenceData(venOrderItem);
 
-                    List<VenOrderItem> venOrderItems = venOrder.getVenOrderItems();
+//                    List<VenOrderItem> venOrderItems = venOrder.getVenOrderItems();
 //                    List<VenOrderItemAdjustment> venOrderItemAdjustmentNewSpreadList = new ArrayList<VenOrderItemAdjustment>();
-                    _log.debug("Total Order Item : " + venOrderItems.size());
+//                    _log.debug("Total Order Item : " + venOrderItems.size());
 
 //                    BigDecimal totalPromo = new BigDecimal(0);
 
@@ -3163,7 +3163,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 //                        }
 //                    }
 
-                    int totalOrderItemAfterPF = venOrderItems.size() - 1;
+//                    int totalOrderItemAfterPF = venOrderItems.size() - 1;
 //                    BigDecimal adjustmentSpread = new BigDecimal(0);
 //
 //                    if (totalOrderItemAfterPF > 0) {
@@ -3171,7 +3171,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 //                    }
 
 //                    _log.debug("Total Promo : " + totalPromo);
-                    _log.debug("Total Order Item : " + totalOrderItemAfterPF);
+//                    _log.debug("Total Order Item : " + totalOrderItemAfterPF);
 //                    _log.debug("Adjustment Spread : " + adjustmentSpread);
 
                     //merge all non free shipping adjustment with the new adjustment spread
