@@ -44,8 +44,9 @@ public interface VenOrderAddressDAO extends JpaRepository<VenOrderAddress, Long>
 	public static final String FIND_BY_VENADDRESSSTREETADDRESS1_AND_VENORDERORDERID=
 	"SELECT o " +
 	"FROM VenOrderAddress o " +
-	"WHERE UPPER(o.venAddress.streetAddress1) LIKE '%?1%' " +
-	"AND o.venOrder.orderId != ?2";
+	"INNER JOIN FETCH o.venAddress a " +
+	"WHERE UPPER(a.streetAddress1) LIKE UPPER('%?1%') " +
+	"AND o.venOrder != ?2";
 	
 	public List<VenOrderAddress> findByVenOrder(VenOrder order);
 	
@@ -62,5 +63,5 @@ public interface VenOrderAddressDAO extends JpaRepository<VenOrderAddress, Long>
 	public VenOrderAddress findWithVenAddressVenCityByVenOrder(VenOrder order);
 	
 	@Query(FIND_BY_VENADDRESSSTREETADDRESS1_AND_VENORDERORDERID)
-	public List<VenOrderAddress> findByVenAddressStreetAddress1AndVenOrderOrderId(String StreetAddress1, long orderId);
+	public List<VenOrderAddress> findByVenAddressStreetAddress1AndVenOrderOrderId(String StreetAddress1, VenOrder venOrder);
 }

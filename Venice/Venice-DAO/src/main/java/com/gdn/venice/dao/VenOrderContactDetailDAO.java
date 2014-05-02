@@ -48,16 +48,18 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 	public static final String FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILVENCONTACTDETAILTYPECONTACTDETAILTYPEID =
 	"SELECT o " +
 	"FROM VenOrderContactDetail o " +
-	"WHERE o.venOrder.orderId = ?1 " +
-	"AND (o.venContactDetail.venContactDetailType.contactDetailTypeId = ?2" +
-	"OR o.venContactDetail.venContactDetailType.contactDetailTypeId = ?3 " +
-	"OR o.venContactDetail.venContactDetailType.contactDetailTypeId = ?4)";
+	"JOIN FETCH o.venContactDetail cd " +
+	"WHERE o.venOrder = ?1 " +
+	"AND (cd.venContactDetailType.contactDetailTypeId = ?2" +
+	"OR cd.venContactDetailType.contactDetailTypeId = ?3 " +
+	"OR cd.venContactDetailType.contactDetailTypeId = ?4)";
 	
 	public static final String FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILCONTACTDETAIL=
 	"SELECT o " +
 	"FROM VenOrderContactDetail o " +
-	"WHERE o.venOrder.orderId = ?1 " +
-	"AND o.venContactDetail.contactDetail = ?2";
+	"JOIN FETCH o.venContactDetail cd " +
+	"WHERE o.venOrder = ?1 " +
+	"AND cd.contactDetail = ?2";
 		
 	
 	@Query(FIND_BY_CONTACTTYPEEMAIL_VENORDER)
@@ -73,8 +75,8 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 	public List<VenOrderContactDetail> findByContactMobileVenOrder(VenOrder order);
 	
 	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILVENCONTACTDETAILTYPECONTACTDETAILTYPEID)
-	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(long orderId, String phone, String mobile, String email);
+	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(VenOrder order, String phone, String mobile, String email);
 
 	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILCONTACTDETAIL)
-	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailContactDetail(long orderId, String contactDetail);
+	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailContactDetail(VenOrder order, String contactDetail);
 }
