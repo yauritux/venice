@@ -75,7 +75,7 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 	public List<VenOrderContactDetail> findByContactMobileVenOrder(VenOrder order);
 	
 	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILVENCONTACTDETAILTYPECONTACTDETAILTYPEID)
-	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(VenOrder order, String phone, String mobile, String email);
+	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(VenOrder order, long phone, long mobile, long email);
 
 	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILCONTACTDETAIL)
 	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailContactDetail(VenOrder order, String contactDetail);
