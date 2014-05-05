@@ -25,9 +25,9 @@ import com.gdn.venice.util.CommonUtil;
 public class Rule45Impl implements Rule  {
 
 
-    private static final long VEN_CONTACT_DETAIL_ID_PHONE = 0;
-    private static final long VEN_CONTACT_DETAIL_ID_MOBILE = 1;
-    private static final long VEN_CONTACT_DETAIL_ID_EMAIL = 3;
+    private static final String VEN_CONTACT_DETAIL_ID_PHONE = "0";
+    private static final String VEN_CONTACT_DETAIL_ID_MOBILE = "1";
+    private static final String VEN_CONTACT_DETAIL_ID_EMAIL = "3";
 	
 	private static final String CLASS_NAME = Rule45Impl.class.getCanonicalName();
 	

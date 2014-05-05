@@ -50,7 +50,7 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 	"FROM VenOrderContactDetail o " +
 	"JOIN FETCH o.venContactDetail cd " +
 	"WHERE o.venOrder = ?1 " +
-	"AND (cd.venContactDetailType.contactDetailTypeId = ?2" +
+	"AND (cd.venContactDetailType.contactDetailTypeId = ?2 " +
 	"OR cd.venContactDetailType.contactDetailTypeId = ?3 " +
 	"OR cd.venContactDetailType.contactDetailTypeId = ?4)";
 	
@@ -75,7 +75,7 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 	public List<VenOrderContactDetail> findByContactMobileVenOrder(VenOrder order);
 	
 	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILVENCONTACTDETAILTYPECONTACTDETAILTYPEID)
-	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(VenOrder order, long phone, long mobile, long email);
+	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(VenOrder order, String phone, String mobile, String email);
 
 	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILCONTACTDETAIL)
 	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailContactDetail(VenOrder order, String contactDetail);
