@@ -14,4 +14,6 @@ public interface FrdFraudSuspicionCaseDAO extends JpaRepository<FrdFraudSuspicio
 	@Query(COUNT_BY_VENORDERID)
 	public int countByVenOrderId(Long orderId);
 	
+	public FrdFraudSuspicionCase findByFraudSuspicionCaseId(Long fraudSuspicionCaseId);
+	
 }
