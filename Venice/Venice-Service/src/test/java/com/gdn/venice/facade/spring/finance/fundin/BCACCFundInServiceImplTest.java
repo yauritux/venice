@@ -302,6 +302,47 @@ public class BCACCFundInServiceImplTest {
 		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id(), reconResult.getReconResultId().longValue());
 	}
 	
+	@Test
+	public void getRemainingBalanceAfterPayment_paymentNotYetPaid_returns0() {
+		
+		FinArFundsInReconRecord fundInNotYetPaid = new FinArFundsInReconRecord();
+		fundInNotYetPaid.setRemainingBalanceAmount(new BigDecimal("10000"));
+		
+		BigDecimal paymentAmount = new BigDecimal("10000");
+		
+		BigDecimal result = sut.getRemainingBalanceAfterPayment(fundInNotYetPaid, paymentAmount);
+		
+		assertEquals(new BigDecimal(0), result);
+	}
+	
+	@Test
+	public void getRemainingBalanceAfterPayment_paymentPaidPartialy_returns0() {
+		
+		FinArFundsInReconRecord fundInPaidPartialy = new FinArFundsInReconRecord();
+		fundInPaidPartialy.setRemainingBalanceAmount(new BigDecimal("5000"));
+		fundInPaidPartialy.setProviderReportPaidAmount(new BigDecimal("5000"));
+		
+		BigDecimal paymentAmount = new BigDecimal("5000");
+		
+		BigDecimal result = sut.getRemainingBalanceAfterPayment(fundInPaidPartialy, paymentAmount);
+		
+		assertEquals(new BigDecimal(0), result);
+	}
+	
+	@Test
+	public void getRemainingBalanceAfterPayment_overPaid_returnsExcessAmount() {
+		
+		FinArFundsInReconRecord fundInPaidPartialy = new FinArFundsInReconRecord();
+		fundInPaidPartialy.setRemainingBalanceAmount(new BigDecimal("5000"));
+		fundInPaidPartialy.setProviderReportPaidAmount(new BigDecimal("5000"));
+		
+		BigDecimal paymentAmount = new BigDecimal("10000");
+		
+		BigDecimal result = sut.getRemainingBalanceAfterPayment(fundInPaidPartialy, paymentAmount);
+		
+		assertEquals(new BigDecimal(-5000), result);
+	}
+	
 	@After
 	public void shutdown(){
 		veniceEnv = VeniceEnvironment.PRODUCTION;

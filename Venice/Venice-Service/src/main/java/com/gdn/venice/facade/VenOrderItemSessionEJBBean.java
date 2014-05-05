@@ -217,6 +217,9 @@ public class VenOrderItemSessionEJBBean implements VenOrderItemSessionEJBRemote,
                 Hibernate.initialize(venOrderItem.getVenOrder().getVenCustomer().getVenParty().getVenContactDetails());
             }
         }
+        
+        em.clear();
+        
         Long endTime = System.currentTimeMillis();
         Long duration = startTime - endTime;
         _log.debug("queryByRange() duration:" + duration + "ms");

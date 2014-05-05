@@ -194,6 +194,8 @@ public class VenOrderPaymentAllocationSessionEJBBean implements VenOrderPaymentA
 		List<VenOrderPaymentAllocation> returnList = (List<VenOrderPaymentAllocation>)query.getResultList();
 		this.bindingArray = null;
 		
+		em.clear();
+		
 		Long endTime = System.currentTimeMillis();
 		Long duration = startTime - endTime;
 		_log.debug("queryByRange() duration:" + duration + "ms");

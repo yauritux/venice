@@ -48,9 +48,13 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 			   "SELECT o " +
 			   "FROM VenOrderPaymentAllocation AS o " +
 			   " JOIN FETCH o.venOrderPayment AS op " +
-			   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
+			   " JOIN FETCH op.finArFundsInReconRecords AS afirr " +
 			   "WHERE " +
-			   " op.referenceId = ?1 ";
+			   " op.referenceId = ?1 " +
+			   " AND op.venPaymentType.paymentTypeId = " + VeniceConstants.VEN_PAYMENT_TYPE_ID_VA +
+			   " AND afirr.finArFundsInActionApplied.actionAppliedId = " + VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE +
+			   " AND afirr.finApprovalStatus.approvalStatusId = " + VeniceConstants.FIN_APPROVAL_STATUS_NEW + 
+			   " AND afirr.reconcilliationRecordTimestamp IS NULL";
 	
 	public static final String FIND_BY_PAYMENTREFERENCEID =
 		   "SELECT o " +
