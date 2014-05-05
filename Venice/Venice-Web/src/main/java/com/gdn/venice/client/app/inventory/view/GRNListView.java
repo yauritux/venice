@@ -7,7 +7,6 @@ import com.gdn.venice.client.app.inventory.data.GRNData;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.view.handler.GRNListUiHandler;
 import com.gdn.venice.client.data.RafDataSource;
-import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
 import com.google.gwt.core.client.GWT;

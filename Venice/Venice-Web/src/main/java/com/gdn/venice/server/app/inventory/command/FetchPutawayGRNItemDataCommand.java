@@ -49,7 +49,6 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     @Override
     public RafDsResponse execute() {
     	_log.info("FetchPutawayGRNItemDataCommand");
-    	System.out.println("warehouse id putaway create: "+request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         try {
@@ -90,7 +89,11 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
     	                    		qty+=storageStock.getQuantity();
     	                    	}
-    	                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	if(shelfCode.length()>1){
+    	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	}else{
+    	                    		shelfCode="-";
+    	                    	}
     	                    }
     	                    
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);

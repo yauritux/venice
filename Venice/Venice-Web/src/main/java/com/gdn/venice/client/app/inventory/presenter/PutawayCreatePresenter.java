@@ -94,7 +94,7 @@ public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyV
 		String itemMap = Util.formXMLfromHashMap(itemDataMap);		
 		request.setData(itemMap);
 		
-		request.setActionURL(GWT.getHostPageBaseURL() + putawayManagementPresenterServlet + "?method=submitPutawayData&type=RPC");
+		request.setActionURL(GWT.getHostPageBaseURL() + putawayManagementPresenterServlet + "?method=savePutawayData&type=RPC");
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setWillHandleError(true);

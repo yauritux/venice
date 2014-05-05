@@ -12,6 +12,7 @@ import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.ShelfManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.util.Util;
+import com.gdn.venice.util.InventoryUtil;
 
 public class EditShelfEditWIPDataCommand implements RafRpcCommand {
 
@@ -53,7 +54,7 @@ public class EditShelfEditWIPDataCommand implements RafRpcCommand {
 				System.out.println("storage value: "+value);
 				
 				Storage storage = new Storage();
-				HashMap<String, String> map = convertToHashMap(value);
+				HashMap<String, String> map = InventoryUtil.convertToHashMap(value);
 				for(Map.Entry<String, String> e : map.entrySet()){
 					String k = e.getKey();
 					String v = e.getValue();
@@ -95,20 +96,5 @@ public class EditShelfEditWIPDataCommand implements RafRpcCommand {
 			return "Failed saving edit shelf, try again later. If error persist please contact administrator";
 		}
 		return "0";
-	}
-	
-	private HashMap<String, String> convertToHashMap(String s) {
-	    String[] arr = s.split(", ");
-	    String str = null;
-	    HashMap<String, String> map = new HashMap<String, String>();
-	    for (int i=0;i<arr.length;i++) {
-	    	str = arr[i].replace("{", "").replace("}", "");
-	        System.out.println("str: "+str);
-	        String[] splited = str.split("=");
-
-	        map.put(splited[0], splited[1]);
-	    }
-	    
-	    return map;
 	}
 }

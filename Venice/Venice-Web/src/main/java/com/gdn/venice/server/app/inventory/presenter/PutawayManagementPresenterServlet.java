@@ -95,7 +95,7 @@ public class PutawayManagementPresenterServlet extends HttpServlet{
 			}				
 		}else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");		
-			if(method.equals("submitPutawayData")){					
+			if(method.equals("savePutawayData")){					
 				RafRpcCommand savePutawayDataCommand = new SavePutawayDataCommand(username, requestBody);
 				retVal = savePutawayDataCommand.execute();
 			}else if(method.equals("savePutawayInputLocationData")){
