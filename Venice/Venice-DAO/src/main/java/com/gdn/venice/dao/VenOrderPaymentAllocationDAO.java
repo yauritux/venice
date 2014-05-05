@@ -26,8 +26,9 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	public static final String FIND_BY_VEN_ORDER_AND_VENORDERPAYMENT_THREEDSSECURITYLEVELAUTHISNOT = 
 	       "SELECT o " +
 	       "FROM VenOrderPaymentAllocation o " +
+		   " JOIN FETCH o.venOrderPayment AS op " +
 	       "WHERE o.venOrder = ?1 " +
-	       "AND venOrderPayment.threeDsSecurityLevelAuth != ?2";
+	       "AND op.threeDsSecurityLevelAuth != ?2";
 
 	public static final String FIND_BY_CREDITCARD_DETAIL = 
 	       "SELECT o " +
