@@ -76,13 +76,18 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 			finArFundsInReconRecordDAO.save(fundInReconReadyToPersistList);
 
 
-			CommonUtil.logDebug(CLASS_NAME, "size 1 adalah : "+fundInReconReadyToPersistList.size());
-			CommonUtil.logDebug(CLASS_NAME, "card number 0 adalah : "+fundInReconReadyToPersistList.get(0).getCardNumber());
-			CommonUtil.logDebug(CLASS_NAME, "card number 1 adalah : "+fundInReconReadyToPersistList.get(1).getCardNumber());
-			CommonUtil.logDebug(CLASS_NAME, "card number 2 adalah : "+fundInReconReadyToPersistList.get(2).getCardNumber());
-			CommonUtil.logDebug(CLASS_NAME, "card number 3 adalah : "+fundInReconReadyToPersistList.get(3).getCardNumber());
-			CommonUtil.logDebug(CLASS_NAME, "card number 4 adalah : "+fundInReconReadyToPersistList.get(4).getCardNumber());
 			
+			
+			
+			try
+			{
+				CommonUtil.logDebug(CLASS_NAME, "size 1 adalah : "+fundInReconReadyToPersistList.size());
+				CommonUtil.logDebug(CLASS_NAME, "card number 0 adalah : "+fundInReconReadyToPersistList.get(0).getCardNumber());
+				CommonUtil.logDebug(CLASS_NAME, "card number 1 adalah : "+fundInReconReadyToPersistList.get(1).getCardNumber());
+			}
+			catch (Exception e) {
+				CommonUtil.logDebug(CLASS_NAME, e.toString());
+			}
 			
 			for(int i=0;i<fundInReconReadyToPersistList.size();i++)
 			{
@@ -129,7 +134,7 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 							CommonUtil.logDebug(CLASS_NAME, e.toString());
 						}
 						
-						
+						/*
 						try
 						{
 							if(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId()==(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()))
@@ -165,6 +170,7 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 							CommonUtil.logDebug(CLASS_NAME, "Gagal ketiga");
 							CommonUtil.logDebug(CLASS_NAME, e.toString());
 						}
+						*/
 					
 					}
 				}
