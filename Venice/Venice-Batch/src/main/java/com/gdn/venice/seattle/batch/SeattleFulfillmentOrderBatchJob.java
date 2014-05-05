@@ -25,9 +25,11 @@ import org.apache.log4j.Logger;
 
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.app.jiraclient.GdnJiraClient;
-import com.gdn.app.jiraclient.entity.GdnJiraIssueType.IssueType;
+import com.gdn.app.jiraclient.GdnJiraPluginConstants;
 import com.gdn.app.jiraclient.exceptions.GdnJiraAlreadyExist;
 import com.gdn.app.jiraclient.exceptions.GdnJiraInvalidTransitionException;
+import com.gdn.app.jiraclient.request.OrderCompleteProcessIssue;
+import com.gdn.app.jiraclient.util.GdnJiraCustomClientImpl;
 import com.gdn.venice.persistence.SeatSlaStatus;
 import com.gdn.venice.persistence.SeatStatusUom;
 import com.gdn.venice.seattle.bean.SeattleOrder;
@@ -46,13 +48,14 @@ public class SeattleFulfillmentOrderBatchJob {
 	private String jiraPassword = "";
 	private static Connection conn;
 	private static Map<Integer,Long> statusOrder=null;
+	private static Map<Long,String> jobStatus=null;
 	private static Timestamp currentTimestamp=null;
 	private static GdnJiraClient jira =null;
 	
 	private static Map<String,SeatStatusUom> SeatStatusUomMap=null;
 	
-	private static final String STATUS_ORDER_BY_STATUS_ID = "select sosh.seat_order_status_history_id , vo.wcs_order_id ,voi.wcs_order_item_id," +
-			" vos.order_status_code, sosh.update_status_date, soe.etd_max, vo.order_timestamp,vos.order_status_id,sof.order_fulfillment_id,sof.issue_id,soe.diff_etd,vop.payment_status_id" +
+	private static final String STATUS_ORDER_BY_STATUS_ID = "select sosh.seat_order_status_history_id , vo.wcs_order_id ,voi.wcs_order_item_id,srst.result_status_tracking_desc," +
+			" vos.order_status_code, sosh.update_status_date, soe.etd_max,soe.start_date,soe.end_date,soe.logisticsetd,  vo.order_timestamp,vos.order_status_id,sof.order_fulfillment_id,sof.issue_id,soe.diff_etd,vop.payment_status_id" +
 			" from seat_order_status_history sosh" +
 			" left join ven_order vo on vo.order_id=sosh.order_id" +
 			" left join ven_order_payment_allocation vopa on vopa.order_id=vo.order_id" +
@@ -61,6 +64,8 @@ public class SeattleFulfillmentOrderBatchJob {
 			" left join ven_order_status vos on vos.order_status_id=sosh.order_status_id" +
 			" left join seat_order_etd soe on soe.order_etd_id=sosh.order_etd_id" +
 			" left join seat_order_fulfillment sof on sof.seat_order_status_history_id=sosh.seat_order_status_history_id" +
+			" left join seat_fulfillment_in_percentage sfip on sfip.fulfillment_in_percentage_id=sof.fulfillment_in_percentage_id" +
+			" left join seat_result_status_tracking srst on srst.result_status_tracking_id=sfip.result_status_tracking_id" +
 			" where sosh.order_status_id = ? " +
 			" and (vos.order_status_code not in ('D','X') or (vos.order_status_code in ('D','X')  and sof.issue_id is not null and sof.status_issue=false) ) " +
 			" and ((vop.payment_status_id=1 and vos.order_status_code <> 'VA') or (vop.payment_status_id=0 and vos.order_status_code = 'VA')" +
@@ -72,14 +77,14 @@ public class SeattleFulfillmentOrderBatchJob {
 			" left join seat_fulfillment_consist_of_sla_status sfcoss on sfcoss.sla_status_id=sss.sla_status_id" +
 			" left join seat_order_status sos on sos.seat_order_status_id=sfcoss.seat_order_status_id" +
 			" left join seat_status_uom ssu on ssu.status_uom_id=sss.status_uom_id" +
-			" where sos.order_status_id =? order by sfcoss.sla_status_id asc";
+			" where sos.order_status_decs=? order by sfcoss.sla_status_id asc";
 	
 
 	private static final String RESULT_STATUS_TARCKING = "select sfip.fulfillment_in_percentage_id ,srst.result_status_tracking_desc" +
 			" from seat_fulfillment_in_percentage sfip" +
 			" left join seat_order_status sos on sos.seat_order_status_id=sfip.seat_order_status_id" +
 			" left join seat_result_status_tracking srst on srst.result_status_tracking_id=sfip.result_status_tracking_id" +
-			" where ? between sfip.min and sfip.max  and sos.order_status_id=?";
+			" where ? between sfip.min and sfip.max  and sos.order_status_decs=?";
 	
 	private static final String UOM = "select * From seat_status_uom";
 	
@@ -111,6 +116,35 @@ public class SeattleFulfillmentOrderBatchJob {
 		jiraUsername = prop.getProperty(environment + ".jiraUsername");
 		jiraPassword = prop.getProperty(environment + ".jiraPassword");
 		
+		 GdnJiraPluginConstants.actualPickupTimeCustomFieldId=prop.getProperty(environment + ".actualPickupTimeCustomFieldId");
+		 GdnJiraPluginConstants.etdOrderCompleteCustomFieldId=prop.getProperty(environment + ".etdOrderCompleteCustomFieldId");
+		 GdnJiraPluginConstants.fraudBinListedCustomFieldId=prop.getProperty(environment + ".fraudBinListedCustomFieldId");
+		 GdnJiraPluginConstants.fraudBlacklistInfoCustomFieldId=prop.getProperty(environment + ".fraudBlacklistInfoCustomFieldId");
+		 GdnJiraPluginConstants.fraudECICustomFieldId=prop.getProperty(environment + ".fraudECICustomFieldId");
+		 GdnJiraPluginConstants.fraudOrderQuantityByEmailCustomFieldId=prop.getProperty(environment + ".fraudOrderQuantityByEmailCustomFieldId");
+		 GdnJiraPluginConstants.fraudPaymentTypeCustomFieldId=prop.getProperty(environment + ".fraudPaymentTypeCustomFieldId");
+		 GdnJiraPluginConstants.fraudTotalPaymentCustomFieldId=prop.getProperty(environment + ".fraudTotalPaymentCustomFieldId");
+		 GdnJiraPluginConstants.issueDueDateCustomFieldId=prop.getProperty(environment + ".issueDueDateCustomFieldId");
+		 GdnJiraPluginConstants.issueLateTimeCustomFieldId=prop.getProperty(environment + ".issueLateTimeCustomFieldId");
+		 GdnJiraPluginConstants.issueTimestampCustomFieldId=prop.getProperty(environment + ".issueTimestampCustomFieldId");
+		 GdnJiraPluginConstants.newEtdMaxOrderCustomFieldId=prop.getProperty(environment + ".newEtdMaxOrderCustomFieldId");
+		 GdnJiraPluginConstants.orderIdCustomFieldId=prop.getProperty(environment + ".orderIdCustomFieldId");
+		 GdnJiraPluginConstants.orderItemIdCustomFieldId=prop.getProperty(environment + ".orderItemIdCustomFieldId");
+		 GdnJiraPluginConstants.orderProcessLateTimeCustomFieldId=prop.getProperty(environment + ".orderProcessLateTimeCustomFieldId");
+		 GdnJiraPluginConstants.orderTrackingProjectKey=prop.getProperty(environment + ".orderTrackingProjectKey");
+		 GdnJiraPluginConstants.selectedPickupTimeCustomFieldId=prop.getProperty(environment + ".selectedPickupTimeCustomFieldId");
+		 GdnJiraPluginConstants.paymentApprovalIssueTypeId=new Long(prop.getProperty(environment + ".paymentApprovalIssueTypeId"));
+		 GdnJiraPluginConstants.fraudCheckingIssueTypeId=new Long(prop.getProperty(environment + ".fraudCheckingIssueTypeId"));
+		 GdnJiraPluginConstants.orderFulfillIssueTypeId=new Long(prop.getProperty(environment + ".orderFulfillIssueTypeId"));
+		 GdnJiraPluginConstants.logisticSettleIssueTypeId=new Long(prop.getProperty(environment + ".logisticSettleIssueTypeId"));
+		 GdnJiraPluginConstants.regularShipmentOrderDeliveryIssueTypeId=new Long(prop.getProperty(environment + ".regularShipmentOrderDeliveryIssueTypeId"));
+		 GdnJiraPluginConstants.fulfillmentOrderItemIssueTypeId=new Long(prop.getProperty(environment + ".fulfillmentOrderItemIssueTypeId"));
+		 GdnJiraPluginConstants.merchantPartnerShipmentOrderDeliveryIssueTypeId=new Long(prop.getProperty(environment + ".merchantPartnerShipmentOrderDeliveryIssueTypeId"));        
+		 GdnJiraPluginConstants.issueApi = prop.getProperty(environment + ".issueApi");
+	
+		
+	
+		
 		System.out.println("environment: "+environment);
 		System.out.println("dbHost: "+dbHost);
 		System.out.println("dbPort: "+dbPort);
@@ -126,6 +160,7 @@ public class SeattleFulfillmentOrderBatchJob {
 	
 	private void setupJiraConnection() throws ClassNotFoundException, SQLException{
 		 jira = new GdnJiraClient();
+		 jira.setGdnJiraCustomClient(new GdnJiraCustomClientImpl());
 		 jira.setJiraHost(jiraHost);
 		 jira.setJiraUser(jiraUsername);
 		 jira.setJiraPass(jiraPassword);
@@ -169,8 +204,12 @@ public class SeattleFulfillmentOrderBatchJob {
 	            	item.setOrderfulfillmentId(rsSeattletList.getLong("order_fulfillment_id"));	    
 	            	item.setIssueId(rsSeattletList.getString("issue_id"));   
 	            	item.setDiffEtd(rsSeattletList.getBigDecimal("diff_etd"));
-	            	item.setStatusPayment(rsSeattletList.getLong("payment_status_id"));           
-	            	
+	            	item.setStatusPayment(rsSeattletList.getLong("payment_status_id"));      
+	            	item.setStartNewEtd(rsSeattletList.getDate("start_date"));
+	            	item.setEndNewEtd(rsSeattletList.getDate("end_date"));
+	            	item.setLogisticsEtd(rsSeattletList.getBigDecimal("logisticsetd"));
+	            	item.setResultStatus(rsSeattletList.getString("result_status_tracking_desc"));
+	            			
 	            	seattleOrderList.add(item);
 	            	rsSeattletList.next();	            	
 	            }
@@ -227,17 +266,16 @@ public class SeattleFulfillmentOrderBatchJob {
 	        }        
 	}
 	
-	private ArrayList<SeatSlaStatus>  getSeatSlaStatusByStatus(long orderStatusId){
+	private ArrayList<SeatSlaStatus>  getSeatSlaStatusByStatus(String jobStatus){
 		PreparedStatement psSLAStatusList = null;      
       	ResultSet rsSLAStatusList = null;
       	ArrayList<SeatSlaStatus> slaStatusList = null;	
 		 try{	            
-		    	_log.debug("Query Seattle Order fot fulfillment data -> get SLA for statusId "+orderStatusId);
+		    	_log.debug("This Sla Status consist Of  "+jobStatus);
 		    	
 		    	slaStatusList = new ArrayList<SeatSlaStatus>();
-		    	psSLAStatusList = conn.prepareStatement(SLA_BY_STATUS_ID, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);            
-	            
-		    	psSLAStatusList.setLong(1, orderStatusId);
+		    	psSLAStatusList = conn.prepareStatement(SLA_BY_STATUS_ID, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);          
+		    	psSLAStatusList.setString(1, jobStatus);
 		    	rsSLAStatusList = psSLAStatusList.executeQuery();
 	    		
 		    	rsSLAStatusList.last();
@@ -443,15 +481,24 @@ public class SeattleFulfillmentOrderBatchJob {
 	 private void loadVariabel(){
 		 statusOrder = new HashMap<Integer,Long> ();
 		 statusOrder.put(0, new Long(0));//VA
-		 statusOrder.put(1, new Long(18));//CS
+		statusOrder.put(1, new Long(18));//CS
 		 statusOrder.put(2, new Long(1));//C 
 		 statusOrder.put(3, new Long(4));//FP 
-		 statusOrder.put(4, new Long(8));//PU
-		 statusOrder.put(5, new Long(16));//CX
-		 statusOrder.put(6, new Long(9));//BP
-		 statusOrder.put(7, new Long(5));//D
-		 statusOrder.put(8, new Long(6));//X
+		statusOrder.put(4, new Long(8));//PU
+		statusOrder.put(5, new Long(16));//CX
+		 statusOrder.put(6, new Long(5));//D
+		 statusOrder.put(7, new Long(6));//X
 		 
+		 jobStatus = new HashMap<Long,String> ();
+		 jobStatus.put(new Long(0),"Payment Approval");//VA
+		 jobStatus.put(new Long(18),"Payment Approval");//CS
+		 jobStatus.put(new Long(1),"Fraud Checking");//C 
+		jobStatus.put(new Long(4),"Order Fulfill");//FP 
+		 jobStatus.put( new Long(8),"Logistic Settle");//PU
+		 jobStatus.put( new Long(16),"Order Delivery");//CX
+		 jobStatus.put( new Long(5),"Actual Delivery");//D
+		 jobStatus.put(new Long(6),"Actual Delivery");//X
+				 
 	 }	
 	 private void closeIssue(String issueID){ 		 
 
@@ -477,34 +524,50 @@ public class SeattleFulfillmentOrderBatchJob {
             }
         }
 	 }
+	 
+	 private OrderCompleteProcessIssue getInfoOfIssueOrderComplete(SeattleOrder item){		 
+		 OrderCompleteProcessIssue itemIssue = new OrderCompleteProcessIssue();			 
+			itemIssue.setEtdOrderComplete(item.getEtdOrderComplate());
+			itemIssue.setNewEtdMaxOrder(item.getNewEtdMax());
+			itemIssue.setOrderProcessLateTime(item.getLate());
+			itemIssue.setOrderId(item.getWcsOrderId());
+			itemIssue.setOrderItemId(item.getWcsOrderItemId());
+			
+		 return itemIssue;
+	 }	 
 	 	 
-	 private SeattleOrder getResultIssue(SeattleOrder item){ 
+	private SeattleOrder getResultIssue(SeattleOrder item){ 
 		  /**
 		  * cek sudah ada issue atau belum
 		  */
 		 try {
 				 if(item.getIssueId()!=null){
-					 
+					 OrderCompleteProcessIssue itemIssue = getInfoOfIssueOrderComplete(item);					   
+					  itemIssue.setIssueKey(item.getIssueId());
+					  _log.info("getIssueId "+item.getIssueId()+" result Issue "+item.getResultStatus());	
+					  jira.updateIssueCustomField(itemIssue);
 					 if(item.getResultStatus().equals("Late")){
-					    //  jira.updateOrderTrackingLateIssue(item.getIssueId());  
-					 }	
+						 _log.info("Update Issue Late  ");		
+					      jira.updateOrderTrackingLateIssue(item.getIssueId());  
+					 }	else  if(item.getResultStatus().equals("Attention")){
+						 _log.info("Update Issue Attention ");			
+					    jira.updateOrderCompleteIssueToAttention(item.getIssueId());  
+					 }
 					 
 				 }else{
 					 /**
 					  * jika belum ada create issue
 					  */
 					 String issue=null;
-					 			 if(item.getResultStatus().equals("Attantion") || item.getResultStatus().equals("Late")){
-					 				 Map<String,String> info = new HashMap<String,String>();
-					 				 info.put("etdOrderComplate", item.getEtdOrderComplate()+"");
-					 				 info.put("newETDMaxOrder", item.getNewEtdMax()+"");
-					 				 info.put("orderProcessLateTime", item.getLate());
-					 				 issue = jira.createOrderTrackingAttentionIssue(item.getWcsOrderId(), item.getWcsOrderItemId(), IssueType.FRAUD_CHECKING);
+					 			 if(item.getResultStatus().equals("Attention") || item.getResultStatus().equals("Late")){		
+					 				 _log.info("Create Issue Attention  ");
+					 				 issue = jira.createAttention(getInfoOfIssueOrderComplete(item));					 				
 					 				 if(item.getResultStatus().equals("Late")){
+					 					 _log.info("Create Issue Late  ");
 									     jira.updateOrderTrackingLateIssue(issue);  
-					 				 }	
-					 				
-					 		     }			
+					 				 }						 				
+					 		     }		
+			     _log.info("Issue Id "+issue );
 				 item.setIssueId(issue);
 					 
 				 }	
@@ -519,18 +582,33 @@ public class SeattleFulfillmentOrderBatchJob {
 		  return item;
 		 
 	 }
+	
+	private Date getMaxEtd(SeattleOrder item){
+		Timestamp maxEtd= new Timestamp(item.getEtdMax().getTime());
+		_log.info("maxEtd " +maxEtd);
+		_log.info("getDiffEtd " +item.getDiffEtd());
+		if(item.getDiffEtd().compareTo(new BigDecimal(0))==1 
+			&& (new Date(currentTimestamp.getTime())).compareTo(item.getStartNewEtd())>=new Long(1)
+			&& (new Date(currentTimestamp.getTime())).compareTo(item.getEndNewEtd())<=new Long(1)){
+			maxEtd = getTimeafterAddDay(new Timestamp(maxEtd.getTime()),new Integer(item.getDiffEtd()+""));
+			_log.info("new maxEtd " +maxEtd);
+		}		
+		return new Date(maxEtd.getTime());
+	}
 	 
 	 private SeattleOrder getResultStatusTracking(SeattleOrder item){
 		 PreparedStatement psResultStatusList = null;      
 	      	ResultSet rsResultStatusList = null;	  
 			 try{	            
-					 long selisihMS = Math.round(new Double(Math.abs(item.getEtdOrderComplate().getTime() - item.getOrderTimestamp().getTime()))/new Double(Math.abs(item.getEtdMax().getTime()- item.getOrderTimestamp().getTime()))*100);
+				   Date maxEtd = getMaxEtd(item); 
+				     item.setNewEtdMax(new Timestamp(maxEtd.getTime()));
+					 long selisihMS = Math.round(new Double(Math.abs(item.getEtdOrderComplate().getTime() - item.getOrderTimestamp().getTime()))/new Double(Math.abs(maxEtd.getTime()- item.getOrderTimestamp().getTime()))*100);
 
-					  _log.info("min "+Math.abs(item.getEtdOrderComplate().getTime() - item.getOrderTimestamp().getTime())+" ==> bagi: "+Math.abs(item.getEtdMax().getTime()- item.getOrderTimestamp().getTime()));
-					  _log.info("selisih "+selisihMS+" ==>Orderdate: "+item.getOrderTimestamp()+" new ETD Max :"+item.getEtdMax()+"' DueDate : "+item.getEtdOrderComplate());    
+					  _log.info("min "+Math.abs(item.getEtdOrderComplate().getTime() - item.getOrderTimestamp().getTime())+" ==> bagi: "+Math.abs(maxEtd.getTime()- item.getOrderTimestamp().getTime()));
+					  _log.info("selisih "+selisihMS+" ==>Orderdate: "+item.getOrderTimestamp()+" new ETD Max :"+maxEtd+"' DueDate : "+item.getEtdOrderComplate());    
 					 	psResultStatusList = conn.prepareStatement(RESULT_STATUS_TARCKING, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);            			            
 				    	psResultStatusList.setInt(1, new Integer(selisihMS+""));
-				    	psResultStatusList.setLong(2, item.getOrderStatusId());
+				    	psResultStatusList.setString(2, jobStatus.get(item.getOrderStatusId()));
 				    	rsResultStatusList = psResultStatusList.executeQuery();		    		
 				    	rsResultStatusList.last();
 						int totalResultStatusList = rsResultStatusList.getRow();
@@ -540,16 +618,22 @@ public class SeattleFulfillmentOrderBatchJob {
 						_log.info("Query returns: " + totalResultStatusList + " row(s)");
 			            for (int i=0; i<totalResultStatusList;i++) {
 			            	item.setResultStatusId(rsResultStatusList.getLong("fulfillment_in_percentage_id"));
-			            	item.setResultStatus(rsResultStatusList.getString("result_status_tracking_desc"));
+			            	_log.info("item.getResultStatus() " + item.getResultStatus() + " row(s)");
+			            	if(item.getResultStatus()!=null && (item.getResultStatus().equals("Late") && rsResultStatusList.getString("result_status_tracking_desc").equals("Late") ||
+			            			item.getResultStatus().equals("Attention") && rsResultStatusList.getString("result_status_tracking_desc").equals("Attention") )){
+			            		item.setResultStatus(item.getResultStatus()+rsResultStatusList.getString("result_status_tracking_desc"));
+			            	}else{
+			            		item.setResultStatus(rsResultStatusList.getString("result_status_tracking_desc"));
+			            	}			            	
 			            	item.setLate("0");
 			            	item.setLateSecond(0);
 							if(item.getResultStatus().contains("Late")){
-								item.setLate(selisihDateTime(item.getEtdOrderComplate(),new Timestamp(item.getEtdMax().getTime())));
-				            	item.setLateSecond((int) Math.abs(item.getEtdOrderComplate().getTime() - item.getEtdMax().getTime()));								
+								item.setLate(selisihDateTime(item.getEtdOrderComplate(),new Timestamp(maxEtd.getTime())));
+				            	item.setLateSecond((int) Math.abs(item.getEtdOrderComplate().getTime() - maxEtd.getTime()));								
 							}	
 							rsResultStatusList.next();
 			            }			            		
-				
+									
 		        } catch (Exception ex) {
 		            ex.printStackTrace();
 		        } finally {
@@ -568,7 +652,6 @@ public class SeattleFulfillmentOrderBatchJob {
 	 private void saveResult(SeattleOrder item){
 		 PreparedStatement psLogisticProvider = null;	
 		 try{	
-
 			 _log.info("Save Fulfillment For Order  : "+item.getWcsOrderItemId());
 				psLogisticProvider = conn.prepareStatement(INSERT_RESULT_ORDER_FULFILLMENT,Statement.RETURN_GENERATED_KEYS);	
 					
@@ -593,10 +676,8 @@ public class SeattleFulfillmentOrderBatchJob {
             	if(psLogisticProvider!=null) psLogisticProvider.close();	            
             } catch (Exception ex) {
                 ex.printStackTrace();
-            }
-		 
-	 }
-	 
+            }		 
+	 }	 
 	 private void updateResult(SeattleOrder item){
 			PreparedStatement psLogisticProvider = null;	
 		 try{		
@@ -623,8 +704,7 @@ public class SeattleFulfillmentOrderBatchJob {
 	            } catch (Exception ex) {
 	                ex.printStackTrace();
 	            }
-	        }		
-		 
+	        }				 
 	 }	 
 	 private void saveOrUpdateResult(SeattleOrder item){		
 				if(item.getOrderfulfillmentId()!=null && item.getOrderfulfillmentId()>0){
@@ -633,9 +713,8 @@ public class SeattleFulfillmentOrderBatchJob {
 					saveResult(item);
 				}	  				 
 	 }	 
-	 private void prosesOrderByStatus(ArrayList<SeattleOrder> orderList,Long statusId){
-		      	
-	        	ArrayList<SeatSlaStatus> seatSlaStatusList = getSeatSlaStatusByStatus(statusId);
+	 private void prosesOrderByStatus(ArrayList<SeattleOrder> orderList,Long statusId){		      	
+	        	ArrayList<SeatSlaStatus> seatSlaStatusList = getSeatSlaStatusByStatus(jobStatus.get(statusId));
 	    		try{
 	    			for (SeattleOrder item : orderList){	  
 	    				if(item.getIssueId()!=null && (item.getStatusOrder().equals("D") || item.getStatusOrder().equals("X") 
@@ -659,6 +738,10 @@ public class SeattleFulfillmentOrderBatchJob {
 					            	seatSlaStatusFulfill.setSeatStatusUom(SeatStatusUomMap.get("WorkDay"));
 					            	seatSlaStatusListTemp.add(seatSlaStatusFulfill);
 				            	}
+				            	SeatSlaStatus seatSlalogisticsEtd = new SeatSlaStatus();				            	
+				            	seatSlalogisticsEtd.setSla(item.getLogisticsEtd());
+				            	seatSlalogisticsEtd.setSeatStatusUom(SeatStatusUomMap.get("WorkDay"));
+				            	seatSlaStatusListTemp.add(seatSlalogisticsEtd);
 				            	_log.info("currentDate : "+currentTimestamp+" DateStatus  : "+item.getUpdateStatusDate() +" compare DateSla : "+slaDate);
 				            	if(currentTimestamp.compareTo(slaDate)==1){		            	
 				            		_log.info("Lebih");
@@ -676,12 +759,11 @@ public class SeattleFulfillmentOrderBatchJob {
 				            	item.setEtdOrderComplate(sumOfslaDate);
 				            	item.setNewEtdMax(new Timestamp(item.getEtdMax().getTime()));
 				            
-				            	
 				            	item= getResultStatusTracking(item);				            
 				            	item= getResultIssue(item);	
 					            saveOrUpdateResult(item);
 				            	
-				            	_log.info(item.getOrderfulfillmentId()+"==>ETD Order Complate : "+item.getEtdOrderComplate()+" new ETD Max :"+
+				            	_log.info(item.getOrderfulfillmentId()+"========>ETD Order Complate : "+item.getEtdOrderComplate()+" new ETD Max :"+
 				            			item.getNewEtdMax()+" Late :"+item.getLate()+
 				            			" result Status : "+item.getResultStatus()+" resultStatusid :"+item.getResultStatusId()+" issue :"+item.getIssueId());    
 	    				}
@@ -709,10 +791,10 @@ public class SeattleFulfillmentOrderBatchJob {
 			        for(int i=0 ;i<statusOrder.size();i++){
 			        	 ArrayList<SeattleOrder> orderList = seattleJob.fetchOrderByStatus(statusOrder.get(i));
 			        	 if(orderList!=null){	
-			        		 _log.info("start calculate by status "+statusOrder.get(i));			        		
+			        		 _log.info("=========>>>>start calculate by status "+jobStatus.get(statusOrder.get(i)));			        		
 			        		 	seattleJob.prosesOrderByStatus(orderList,statusOrder.get(i));
 			        	 }else{
-			 	        	_log.info("No order for calculated by status "+statusOrder.get(i));
+			 	        	_log.info("==========<<<<<<No order for calculated by status "+jobStatus.get(statusOrder.get(i)));
 			 	        }
 			        }
 	        }catch (Exception e) {

@@ -40,6 +40,11 @@ public class SeatOrderEtd implements Serializable {
     @Temporal( TemporalType.DATE)
 	@Column(name="etd_min")
 	private Date etdMin;
+ 
+	@Temporal( TemporalType.DATE)
+	@Column(name="etd_new")
+	private Date etdNew;
+
 
 	private String other;
 
@@ -47,6 +52,20 @@ public class SeatOrderEtd implements Serializable {
 
 	@Column(name="update_etd_date")
 	private Timestamp updateEtdDate;
+	
+	@Temporal( TemporalType.DATE)
+	@Column(name="start_date")
+	private Date startDate;
+	
+	@Temporal( TemporalType.DATE)
+	@Column(name="end_date")
+	private Date endDate;
+	
+	@Column(name="sku")
+	private String sku;
+	
+ 	@Column(name="logisticsEtd", precision=10, scale=2)
+    private BigDecimal logisticsEtd;
 
 	//bi-directional many-to-one association to SeatOrderStatusHistory
 	@OneToMany(mappedBy="seatOrderEtd")
@@ -135,4 +154,43 @@ public class SeatOrderEtd implements Serializable {
 		this.wcsOrderId = wcsOrderId;
 	}
 	
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getSku() {
+		return sku;
+	}
+
+	public void setSku(String sku) {
+		this.sku = sku;
+	}
+	
+	public BigDecimal getLogisticsEtd() {
+		return logisticsEtd;
+	}
+
+	public void setLogisticsEtd(BigDecimal logisticsEtd) {
+		this.logisticsEtd = logisticsEtd;
+	}
+
+	public Date getEtdNew() {
+			return etdNew;
+	}
+
+	public void setEtdNew(Date etdNew) {
+		this.etdNew = etdNew;
+	}
 }

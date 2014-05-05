@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gdn.venice.dao.VenOrderItemStatusHistoryDAO;
 import com.gdn.venice.inbound.services.OrderItemStatusHistoryService;
+import com.gdn.venice.inbound.services.SeatOrderStatusHistoryService;
 import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.persistence.VenOrderItemStatusHistory;
 import com.gdn.venice.persistence.VenOrderItemStatusHistoryPK;
@@ -26,6 +27,9 @@ public class OrderItemStatusHistoryServiceImpl implements OrderItemStatusHistory
 
 	@Autowired
 	private VenOrderItemStatusHistoryDAO venOrderItemStatusHistoryDAO;
+	
+	 @Autowired
+	 private SeatOrderStatusHistoryService seatOrderStatusHistoryService;
 	
 	/**
 	 * Create a history record for the new status for an order item 
@@ -57,6 +61,9 @@ public class OrderItemStatusHistoryServiceImpl implements OrderItemStatusHistory
 				
 		venOrderItemStatusHistory = venOrderItemStatusHistoryDAO.save(venOrderItemStatusHistory);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "done add order item status history");
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "Start Create Seat Order Status History");
+		seatOrderStatusHistoryService.createSeatOrderStatusHistory(venOrderItem, venOrderStatus);
 		
 		if(venOrderItemStatusHistory != null){
 			return Boolean.TRUE;

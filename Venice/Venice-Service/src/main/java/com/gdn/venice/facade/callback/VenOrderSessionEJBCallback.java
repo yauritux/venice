@@ -1,5 +1,6 @@
 package com.gdn.venice.facade.callback;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -9,9 +10,11 @@ import org.apache.log4j.Logger;
 
 import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.venice.facade.SeatOrderStatusHistorySessionEJBRemote;
 import com.gdn.venice.facade.VenOrderSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderStatusHistorySessionEJBRemote;
 import com.gdn.venice.integration.outbound.Publisher;
+import com.gdn.venice.persistence.SeatOrderStatusHistory;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderStatusHistory;
 import com.gdn.venice.persistence.VenOrderStatusHistoryPK;
@@ -146,7 +149,7 @@ public class VenOrderSessionEJBCallback implements SessionCallback {
 			_log.debug("\n wcs order id: "+venOrder.getWcsOrderId());
 			locator = new Locator<Object>();
 
-			VenOrderSessionEJBRemote orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
+			VenOrderSessionEJBRemote orderHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");	
 					
 			List<VenOrder> venOrderList = orderHome.queryByRange("select o from VenOrder o where o.wcsOrderId ='" + venOrder.getWcsOrderId() +"'", 0, 0);
 			_log.debug("\n initial venOrderList size: "+venOrderList.size());				
@@ -189,7 +192,7 @@ public class VenOrderSessionEJBCallback implements SessionCallback {
 				_log.debug("start publish order status");
 				Publisher publisher = new Publisher();
 				publisher.publishUpdateOrderStatus(venOrder, blockingSource);
-				_log.debug("done publish order status");
+				_log.debug("done publish order status");				
 			}			
 		} catch (Exception e) {
 			String errMsg = "An exception occured when processing a postMerge callback for VenOrderSessionEJBCallback:" + e.getMessage();

@@ -16,7 +16,9 @@ public class SeattleOrder {
 	private String customerUserName;
 	private String customerName;
 	private String issueId;	
-	private Date etdMax;	
+	private Date etdMax;		
+	private Date startNewEtd;	
+	private Date endNewEtd;	
 	private Timestamp orderTimestamp;	
 	private Timestamp etdOrderComplate;	
 	private Timestamp newEtdMax;
@@ -34,7 +36,40 @@ public class SeattleOrder {
 	private boolean closeIssueStatus;
 	private boolean closeIssue;
 	private Long statusPayment;
+	private BigDecimal logisticsEtd;
+	private Long typeOfOrder;
+	private Timestamp actualPickupdate;
 	
+	public Timestamp getActualPickupdate() {
+		return actualPickupdate;
+	}
+	public void setActualPickupdate(Timestamp actualPickupdate) {
+		this.actualPickupdate = actualPickupdate;
+	}
+	public Long getTypeOfOrder() {
+		return typeOfOrder;
+	}
+	public void setTypeOfOrder(Long typeOfOrder) {
+		this.typeOfOrder = typeOfOrder;
+	}
+	public BigDecimal getLogisticsEtd() {
+		return logisticsEtd;
+	}
+	public void setLogisticsEtd(BigDecimal logisticsEtd) {
+		this.logisticsEtd = logisticsEtd;
+	}
+	public Date getStartNewEtd() {
+		return startNewEtd;
+	}
+	public void setStartNewEtd(Date startNewEtd) {
+		this.startNewEtd = startNewEtd;
+	}
+	public Date getEndNewEtd() {
+		return endNewEtd;
+	}
+	public void setEndNewEtd(Date endNewEtd) {
+		this.endNewEtd = endNewEtd;
+	}	
 	public boolean isCloseIssueStatus() {
 		return closeIssueStatus;
 	}

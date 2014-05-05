@@ -70,6 +70,7 @@ import com.gdn.venice.facade.LogAirwayBillReturSessionEJBRemote;
 import com.gdn.venice.facade.LogAirwayBillSessionEJBLocal;
 import com.gdn.venice.facade.LogMerchantPickupInstructionSessionEJBLocal;
 import com.gdn.venice.facade.SeatOrderEtdSessionEJBLocal;
+import com.gdn.venice.facade.SeatOrderStatusHistorySessionEJBLocal;
 import com.gdn.venice.facade.VenAddressSessionEJBLocal;
 import com.gdn.venice.facade.VenAddressTypeSessionEJBLocal;
 import com.gdn.venice.facade.VenCitySessionEJBLocal;
@@ -126,6 +127,7 @@ import com.gdn.venice.inbound.receivers.OrderReceiver;
 import com.gdn.venice.inbound.services.CustomerService;
 import com.gdn.venice.inbound.services.MerchantProductService;
 import com.gdn.venice.inbound.services.PartyService;
+import com.gdn.venice.inbound.services.SeatOrderStatusHistoryService;
 import com.gdn.venice.persistence.FinApprovalStatus;
 import com.gdn.venice.persistence.FinArFundsInActionApplied;
 import com.gdn.venice.persistence.FinArFundsInReconRecord;
@@ -144,6 +146,7 @@ import com.gdn.venice.persistence.LogLogisticService;
 import com.gdn.venice.persistence.LogLogisticsProvider;
 import com.gdn.venice.persistence.LogMerchantPickupInstruction;
 import com.gdn.venice.persistence.SeatOrderEtd;
+import com.gdn.venice.persistence.SeatOrderStatusHistory;
 import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenAddressType;
 import com.gdn.venice.persistence.VenBank;
@@ -244,6 +247,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
     VenOrderItemStatusHistoryService venOrderItemStatusHistoryService;
     @Autowired
     VenOrderItemService venOrderItemService;
+    
+    @Autowired 
+    SeatOrderStatusHistoryService seatOrderStatusHistoryService;
     
     @Autowired
     private CustomerService customerService;
@@ -992,10 +998,12 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 .asDate(order.getOrderItems().get(0).getEtdMax()))));
         etdForSeattle.setEtdMin(com.djarum.raf.utilities.SQLDateUtility.utilDateToSqlTimestamp((com.djarum.raf.utilities.XMLGregorianCalendarConverter
                 .asDate(order.getOrderItems().get(0).getEtdMin()))));
+        etdForSeattle.setLogisticsEtd(order.getOrderItems().get(0).getLogisticsInfo()!=null && order.getOrderItems().get(0).getLogisticsInfo().getLogisticsEtd()!=null ? new BigDecimal(order.getOrderItems().get(0).getLogisticsInfo().getLogisticsEtd()): new BigDecimal(0));
         etdForSeattle.setDiffEtd(new BigDecimal(0));
         etdForSeattle.setReason("Set From System");
         etdForSeattle.setOther("Set From System");
         etdForSeattle.setByUser("System");
+        etdForSeattle.setSku(order.getOrderItems().get(0).getProduct().getGdnSKU().getCode());
         etdForSeattle.setUpdateEtdDate(new Timestamp(System.currentTimeMillis()));
         etdForSeattle.setWcsOrderId(order.getOrderId().getCode());
         
@@ -1055,8 +1063,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         try {
             _genericLocator = new Locator<Object>();
             VenOrderSessionEJBLocal orderHome = (VenOrderSessionEJBLocal) this._genericLocator.lookupLocal(VenOrderSessionEJBLocal.class, "VenOrderSessionEJBBeanLocal");
-            SeatOrderEtdSessionEJBLocal orderEtdHome = (SeatOrderEtdSessionEJBLocal) this._genericLocator.lookupLocal(SeatOrderEtdSessionEJBLocal.class, "SeatOrderEtdSessionEJBBeanLocal");
-            Boolean orderExists = false;
+             Boolean orderExists = false;
             if (this.orderExists(order.getOrderId().getCode())) {
                 orderExists = true;
                 existingOrder = this.retreiveExistingOrder(order.getOrderId().getCode());
@@ -1075,8 +1082,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 }
             }
             if (!orderExists) {
-                venOrder = (VenOrder) orderHome.persistVenOrder(venOrder);
-                etdForSeattle = orderEtdHome.persistSeatOrderEtd(etdForSeattle);                
+                venOrder = (VenOrder) orderHome.persistVenOrder(venOrder);                
             } else {
                 //venice 117, remove existing order, then persist new order, so the payment not duplicate
                 orderHome.removeVenOrder(existingOrder);
@@ -1218,6 +1224,8 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 
         //ad order status history
         this.createOrderStatusHistory(venOrder, venOrder.getVenOrderStatus());
+        //ad Seat order status history
+        this.createSeatOrderStatusHistory(venOrder,etdForSeattle);
         try {
             if (_genericLocator != null) {
                 _genericLocator.close();
@@ -5763,6 +5771,9 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 
             venOrderItemStatusHistory = orderItemStatusHistoryHome.persistVenOrderItemStatusHistory(venOrderItemStatusHistory);
             _log.debug("done add order item status history");
+            
+            seatOrderStatusHistoryService.createSeatOrderStatusHistory(venOrderItem, venOrderStatus);
+            _log.debug("done add seat order status history");
             if (venOrderItemStatusHistory != null) {
                 return true;
             }
@@ -5807,6 +5818,40 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
             throw new EJBException(errMsg + e.getMessage());
         }
     }
+    
+    private Boolean createSeatOrderStatusHistory(VenOrder venOrder,SeatOrderEtd etdForSeattle) {
+        try {
+            _log.debug("add Seat order status history");
+            _log.debug("\n wcs order id: " + venOrder.getWcsOrderId());
+            _log.debug("\n order status: " + venOrder.getVenOrderStatus().getOrderStatusCode());
+            SeatOrderStatusHistorySessionEJBLocal seatOrderStatusHistoryHome = (SeatOrderStatusHistorySessionEJBLocal) this._genericLocator
+                    .lookupLocal(SeatOrderStatusHistorySessionEJBLocal.class, "SeatOrderStatusHistorySessionEJBBeanLocal");
+            
+            SeatOrderEtdSessionEJBLocal seatOrderEtdHome = (SeatOrderEtdSessionEJBLocal) this._genericLocator
+            .lookupLocal(SeatOrderEtdSessionEJBLocal.class, "SeatOrderEtdSessionEJBBeanLocal");
+            
+            etdForSeattle = seatOrderEtdHome.persistSeatOrderEtd(etdForSeattle);
+        	
+            SeatOrderStatusHistory seatOrderStatusHistory = new SeatOrderStatusHistory();		
+			seatOrderStatusHistory.setVenOrder(venOrder);
+			seatOrderStatusHistory.setVenOrderStatus(venOrder.getVenOrderStatus());				
+			seatOrderStatusHistory.setSeatOrderEtd(etdForSeattle);		
+			seatOrderStatusHistory.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	          
+            
+			seatOrderStatusHistory = seatOrderStatusHistoryHome.persistSeatOrderStatusHistory(seatOrderStatusHistory);
+            _log.debug("done add Seat order status history");
+            if (seatOrderStatusHistory != null) {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            String errMsg = "An exception occured when creating Seat order status history:";
+            _log.error(errMsg + e.getMessage());
+            e.printStackTrace();
+            throw new EJBException(errMsg + e.getMessage());
+        }
+    }   
+  
 
     private Boolean createReturStatusHistory(VenRetur venRetur, VenOrderStatus venReturStatus) {
         try {

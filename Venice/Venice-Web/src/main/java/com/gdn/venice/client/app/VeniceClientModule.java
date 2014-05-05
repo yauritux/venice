@@ -83,10 +83,12 @@ import com.gdn.venice.client.app.logistic.view.ProviderManagementView;
 import com.gdn.venice.client.app.reservation.presenter.ReservationOrderManagementPresenter;
 import com.gdn.venice.client.app.reservation.view.ReservationOrderManagementView;
 import com.gdn.venice.client.app.seattle.presenter.SeatETDPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatHolidayPresenter;
 import com.gdn.venice.client.app.seattle.presenter.SeatSLAFulfillmentReportPresenter;
 import com.gdn.venice.client.app.seattle.presenter.SeatSLAStatusReportPresenter;
 import com.gdn.venice.client.app.seattle.presenter.SeatUoMPresenter;
 import com.gdn.venice.client.app.seattle.view.SeatETDView;
+import com.gdn.venice.client.app.seattle.view.SeatHolidayView;
 import com.gdn.venice.client.app.seattle.view.SeatSLAFulfillmentReportView;
 import com.gdn.venice.client.app.seattle.view.SeatSLAStatusReportView;
 import com.gdn.venice.client.app.seattle.view.SeatUoMView;
@@ -381,5 +383,10 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				SeatUoMPresenter.MyView.class,
 				SeatUoMView.class,
 				SeatUoMPresenter.MyProxy.class);
+		
+		bindPresenter(SeatHolidayPresenter.class, 
+				SeatHolidayPresenter.MyView.class,
+				SeatHolidayView.class,
+				SeatHolidayPresenter.MyProxy.class);
 	}
 }

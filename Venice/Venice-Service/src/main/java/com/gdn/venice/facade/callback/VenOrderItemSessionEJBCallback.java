@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ejb.EJBException;
 import javax.persistence.EntityManager;
@@ -16,12 +17,14 @@ import org.hibernate.ejb.EntityManagerImpl;
 import com.djarum.raf.utilities.Locator;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.facade.LogAirwayBillSessionEJBRemote;
+import com.gdn.venice.facade.SeatOrderStatusHistorySessionEJBRemote;
 import com.gdn.venice.facade.VenOrderItemStatusHistorySessionEJBRemote;
 import com.gdn.venice.integration.outbound.Publisher;
 import com.gdn.venice.persistence.LogAirwayBill;
 import com.gdn.venice.persistence.LogApprovalStatus;
 import com.gdn.venice.persistence.LogLogisticService;
 import com.gdn.venice.persistence.LogLogisticsProvider;
+import com.gdn.venice.persistence.SeatOrderStatusHistory;
 import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenCity;
 import com.gdn.venice.persistence.VenMerchant;
@@ -303,6 +306,8 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
                     _log.debug("\n order item status: " + venOrderItem.getVenOrderStatus().getOrderStatusId());
                     VenOrderItemStatusHistorySessionEJBRemote orderItemHistorySessionHome = (VenOrderItemStatusHistorySessionEJBRemote) locator
                             .lookup(VenOrderItemStatusHistorySessionEJBRemote.class, "VenOrderItemStatusHistorySessionEJBBean");
+                    SeatOrderStatusHistorySessionEJBRemote seatOrderHistorySessionHome = (SeatOrderStatusHistorySessionEJBRemote) locator
+                    .lookup(SeatOrderStatusHistorySessionEJBRemote.class, "SeatOrderStatusHistorySessionEJBBean");
 
                     VenOrderItemStatusHistoryPK venOrderItemStatusHistoryPK = new VenOrderItemStatusHistoryPK();
                     venOrderItemStatusHistoryPK.setOrderItemId(venOrderItem.getOrderItemId());
@@ -312,9 +317,18 @@ public class VenOrderItemSessionEJBCallback implements SessionCallback {
                     orderItemStatusHistory.setId(venOrderItemStatusHistoryPK);
                     orderItemStatusHistory.setStatusChangeReason("Updated by System");
                     orderItemStatusHistory.setVenOrderStatus(venOrderItem.getVenOrderStatus());
-
+                    
                     orderItemHistorySessionHome.persistVenOrderItemStatusHistory(orderItemStatusHistory);
                     _log.debug("done add order item status history");
+                    
+                    SeatOrderStatusHistory seatOrderStatusHistory = new SeatOrderStatusHistory();            		
+            		List<SeatOrderStatusHistory> seatOrderStatusHistoryList =seatOrderHistorySessionHome.queryByRange("select o from SeatOrderStatusHistory o where o.venOrderItem.orderItemId="+venOrderItem.getOrderItemId(), 0, 0);	
+            		if(seatOrderStatusHistoryList.size()>0){            	
+            			seatOrderStatusHistory = seatOrderStatusHistoryList.get(0);
+            			seatOrderStatusHistory.setVenOrderStatus(venOrderItem.getVenOrderStatus());		
+            			seatOrderStatusHistory.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
+                 		seatOrderStatusHistory = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(seatOrderStatusHistory);
+            		}				
                 }
             }
 

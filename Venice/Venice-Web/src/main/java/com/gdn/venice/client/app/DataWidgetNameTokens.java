@@ -82,5 +82,6 @@ public class DataWidgetNameTokens {
 	public static String  SEATTLE_SLASTATUS_TREENODE = "SeattleSLAStatusTreeNode";
 	public static String  SEATTLE_ETD_TREENODE = "SeattleETDTreeNode";
 	public static String  SEATTLE_UOM_TREENODE = "SeattleUoMTreeNode";
+	public static String  SEATTLE_HOLIDAY_TREENODE = "SeattleHolidayTreeNode";
 
 }

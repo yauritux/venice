@@ -42,6 +42,7 @@ import com.gdn.venice.client.app.logistic.presenter.LogisticsDashboardPresenter;
 import com.gdn.venice.client.app.logistic.presenter.ProviderManagementPresenter;
 import com.gdn.venice.client.app.reservation.presenter.ReservationOrderManagementPresenter;
 import com.gdn.venice.client.app.seattle.presenter.SeatETDPresenter;
+import com.gdn.venice.client.app.seattle.presenter.SeatHolidayPresenter;
 import com.gdn.venice.client.app.seattle.presenter.SeatSLAFulfillmentReportPresenter;
 import com.gdn.venice.client.app.seattle.presenter.SeatSLAStatusReportPresenter;
 import com.gdn.venice.client.app.seattle.presenter.SeatUoMPresenter;
@@ -180,4 +181,7 @@ public interface VeniceGinjector extends Ginjector {
   AsyncProvider<SeatETDPresenter> getSeatETDPresenter();
   
   AsyncProvider<SeatUoMPresenter> getSeatUoMPresenter();
+  
+  AsyncProvider<SeatHolidayPresenter> getSeatHolidayPresenter();
+  
 }

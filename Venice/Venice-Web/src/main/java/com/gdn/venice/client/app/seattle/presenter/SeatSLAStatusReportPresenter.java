@@ -1,10 +1,13 @@
 package com.gdn.venice.client.app.seattle.presenter;
 
+import java.util.Map;
+
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.seattle.data.SeattleData;
 import com.gdn.venice.client.app.seattle.view.hendlers.SeatSLAStatusUiHandlers;
 import com.gdn.venice.client.app.seattle.view.hendlers.SeatSLAStatusUiHandlers;
 import com.gdn.venice.client.presenter.MainPagePresenter;
+import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
 import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
@@ -46,6 +49,7 @@ public class SeatSLAStatusReportPresenter extends Presenter<SeatSLAStatusReportP
 	 */
 	public interface MyView extends View, HasUiHandlers<SeatSLAStatusUiHandlers> {
 		void loadData(DataSource dataSource);
+		public void setComboBoxUoM(Map <String,String> map);
 		
 	}
 
@@ -54,7 +58,7 @@ public class SeatSLAStatusReportPresenter extends Presenter<SeatSLAStatusReportP
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		onGetUserRoleData();
+		onFetchUoMDataCommandComboBox();
 		this.dispatcher = dispatcher;
 	}
 
@@ -62,6 +66,27 @@ public class SeatSLAStatusReportPresenter extends Presenter<SeatSLAStatusReportP
 	protected void revealInParent() {
 		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetContextArea,
 				this);
+	}
+	
+public void onFetchUoMDataCommandComboBox() {
+		
+		//final String temp;
+		RPCRequest request=new RPCRequest();
+		request.setActionURL(GWT.getHostPageBaseURL() + seatSLAStatusPresenterServlet + "?method=fetchUoMCommandComboBox&type=RPC");
+		request.setHttpMethod("POST");
+		request.setUseSimpleHttp(true);
+		request.setShowPrompt(false);
+		RPCManager.sendRequest(request, 
+				new RPCCallback () {			
+					public void execute(RPCResponse response,
+							Object rawData, RPCRequest request) {
+						String rpcResponse = rawData.toString();						
+						String xmlData = rpcResponse;						
+						getView().setComboBoxUoM(Util.formComboBoxMap(Util.formHashMapfromXML(xmlData)));
+						onGetUserRoleData();
+						}
+		});
+
 	}
 	
 	@Override
@@ -74,7 +99,7 @@ public class SeatSLAStatusReportPresenter extends Presenter<SeatSLAStatusReportP
 		RPCManager.sendRequest(request, new RPCCallback () {
 					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String userRole = rawData.toString().trim();
-						getView().loadData(SeattleData.getSLAFulfillment(userRole));
+						getView().loadData(SeattleData.getSLAStatus(userRole));
 					}
     	});  
 	}

@@ -73,7 +73,14 @@ public class FetchSLAFulfillmenDataCommand implements RafDsCommand {
 		}catch(Exception e){
 			e.printStackTrace();
 			rafDsResponse.setStatus(-1);
-		}finally{			
+		}finally{
+			try {
+				if(locator!=null){
+					locator.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		rafDsResponse.setData(dataList);
 		return rafDsResponse;

@@ -137,6 +137,9 @@ public class VenOrderItem implements Serializable {
         @Column(name="cx_date")
 	private Timestamp cxDate;
         
+   	@Column(name="logisticsEtd", precision=10, scale=2)
+    private BigDecimal logisticsEtd;
+        
         @Column(name="cx_mta_date")
 	private Timestamp cxMtaDate;
         
@@ -671,4 +674,13 @@ public class VenOrderItem implements Serializable {
 			List<SeatOrderStatusHistory> seatOrderStatusHistories) {
 		SeatOrderStatusHistories = seatOrderStatusHistories;
 	}
+	
+	 public BigDecimal getLogisticsEtd() {
+			return logisticsEtd;
+	}
+
+	public void setLogisticsEtd(BigDecimal logisticsEtd) {
+		this.logisticsEtd = logisticsEtd;
+	}
+
 }

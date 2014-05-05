@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>com.gdn.app</groupId>
 			<artifactId>GdnJiraClient</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

@@ -3,10 +3,8 @@ package com.gdn.venice.client.app.seattle.presenter;
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.seattle.data.SeattleData;
 import com.gdn.venice.client.app.seattle.view.hendlers.SeatETDUiHandlers;
-import com.gdn.venice.client.app.seattle.view.hendlers.SeatETDUiHandlers;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.widgets.RafViewLayout;
-import com.google.gwt.core.client.GWT;
 import com.google.inject.Inject;
 import com.gwtplatform.dispatch.client.DispatchAsync;
 import com.gwtplatform.mvp.client.EventBus;
@@ -19,10 +17,6 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import com.smartgwt.client.data.DataSource;
-import com.smartgwt.client.rpc.RPCCallback;
-import com.smartgwt.client.rpc.RPCManager;
-import com.smartgwt.client.rpc.RPCRequest;
-import com.smartgwt.client.rpc.RPCResponse;
 
 /**
  * Presenter for SeatETDPresenter
@@ -54,7 +48,7 @@ public class SeatETDPresenter extends Presenter<SeatETDPresenter.MyView, SeatETD
 		super(eventBus, view, proxy);
 		getView().setUiHandlers(this);
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		onGetUserRoleData();
+		getView().loadData(SeattleData.getSKUData());
 		this.dispatcher = dispatcher;
 	}
 
@@ -64,23 +58,4 @@ public class SeatETDPresenter extends Presenter<SeatETDPresenter.MyView, SeatETD
 				this);
 	}
 	
-	@Override
-	public void onGetUserRoleData() {	
-		RPCRequest request=new RPCRequest();				
-		request.setActionURL(GWT.getHostPageBaseURL() + "ToDoListPresenterServlet?method=getUserRole&type=RPC");
-		request.setHttpMethod("POST");
-		request.setUseSimpleHttp(true);
-		
-		RPCManager.sendRequest(request, new RPCCallback () {
-					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
-						String userRole = rawData.toString().trim();
-						getView().loadData(SeattleData.getSLAFulfillment(userRole));
-					}
-    	});  
-	}
-
-
-	
-
-
 }

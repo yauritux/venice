@@ -6,10 +6,12 @@ import java.util.List;
 
 import com.djarum.raf.utilities.Locator;
 import com.gdn.venice.client.app.DataConstantNameTokens;
+import com.gdn.venice.facade.SeatOrderStatusHistorySessionEJBRemote;
 import com.gdn.venice.facade.VenOrderItemSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderItemStatusHistorySessionEJBRemote;
 import com.gdn.venice.facade.VenOrderSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderStatusHistorySessionEJBRemote;
+import com.gdn.venice.persistence.SeatOrderStatusHistory;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderItem;
 import com.gdn.venice.persistence.VenOrderItemStatusHistory;
@@ -18,6 +20,7 @@ import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenOrderStatusHistory;
 import com.gdn.venice.persistence.VenOrderStatusHistoryPK;
 import com.gdn.venice.server.command.RafRpcCommand;
+import com.gdn.venice.util.VeniceConstants;
 
 public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 
@@ -120,7 +123,6 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 
         //now add history order and order item
         Locator<Object> historyLocator = null;
-
         try {
             System.out.println("start add order history");
             historyLocator = new Locator<Object>();
@@ -148,6 +150,8 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
             System.out.println("start add order item history");
             VenOrderItemSessionEJBRemote orderItemSessionHome = (VenOrderItemSessionEJBRemote) historyLocator
                     .lookup(VenOrderItemSessionEJBRemote.class, "VenOrderItemSessionEJBBean");
+            SeatOrderStatusHistorySessionEJBRemote seatOrderHistorySessionHome = (SeatOrderStatusHistorySessionEJBRemote) historyLocator
+            .lookup(SeatOrderStatusHistorySessionEJBRemote.class, "SeatOrderStatusHistorySessionEJBBean");
 
             String select = "select oi from VenOrderItem oi where oi.venOrder.orderId=" + orderId;
 
@@ -167,6 +171,15 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 //				System.out.println("status: "+venOrderStatus.getOrderStatusId());
 
                 orderItemHistorySessionHome.persistVenOrderItemStatusHistory(orderItemStatusHistory);
+            }
+            if (!method.equals("updateOrderStatusToSF")) {
+		       		List<SeatOrderStatusHistory> seatOrderStatusHistoryList =seatOrderHistorySessionHome.queryByRange("select o from SeatOrderStatusHistory o where o.venOrder.orderId="+orderId, 0, 0);	
+		       		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){            	
+		       			SeatOrderStatusHistory item = items;
+		       			item.setVenOrderStatus(venOrderStatus);		
+		       			item.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
+		       			item = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(item);
+		       		}		
             }
         } catch (Exception ex) {
             ex.printStackTrace();

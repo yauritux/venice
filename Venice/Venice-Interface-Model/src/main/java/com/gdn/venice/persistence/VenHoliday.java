@@ -19,8 +19,11 @@ public class VenHoliday implements Serializable {
 	@TableGenerator(name="ven_holiday", table="openjpaseq", pkColumnName="id", valueColumnName="sequence_value", allocationSize=1)  //flush every 1 insert
 	@Column(name="holiday_id", unique=true, nullable=false)
 	private Long holidayId;
+	
+	@Column(name="deskripsi")
+	private String deskripsi;
 
-    @Temporal( TemporalType.DATE)
+	@Temporal( TemporalType.DATE)
 	@Column(name="holiday_date", nullable=false)
 	private Date holidayDate;
 
@@ -42,5 +45,14 @@ public class VenHoliday implements Serializable {
 	public void setHolidayDate(Date holidayDate) {
 		this.holidayDate = holidayDate;
 	}
+	
+    public String getDeskripsi() {
+		return deskripsi;
+	}
+
+	public void setDeskripsi(String deskripsi) {
+		this.deskripsi = deskripsi;
+	}
+
 
 }

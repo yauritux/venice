@@ -9,21 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gdn.venice.client.app.DataNameTokens;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchBankAccountComboBoxDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchJournalRelatedLogisticsInvoiceDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchLogisticsPaymentDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchLogisticsPaymentProcessingDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchManualJournalTransactionPaymentData;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchMerchantPaymentDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchMerchantPaymentProcessingDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchPaymentDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchRefundPaymentDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FetchRefundPaymentProcessingDataCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.FinishPaymentCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.MakePaymentCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.PaymentsProcessCommand;
-import com.gdn.venice.server.app.finance.presenter.commands.UpdateRefundPaymentProcessingDataCommand;
-import com.gdn.venice.server.app.seattle.presenter.commands.FetchSLAFulfillmenDataCommand;
+import com.gdn.venice.server.app.seattle.presenter.commands.FetchUoMDataCommand;
+import com.gdn.venice.server.app.seattle.presenter.commands.UpdateUoMDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -73,18 +60,31 @@ public class SeatUoMPresenterServlet extends HttpServlet {
 			}
 			
 			String method = request.getParameter("method");
-			if (method.equals("fetchSLAFulfillmenData")) {
-				HashMap<String, String> params = new HashMap<String, String>();
-				params.put("userRole", request.getParameter("userRole"));
-				rafDsRequest.setParams(params);	
-				RafDsCommand fetchSLAFulfillmenData = new FetchSLAFulfillmenDataCommand(rafDsRequest, userName);
-				RafDsResponse rafDsResponse = fetchSLAFulfillmenData.execute();
+			if (method.equals("fetchUoMData")) {
+				RafDsCommand fetchUoMData = new FetchUoMDataCommand(rafDsRequest, userName);
+				RafDsResponse rafDsResponse = fetchUoMData.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} 
+			} else if(method.equals("updateUoMData")){		
+				HashMap<String, String> params = new HashMap<String, String>();
+				params.put(DataNameTokens.SEATSTATUSUOM_ID, request.getParameter(DataNameTokens.SEATSTATUSUOM_ID));
+				rafDsRequest.setParams(params);	
+				RafDsCommand updateUoMData = new UpdateUoMDataCommand(rafDsRequest,userName);
+				RafDsResponse rafDsResponse = updateUoMData.execute();
+				try {
+					if (rafDsResponse.getStatus() == 0){
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+					}else {
+						String errorMessage = "Please check again of data is selected to be Updated";						
+						retVal = "<response><status>-1</status><data>" + errorMessage + "</data></response>";
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}			
 		} else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");			
 			String requestBody = Util.extractRequestBody(request);	

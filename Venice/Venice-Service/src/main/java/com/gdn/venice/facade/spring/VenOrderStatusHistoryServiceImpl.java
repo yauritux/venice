@@ -28,8 +28,7 @@ public class VenOrderStatusHistoryServiceImpl implements VenOrderStatusHistorySe
 	@Override
 	public void saveVenOrderStatusHistory(VenOrder venOrder) {
 		String changeReason = "Updated by System";
-		commonSaveVenOrderStatusHistory(venOrder, changeReason);
-		commonSaveSeatOrderStatusHistory(venOrder);
+		commonSaveVenOrderStatusHistory(venOrder, changeReason);	
 	}
 	
 	@Override

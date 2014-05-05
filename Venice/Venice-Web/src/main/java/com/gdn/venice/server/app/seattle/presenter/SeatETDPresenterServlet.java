@@ -24,6 +24,9 @@ import com.gdn.venice.server.app.finance.presenter.commands.MakePaymentCommand;
 import com.gdn.venice.server.app.finance.presenter.commands.PaymentsProcessCommand;
 import com.gdn.venice.server.app.finance.presenter.commands.UpdateRefundPaymentProcessingDataCommand;
 import com.gdn.venice.server.app.seattle.presenter.commands.FetchSLAFulfillmenDataCommand;
+import com.gdn.venice.server.app.seattle.presenter.commands.FetchSkuDataCommand;
+import com.gdn.venice.server.app.seattle.presenter.commands.UpdateHolidayDataCommand;
+import com.gdn.venice.server.app.seattle.presenter.commands.UpdateSkuDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -73,18 +76,26 @@ public class SeatETDPresenterServlet extends HttpServlet {
 			}
 			
 			String method = request.getParameter("method");
-			if (method.equals("fetchSLAFulfillmenData")) {
-				HashMap<String, String> params = new HashMap<String, String>();
-				params.put("userRole", request.getParameter("userRole"));
-				rafDsRequest.setParams(params);	
-				RafDsCommand fetchSLAFulfillmenData = new FetchSLAFulfillmenDataCommand(rafDsRequest, userName);
-				RafDsResponse rafDsResponse = fetchSLAFulfillmenData.execute();
+			if (method.equals("fetchSkuData")) {				
+				RafDsCommand fetchSkuData = new FetchSkuDataCommand(rafDsRequest, userName);
+				RafDsResponse rafDsResponse = fetchSkuData.execute();
 				try {
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} 
+			} else if (method.equals("updateSkuData")) {
+				HashMap<String, String> params = new HashMap<String, String>();
+				params.put(DataNameTokens.VENMERCHANTPRODUCT_PRODUCTID, request.getParameter(DataNameTokens.VENMERCHANTPRODUCT_PRODUCTID));
+				rafDsRequest.setParams(params);	
+				RafDsCommand updateSkuData = new UpdateSkuDataCommand(rafDsRequest, userName);
+				RafDsResponse rafDsResponse = updateSkuData.execute();
+				try {
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}		
+			}
 		} else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");			
 			String requestBody = Util.extractRequestBody(request);	

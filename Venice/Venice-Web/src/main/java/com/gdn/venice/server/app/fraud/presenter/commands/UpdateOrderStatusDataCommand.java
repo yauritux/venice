@@ -12,6 +12,7 @@ import com.gdn.venice.client.app.DataConstantNameTokens;
 import com.gdn.venice.facade.FrdCustomerWhitelistBlacklistSessionEJBRemote;
 import com.gdn.venice.facade.FrdEntityBlacklistSessionEJBRemote;
 import com.gdn.venice.facade.FrdFraudSuspicionCaseSessionEJBRemote;
+import com.gdn.venice.facade.SeatOrderStatusHistorySessionEJBRemote;
 import com.gdn.venice.facade.VenAddressSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderAddressSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderContactDetailSessionEJBRemote;
@@ -24,6 +25,7 @@ import com.gdn.venice.facade.VenOrderStatusHistorySessionEJBRemote;
 import com.gdn.venice.persistence.FrdCustomerWhitelistBlacklist;
 import com.gdn.venice.persistence.FrdEntityBlacklist;
 import com.gdn.venice.persistence.FrdFraudSuspicionCase;
+import com.gdn.venice.persistence.SeatOrderStatusHistory;
 import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderAddress;
@@ -147,6 +149,10 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 			VenOrderItemStatusHistorySessionEJBRemote orderItemHistorySessionHome = (VenOrderItemStatusHistorySessionEJBRemote) historyLocator
 			.lookup(VenOrderItemStatusHistorySessionEJBRemote.class, "VenOrderItemStatusHistorySessionEJBBean");
 			
+			  SeatOrderStatusHistorySessionEJBRemote seatOrderHistorySessionHome = (SeatOrderStatusHistorySessionEJBRemote) historyLocator
+              .lookup(SeatOrderStatusHistorySessionEJBRemote.class, "SeatOrderStatusHistorySessionEJBBean");
+
+			
 			VenOrderStatusHistoryPK venOrderStatusHistoryPK = new VenOrderStatusHistoryPK();
 			venOrderStatusHistoryPK.setOrderId(new Long(orderId));
 			venOrderStatusHistoryPK.setHistoryTimestamp(new Timestamp(System.currentTimeMillis()));
@@ -176,6 +182,16 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 
 				orderItemHistorySessionHome.persistVenOrderItemStatusHistory(orderItemStatusHistory);	
 			}			
+			if (!method.equals("updateOrderStatusToSF")) {
+				_log.debug("add seat order status history");
+	       		List<SeatOrderStatusHistory> seatOrderStatusHistoryList =seatOrderHistorySessionHome.queryByRange("select o from SeatOrderStatusHistory o where o.venOrder.orderId="+orderId, 0, 0);	
+	       		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){            	
+	       			SeatOrderStatusHistory item = items;
+	       			item.setVenOrderStatus(venOrderStatus);		
+	       			item.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
+	       			item = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(item);
+	       		}		
+			}
 
 			if (method.equals("updateOrderStatusToFC")){
 				addToBlackList(wcsOrderId, username);

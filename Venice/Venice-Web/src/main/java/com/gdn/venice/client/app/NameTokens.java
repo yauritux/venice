@@ -70,6 +70,7 @@ public class NameTokens {
 	public static final String seattleSLAStatusViewer = "!seattleSLAStatusViewer";
 	public static final String seattleETDViewer = "!seattleETDViewer";
 	public static final String seattleUoMViewer = "!seattleUoMViewer";
+	public static final String seattleHolidayViewer = "!seattleHolidayViewer";
 
 	public static String getPageAfterLogin() {
 		return taskSummaryPage;

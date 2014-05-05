@@ -8,5 +8,6 @@ import com.gdn.venice.persistence.SeatOrderEtd;
 
 public interface SeatOrderEtdDAO extends JpaRepository<SeatOrderEtd, Long> {
 	public ArrayList<SeatOrderEtd> findByWcsOrderId(String wcsOrderId);
+	public ArrayList<SeatOrderEtd> findBySku(String sku);
 	
 }

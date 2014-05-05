@@ -17,6 +17,7 @@ import com.gdn.venice.facade.FrdBlacklistReasonSessionEJBRemote;
 import com.gdn.venice.facade.FrdCustomerWhitelistBlacklistSessionEJBRemote;
 import com.gdn.venice.facade.FrdEntityBlacklistSessionEJBRemote;
 import com.gdn.venice.facade.FrdParameterRule31SessionEJBRemote;
+import com.gdn.venice.facade.SeatOrderStatusHistorySessionEJBRemote;
 import com.gdn.venice.facade.VenAddressSessionEJBRemote;
 import com.gdn.venice.facade.VenBinCreditLimitEstimateSessionEJBRemote;
 import com.gdn.venice.facade.VenOrderAddressSessionEJBRemote;
@@ -31,6 +32,7 @@ import com.gdn.venice.persistence.FrdBlacklistReason;
 import com.gdn.venice.persistence.FrdCustomerWhitelistBlacklist;
 import com.gdn.venice.persistence.FrdEntityBlacklist;
 import com.gdn.venice.persistence.FrdParameterRule31;
+import com.gdn.venice.persistence.SeatOrderStatusHistory;
 import com.gdn.venice.persistence.VenAddress;
 import com.gdn.venice.persistence.VenBinCreditLimitEstimate;
 import com.gdn.venice.persistence.VenOrder;
@@ -245,6 +247,10 @@ public class UpdateOrderFPBatchJob {
 
                         VenOrderItemStatusHistorySessionEJBRemote orderItemHistorySessionHome = (VenOrderItemStatusHistorySessionEJBRemote) historyLocator
                                 .lookup(VenOrderItemStatusHistorySessionEJBRemote.class, "VenOrderItemStatusHistorySessionEJBBean");
+                        
+                        SeatOrderStatusHistorySessionEJBRemote seatOrderHistorySessionHome = (SeatOrderStatusHistorySessionEJBRemote) historyLocator
+                        .lookup(SeatOrderStatusHistorySessionEJBRemote.class, "SeatOrderStatusHistorySessionEJBBean");
+
 
                         VenOrderStatusHistoryPK venOrderStatusHistoryPK = new VenOrderStatusHistoryPK();
                         venOrderStatusHistoryPK.setOrderId(orderPaymentAllocationList.get(tempCounter).getVenOrder().getOrderId());
@@ -286,6 +292,15 @@ public class UpdateOrderFPBatchJob {
                                 orderItemHistorySessionHome.persistVenOrderItemStatusHistory(orderItemStatusHistory);
                             }
                         }
+                     
+                    _log.debug("add seat order status history");
+               		List<SeatOrderStatusHistory> seatOrderStatusHistoryList =seatOrderHistorySessionHome.queryByRange("select o from SeatOrderStatusHistory o where o.venOrder.orderId="+order.getOrderId(), 0, 0);	
+               		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){            	
+               			SeatOrderStatusHistory item = items;
+               			item.setVenOrderStatus(venOrderStatusFP);		
+               			item.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
+               			item = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(item);
+               		}		
 
                         //check genuine list
                         FrdParameterRule31SessionEJBRemote genuineListSessionHome = (FrdParameterRule31SessionEJBRemote) locator.lookup(FrdParameterRule31SessionEJBRemote.class, "FrdParameterRule31SessionEJBBean");

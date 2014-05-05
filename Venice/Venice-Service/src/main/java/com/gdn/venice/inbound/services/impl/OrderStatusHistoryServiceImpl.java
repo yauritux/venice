@@ -13,6 +13,7 @@ import com.gdn.venice.dao.VenOrderStatusHistoryDAO;
 import com.gdn.venice.exception.CannotPersistOrderStatusHistoryException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.OrderStatusHistoryService;
+import com.gdn.venice.inbound.services.SeatOrderStatusHistoryService;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenOrderStatusHistory;
@@ -30,6 +31,9 @@ public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService 
 
 	@Autowired
 	private VenOrderStatusHistoryDAO venOrderStatusHistoryDAO;
+	
+	 @Autowired
+	 private SeatOrderStatusHistoryService seatOrderStatusHistoryService;
 	
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)

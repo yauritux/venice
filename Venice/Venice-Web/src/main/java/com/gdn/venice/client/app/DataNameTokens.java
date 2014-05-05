@@ -1181,6 +1181,32 @@ public class DataNameTokens {
 	public static String SEATFULFILLMENTINPERCENTAGE_UPDATEDATE="SeatFulfillmentInPercentage.updateDate";
 	public static String SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_PIC="SeatFulfillmentInPercentage.seatOrderStatus.pic";
 	
+	public static String SEATSLASTATUSPERCENTAGE_ID="SeatSlaStatusPercentage.seatSlaStatusPercentageId";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_VENORDERSTATUS_CODE="SeatSlaStatusPercentage.seatSlaStatus.seatOrderStatus.venOrderStatus.orderStatusCode";
+	public static String SEATSLASTATUSPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC="SeatSlaStatusPercentage.seatResultStatusTracking.resultStatusTrackingDesc";
+	public static String SEATSLASTATUSPERCENTAGE_MIN="SeatSlaStatusPercentage.min";
+	public static String SEATSLASTATUSPERCENTAGE_MAX="SeatSlaStatusPercentage.max";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_BYUSER="SeatSlaStatusPercentage.seatSlaStatus.byUser";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_UPDATEDATE="SeatSlaStatusPercentage.seatSlaStatus.updateDate";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_PIC="SeatSlaStatusPercentage.seatSlaStatus.seatOrderStatus.pic";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SLA="SeatSlaStatusPercentage.seatSlaStatus.sla";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATSTATUSUOM_DESC="SeatSlaStatusPercentage.seatSlaStatus.seatStatusUom.statusUomDesc";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATSTATUSUOM_ID="SeatSlaStatusPercentage.seatSlaStatus.seatStatusUom.statusUomId";
+	
+	public static String SEATSTATUSUOM_ID="SeatStatusUom.statusUomId";
+	public static String SEATSTATUSUOM_STATUSUOMDESC="SeatStatusUom.statusUomDesc";
+	public static String SEATSTATUSUOM_STATUSUOMFROM="SeatStatusUom.statusUomFrom";
+	public static String SEATSTATUSUOM_STATUSUOMEND="SeatStatusUom.statusUomEnd";
+	public static String SEATSTATUSUOM_BYUSER="SeatStatusUom.byUser";
+	public static String SEATSTATUSUOM_UPDATEDATE="SeatStatusUom.updateDate";
+	
+	public static String HOLIDAY_ID="VenHoliday.holidayId";
+	public static String HOLIDAY_DATE="VenHoliday.holidayDate";
+	public static String HOLIDAY_DESKRIPSI="VenHoliday.deskripsi";
+	
+	public static String SEAT_ORDER_ETD_NEW = "SeatOrderEtd.etdNew";
+	public static String SEAT_ORDER_ETD_START = "SeatOrderEtd.startDate";
+	public static String SEAT_ORDER_ETD_END = "SeatOrderEtd.endDate";
 	/**
 	 * This constructor adds all of the name token and the wrapper type
 	 * definitions into the Map. This should really be removed so that the 
@@ -1529,6 +1555,7 @@ public class DataNameTokens {
 		fieldClassMap.put(VENMERCHANTPRODUCT_WCSPRODUCTSKU, "java.lang.String");
 		fieldClassMap.put(VENMERCHANTPRODUCT_MERCHANTID, "java.lang.Long");
 		fieldClassMap.put(VENMERCHANTPRODUCT_COSTOFGOODSSOLD, "java.math.BigDecimal");
+		fieldClassMap.put(VENMERCHANTPRODUCT_WCSPRODUCTNAME, "java.lang.String");
 		
 		fieldClassMap.put(VENCITY_CITYID, "java.lang.Long");
 		fieldClassMap.put(VENCITY_CITYNAME, "java.lang.String");
@@ -2232,7 +2259,34 @@ public class DataNameTokens {
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_BYUSER,"java.lang.String");
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_UPDATEDATE,"java.sql.Timestamp");
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_PIC,"java.lang.String");	
-									
+		
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_ID,"java.lang.Long");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_VENORDERSTATUS_CODE,"java.lang.String");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC,"java.lang.String");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_MIN,"java.math.BigDecimal");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_MAX,"java.math.BigDecimal");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_BYUSER,"java.lang.String");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_UPDATEDATE,"java.sql.Timestamp");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_PIC,"java.lang.String");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SLA,"java.math.BigDecimal");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATSTATUSUOM_DESC,"java.lang.String");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATSTATUSUOM_ID,"java.lang.Long");
+		
+		fieldClassMap.put(SEATSTATUSUOM_ID,"java.lang.Long");
+		fieldClassMap.put(SEATSTATUSUOM_STATUSUOMDESC,"java.lang.String");
+		fieldClassMap.put(SEATSTATUSUOM_STATUSUOMFROM,"java.math.BigDecimal");
+		fieldClassMap.put(SEATSTATUSUOM_STATUSUOMEND,"java.math.BigDecimal");
+		fieldClassMap.put(SEATSTATUSUOM_BYUSER,"java.lang.String");
+		fieldClassMap.put(SEATSTATUSUOM_UPDATEDATE,"java.sql.Timestamp");
+		
+		fieldClassMap.put(HOLIDAY_ID,"java.lang.Long");
+		fieldClassMap.put(HOLIDAY_DATE,"java.util.Date");
+		fieldClassMap.put(HOLIDAY_DESKRIPSI,"java.lang.String");
+		
+		fieldClassMap.put(SEAT_ORDER_ETD_NEW,"java.util.Date");
+		fieldClassMap.put(SEAT_ORDER_ETD_START,"java.util.Date");
+		fieldClassMap.put(SEAT_ORDER_ETD_END,"java.util.Date");
+						
 	}
 	
 	/**

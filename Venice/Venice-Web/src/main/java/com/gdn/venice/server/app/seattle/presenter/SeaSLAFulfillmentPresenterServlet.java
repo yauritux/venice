@@ -23,7 +23,9 @@ import com.gdn.venice.server.app.finance.presenter.commands.FinishPaymentCommand
 import com.gdn.venice.server.app.finance.presenter.commands.MakePaymentCommand;
 import com.gdn.venice.server.app.finance.presenter.commands.PaymentsProcessCommand;
 import com.gdn.venice.server.app.finance.presenter.commands.UpdateRefundPaymentProcessingDataCommand;
+import com.gdn.venice.server.app.kpi.presenter.commands.UpdatePeriodeKpiSetupDataCommand;
 import com.gdn.venice.server.app.seattle.presenter.commands.FetchSLAFulfillmenDataCommand;
+import com.gdn.venice.server.app.seattle.presenter.commands.UpdateSLAFulfillmenDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
@@ -84,7 +86,23 @@ public class SeaSLAFulfillmentPresenterServlet extends HttpServlet {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} 
+			} else if(method.equals("updateSLAFulfillmenData")){		
+				HashMap<String, String> params = new HashMap<String, String>();
+				params.put(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_ID, request.getParameter(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_ID));
+				rafDsRequest.setParams(params);	
+				RafDsCommand updateSLAFulfillmenData = new UpdateSLAFulfillmenDataCommand(rafDsRequest,userName);
+				RafDsResponse rafDsResponse = updateSLAFulfillmenData.execute();
+				try {
+					if (rafDsResponse.getStatus() == 0){
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+					}else {
+						String errorMessage = "Please check again of data is selected to be Updated";						
+						retVal = "<response><status>-1</status><data>" + errorMessage + "</data></response>";
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}				
 		} else if (type.equals(RafRpcCommand.RPC)) {
 			String method = request.getParameter("method");			
 			String requestBody = Util.extractRequestBody(request);	
