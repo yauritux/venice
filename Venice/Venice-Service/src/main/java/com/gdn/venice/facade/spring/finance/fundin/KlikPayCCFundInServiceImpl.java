@@ -101,7 +101,7 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 					if(fundInReconReadyToPersistList.get(i).getFinArReconResult()!=null){
 						try
 						{
-							if(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId().equals(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()))
+							if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId().equals(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id())))
 							{
 								CommonUtil.logDebug(CLASS_NAME, "Masuk pertama");
 								VenOrderPayment venOrderPayment = fundInReconReadyToPersistList.get(i).getVenOrderPayment();
@@ -116,9 +116,10 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 							CommonUtil.logDebug(CLASS_NAME, e.toString());
 						}
 						
+						
 						try
 						{
-							if(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId()==(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()))
+							if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId()==(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id())))
 							{
 								CommonUtil.logDebug(CLASS_NAME, "Masuk kedua");
 								VenOrderPayment venOrderPayment = fundInReconReadyToPersistList.get(i).getVenOrderPayment();
@@ -137,7 +138,7 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 						
 						try
 						{
-							if(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId()==(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()))
+							if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId()==(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id())))
 							{
 								CommonUtil.logDebug(CLASS_NAME, "A");
 								Long orderPaymentId = fundInReconReadyToPersistList.get(i).getVenOrderPayment().getOrderPaymentId();
