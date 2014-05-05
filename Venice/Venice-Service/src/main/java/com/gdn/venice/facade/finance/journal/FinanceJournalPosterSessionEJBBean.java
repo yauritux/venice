@@ -2641,13 +2641,29 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(
 							System.currentTimeMillis()));
 					
+					
+					
+					
+
+					_log.debug("Mulai dari sini !!!");
+					_log.debug("Card number adalah : "+destinationVenOrderPayment.getCardNumber());
 					if(destinationVenOrderPayment.getCardNumber()!=null)
 					{
+						_log.debug("A");
 						String cardNumber = destinationVenOrderPayment.getCardNumber();
+						_log.debug("Card number 1 adalah : "+cardNumber);
+						_log.debug("B");
 						VenOrderPayment venOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
+						_log.debug("C");
 						venOrderPayment.setCardNumber(cardNumber);
+						_log.debug("D");
 						destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
+						_log.debug("E");
 					}
+					_log.debug("Akhirnya dari sini !!!");
+					
+					
+					
 					
 					newRecord.setVenOrderPayment(destinationVenOrderPayment
 							.getVenOrderPayment());
@@ -2922,14 +2938,31 @@ public class FinanceJournalPosterSessionEJBBean implements
 					Date d = new Date();
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(d
 							.getTime()));
+				
 					
+					
+					
+					
+					_log.debug("Mulai dari sini !!!~");
+					_log.debug("Card number adalah ~: "+newRecord.getCardNumber());
 					if(newRecord.getCardNumber()!=null)
 					{
+						_log.debug("A~");
 						String cardNumber = newRecord.getCardNumber();
+						_log.debug("Card number 1 adalah : ~"+cardNumber);
+						_log.debug("B~");
 						VenOrderPayment venOrderPayment = newRecord.getVenOrderPayment();
+						_log.debug("C~");
 						venOrderPayment.setCardNumber(cardNumber);
+						_log.debug("D~");
 						newRecord.setVenOrderPayment(venOrderPayment);
+						_log.debug("E~");
 					}
+					_log.debug("Akhirnya dari sini !!!~");
+					
+					
+					
+					
 					
 					newRecord.setVenOrderPayment(tempRecord
 							.getVenOrderPayment());
