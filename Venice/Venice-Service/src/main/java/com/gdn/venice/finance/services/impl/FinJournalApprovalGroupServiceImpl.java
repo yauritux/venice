@@ -2,6 +2,9 @@ package com.gdn.venice.finance.services.impl;
 
 import java.sql.Timestamp;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -14,6 +17,7 @@ import com.gdn.venice.dao.FinJournalApprovalGroupDAO;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.finance.services.FinApprovalStatusService;
 import com.gdn.venice.finance.services.FinJournalApprovalGroupService;
+import com.gdn.venice.persistence.FinApprovalStatus;
 import com.gdn.venice.persistence.FinJournal;
 import com.gdn.venice.persistence.FinJournalApprovalGroup;
 
@@ -25,6 +29,9 @@ import com.gdn.venice.persistence.FinJournalApprovalGroup;
 @Service
 @Scope(value = "singleton", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class FinJournalApprovalGroupServiceImpl implements FinJournalApprovalGroupService {
+	
+	@PersistenceContext
+	private EntityManager em;
 
 	@Autowired
 	private FinJournalApprovalGroupDAO finJournalApprovalGroupDAO;
@@ -43,6 +50,24 @@ public class FinJournalApprovalGroupServiceImpl implements FinJournalApprovalGro
 		finJournalApprovalGroup.setJournalGroupDesc(journalDescription);
 		finJournalApprovalGroup.setJournalGroupTimestamp(new Timestamp(System.currentTimeMillis()));
 		
+		return persist(finJournalApprovalGroup);
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public FinJournalApprovalGroup persist(FinJournalApprovalGroup finJournalApprovalGroup) 
+	  throws VeniceInternalException {
 		return finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public FinJournalApprovalGroup updateApprovalStatus(FinJournalApprovalGroup finJournalApprovalGroup,
+			FinApprovalStatus finApprovalStatus) throws VeniceInternalException {
+		finJournalApprovalGroup.setFinApprovalStatus(finApprovalStatus);
+		if (!em.contains(finJournalApprovalGroup)) {
+			finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+		}
+		return finJournalApprovalGroup;
 	}
 }
