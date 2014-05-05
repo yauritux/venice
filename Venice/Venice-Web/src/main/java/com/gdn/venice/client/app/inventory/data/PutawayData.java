@@ -18,6 +18,7 @@ import com.smartgwt.client.types.DSOperationType;
 public class PutawayData {
 	
 	public static DataSource getGRNItemData(String warehouseId, int page, int limit) {
+		System.out.println("warehouse id di data: "+warehouseId);
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, "GRN Item ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, "Reff No"),
@@ -29,22 +30,17 @@ public class PutawayData {
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
-				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayGRNItemData&type=DataSource&limit="+limit+"&page="+page,
+				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayGRNItemData&type=DataSource&limit="+limit+"&page="+page+"&warehouseId="+warehouseId,
 				null,
 				null,
 				null, 
 				dataSourceFields);
-		HashMap<String, String> params = new HashMap<String, String>();
-		
-		if(warehouseId != null) {
-			params.put(DataNameTokens.INV_WAREHOUSE_ID, warehouseId);
-			dataSource.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
-		}
 
 		return dataSource;		 
 	}
 	
 	public static DataSource getPutawayData(String warehouseId, int page, int limit) {
+		System.out.println("warehouse id di data: "+warehouseId);
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_ID, "Putaway ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_NUMBER, "Putaway Number"),
@@ -56,17 +52,11 @@ public class PutawayData {
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
-				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayData&type=DataSource&limit="+limit+"&page="+page,
+				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayData&type=DataSource&limit="+limit+"&page="+page+"&warehouseId="+warehouseId,
 				null,
 				null,
 				null, 
 				dataSourceFields);
-		HashMap<String, String> params = new HashMap<String, String>();
-		
-		if(warehouseId != null) {
-			params.put(DataNameTokens.INV_WAREHOUSE_ID, warehouseId);
-			dataSource.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
-		}
 
 		return dataSource;		 
 	}	

@@ -138,7 +138,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
     
 	private void buildGrnListGrid(String warehouseId, String type) {
 		if(type.equals("GRN")){
-			DataSource grnItemData = PutawayData.getGRNItemData(warehouseId, 1, 20);
+			DataSource grnItemData = PutawayData.getGRNItemData(warehouseId, 1, 100);
 			ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
 	        ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3], listGridField[4]};
 	

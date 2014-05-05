@@ -39,7 +39,7 @@ public class FetchPutawayDataCommand implements RafDsCommand {
     @Override
     public RafDsResponse execute() {
     	_log.info("FetchPutawayDataCommand");
-    	System.out.println("warehouse id putaway: "+request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
+    	System.out.println("warehouse id putaway input: "+request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         try {
