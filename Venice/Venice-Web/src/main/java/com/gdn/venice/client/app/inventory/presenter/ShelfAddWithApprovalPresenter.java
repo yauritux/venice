@@ -57,8 +57,7 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
     /**
      * {@link ShelfListFilterPresenter}'s view.
      */
-    public interface MyView extends View,
-            HasUiHandlers<ShelfAddWithApprovalUiHandler> {
+    public interface MyView extends View, HasUiHandlers<ShelfAddWithApprovalUiHandler> {
 
         public void loadApprovalAddShelfData(DataSource dataSource);
         public void refreshAllShelfData();
@@ -96,11 +95,9 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
             RPCManager.setDefaultPrompt("Saving records...");
             RPCManager.setShowPrompt(true);
 
-            RPCManager.sendRequest(request,
-                    new RPCCallback() {
+            RPCManager.sendRequest(request, new RPCCallback() {
                         @Override
-                        public void execute(RPCResponse response,
-                                Object rawData, RPCRequest request) {
+                        public void execute(RPCResponse response, Object rawData, RPCRequest request) {
                             String rpcResponse = rawData.toString();
 
                             if (rpcResponse.startsWith("0")) {
@@ -131,11 +128,9 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
             RPCManager.setDefaultPrompt("Saving records...");
             RPCManager.setShowPrompt(true);
 
-            RPCManager.sendRequest(request,
-                    new RPCCallback() {
+            RPCManager.sendRequest(request, new RPCCallback() {
                         @Override
-                        public void execute(RPCResponse response,
-                                Object rawData, RPCRequest request) {
+                        public void execute(RPCResponse response, Object rawData, RPCRequest request) {
                             String rpcResponse = rawData.toString();
 
                             if (rpcResponse.startsWith("0")) {
@@ -166,11 +161,9 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
             RPCManager.setDefaultPrompt("Saving records...");
             RPCManager.setShowPrompt(true);
 
-            RPCManager.sendRequest(request,
-                    new RPCCallback() {
+            RPCManager.sendRequest(request, new RPCCallback() {
                         @Override
-                        public void execute(RPCResponse response,
-                                Object rawData, RPCRequest request) {
+                        public void execute(RPCResponse response, Object rawData, RPCRequest request) {
                             String rpcResponse = rawData.toString();
 
                             if (rpcResponse.startsWith("0")) {
@@ -204,8 +197,7 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
 		RPCManager.setDefaultPrompt("Saving records...");
 		RPCManager.setShowPrompt(true);
 		
-		RPCManager.sendRequest(request, 
-				new RPCCallback () {
+		RPCManager.sendRequest(request, new RPCCallback () {
 					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						

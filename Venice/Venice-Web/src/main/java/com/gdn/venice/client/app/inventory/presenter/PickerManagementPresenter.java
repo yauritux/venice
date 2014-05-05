@@ -5,6 +5,7 @@
 package com.gdn.venice.client.app.inventory.presenter;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.inventory.data.PickerData;
@@ -33,8 +34,6 @@ import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
-import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
-import java.util.LinkedHashMap;
 
 /**
  *
@@ -89,7 +88,7 @@ public class PickerManagementPresenter extends Presenter<PickerManagementPresent
         super(eventBus, view, proxy);
         getView().setUiHandlers(this);
         ((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-        getView().loadAllPickerData(PickerData.getAllPickerData(1, 20));
+        getView().loadAllPickerData(PickerData.getAllPickerData(1, 100));
         loadWarehouseComboboxData();
         this.dispatcher = dispatcher;
     }

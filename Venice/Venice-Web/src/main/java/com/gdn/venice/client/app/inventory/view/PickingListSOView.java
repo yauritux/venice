@@ -431,6 +431,8 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
 						        }	                      
 						    }	
 						});	
+ 				}else if(selectedRecords.length>0){
+ 					buildAssignPickerWindow(warehouseComboBox.getDisplayValue().toString()).show();
  				}
 			}
 		});

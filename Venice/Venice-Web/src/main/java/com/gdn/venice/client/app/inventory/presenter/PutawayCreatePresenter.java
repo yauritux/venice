@@ -78,8 +78,7 @@ public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyV
 		request.setShowPrompt(false);
 		RPCManager.sendRequest(request, 
 				new RPCCallback () {
-					public void execute(RPCResponse response,
-							Object rawData, RPCRequest request) {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						String xmlData = rpcResponse;
 						final LinkedHashMap<String, String> warehouseMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlData));

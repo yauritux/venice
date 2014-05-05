@@ -431,6 +431,8 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 						        }	                      
 						    }	
 						});	
+ 				}else if(selectedRecords.length>0){
+ 					buildAssignPickerWindow(warehouseComboBox.getDisplayValue().toString()).show();
  				}
 			}
 		});

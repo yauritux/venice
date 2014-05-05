@@ -67,7 +67,7 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
 		getView().setUiHandlers(this);
 		
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		getView().loadASNData(GRNData.getASNData(1, 20));
+		getView().loadASNData(GRNData.getASNData(1, 100));
 		this.dispatcher = dispatcher;
 	}
 

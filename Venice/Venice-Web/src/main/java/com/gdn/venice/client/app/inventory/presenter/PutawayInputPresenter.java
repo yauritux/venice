@@ -78,10 +78,8 @@ public class PutawayInputPresenter extends Presenter<PutawayInputPresenter.MyVie
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setShowPrompt(false);
-		RPCManager.sendRequest(request, 
-				new RPCCallback () {
-					public void execute(RPCResponse response,
-							Object rawData, RPCRequest request) {
+		RPCManager.sendRequest(request, new RPCCallback () {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						String xmlData = rpcResponse;
 						final LinkedHashMap<String, String> warehouseMap = Util.formComboBoxMap(Util.formHashMapfromXML(xmlData));

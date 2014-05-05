@@ -57,13 +57,10 @@ public class ShelfEditWithApprovalPresenter extends Presenter<ShelfEditWithAppro
     /**
      * {@link ShelfListFilterPresenter}'s view.
      */
-    public interface MyView extends View,
-            HasUiHandlers<ShelfEditWithApprovalUiHandler> {
+    public interface MyView extends View, HasUiHandlers<ShelfEditWithApprovalUiHandler> {
 
         public void loadApprovalEditShelfData(DataSource dataSource);
-
         public void refreshAllShelfData();
-
         public Window getShelfDetailWindow();
     }
 
