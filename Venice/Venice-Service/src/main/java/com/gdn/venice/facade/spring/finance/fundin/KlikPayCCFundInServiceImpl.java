@@ -109,6 +109,7 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 								venOrderPayment.setCardNumber(fundInReconReadyToPersistList.get(i).getCardNumber());
 								CommonUtil.logDebug(CLASS_NAME, "Masuk pertama");
 								venOrderPaymentDAO.save(venOrderPayment);
+								CommonUtil.logDebug(CLASS_NAME, "Masuk pertama");
 							}
 						}
 						catch (Exception e) {
@@ -116,7 +117,7 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 							CommonUtil.logDebug(CLASS_NAME, e.toString());
 						}
 						
-						
+						/*
 						try
 						{
 							if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId()==(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id())))
@@ -171,7 +172,7 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 							CommonUtil.logDebug(CLASS_NAME, "Gagal ketiga");
 							CommonUtil.logDebug(CLASS_NAME, e.toString());
 						}
-						
+						*/
 					
 					}
 				}
