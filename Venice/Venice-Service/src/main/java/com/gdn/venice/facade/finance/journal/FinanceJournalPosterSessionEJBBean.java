@@ -2736,6 +2736,18 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					destinationVenOrderPayment = fundsInReconRecordHome
 							.mergeFinArFundsInReconRecord(destinationVenOrderPayment);
+					
+					
+					
+					
+					VenOrderPayment tempVenOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
+					tempVenOrderPayment.setCardNumber(destinationVenOrderPayment.getCardNumber()!=null?destinationVenOrderPayment.getCardNumber():"");
+					orderPaymentHome.mergeVenOrderPayment(tempVenOrderPayment);
+					
+					
+					
+					
+					
 				} else {
 					newRecord = destinationVenOrderPayment;
 
@@ -2809,6 +2821,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord.setFinArReconResult(finArReconResult);
 					newRecord = fundsInReconRecordHome
 							.mergeFinArFundsInReconRecord(newRecord);
+					
+					
+					
+
+					VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
+					tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
+					orderPaymentHome.mergeVenOrderPayment(tempVenOrderPayment);
+					
+					
+					
+					
+					
+					
+					
 				}
 
 				FinArFundsInAllocatePayment finArFundsInAllocates = new FinArFundsInAllocatePayment();
@@ -3048,6 +3074,22 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.persistFinArFundsInReconRecord(newRecord);
 					_log.debug("Allocate and  reconciliation record persisted id:"
 							+ newRecord.getReconciliationRecordId());
+					
+					
+					
+					
+					
+
+					VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
+					tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
+					orderPaymentHome.mergeVenOrderPayment(tempVenOrderPayment);
+					
+					
+					
+					
+					
+					
+					
 				} else {
 					BigDecimal paidAmount = (tempRecord
 							.getProviderReportPaidAmount() != null ? tempRecord
@@ -3131,6 +3173,17 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.mergeFinArFundsInReconRecord(tempRecord);
 					_log.debug("Allocate and  reconciliation record merge id:"
 							+ tempRecord.getReconciliationRecordId());
+					
+					
+					
+
+					VenOrderPayment tempVenOrderPayment = tempRecord.getVenOrderPayment();
+					tempVenOrderPayment.setCardNumber(tempRecord.getCardNumber()!=null?tempRecord.getCardNumber():"");
+					orderPaymentHome.mergeVenOrderPayment(tempVenOrderPayment);
+					
+					
+					
+					
 
 				}
 			} else {
