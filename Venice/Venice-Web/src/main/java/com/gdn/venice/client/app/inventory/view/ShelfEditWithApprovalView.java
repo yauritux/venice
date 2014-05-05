@@ -208,13 +208,14 @@ public class ShelfEditWithApprovalView extends ViewWithUiHandlers<ShelfEditWithA
 			}
 		});
 
-		buttonSet.setAlign(Alignment.CENTER);
-        if(record.getAttribute(DataNameTokens.INV_SHELF_APPROVALSTATUS).equals("Need Correction")){
-        	buttonSet.addMember(editButton);
-        }else{            
+		buttonSet.setAlign(Alignment.CENTER);        
+        if (!record.getAttribute(DataNameTokens.INV_SHELF_APPROVALSTATUS).equals("Need Correction") 
+                && MainPagePresenter.getSignedInUserRole().toLowerCase().contains("inv_wh_approver")) {
             buttonSet.addMember(approveButton);
             buttonSet.addMember(correctionButton);
             buttonSet.addMember(rejectButton);
+        } else if (record.getAttribute(DataNameTokens.INV_SHELF_APPROVALSTATUS).equals("Need Correction")) {
+            buttonSet.addMember(editButton);
         }
         
         addStorageButton = new ToolStripButton();
