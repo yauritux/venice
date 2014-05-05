@@ -2646,14 +2646,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 					
 
 					_log.debug("Mulai dari sini !!!");
-					_log.debug("Card number adalah : "+destinationVenOrderPayment.getCardNumber());
-					if(destinationVenOrderPayment.getCardNumber()!=null)
+					_log.debug("Card number adalah : "+payment.getCardNumber());
+					if(payment.getCardNumber()!=null)
 					{
 						_log.debug("A");
-						String cardNumber = destinationVenOrderPayment.getCardNumber();
+						String cardNumber = payment.getCardNumber();
 						_log.debug("Card number 1 adalah : "+cardNumber);
 						_log.debug("B");
-						VenOrderPayment venOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
+						VenOrderPayment venOrderPayment = payment.getVenOrderPayment();
 						_log.debug("C");
 						venOrderPayment.setCardNumber(cardNumber);
 						_log.debug("D");
@@ -2781,6 +2781,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getRemainingBalanceAmount().abs()
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : newRecord.getRemainingBalanceAmount();
+							
+							
+					
+							
+
+							_log.debug("Masuk sini lah !");	
+							_log.debug("CardNumber adalah : "+payment.getCardNumber());	
+					newRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
+							
+				    
+							
+							
+							
 
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
@@ -2944,14 +2957,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 					
 					
 					_log.debug("Mulai dari sini !!!~");
-					_log.debug("Card number adalah ~: "+newRecord.getCardNumber());
-					if(newRecord.getCardNumber()!=null)
+					_log.debug("Card number adalah ~: "+payment.getCardNumber());
+					if(payment.getCardNumber()!=null)
 					{
 						_log.debug("A~");
-						String cardNumber = newRecord.getCardNumber();
+						String cardNumber = payment.getCardNumber();
 						_log.debug("Card number 1 adalah : ~"+cardNumber);
 						_log.debug("B~");
-						VenOrderPayment venOrderPayment = newRecord.getVenOrderPayment();
+						VenOrderPayment venOrderPayment = payment.getVenOrderPayment();
 						_log.debug("C~");
 						venOrderPayment.setCardNumber(cardNumber);
 						_log.debug("D~");
@@ -3084,6 +3097,21 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getRemainingBalanceAmount().abs()
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : tempRecord.getRemainingBalanceAmount();
+							
+							
+							
+							
+
+							_log.debug("Masuk disini lah 1 !");	
+							_log.debug("CardNumber adalah: "+payment.getCardNumber());
+					tempRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
+							
+							
+							
+							
+							
+							
+							
 
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
@@ -3135,6 +3163,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 			BigDecimal oldRemainingBalance = oldRemainingBalanceAmount.abs()
 					.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 					0) : oldRemainingBalanceAmount;
+					
+					
+					
+					
+					
+					
+			
+					
+					
+					
+					
+					
+					
+					
 
 			if (oldRemainingBalance.compareTo(new BigDecimal(0)) == 0) {
 				payment.setRemainingBalanceAmount(new BigDecimal(0));
