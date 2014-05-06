@@ -65,21 +65,13 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 			
 			finArFundsInReconRecordDAO.save(fundInReconReadyToPersistList);
 			
-			for(int i=0;i<fundInReconReadyToPersistList.size();i++)
-			{	
+			for(int i=0;i<fundInReconReadyToPersistList.size();i++)	{	
 					if(fundInReconReadyToPersistList.get(i).getFinArReconResult()!=null){
-						try
-						{
-							if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId().equals(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id())))
-							{
+							if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId().equals(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()))) {
 								VenOrderPayment venOrderPayment = fundInReconReadyToPersistList.get(i).getVenOrderPayment();
 								venOrderPayment.setCardNumber(fundInReconReadyToPersistList.get(i).getCardNumber());
 								venOrderPaymentDAO.save(venOrderPayment);
-							}
-						}
-						catch (Exception e) {
-							CommonUtil.logError(CLASS_NAME, e);
-						}					
+							}			
 					}
 			}
 			
