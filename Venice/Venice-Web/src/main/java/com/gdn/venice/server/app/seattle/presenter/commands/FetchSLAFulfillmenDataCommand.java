@@ -57,7 +57,7 @@ public class FetchSLAFulfillmenDataCommand implements RafDsCommand {
 				HashMap<String, String> map = new HashMap<String, String>();
 				SeatFulfillmentInPercentage list = seatFulfillmentInPercentageList.get(i);
 				map.put(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_ID, list.getFulfillmentInPercentageId().toString());
-				map.put(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_VENORDERSTATUS_CODE, Util.isNull(list.getSeatOrderStatus().getVenOrderStatus().getOrderStatusCode(),"").toString());	
+				map.put(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_ORDERSTATUSDESC, Util.isNull(list.getSeatOrderStatus().getOrderStatusDecs(),"").toString());	
 				map.put(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC, Util.isNull(list.getSeatResultStatusTracking().getResultStatusTrackingDesc(),"").toString());	
 				map.put(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_MIN, Util.isNull(list.getMin(),"").toString());	
 				map.put(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_MAX, Util.isNull(list.getMax(),"").toString());	

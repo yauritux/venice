@@ -64,7 +64,7 @@ public class SeatSLAFulfillmentReportView extends ViewWithUiHandlers<SeatSLAFulf
 		
 		
 		slaFulfillmentListGrid.getField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_ID).setCanEdit(false);
-		slaFulfillmentListGrid.getField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_VENORDERSTATUS_CODE).setCanEdit(false);
+		slaFulfillmentListGrid.getField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_ORDERSTATUSDESC).setCanEdit(false);
 		slaFulfillmentListGrid.getField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC).setCanEdit(false);
 		slaFulfillmentListGrid.getField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_BYUSER).setCanEdit(false);
 		slaFulfillmentListGrid.getField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_UPDATEDATE).setCanEdit(false);

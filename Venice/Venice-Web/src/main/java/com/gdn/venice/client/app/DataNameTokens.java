@@ -1173,7 +1173,7 @@ public class DataNameTokens {
 	public static String FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT="FinArFundsInActionAppliedHistory.amount";
 	
 	public static String SEATFULFILLMENTINPERCENTAGE_ID="SeatFulfillmentInPercentage.fulfillmentInPercentageId";
-	public static String SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_VENORDERSTATUS_CODE="SeatFulfillmentInPercentage.seatOrderStatus.venOrderStatus.orderStatusCode";
+	public static String SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_ORDERSTATUSDESC="SeatFulfillmentInPercentage.seatOrderStatus.orderStatusDecs";
 	public static String SEATFULFILLMENTINPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC="SeatFulfillmentInPercentage.seatResultStatusTracking.resultStatusTrackingDesc";
 	public static String SEATFULFILLMENTINPERCENTAGE_MIN="SeatFulfillmentInPercentage.min";
 	public static String SEATFULFILLMENTINPERCENTAGE_MAX="SeatFulfillmentInPercentage.max";
@@ -1182,7 +1182,7 @@ public class DataNameTokens {
 	public static String SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_PIC="SeatFulfillmentInPercentage.seatOrderStatus.pic";
 	
 	public static String SEATSLASTATUSPERCENTAGE_ID="SeatSlaStatusPercentage.seatSlaStatusPercentageId";
-	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_VENORDERSTATUS_CODE="SeatSlaStatusPercentage.seatSlaStatus.seatOrderStatus.venOrderStatus.orderStatusCode";
+	public static String SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_ORDERSTATUSDESC="SeatSlaStatusPercentage.seatSlaStatus.seatOrderStatus.orderStatusDecs";
 	public static String SEATSLASTATUSPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC="SeatSlaStatusPercentage.seatResultStatusTracking.resultStatusTrackingDesc";
 	public static String SEATSLASTATUSPERCENTAGE_MIN="SeatSlaStatusPercentage.min";
 	public static String SEATSLASTATUSPERCENTAGE_MAX="SeatSlaStatusPercentage.max";
@@ -2252,7 +2252,7 @@ public class DataNameTokens {
 		fieldClassMap.put(FINARFUNDSINACTIONAPPLIEDHISTORY_AMOUNT,"java.math.BigDecimal");
 		
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_ID,"java.lang.Long");
-		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_VENORDERSTATUS_CODE,"java.lang.String");
+		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_ORDERSTATUSDESC,"java.lang.String");
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC,"java.lang.String");
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_MIN,"java.math.BigDecimal");
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_MAX,"java.math.BigDecimal");
@@ -2261,7 +2261,7 @@ public class DataNameTokens {
 		fieldClassMap.put(SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_PIC,"java.lang.String");	
 		
 		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_ID,"java.lang.Long");
-		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_VENORDERSTATUS_CODE,"java.lang.String");
+		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_ORDERSTATUSDESC,"java.lang.String");
 		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC,"java.lang.String");
 		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_MIN,"java.math.BigDecimal");
 		fieldClassMap.put(SEATSLASTATUSPERCENTAGE_MAX,"java.math.BigDecimal");

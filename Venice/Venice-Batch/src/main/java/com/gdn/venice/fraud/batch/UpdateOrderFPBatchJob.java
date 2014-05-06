@@ -296,10 +296,9 @@ public class UpdateOrderFPBatchJob {
                     _log.debug("add seat order status history");
                		List<SeatOrderStatusHistory> seatOrderStatusHistoryList =seatOrderHistorySessionHome.queryByRange("select o from SeatOrderStatusHistory o where o.venOrder.orderId="+order.getOrderId(), 0, 0);	
                		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){            	
-               			SeatOrderStatusHistory item = items;
-               			item.setVenOrderStatus(venOrderStatusFP);		
-               			item.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
-               			item = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(item);
+               			items.setVenOrderStatus(venOrderStatusFP);		
+               			items.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
+               			seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(items);
                		}		
 
                         //check genuine list

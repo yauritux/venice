@@ -20,7 +20,6 @@ import com.gdn.venice.persistence.VenOrderStatus;
 import com.gdn.venice.persistence.VenOrderStatusHistory;
 import com.gdn.venice.persistence.VenOrderStatusHistoryPK;
 import com.gdn.venice.server.command.RafRpcCommand;
-import com.gdn.venice.util.VeniceConstants;
 
 public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 
@@ -174,11 +173,10 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
             }
             if (!method.equals("updateOrderStatusToSF")) {
 		       		List<SeatOrderStatusHistory> seatOrderStatusHistoryList =seatOrderHistorySessionHome.queryByRange("select o from SeatOrderStatusHistory o where o.venOrder.orderId="+orderId, 0, 0);	
-		       		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){            	
-		       			SeatOrderStatusHistory item = items;
-		       			item.setVenOrderStatus(venOrderStatus);		
-		       			item.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
-		       			item = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(item);
+		       		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){         
+		       			items.setVenOrderStatus(venOrderStatus);		
+		       			items.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
+		       			items = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(items);
 		       		}		
             }
         } catch (Exception ex) {

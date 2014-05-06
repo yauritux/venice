@@ -66,7 +66,7 @@ public class SeatSLAStatusReportView extends ViewWithUiHandlers<SeatSLAStatusUiH
 		slaStatusListGrid.setEditEvent(ListGridEditEvent.DOUBLECLICK);	
 				
 		slaStatusListGrid.getField(DataNameTokens.SEATSLASTATUSPERCENTAGE_ID).setCanEdit(false);
-		slaStatusListGrid.getField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_VENORDERSTATUS_CODE).setCanEdit(false);
+		slaStatusListGrid.getField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_ORDERSTATUSDESC).setCanEdit(false);
 		slaStatusListGrid.getField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC).setCanEdit(false);
 		slaStatusListGrid.getField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATSTATUSUOM_DESC).setCanEdit(false);	
 		slaStatusListGrid.getField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_BYUSER).setCanEdit(false);

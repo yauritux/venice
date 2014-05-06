@@ -38,8 +38,29 @@ public class SeattleOrder {
 	private Long statusPayment;
 	private BigDecimal logisticsEtd;
 	private Long typeOfOrder;
-	private Timestamp actualPickupdate;
+	private Timestamp actualPickupdate;	
+	private String orderStatusDescComplete;
+	private Timestamp timeComplete;	
+	private String moreInfo;	
 	
+	public String getMoreInfo() {
+		return moreInfo;
+	}
+	public void setMoreInfo(String moreInfo) {
+		this.moreInfo = moreInfo;
+	}
+	public String getOrderStatusDescComplete() {
+		return orderStatusDescComplete;
+	}
+	public void setOrderStatusDescComplete(String orderStatusDescComplete) {
+		this.orderStatusDescComplete = orderStatusDescComplete;
+	}
+	public Timestamp getTimeComplete() {
+		return timeComplete;
+	}
+	public void setTimeComplete(Timestamp timeComplete) {
+		this.timeComplete = timeComplete;
+	}
 	public Timestamp getActualPickupdate() {
 		return actualPickupdate;
 	}

@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.Date;
@@ -31,6 +32,7 @@ import com.gdn.app.jiraclient.exceptions.GdnJiraInvalidTransitionException;
 import com.gdn.app.jiraclient.request.FraudCheckingIssue;
 import com.gdn.app.jiraclient.request.OrderCompleteProcessIssue;
 import com.gdn.app.jiraclient.util.GdnJiraCustomClientImpl;
+import com.gdn.venice.persistence.SeatOrderStatus;
 import com.gdn.venice.persistence.SeatSlaStatus;
 import com.gdn.venice.persistence.SeatStatusUom;
 import com.gdn.venice.seattle.bean.SeattleOrder;
@@ -58,7 +60,7 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 	private static final String STATUS_ORDER_BY_STATUS_ID = "select sosh.seat_order_status_history_id , vo.wcs_order_id ,voi.wcs_order_item_id," +
 				" vos.order_status_code, sosh.update_status_date, soe.etd_max,soe.logisticsetd, soe.start_date,soe.end_date, vo.order_timestamp,vos.order_status_id,sof.order_fulfillment_id,sof.issue_id," +
 				"soe.diff_etd,sost.seat_order_status_tracking_id,sost.issue_id as issue_id2,sof.etd_order_complete,sof.new_etd_max_order," +
-				"sof.order_process_late_time,sost.status_issue,srst.result_status_tracking_desc,voi.logistics_service_id" +
+				"sof.order_process_late_time,sost.status_issue,srst.result_status_tracking_desc,voi.logistics_service_id,sof.order_status_dec,sof.created_date" +
 				" from seat_order_status_history sosh" +
 				" left join ven_order vo on vo.order_id=sosh.order_id" +
 				" left join ven_order_payment_allocation vopa on vopa.order_id=vo.order_id" +
@@ -71,10 +73,11 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 				" left join seat_result_status_tracking srst on srst.result_status_tracking_id=sssp.result_status_tracking_id" +			
 				" where sosh.order_status_id = ? order by sosh.order_status_id";
 	
-	private static final String SLA_BY_STATUS_ID = "select sss.sla, sss.sla_second, ssu.status_uom_id, ssu.status_uom_desc, ssu.status_uom_type, ssu.status_uom_from, ssu.status_uom_end" +
+	private static final String SLA_BY_STATUS_ID = "select sos2.order_status_decs,sss.sla, sss.sla_second, ssu.status_uom_id, ssu.status_uom_desc, ssu.status_uom_type, ssu.status_uom_from, ssu.status_uom_end" +
 	" from seat_sla_status sss" +
 	" left join seat_fulfillment_consist_of_sla_status sfcoss on sfcoss.sla_status_id=sss.sla_status_id" +
 	" left join seat_order_status sos on sos.seat_order_status_id=sfcoss.seat_order_status_id" +
+	" left join seat_order_status sos2 on sos2.seat_order_status_id=sss.seat_order_status_id"+
 	" left join seat_status_uom ssu on ssu.status_uom_id=sss.status_uom_id" +
 	" where sos.order_status_decs=? order by sfcoss.sla_status_id asc";
 	
@@ -242,7 +245,9 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 	             	item.setStartNewEtd(rsSeattletList.getDate("start_date"));
 	            	item.setEndNewEtd(rsSeattletList.getDate("end_date"));
 	            	item.setLogisticsEtd(rsSeattletList.getBigDecimal("logisticsetd"));
-	            	item.setTypeOfOrder(rsSeattletList.getLong("logistics_service_id"));	   
+	            	item.setTypeOfOrder(rsSeattletList.getLong("logistics_service_id"));	  
+	            	item.setOrderStatusDescComplete(rsSeattletList.getString("order_status_dec"));
+	            	item.setTimeComplete(rsSeattletList.getTimestamp("created_date"));
 	            		            	
 	            	seattleOrderList.add(item);
 	            	rsSeattletList.next();	            	
@@ -384,12 +389,18 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 				}else{         					
 		            for (int i=0; i<totalSLAList;i++) {
 		            	SeatSlaStatus item= new SeatSlaStatus();
-		            	item.setSla(rsSLAStatusList.getBigDecimal("sla"));
-		            	item.setSlaSecond(rsSLAStatusList.getBigDecimal("sla_second"));		            	
+
+		            	SeatOrderStatus seatOrderStatus = new SeatOrderStatus();
+		            	seatOrderStatus.setOrderStatusDecs(rsSLAStatusList.getString("order_status_decs"));
+		            	item.setSeatOrderStatus(seatOrderStatus);
+		          	            	
 		            	SeatStatusUom itemSeatStatusUom = new SeatStatusUom();		            	
 		            	itemSeatStatusUom.setStatusUomDesc(rsSLAStatusList.getString("status_uom_desc"));	
-		            	itemSeatStatusUom.setStatusUomType(rsSLAStatusList.getString("status_uom_type"));			            	            	
-		            	item.setSeatStatusUom(itemSeatStatusUom);		            	
+		            	itemSeatStatusUom.setStatusUomType(rsSLAStatusList.getString("status_uom_type"));		
+		            	item.setSeatStatusUom(itemSeatStatusUom);	
+		            	
+		              	item.setSla(rsSLAStatusList.getBigDecimal("sla"));		                  	
+		            	item.setSlaSecond(rsSLAStatusList.getBigDecimal("sla_second"));	
 		            	slaStatusList.add(item);
 		            	rsSLAStatusList.next();
 		            }
@@ -511,16 +522,17 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 		    return new Timestamp(cal.getTime().getTime());
 	 }
 	 
-		@SuppressWarnings("deprecation")
+	 @SuppressWarnings("deprecation")
 		private Timestamp calTimeWithWorkHour(Timestamp orderStatusUpdateDate, SeatSlaStatus seatSlaStatus){	
 			SeatStatusUom uomItem =  SeatStatusUomMap.get("WorkHour");	 
-					
-			orderStatusUpdateDate=getStartTimeWithUoMWorkHour(orderStatusUpdateDate,uomItem);	
+			
+			Timestamp later= new Timestamp(orderStatusUpdateDate.getTime());		
+			later=getStartTimeWithUoMWorkHour(later,uomItem);	
 			int rangeUoM = new Integer(uomItem.getStatusUomEnd()+"") - new Integer(uomItem.getStatusUomFrom()+"");
 			int slaValue = new Integer(seatSlaStatus.getSla()+"");
 			_log.info("get Hour Timebefore "+orderStatusUpdateDate+" sla : "+slaValue);
 			
-			Timestamp later= orderStatusUpdateDate;			
+				
 			while(slaValue!=0 ){
 				if(later.getHours()==new Integer(uomItem.getStatusUomEnd()+"")){				
 					later = getTimeafterAddHour(later,24-rangeUoM);
@@ -540,25 +552,32 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 			_log.info("loop after hour = "+later.getHours()+" minut : "+later.getMinutes()+" secon :"+later.getSeconds());
 			if(later.getHours()==new Integer(uomItem.getStatusUomEnd()+"") && (later.getMinutes() > 0 || later.getSeconds() > 0)){
 				later.setHours(new Integer(uomItem.getStatusUomFrom()+""));
+				later=getTimeafterAddDay(later,1);
 			}
 			
 			_log.info("get calTimeWithWorkHour before " + orderStatusUpdateDate +" after :"+later);				 
 			return later;
 		 }	
 	 
-	 private Timestamp calTimeWithWorkDay(Timestamp orderStatusUpdateDate,SeatSlaStatus seatSlaStatus){			
+	 @SuppressWarnings("deprecation")
+	private Timestamp calTimeWithWorkDay(Timestamp orderStatusUpdateDate,SeatSlaStatus seatSlaStatus){			
 		 	SeatStatusUom uomItem =  SeatStatusUomMap.get("WorkHour");	
 		 	
 		 	int addday = new Integer(seatSlaStatus.getSla()+"");
-		 	int rangeUoM = new Integer(uomItem.getStatusUomEnd()+"") - new Integer(uomItem.getStatusUomFrom()+"");
-		 	_log.info("get Day Timebefore "+orderStatusUpdateDate+" rangeUoM : "+rangeUoM+" day : "+addday);
-		 
-		 	SeatSlaStatus newSlaStatus = new SeatSlaStatus();
-		 	newSlaStatus.setSla(new BigDecimal(rangeUoM*addday));
-	 
-		 	Timestamp later  = calTimeWithWorkHour(orderStatusUpdateDate,newSlaStatus);			
+		 	Timestamp later= new Timestamp(orderStatusUpdateDate.getTime());
+		 	if(addday>0){		
+		 			int rangeUoM = new Integer(uomItem.getStatusUomEnd()+"") - new Integer(uomItem.getStatusUomFrom()+"");
+		 			_log.info("get Day Timebefore "+later+" rangeUoM : "+rangeUoM+" day : "+addday);
+				 	SeatSlaStatus newSlaStatus = new SeatSlaStatus();
+				 	newSlaStatus.setSla(new BigDecimal(rangeUoM*addday));
 				 	
-			    
+				 	 later  = calTimeWithWorkHour(later,newSlaStatus);	
+		 	}else{		 		
+		 		later=getStartTimeWithUoMWorkHour(later,uomItem);	
+		 		later.setHours(uomItem.getStatusUomEnd().intValue());
+		 		later.setSeconds(0);
+		 		later.setMinutes(0);
+		 	}	 		 			
 			_log.info("get TimeWithWorkDay before " + orderStatusUpdateDate +" after :"+later);				 
 		 return later;
 	 }
@@ -787,7 +806,8 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 			 try{	            
 				 Date maxEtd = getMaxEtd(item); 
 					 long selisihMS = Math.round(new Double(Math.abs(item.getEtdOrderComplate().getTime() - item.getOrderTimestamp().getTime()))/new Double(Math.abs(maxEtd.getTime()- item.getOrderTimestamp().getTime()))*100);
-
+					 item.setNewEtdMax(new Timestamp(maxEtd.getTime()));
+					 
 					  _log.info("min "+Math.abs(item.getEtdOrderComplate().getTime() - item.getOrderTimestamp().getTime())+" ==> bagi: "+Math.abs(maxEtd.getTime()- item.getOrderTimestamp().getTime()));
 					  _log.info("selisih "+selisihMS+" ==>Orderdate: "+item.getOrderTimestamp()+" new ETD Max :"+maxEtd+"' DueDate : "+item.getEtdOrderComplate());    
 					 	psResultStatusList = conn.prepareStatement(RESULT_FULFILLMENT_TARCKING, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);            			            
@@ -965,37 +985,52 @@ public class SeattleStatusOrderFraudCheckingBatchJob {
 				saveResultStatus(item);
 			}	  				 
 }	 
+	 private BigDecimal getSlaAdditional(SeattleOrder item){
+			_log.info("getDiffEtd " +item.getDiffEtd());
+			if(item.getDiffEtd().compareTo(new BigDecimal(0))==1 
+				&& (new Date(currentTimestamp.getTime())).compareTo(item.getStartNewEtd())>=new Long(1)
+				&& (new Date(currentTimestamp.getTime())).compareTo(item.getEndNewEtd())<=new Long(1)){
+				_log.info("retuen  maxEtd " +item.getDiffEtd());				
+				return item.getDiffEtd();				
+			}else{
+				return null;
+			}
+	 }
 	 private void prosesOrderByStatus(ArrayList<SeattleOrder> orderList){
 		      	
 	        	ArrayList<SeatSlaStatus> seatSlaStatusList = getSeatSlaStatusByStatus();
 	    		try{
 	    			for (SeattleOrder item : orderList){	    				    				
+	    				Timestamp slaDate =null;
+	    				boolean cekHoliday = true;
 	    				ArrayList<SeatSlaStatus> seatSlaStatusListTemp = new ArrayList<SeatSlaStatus>();
 	    				for(SeatSlaStatus slaItem : seatSlaStatusList){
-	    					seatSlaStatusListTemp.add(slaItem);
-	    				}	
-
-	    			   Timestamp slaDate = getSLADueDate(item.getUpdateStatusDate(),seatSlaStatusListTemp.get(0));
-	    				boolean cekHoliday = seatSlaStatusListTemp.get(0).getSeatStatusUom().getStatusUomDesc().equals("WorkDay") || seatSlaStatusListTemp.get(0).getSeatStatusUom().getStatusUomDesc().equals("WorkHour") ;
-	    				if(cekHoliday){
+	    					if(slaItem.getSeatOrderStatus().getOrderStatusDecs().equals("Order Delivery")){
+	    						BigDecimal regShipment= item.getLogisticsEtd().divide(new BigDecimal(1.2),RoundingMode.HALF_DOWN);
+	    						slaItem.setSla(regShipment);
+	    					}
+	    					if(slaItem.getSeatOrderStatus().getOrderStatusDecs().equals(jobStatus)){
+	    						 slaDate = getSLADueDate(item.getUpdateStatusDate(),slaItem);
+	    	    				 cekHoliday = slaItem.getSeatStatusUom().getStatusUomDesc().equals("WorkDay") || slaItem.getSeatStatusUom().getStatusUomDesc().equals("WorkHour") ;
+	    					}else{
+	    							seatSlaStatusListTemp.add(slaItem);			  
+	    					}
+	    				}	 	    
+	      				if(cekHoliday){
 	    					slaDate=cekHoliday(item.getUpdateStatusDate(),slaDate);
 		            	}	
 	    				item.setStatusDueDate(slaDate);
 	    				
-	    				if(item.getOrderfulfillmentId()==0 && !item.getTypeOfOrder().equals(new Long(0)) && !item.getTypeOfOrder().equals(new Long(1)))	{
-			    				seatSlaStatusListTemp.remove(0);
+	    				if((item.getOrderfulfillmentId()==0 || (item.getOrderfulfillmentId()!=0 && !item.getOrderStatusDescComplete().equals(item.getStatusOrder())))
+	    						&& !item.getTypeOfOrder().equals(new Long(0)) && !item.getTypeOfOrder().equals(new Long(1)))	{
 				            	Timestamp sumOfslaDate =slaDate;		            	
 				            	
-				            	if(item.getDiffEtd()!=null && item.getDiffEtd().compareTo(new BigDecimal(0))==1){
+				            	if(getSlaAdditional(item)!=null){
 				            		SeatSlaStatus seatSlaStatusFulfill = new SeatSlaStatus();
 					            	seatSlaStatusFulfill.setSla(item.getDiffEtd());
 					            	seatSlaStatusFulfill.setSeatStatusUom(SeatStatusUomMap.get("WorkDay"));
 					            	seatSlaStatusListTemp.add(seatSlaStatusFulfill);
-				            	}
-				            	SeatSlaStatus seatSlalogisticsEtd = new SeatSlaStatus();				            	
-				            	seatSlalogisticsEtd.setSla(item.getLogisticsEtd());
-				            	seatSlalogisticsEtd.setSeatStatusUom(SeatStatusUomMap.get("WorkDay"));
-				            	seatSlaStatusListTemp.add(seatSlalogisticsEtd);
+				            	}				            	
 				            	_log.info("currentDate : "+currentTimestamp+" DateStatus  : "+item.getUpdateStatusDate() +" compare DateSla : "+slaDate);
 				            	if(currentTimestamp.compareTo(slaDate)==1){		            	
 				            		_log.info("Lebih");

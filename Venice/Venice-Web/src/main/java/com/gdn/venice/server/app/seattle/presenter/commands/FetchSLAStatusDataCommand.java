@@ -58,7 +58,7 @@ public class FetchSLAStatusDataCommand implements RafDsCommand {
 				SeatSlaStatusPercentage list = SeatSlaStatusPercentageList.get(i);
 				
 				map.put(DataNameTokens.SEATSLASTATUSPERCENTAGE_ID, list.getSeatSlaStatusPercentageId().toString());
-				map.put(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_VENORDERSTATUS_CODE, Util.isNull(list.getSeatSlaStatus().getSeatOrderStatus().getVenOrderStatus().getOrderStatusCode(),"").toString());	
+				map.put(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_ORDERSTATUSDESC, Util.isNull(list.getSeatSlaStatus().getSeatOrderStatus().getOrderStatusDecs(),"").toString());	
 				map.put(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC, Util.isNull(list.getSeatResultStatusTracking().getResultStatusTrackingDesc(),"").toString());	
 				map.put(DataNameTokens.SEATSLASTATUSPERCENTAGE_MIN, Util.isNull(list.getMin(),"").toString());	
 				map.put(DataNameTokens.SEATSLASTATUSPERCENTAGE_MAX, Util.isNull(list.getMax(),"").toString());	

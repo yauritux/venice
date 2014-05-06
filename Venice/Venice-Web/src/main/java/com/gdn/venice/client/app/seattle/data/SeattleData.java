@@ -16,7 +16,7 @@ public class SeattleData {
 	public static RafDataSource getSLAFulfillment(String userRole) {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_ID, "ID"),
-				new DataSourceTextField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_VENORDERSTATUS_CODE, "Order Status"), 
+				new DataSourceTextField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATORDERSTATUS_ORDERSTATUSDESC, "Order Status"), 
 				new DataSourceTextField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC, "Status"),
 				new DataSourceTextField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_MIN, "Min"),
 				new DataSourceTextField(DataNameTokens.SEATFULFILLMENTINPERCENTAGE_MAX, "Max"), 
@@ -50,7 +50,7 @@ public class SeattleData {
 	public static RafDataSource getSLAStatus(String userRole) {
 		DataSourceField[] dataSourceFields = {				
 				new DataSourceTextField(DataNameTokens.SEATSLASTATUSPERCENTAGE_ID, "ID"),
-				new DataSourceTextField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_VENORDERSTATUS_CODE, "Order Status"), 
+				new DataSourceTextField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATSLASTATUS_SEATORDERSTATUS_ORDERSTATUSDESC, "Order Status"), 
 				new DataSourceTextField(DataNameTokens.SEATSLASTATUSPERCENTAGE_SEATRESULTSTATUSTRACKING_DESC, "Status"),
 				new DataSourceTextField(DataNameTokens.SEATSLASTATUSPERCENTAGE_MIN, "Min"),
 				new DataSourceTextField(DataNameTokens.SEATSLASTATUSPERCENTAGE_MAX, "Max"), 

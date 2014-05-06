@@ -998,14 +998,19 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 .asDate(order.getOrderItems().get(0).getEtdMax()))));
         etdForSeattle.setEtdMin(com.djarum.raf.utilities.SQLDateUtility.utilDateToSqlTimestamp((com.djarum.raf.utilities.XMLGregorianCalendarConverter
                 .asDate(order.getOrderItems().get(0).getEtdMin()))));
-        etdForSeattle.setLogisticsEtd(order.getOrderItems().get(0).getLogisticsInfo()!=null && order.getOrderItems().get(0).getLogisticsInfo().getLogisticsEtd()!=null ? new BigDecimal(order.getOrderItems().get(0).getLogisticsInfo().getLogisticsEtd()): new BigDecimal(0));
+        etdForSeattle.setLogisticsEtd(order.getOrderItems().get(0).getLogisticsInfo()!=null 
+        		&& order.getOrderItems().get(0).getLogisticsInfo().getLogisticsEtd()!=null ? 
+        		new BigDecimal(order.getOrderItems().get(0).getLogisticsInfo().getLogisticsEtd()): new BigDecimal(0));
         etdForSeattle.setDiffEtd(new BigDecimal(0));
-        etdForSeattle.setReason("Set From System");
-        etdForSeattle.setOther("Set From System");
+        etdForSeattle.setReason("From System");
+        etdForSeattle.setOther(order.getOrderItems().get(0).getLogisticsInfo()!=null &&
+        		order.getOrderItems().get(0).getLogisticsInfo().getLogisticsService()!=null ? 
+        		order.getOrderItems().get(0).getLogisticsInfo().getLogisticsService().getService().getCode():"From System");
         etdForSeattle.setByUser("System");
         etdForSeattle.setSku(order.getOrderItems().get(0).getProduct().getGdnSKU().getCode());
         etdForSeattle.setUpdateEtdDate(new Timestamp(System.currentTimeMillis()));
         etdForSeattle.setWcsOrderId(order.getOrderId().getCode());
+        
         
         // Remove the customer and the order items because they need to be ignored at this stage
        // order.setCustomer(null);        

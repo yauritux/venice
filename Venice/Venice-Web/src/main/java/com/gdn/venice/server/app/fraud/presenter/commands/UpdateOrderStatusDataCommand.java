@@ -185,11 +185,10 @@ public class UpdateOrderStatusDataCommand implements RafRpcCommand {
 			if (!method.equals("updateOrderStatusToSF")) {
 				_log.debug("add seat order status history");
 	       		List<SeatOrderStatusHistory> seatOrderStatusHistoryList =seatOrderHistorySessionHome.queryByRange("select o from SeatOrderStatusHistory o where o.venOrder.orderId="+orderId, 0, 0);	
-	       		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){            	
-	       			SeatOrderStatusHistory item = items;
-	       			item.setVenOrderStatus(venOrderStatus);		
-	       			item.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
-	       			item = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(item);
+	       		for(SeatOrderStatusHistory items : seatOrderStatusHistoryList){          
+	       			items.setVenOrderStatus(venOrderStatus);		
+	       			items.setUpdateStatusDate(new Timestamp(System.currentTimeMillis()));	
+	       			items = seatOrderHistorySessionHome.mergeSeatOrderStatusHistory(items);
 	       		}		
 			}
 
