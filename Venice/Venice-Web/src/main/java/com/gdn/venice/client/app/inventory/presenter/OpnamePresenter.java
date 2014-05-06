@@ -67,6 +67,10 @@ public class OpnamePresenter extends Presenter<OpnamePresenter.MyView, OpnamePre
         public void refreshAllSupplierData();
 
         public Window getCreateOpnameWindow();
+        
+        public void setCategoryMap(LinkedHashMap<String, String> map);
+        
+        public void setUomMap(LinkedHashMap<String, String> map);
     }
 
     /**
@@ -84,6 +88,8 @@ public class OpnamePresenter extends Presenter<OpnamePresenter.MyView, OpnamePre
         getView().setUiHandlers(this);
         ((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
         loadWarehouseData();
+        loadCategoryData();
+        loadUomData();
         this.dispatcher = dispatcher;
     }
 
@@ -121,5 +127,38 @@ public class OpnamePresenter extends Presenter<OpnamePresenter.MyView, OpnamePre
                 + "?method=saveOpnameList&type=RPC&username=" + MainPagePresenter.signedInUser
                 + "&warehouseCode=" + warehouseCode + "&data=" + data
                 + "&stockType=" + stockType + "&supplierCode=" + supplierCode, "_blank", null);
+    }
+
+    private void loadCategoryData() {
+        RPCRequest request = new RPCRequest();
+        request.setActionURL(GWT.getHostPageBaseURL() + opnamePresenterServlet
+                + "?method=fetchCategoryComboBoxData&type=RPC");
+        request.setHttpMethod("POST");
+        request.setUseSimpleHttp(true);
+        RPCManager.sendRequest(request,
+                new RPCCallback() {
+                    @Override
+                    public void execute(RPCResponse response,
+                            Object rawData, RPCRequest request) {
+                        String rpcResponse = rawData.toString();
+                        getView().setCategoryMap(Util.formComboBoxMap(Util.formHashMapfromXML(rpcResponse)));
+                    }
+                });
+    }
+
+    private void loadUomData() {
+        RPCRequest request = new RPCRequest();
+        request.setActionURL(GWT.getHostPageBaseURL() + opnamePresenterServlet
+                + "?method=fetchUomComboBoxData&type=RPC");
+        request.setHttpMethod("POST");
+        RPCManager.sendRequest(request,
+                new RPCCallback() {
+                    @Override
+                    public void execute(RPCResponse response,
+                            Object rawData, RPCRequest request) {
+                        String rpcResponse = rawData.toString();
+                        getView().setUomMap(Util.formComboBoxMap(Util.formHashMapfromXML(rpcResponse)));
+                    }
+                });
     }
 }

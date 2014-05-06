@@ -6,7 +6,10 @@ package com.gdn.venice.server.app.inventory.presenter;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.command.AddOpnameDetailDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchAllWarehouseComboBoxDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchItemCategoryComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemStorageDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchItemUomComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchOpnameDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchOpnameDetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchStorageByItemDataCommand;
@@ -143,6 +146,14 @@ public class OpnamePresenterServlet extends HttpServlet {
             } else if (method.equals("saveOpnameAdjustment")) {
                 RafRpcCommand getStorageByItemCommand = new SaveOpnameAdjustmentDataCommand(request.getParameter("opnameId"), username);
                 response.getOutputStream().println(getStorageByItemCommand.execute());
+            } else if (method.equals("fetchCategoryComboBoxData")) {
+                RafRpcCommand fetchCategoryComboBoxDataCommand = new FetchItemCategoryComboBoxDataCommand();
+                String val = fetchCategoryComboBoxDataCommand.execute();
+                System.out.println(val);
+                response.getOutputStream().println(val);
+            } else if (method.equals("fetchUomComboBoxData")) {
+                RafRpcCommand fetchUomComboBoxDataCommand = new FetchItemUomComboBoxDataCommand();
+                response.getOutputStream().println(fetchUomComboBoxDataCommand.execute());
             }
         }
     }

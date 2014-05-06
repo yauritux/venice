@@ -243,6 +243,8 @@ public class CurrencyManagementView extends ViewWithUiHandlers<CurrencyManagemen
         currencyListGrid.setFields(listGridField);
         currencyListGrid.setDataSource(dataSource);
         currencyListGrid.getField(DataNameTokens.INV_CURRENCY_ID).setHidden(Boolean.TRUE);
+        currencyListGrid.getField(DataNameTokens.INV_CURRENCY_UPDATED_BY).setCanFilter(Boolean.FALSE);
+        currencyListGrid.getField(DataNameTokens.INV_CURRENCY_UPDATE_DATE).setCanFilter(Boolean.FALSE);
         currencyListGrid.setAutoFitData(Autofit.BOTH);
 
         currencyLayout.setMembers(currencyToolStrip, currencyListGrid);

@@ -70,6 +70,8 @@ public class PrintGRNServlet extends HttpServlet {
                 CommonUtil.logError(CLASS_NAME, ex.getMessage());
             } catch (InvalidFormatException ex) {
                 CommonUtil.logError(CLASS_NAME, ex.getMessage());
+            } finally{
+                is.close();
             }
         }
     }

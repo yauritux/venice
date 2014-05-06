@@ -59,6 +59,7 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
     SelectItem cbSupplier;
     ToolStrip toolstrip;
     ToolStripButton processButton;
+    private LinkedHashMap<String, String> categoryMap, uomMap;
 
     @Inject
     public OpnameView() {
@@ -301,7 +302,9 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
     public void loadItemStorageData(String warehouseCode, String stockType, String supplierCode) {
         DataSource ds = OpnameData.getAllItemStorageData(warehouseCode, stockType, supplierCode);
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(ds);
-
+        ds.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY).setValueMap(categoryMap);
+        ds.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMUOM).setValueMap(uomMap);
+        
         opnameGrid.setDataSource(ds);
         opnameGrid.setFields(listGridField);
         opnameGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ID).setHidden(true);
@@ -351,5 +354,21 @@ public class OpnameView extends ViewWithUiHandlers<OpnameUiHandler> implements
         };
 
         supplierGrid.getDataSource().fetchData(supplierGrid.getFilterEditorCriteria(), callBack);
+    }
+
+    /**
+     * @param categoryMap the categoryMap to set
+     */
+    @Override
+    public void setCategoryMap(LinkedHashMap<String, String> categoryMap) {
+        this.categoryMap = categoryMap;
+    }
+
+    /**
+     * @param uomMap the uomMap to set
+     */
+    @Override
+    public void setUomMap(LinkedHashMap<String, String> uomMap) {
+        this.uomMap = uomMap;
     }
 }

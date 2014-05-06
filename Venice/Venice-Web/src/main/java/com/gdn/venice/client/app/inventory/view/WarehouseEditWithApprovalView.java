@@ -263,6 +263,10 @@ public class WarehouseEditWithApprovalView extends ViewWithUiHandlers<WarehouseE
         warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CITY).setCanFilter(Boolean.FALSE);
         warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_DESCRIPTION).setCanFilter(Boolean.FALSE);
         warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_ZIPCODE).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_AVAILABLE_SPACE).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CONTACT_PERSON).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_CONTACT_PHONE).setCanFilter(Boolean.FALSE);
+        warehouseListGrid.getField(DataNameTokens.INV_WAREHOUSE_SPACE).setCanFilter(Boolean.FALSE);
         warehouseListGrid.setAutoFitData(Autofit.BOTH);
 
         warehouseApprovalAddLayout.setMembers(warehouseListToolStrip, warehouseListGrid);

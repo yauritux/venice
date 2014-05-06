@@ -286,4 +286,50 @@ public class OpnameService {
             return null;
         }
     }
+
+    public ResultWrapper<List<String>> getCategory() throws IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "item/getExistingCategory";
+        System.out.println(url);
+        PostMethod httpPost = new PostMethod(url);
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<String>>>() {
+            });
+        } else {
+            return null;
+        }
+    }
+
+    public ResultWrapper<List<String>> getUoM() throws IOException {
+        String url = InventoryUtil.getStockholmProperties().getProperty("address")
+                + "item/getExistingUoM";
+        System.out.println(url);
+        PostMethod httpPost = new PostMethod(url);
+
+        int httpCode = httpClient.executeMethod(httpPost);
+        if (httpCode == HttpStatus.SC_OK) {
+            InputStream is = httpPost.getResponseBodyAsStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                sb.append(line);
+            }
+            is.close();
+            System.out.println(sb.toString());
+            return mapper.readValue(sb.toString(), new TypeReference<ResultWrapper<List<String>>>() {
+            });
+        } else {
+            return null;
+        }
+    }
 }
