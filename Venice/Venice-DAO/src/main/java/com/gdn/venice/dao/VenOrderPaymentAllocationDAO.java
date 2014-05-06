@@ -55,9 +55,13 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 			   "SELECT o " +
 			   "FROM VenOrderPaymentAllocation AS o " +
 			   " JOIN FETCH o.venOrderPayment AS op " +
-			   " LEFT JOIN FETCH op.finArFundsInReconRecords AS afirr " +
+			   " JOIN FETCH op.finArFundsInReconRecords AS afirr " +
 			   "WHERE " +
-			   " op.referenceId = ?1 ";
+			   " op.referenceId = ?1 " +
+			   " AND op.venPaymentType.paymentTypeId = " + VeniceConstants.VEN_PAYMENT_TYPE_ID_VA +
+			   " AND afirr.finArFundsInActionApplied.actionAppliedId = " + VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE +
+			   " AND afirr.finApprovalStatus.approvalStatusId = " + VeniceConstants.FIN_APPROVAL_STATUS_NEW + 
+			   " AND afirr.reconcilliationRecordTimestamp IS NULL";
 	
 	public static final String FIND_BY_PAYMENTREFERENCEID =
 		   "SELECT o " +
@@ -107,6 +111,19 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   "INNER JOIN FETCH a.venCity c " +
 		   "WHERE o.venOrder = ?1 ";
 	
+	public static final String FIND_BY_ORDERPAYMENTID = 
+		   "SELECT o FROM VenOrderPaymentAllocation o " +
+	       "WHERE o.venOrderPayment.orderPaymentId = ?1";
+	
+	public static final String COUNT_BY_WCSORDERIDANDPAYMENTREFID_SQL =
+		   "SELECT COUNT(o) " +
+		   "FROM VenOrderPaymentAllocation AS o " +
+		   " JOIN o.venOrderPayment AS op " +
+		   " JOIN o.venOrder AS order " +
+		   "WHERE " +
+		   " order.wcsOrderId = ?1 AND " +
+		   " op.referenceId = ?2 ";
+	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
@@ -137,6 +154,14 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	@Query(FIND_WITH_VENADDRESS_VENCITY_BY_VENORDER)
 	public List<VenOrderPaymentAllocation> findWithVenAddressVenCityByVenOrder(VenOrder order);
 	
+
 	@Query(FIND_BY_VEN_ORDER_AND_VENORDERPAYMENT_THREEDSSECURITYLEVELAUTHISNOT)
 	public List<VenOrderPaymentAllocation> findByVenOrderAndVenOrderPaymentThreeDsSecurityAuthIsNot(VenOrder venOrder, String threeDsSecurityLevelAuth);	
+
+	@Query(FIND_BY_ORDERPAYMENTID)
+	public List<VenOrderPaymentAllocation> findByOrderPaymentId(Long orderPaymentId);
+	
+	@Query(COUNT_BY_WCSORDERIDANDPAYMENTREFID_SQL)
+	public int countByWcsOrderIdAndPaymentRef(String wcsOrderId, String paymentRefId);
+
 }
