@@ -46,6 +46,7 @@ import com.gdn.venice.dao.FinArFundsInJournalTransactionDAO;
 import com.gdn.venice.dao.FinArFundsInReconRecordDAO;
 import com.gdn.venice.dao.FinArFundsInRefundDAO;
 import com.gdn.venice.dao.FinJournalApprovalGroupDAO;
+import com.gdn.venice.dao.FinJournalDAO;
 import com.gdn.venice.dao.FinJournalTransactionDAO;
 import com.gdn.venice.dao.FinSalesRecordDAO;
 import com.gdn.venice.dao.LogProviderAgreementDAO;
@@ -173,6 +174,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 	@Autowired
 	private VenSettlementRecordDAO venSettlementRecordDAO;
 	
+	@Autowired
+	private FinJournalDAO finJournalDAO;
+	
 	private static BigDecimal GDNPPN_DIVISOR = new BigDecimal(
 			VeniceConstants.VEN_GDN_PPN_RATE).divide(new BigDecimal(100), 2,
 			RoundingMode.HALF_UP).add(new BigDecimal(1));
@@ -218,7 +222,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
-			FinJournal finJournalCashReceive = new FinJournal();
+			//FinJournal finJournalCashReceive = new FinJournal();
+			FinJournal finJournalCashReceive = finJournalDAO.findByJournalId(FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id());
 			// FinJournalApprovalGroup finJournalApprovalGroups = null;
 			int count = 0;
 
@@ -263,9 +268,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					if (finJournalApprovalGroup == null
 							&& finArFundsInJournalTransactionList.isEmpty()) {
-						finJournalCashReceive
+						/*finJournalCashReceive
 								.setJournalId(FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id());
-
+*/
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyy-MMM-dd");
 						finJournalApprovalGroup = new FinJournalApprovalGroup();
