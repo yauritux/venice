@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.djarum.raf.utilities.Locator;
 import com.gdn.venice.dao.FrdParameterRule45DAO;
 import com.gdn.venice.dao.VenMerchantProductDAO;
 import com.gdn.venice.dao.VenOrderAddressDAO;
@@ -66,47 +65,30 @@ public class Rule45Impl implements Rule  {
 
     
     public boolean isEci5HistoryOrder(VenOrder venOrder) {
-    	boolean result=false;
-    	  Locator<Object> locator = null;
-          
-          try {
-              locator = new Locator<Object>();
-    	
-	    	 List<VenOrderAddress> orderHistoryEci5Address;
-	         List<VenOrderAddress> orderEci5Address = venOrderAddressDAO.findWithVenAddressesByVenOrder(venOrder);
-	         if(orderEci5Address.size()>0){
-	        	 orderHistoryEci5Address=venOrderAddressDAO.findByVenAddressStreetAddress1AndVenOrderOrderId(orderEci5Address.get(0).getVenAddress().getStreetAddress1().toUpperCase(),venOrder);
-	         	if(orderHistoryEci5Address.size()>0){
-	         		List<VenOrderContactDetail> orderHistoryEci5ContactDetail;	
-	         		
-	         		List<VenOrderContactDetail> orderEci5ContactDetail=venOrderContactDetailDAO.findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(venOrder,VEN_CONTACT_DETAIL_ID_PHONE,VEN_CONTACT_DETAIL_ID_MOBILE,VEN_CONTACT_DETAIL_ID_EMAIL);
-	         		List<VenOrderPaymentAllocation> orderHistoryEci5PaymentAllocation;
-	         		
-	         		if(orderEci5ContactDetail.size()>0){
-		         		for(int i=0;i<orderHistoryEci5Address.size();i++){
-		         			for(int j=0;j<orderEci5ContactDetail.size();j++){			         			
-		         				orderHistoryEci5ContactDetail=venOrderContactDetailDAO.findByVenOrderOrderIdAndVenContactDetailContactDetail(orderEci5Address.get(i).getVenOrder(),orderEci5ContactDetail.get(j).getVenContactDetail().getContactDetail());
-			         			orderHistoryEci5PaymentAllocation=venOrderPaymentAllocationDAO.findByVenOrderAndVenOrderPaymentThreeDsSecurityAuthIsNot(orderHistoryEci5ContactDetail.get(i).getVenOrder(),"07");
-			         			if(orderHistoryEci5PaymentAllocation.size()>0){
-			                         result = true;            				
-			         			}
-		         			}
-		         		}
-	         		}
-	         	}
-	         }
-          } catch (Exception ex) {
-              ex.printStackTrace();
-          } finally {
-              try {
-                  if (locator != null) {
-                      locator.close();
-                  }
-              } catch (Exception e) {
-                  e.printStackTrace();
-              }
-          }
-	    	return result;
-    }
-	
+    	boolean result=false;  	
+    	List<VenOrderAddress> orderHistoryEci5Address;
+        List<VenOrderAddress> orderEci5Address = venOrderAddressDAO.findWithVenAddressesByVenOrder(venOrder);
+        if(orderEci5Address.size()>0){
+         orderHistoryEci5Address=venOrderAddressDAO.findByVenAddressStreetAddress1AndVenOrderOrderId(orderEci5Address.get(0).getVenAddress().getStreetAddress1().toUpperCase(),venOrder);
+        	if(orderHistoryEci5Address.size()>0){
+        		List<VenOrderContactDetail> orderHistoryEci5ContactDetail;	
+        		
+        		List<VenOrderContactDetail> orderEci5ContactDetail=venOrderContactDetailDAO.findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(venOrder,VEN_CONTACT_DETAIL_ID_PHONE,VEN_CONTACT_DETAIL_ID_MOBILE,VEN_CONTACT_DETAIL_ID_EMAIL);
+        		List<VenOrderPaymentAllocation> orderHistoryEci5PaymentAllocation;
+        		
+        		if(orderEci5ContactDetail.size()>0){
+	        		for(int i=0;i<orderHistoryEci5Address.size();i++){
+	        			for(int j=0;j<orderEci5ContactDetail.size();j++){			         			
+	        				orderHistoryEci5ContactDetail=venOrderContactDetailDAO.findByVenOrderOrderIdAndVenContactDetailContactDetail(orderEci5Address.get(i).getVenOrder(),orderEci5ContactDetail.get(j).getVenContactDetail().getContactDetail());
+		        			orderHistoryEci5PaymentAllocation=venOrderPaymentAllocationDAO.findByVenOrderAndVenOrderPaymentThreeDsSecurityAuthIsNot(orderHistoryEci5ContactDetail.get(i).getVenOrder(),"07");
+		        			if(orderHistoryEci5PaymentAllocation.size()>0){
+		                        result = true;            				
+		        			}
+	        			}
+	        		}
+        		}
+        	}
+        }
+    	return result;
+    }	
 }

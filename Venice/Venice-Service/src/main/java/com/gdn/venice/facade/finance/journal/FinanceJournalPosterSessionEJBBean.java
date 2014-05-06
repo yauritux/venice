@@ -2610,29 +2610,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(
 							System.currentTimeMillis()));
 					
-					
-					
-					
-
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "Mulai dari sini !!!");
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "Card number adalah : "+payment.getCardNumber());
 					if(payment.getCardNumber()!=null)
 					{
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "A");
 						String cardNumber = payment.getCardNumber();
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "Card number 1 adalah : "+cardNumber);
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "B");
 						VenOrderPayment venOrderPayment = payment.getVenOrderPayment();
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "C");
 						venOrderPayment.setCardNumber(cardNumber);
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "D");
 						destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "E");
 					}
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "Akhirnya dari sini !!!");
-					
-					
-					
 					
 					newRecord.setVenOrderPayment(destinationVenOrderPayment
 							.getVenOrderPayment());
@@ -2701,7 +2685,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 						newRecord = finArFundsInReconRecordDAO.save(newRecord);
 					}
 					
-
 					FinArFundsInActionApplied finArFundsInActionAppliedss = new FinArFundsInActionApplied();
 					finArFundsInActionAppliedss
 							.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED.id());
@@ -2713,11 +2696,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::destinationVenOrderPayment is not in attach mode");
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::calling finArFundsInReconRecordDAO.save explicitly");
 						destinationVenOrderPayment = finArFundsInReconRecordDAO.save(destinationVenOrderPayment);
-						
-						VenOrderPayment tempVenOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
-						tempVenOrderPayment.setCardNumber(destinationVenOrderPayment.getCardNumber()!=null?destinationVenOrderPayment.getCardNumber():"");
-						tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
 					}
+					
+					VenOrderPayment tempVenOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
+					tempVenOrderPayment.setCardNumber(destinationVenOrderPayment.getCardNumber()!=null?destinationVenOrderPayment.getCardNumber():"");
+					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
 				} else {
 					newRecord = destinationVenOrderPayment;
 
@@ -2794,12 +2777,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 					if (!em.contains(newRecord)) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::newRecord is not in attach mode");
 						newRecord = finArFundsInReconRecordDAO.save(newRecord);
-						
-						VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
-						tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
-						tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
-
 					}
+					
+					VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
+					tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
+					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
 				}
 
 				FinArFundsInAllocatePayment finArFundsInAllocates = new FinArFundsInAllocatePayment();
