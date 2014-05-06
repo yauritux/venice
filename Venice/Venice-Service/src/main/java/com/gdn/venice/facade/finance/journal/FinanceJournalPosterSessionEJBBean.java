@@ -2752,19 +2752,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : newRecord.getRemainingBalanceAmount();
 							
-							
-					
-							
-
-							CommonUtil.logDebug(this.getClass().getCanonicalName(), "Masuk sini lah !");	
-									CommonUtil.logDebug(this.getClass().getCanonicalName(), "CardNumber adalah : "+payment.getCardNumber());	
 					newRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
 							
-				    
-							
-							
-							
-
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
 								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
@@ -2959,30 +2948,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(d
 							.getTime()));
 				
-					
-					
-					
-					
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "Mulai dari sini !!!~");
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "Card number adalah ~: "+payment.getCardNumber());
 					if(payment.getCardNumber()!=null)
 					{
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "A~");
 						String cardNumber = payment.getCardNumber();
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "Card number 1 adalah : ~"+cardNumber);
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "B~");
 						VenOrderPayment venOrderPaymentDest = payment.getVenOrderPayment();
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "C~");
 						venOrderPaymentDest.setCardNumber(cardNumber);
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "D~");
 						newRecord.setVenOrderPayment(venOrderPaymentDest);
-						CommonUtil.logDebug(this.getClass().getCanonicalName(), "E~");
 					}
-					CommonUtil.logDebug(this.getClass().getCanonicalName(), "Akhirnya dari sini !!!~");
-					
-					
-					
-					
 					
 					newRecord.setVenOrderPayment(tempRecord
 							.getVenOrderPayment());
@@ -3059,20 +3031,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Allocate and  reconciliation record persisted id:"
 							+ newRecord.getReconciliationRecordId());
 					
-					
-					
-					
-					
-
 					VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
 					tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
 					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
-					
-					
-					
-					
-					
-					
 					
 				} else {
 					BigDecimal paidAmount = (tempRecord
@@ -3124,21 +3085,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : tempRecord.getRemainingBalanceAmount();
 							
-							
-							
-							
-
-							CommonUtil.logDebug(this.getClass().getCanonicalName(), "Masuk disini lah 1 !");	
-							CommonUtil.logDebug(this.getClass().getCanonicalName(), "CardNumber adalah: "+payment.getCardNumber());
 					tempRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
-							
-							
-							
-							
-							
-							
-							
-
+					
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
 								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
@@ -3161,16 +3109,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Allocate and  reconciliation record merge id:"
 							+ tempRecord.getReconciliationRecordId());
 					
-					
-					
-
 					VenOrderPayment tempVenOrderPayment = tempRecord.getVenOrderPayment();
 					tempVenOrderPayment.setCardNumber(tempRecord.getCardNumber()!=null?tempRecord.getCardNumber():"");
 					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
-					
-					
-					
-					
 
 				}
 			} else {
@@ -3204,20 +3145,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 					0) : oldRemainingBalanceAmount;
 					
-					
-					
-					
-					
-					
-			
-					
-					
-					
-					
-					
-					
-					
-
 			if (oldRemainingBalance.compareTo(new BigDecimal(0)) == 0) {
 				payment.setRemainingBalanceAmount(new BigDecimal(0));
 				payment.setProviderReportPaidAmount(new BigDecimal(0));

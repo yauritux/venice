@@ -65,15 +65,8 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 			
 			finArFundsInReconRecordDAO.save(fundInReconReadyToPersistList);
 			
-			
-			
-			
-
-			
 			for(int i=0;i<fundInReconReadyToPersistList.size();i++)
-			{
-				try
-				{					
+			{	
 					if(fundInReconReadyToPersistList.get(i).getFinArReconResult()!=null){
 						try
 						{
@@ -88,20 +81,7 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 							CommonUtil.logError(CLASS_NAME, e);
 						}					
 					}
-				}
-				catch(Exception e)
-				{
-					CommonUtil.logError(CLASS_NAME, e);
-					e.printStackTrace();
-					return e.getMessage();
-				}
-
 			}
-			
-			
-			
-			
-			
 			
 			return constructSuccessMessage(fundInData);
 			
