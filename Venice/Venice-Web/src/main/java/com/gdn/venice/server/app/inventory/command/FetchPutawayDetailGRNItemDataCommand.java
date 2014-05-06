@@ -138,7 +138,11 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
     	                    		qty+=storageStock.getQuantity();
     	                    	}
-    	                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	if(shelfCode.length()>1){
+    	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	}else{
+    	                    		shelfCode="-";
+    	                    	}
     	                    }
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);

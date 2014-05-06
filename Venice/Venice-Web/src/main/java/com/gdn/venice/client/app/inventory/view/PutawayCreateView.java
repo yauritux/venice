@@ -114,7 +114,6 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMID));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_TYPE, putawayTypeComboBox.getValue().toString());
@@ -138,7 +137,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
     
 	private void buildGrnListGrid(String warehouseId, String type) {
 		if(type.equals("GRN")){
-			DataSource grnItemData = PutawayData.getGRNItemData(warehouseId, 1, 20);
+			DataSource grnItemData = PutawayData.getGRNItemData(warehouseId, 1, 100);
 			ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
 	        ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3], listGridField[4]};
 	

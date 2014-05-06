@@ -19,6 +19,7 @@ import com.gdn.venice.server.app.inventory.command.EditShelfEditWIPDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchShelfDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchShelfInProcessDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchStorageDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchStorageInProcessDataCommand;
 import com.gdn.venice.server.app.inventory.command.NeedCorrectionCreateShelfWIPDataCommand;
 import com.gdn.venice.server.app.inventory.command.NeedCorrectionEditShelfDataCommand;
 import com.gdn.venice.server.app.inventory.command.NonActiveShelfDataCommand;
@@ -87,6 +88,14 @@ public class ShelfManagementPresenterServlet extends HttpServlet{
 			}else if(method.equals("fetchStorageData")){
 				RafDsCommand fetchStorageDataCommand = new FetchStorageDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchStorageDataCommand.execute();
+				try{
+					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else if(method.equals("fetchStorageInProcessData")){
+				RafDsCommand fetchStorageInProcessDataCommand = new FetchStorageInProcessDataCommand(rafDsRequest);
+				RafDsResponse rafDsResponse = fetchStorageInProcessDataCommand.execute();
 				try{
 					retVal = RafDsResponse.convertRafDsResponsetoXml(rafDsResponse);
 				}catch(Exception e){

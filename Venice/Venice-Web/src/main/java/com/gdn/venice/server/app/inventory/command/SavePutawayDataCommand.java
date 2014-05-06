@@ -57,9 +57,9 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 			grnService = new GRNManagementService();
 			asnService = new ASNManagementService();
 			ResultWrapper<GoodReceivedNoteItem> grni = null;
-
 								
 			String grnItemId="", type="";
+			System.out.println("itemMap.entrySet() size: "+itemMap.entrySet().size());
 			for(Map.Entry<String, String> entry : itemMap.entrySet()){				
 				Putaway putaway = new Putaway();			
 				putaway.setCreatedBy(username);				

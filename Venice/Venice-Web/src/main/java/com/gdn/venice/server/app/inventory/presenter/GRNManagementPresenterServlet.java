@@ -82,7 +82,7 @@ public class GRNManagementPresenterServlet extends HttpServlet{
 			
 			String method = request.getParameter("method");
 			
-			if(method.equals("fetchGRNData")){			
+			if(method.equals("fetchGRNData")){
 				RafDsCommand fetchGRNDataCommand = new FetchGRNDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchGRNDataCommand.execute();
 				try{
@@ -126,7 +126,7 @@ public class GRNManagementPresenterServlet extends HttpServlet{
                 RafRpcCommand fetchAttributeNameCommand = new FetchAttributeNameDataCommand(request.getParameter("itemId"), username);
                 retVal = fetchAttributeNameCommand.execute();
             } else if (method.equals("saveGrnAttributeData")) {
-                RafRpcCommand saveGrnAttributeDataCommand = new SaveGrnAttributeDataCommand(username, request.getParameter("asnItemId"), requestBody);
+                RafRpcCommand saveGrnAttributeDataCommand = new SaveGrnAttributeDataCommand(username, request.getParameter("itemId"), request.getParameter("asnItemId"), requestBody);
                 retVal = saveGrnAttributeDataCommand.execute();
             }  
 		}

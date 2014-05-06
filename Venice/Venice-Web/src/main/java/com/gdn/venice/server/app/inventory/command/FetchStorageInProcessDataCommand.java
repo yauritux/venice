@@ -16,24 +16,24 @@ import com.gdn.venice.server.data.RafDsResponse;
  *
  * @author Roland
  */
-public class FetchStorageDataCommand implements RafDsCommand {
+public class FetchStorageInProcessDataCommand implements RafDsCommand {
 
     private RafDsRequest request;
     ShelfManagementService shelfService;
     
-    public FetchStorageDataCommand(RafDsRequest request) {
+    public FetchStorageInProcessDataCommand(RafDsRequest request) {
         this.request = request;
     }
 
     @Override
     public RafDsResponse execute() {
-    	System.out.println("fetch storage command");
+    	System.out.println("fetch storage in process command");
         RafDsResponse rafDsResponse = new RafDsResponse();
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         
         try {
         		shelfService = new ShelfManagementService();
-                InventoryPagingWrapper<StorageWIP> storageWrapper = shelfService.getStorageData(request, new Long(request.getParams().get(DataNameTokens.INV_SHELF_ID)));
+                InventoryPagingWrapper<StorageWIP> storageWrapper = shelfService.getStorageInProcessData(request, new Long(request.getParams().get(DataNameTokens.INV_SHELF_ID)));
                 if(storageWrapper!=null && storageWrapper.isSuccess()){
 
                 System.out.println("storageWrapper size: "+storageWrapper.getContent().size());

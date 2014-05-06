@@ -2,8 +2,6 @@ package com.gdn.venice.exportimport.inventory.dataexport.servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -21,17 +19,8 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
 import com.djarum.raf.utilities.Log4jLoggerFactory;
-import com.gdn.inventory.exchange.entity.WarehouseItem;
-import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
-import com.gdn.inventory.exchange.entity.module.outbound.PickPackage;
-import com.gdn.inventory.exchange.entity.module.outbound.PickPackageSalesOrder;
-import com.gdn.inventory.paging.InventoryPagingWrapper;
-import com.gdn.inventory.wrapper.ResultListWrapper;
-import com.gdn.venice.exportimport.inventory.dataexport.PickingListPrint;
+import com.gdn.inventory.exchange.entity.request.PickPackagePrintRequest;
 import com.gdn.venice.server.app.inventory.service.PickingListManagementService;
-import com.gdn.venice.server.app.inventory.service.PutawayManagementService;
-import com.gdn.venice.server.data.RafDsRequest;
-import com.gdn.venice.server.util.Util;
 
 /**
  * Servlet implementation class PickingListSOExportServlet.
@@ -60,64 +49,10 @@ public class PickingListSOExportServlet extends HttpServlet {
 	protected void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("PickingListSOExportServlet");
 		
-		PickingListPrint plPrint = new PickingListPrint();
-		List<PickingListPrint> plPrintList = new ArrayList<PickingListPrint>();
-		
 		PickingListManagementService pickingListService = new PickingListManagementService();
-		PutawayManagementService putawayService = new PutawayManagementService();
-		
-		RafDsRequest rafDsRequest = new RafDsRequest();
-		HashMap<String, String> params = new HashMap<String, String>();
-        params.put("page", "1");
-		params.put("limit", "100");
-        rafDsRequest.setParams(params);       
-
-        InventoryPagingWrapper<PickPackage> packageWrapper = pickingListService.getPackageSOByPicker(Util.getUserName(request), request.getParameter("pickerName"), request.getParameter("warehouseId"), rafDsRequest);
-		if(packageWrapper!=null && packageWrapper.isSuccess()){							
-			for(PickPackage pickPackage : packageWrapper.getContent()){					
-				ResultListWrapper<PickPackageSalesOrder> pickPackageWrapper = pickingListService.getPickingListSODetail(Util.getUserName(request), pickPackage.getId().toString());
-	        	if(pickPackageWrapper!=null && pickPackageWrapper.isSuccess()){
-	        		for(PickPackageSalesOrder ppso : pickPackageWrapper.getContents()){ 
-	        			plPrint.setSalesOrder(ppso.getSalesOrder());
-	        			plPrint.setPickPackage(ppso.getPickPackage());
-	        			plPrint.setWarehouseSkuId(ppso.getSalesOrder().getAssignedItem().getCode());
-	        			plPrint.setItemName(ppso.getSalesOrder().getAssignedItem().getName());
-	        									            			
-						WarehouseItem whItem = putawayService.getWarehouseItemData(ppso.getSalesOrder().getAssignedItem().getId(), 
-								ppso.getSalesOrder().getWarehouse().getId(), 
-								ppso.getSalesOrder().getSupplier().getId(), ppso.getSalesOrder().getStockType());
-						        			
-                        if(whItem!=null){
-        					System.out.println("whItem Id: "+whItem.getId());
-                        	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
-                        	int counter = 0;
-                        	for(WarehouseItemStorageStock storageStock : storageStockList){
-                        		if(counter==0){
-                        			System.out.println("add first stock");
-                        			plPrint.setQty(Integer.toString(ppso.getSalesOrder().getQuantity()));
-                            		plPrint.setShelfCode(storageStock.getStorage().getShelf().getCode());
-                            		plPrint.setStorageCode(storageStock.getStorage().getCode());
-                        			plPrint.setQtyStorage(Integer.toString(storageStock.getQuantity()));
-                            		plPrintList.add(plPrint);
-                        			counter+=1;
-                        		}else{
-                        			System.out.println("add other stock");
-                        			PickingListPrint plPrintTemp = new PickingListPrint();
-                        			plPrintTemp.setSalesOrder(plPrint.getSalesOrder());
-                        			plPrintTemp.setPickPackage(plPrint.getPickPackage());
-                        			plPrintTemp.setWarehouseSkuId(plPrint.getWarehouseSkuId());
-                        			plPrintTemp.setItemName(plPrint.getItemName());
-                        			plPrintTemp.setShelfCode(storageStock.getStorage().getShelf().getCode());
-                        			plPrintTemp.setStorageCode(storageStock.getStorage().getCode());
-                        			plPrintTemp.setQtyStorage(Integer.toString(storageStock.getQuantity()));
-                        			plPrintList.add(plPrintTemp);
-                        		}
-                        	}                    	
-                        }                       	            		
-	        		}
-	        	}
-			}				
-		}	
+		List<PickPackagePrintRequest> plPrintList = pickingListService.getPickPackageSOPrint(request.getParameter("pickerId")
+				, request.getParameter("warehouseId"));
+						
 		System.out.println("plPrintList size: "+plPrintList.size()+", start print report to excel");
 		OutputStream out = null;
 
@@ -131,7 +66,6 @@ public class PickingListSOExportServlet extends HttpServlet {
 				HSSFWorkbook wb = new HSSFWorkbook(); 
 				HSSFSheet sheet = wb.createSheet("Picking List");				
 				 
-				//style
 				CellStyle headerCellstyle = wb.createCellStyle();
 				headerCellstyle.setBorderBottom(CellStyle.BORDER_THIN);
 				headerCellstyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
@@ -178,18 +112,17 @@ public class PickingListSOExportServlet extends HttpServlet {
 				headerRow.createCell(startCol+10).setCellValue(new HSSFRichTextString("Storage Code"));
 				headerRow.createCell(startCol+11).setCellValue(new HSSFRichTextString("Qty Storage"));
 				headerRow.createCell(startCol+12).setCellValue(new HSSFRichTextString("Qty Picked"));
+				headerRow.createCell(startCol+13).setCellValue(new HSSFRichTextString("Container ID"));
 									   
-				//set style for header
-				for(int i=startCol; i<=startCol+12; i++){
+				for(int i=startCol; i<=startCol+13; i++){
 					HSSFCell cell = headerRow.getCell(i);
 					cell.setCellStyle(headerCellstyle);
 				}    
 										
-				//Looping for generating excel rows
 				HSSFRow detailRow = null;
 				for (int i = 0; i < plPrintList.size(); i++) {
 					System.out.println("looping data");					
-					PickingListPrint pl = plPrintList.get(i);	
+					PickPackagePrintRequest pl = plPrintList.get(i);	
 					
 					startRow=startRow+1;
 					detailRow = sheet.createRow(startRow);
@@ -208,16 +141,15 @@ public class PickingListSOExportServlet extends HttpServlet {
 					cell = detailRow.createCell(startCol+10);cell.setCellValue(new HSSFRichTextString(pl.getStorageCode()));
 					cell = detailRow.createCell(startCol+11);cell.setCellValue(new HSSFRichTextString(pl.getQtyStorage()));
 					cell = detailRow.createCell(startCol+12);cell.setCellValue(new HSSFRichTextString(""));
+					cell = detailRow.createCell(startCol+13);cell.setCellValue(new HSSFRichTextString(""));
 					
-					//set style for list
-					for(int l=startCol; l<=startCol+12; l++){
+					for(int l=startCol; l<=startCol+13; l++){
 						HSSFCell cell2 = detailRow.getCell(l);
 						cell2.setCellStyle(detailCellstyle);
 					}	
 				}		
 				
-				//set style for list
-				for(int l=startCol; l<=startCol+12; l++){
+				for(int l=startCol; l<=startCol+13; l++){
 					sheet.autoSizeColumn(l);
 				}	
 				

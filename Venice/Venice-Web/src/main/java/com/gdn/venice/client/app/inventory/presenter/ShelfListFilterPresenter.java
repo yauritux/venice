@@ -87,10 +87,8 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		RPCManager.setDefaultPrompt("Saving records...");
 		RPCManager.setShowPrompt(true);
 		
-		RPCManager.sendRequest(request, 
-				new RPCCallback () {
-					public void execute(RPCResponse response,
-							Object rawData, RPCRequest request) {
+		RPCManager.sendRequest(request, new RPCCallback () {
+					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						
 						if (rpcResponse.startsWith("0")) {
@@ -115,8 +113,7 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		
 		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
 		
-		request.setData(shelfMap);
-		
+		request.setData(shelfMap);		
 		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=nonActiveShelf&type=RPC");
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
@@ -125,8 +122,7 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		RPCManager.setDefaultPrompt("Saving records...");
 		RPCManager.setShowPrompt(true);
 		
-		RPCManager.sendRequest(request, 
-				new RPCCallback () {
+		RPCManager.sendRequest(request, new RPCCallback () {
 					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						
@@ -153,8 +149,7 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
 		String storageMap = Util.formXMLfromHashMap(storageDataMap);
 		
-		request.setData(shelfMap+"#"+storageMap);
-		
+		request.setData(shelfMap+"#"+storageMap);		
 		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=editShelfData&type=RPC");
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
@@ -163,8 +158,7 @@ public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter
 		RPCManager.setDefaultPrompt("Saving records...");
 		RPCManager.setShowPrompt(true);
 		
-		RPCManager.sendRequest(request, 
-				new RPCCallback () {
+		RPCManager.sendRequest(request, new RPCCallback () {
 					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
 						String rpcResponse = rawData.toString();
 						

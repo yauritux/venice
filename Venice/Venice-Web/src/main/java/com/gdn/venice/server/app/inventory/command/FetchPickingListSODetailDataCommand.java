@@ -66,7 +66,11 @@ public class FetchPickingListSODetailDataCommand implements RafDsCommand {
                     		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getQuantity();
                     		shelfCode+=", ";
                     	}
-                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+                    	if(shelfCode.length()>1){
+                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+                    	}else{
+                    		shelfCode="-";
+                    	}
                     	
                     	map.put(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, shelfCode);
                     }   

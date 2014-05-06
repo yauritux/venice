@@ -163,7 +163,9 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
         });
 
         buttonSet.setAlign(Alignment.CENTER);
-        buttonSet.setMembers(approveButton, rejectButton);
+        if (MainPagePresenter.getSignedInUserRole().toLowerCase().contains("inv_wh_approver")) {
+            buttonSet.setMembers(approveButton, rejectButton);
+        }
 
         shelfDetailLayout.setMembers(shelfDetailForm, buttonSet, storageLabel, storageListGrid);
         shelfDetailWindow.addItem(shelfDetailLayout);

@@ -7,7 +7,6 @@ import com.gdn.venice.client.app.inventory.data.GRNData;
 import com.gdn.venice.client.app.inventory.presenter.GRNListPresenter;
 import com.gdn.venice.client.app.inventory.view.handler.GRNListUiHandler;
 import com.gdn.venice.client.data.RafDataSource;
-import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
 import com.google.gwt.core.client.GWT;
@@ -187,7 +186,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
     }
 
     private ListGrid buildItemListGrid(String grnId) {
-        DataSource grnItemData = GRNData.getGRNItemData(grnId, 1, 20);
+        DataSource grnItemData = GRNData.getGRNItemData(grnId, 1, 100);
 
         final ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
         ListGridField attributeField = new ListGridField("ATTRIBUTEFIELD", "View Attribute");

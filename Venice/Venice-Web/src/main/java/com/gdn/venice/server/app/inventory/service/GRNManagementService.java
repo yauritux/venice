@@ -315,10 +315,10 @@ public class GRNManagementService {
         }
     }
 
-    public ResultWrapper<List<Attribute>> saveAttributeToCache(String username, String asnItemId, List<String> attribute) throws JsonGenerationException, JsonMappingException, IOException {
+    public ResultWrapper<List<Attribute>> saveAttributeToCache(String username, String itemId, String asnItemId, List<String> attribute) throws JsonGenerationException, JsonMappingException, IOException {
         System.out.println("saveAttributeToCache");
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "goodReceivedNote/saveAttributeToCache?username=" + username + "&asnItemId=" + asnItemId;
+                + "goodReceivedNote/saveAttributeToCache?username=" + username + "&itemId=" + itemId+ "&asnItemId=" + asnItemId;
         System.out.println("url: " + url);
         PostMethod httpPost = new PostMethod(url);
         String json = mapper.writeValueAsString(attribute);

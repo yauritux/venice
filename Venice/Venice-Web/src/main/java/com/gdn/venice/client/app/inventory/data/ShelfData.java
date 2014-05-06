@@ -37,7 +37,6 @@ public class ShelfData {
 	}
 	
 	public static DataSource getStorageData(String shelfId, int page, int limit) {
-		System.out.println("shelfId: "+shelfId);
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_STORAGE_ID, "Storage Bin ID"),
 				new DataSourceTextField(DataNameTokens.INV_STORAGE_CODE, "Storage Bin Code"),
@@ -47,6 +46,30 @@ public class ShelfData {
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
 				GWT.getHostPageBaseURL() + ShelfListFilterPresenter.shelfManagementPresenterServlet + "?method=fetchStorageData&type=DataSource&limit="+limit+"&page="+page,
+				null,
+				null,
+				null, 
+				dataSourceFields);
+		HashMap<String, String> params = new HashMap<String, String>();
+		
+		if(shelfId != null) {
+			params.put(DataNameTokens.INV_SHELF_ID, shelfId);
+			dataSource.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
+		}
+
+		return dataSource;		 
+	}
+	
+	public static DataSource getStorageInProcessData(String shelfId, int page, int limit) {
+		DataSourceField[] dataSourceFields = {
+				new DataSourceTextField(DataNameTokens.INV_STORAGE_ID, "Storage Bin ID"),
+				new DataSourceTextField(DataNameTokens.INV_STORAGE_CODE, "Storage Bin Code"),
+				new DataSourceTextField(DataNameTokens.INV_STORAGE_DESCRIPTION, "Storage Bin Description"),
+				new DataSourceTextField(DataNameTokens.INV_STORAGE_TYPE, "Storage Bin Type")};
+		dataSourceFields[0].setPrimaryKey(true);
+
+		RafDataSource dataSource = new RafDataSource("/response/data/*",
+				GWT.getHostPageBaseURL() + ShelfListFilterPresenter.shelfManagementPresenterServlet + "?method=fetchStorageInProcessData&type=DataSource&limit="+limit+"&page="+page,
 				null,
 				null,
 				null, 

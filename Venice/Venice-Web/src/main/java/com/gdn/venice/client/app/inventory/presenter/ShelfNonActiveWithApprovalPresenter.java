@@ -57,8 +57,7 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
     /**
      * {@link ShelfListFilterPresenter}'s view.
      */
-    public interface MyView extends View,
-            HasUiHandlers<ShelfNonActiveWithApprovalUiHandler> {
+    public interface MyView extends View, HasUiHandlers<ShelfNonActiveWithApprovalUiHandler> {
 
         public void loadApprovalNonActiveShelfData(DataSource dataSource);
         public void refreshAllShelfData();
@@ -74,8 +73,7 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
      * @param dispatcher
      */
     @Inject
-    public ShelfNonActiveWithApprovalPresenter(EventBus eventBus, MyView view,
-            MyProxy proxy, DispatchAsync dispatcher) {
+    public ShelfNonActiveWithApprovalPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
         super(eventBus, view, proxy);
         getView().setUiHandlers(this);
         ((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
@@ -97,11 +95,9 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
             RPCManager.setDefaultPrompt("Saving records...");
             RPCManager.setShowPrompt(true);
 
-            RPCManager.sendRequest(request,
-                    new RPCCallback() {
+            RPCManager.sendRequest(request, new RPCCallback() {
                         @Override
-                        public void execute(RPCResponse response,
-                                Object rawData, RPCRequest request) {
+                        public void execute(RPCResponse response, Object rawData, RPCRequest request) {
                             String rpcResponse = rawData.toString();
 
                             if (rpcResponse.startsWith("0")) {
@@ -132,11 +128,9 @@ public class ShelfNonActiveWithApprovalPresenter extends Presenter<ShelfNonActiv
             RPCManager.setDefaultPrompt("Saving records...");
             RPCManager.setShowPrompt(true);
 
-            RPCManager.sendRequest(request,
-                    new RPCCallback() {
+            RPCManager.sendRequest(request, new RPCCallback() {
                         @Override
-                        public void execute(RPCResponse response,
-                                Object rawData, RPCRequest request) {
+                        public void execute(RPCResponse response, Object rawData, RPCRequest request) {
                             String rpcResponse = rawData.toString();
 
                             if (rpcResponse.startsWith("0")) {

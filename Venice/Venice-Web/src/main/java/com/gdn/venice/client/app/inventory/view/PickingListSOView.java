@@ -138,7 +138,7 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
      				for (int i = 0; i < records.length; i++) {
      					ListGridRecord selectedRecord = records[i];  
      					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).isEmpty()){     						
-     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME));
+     						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERID));
      					}
      				}
      				
@@ -151,9 +151,13 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
      					host = host.substring(0, host.indexOf("Venice/"));
      				}
      				
-					for(String pickerName : set){		
-	     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListSOExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerName=" + pickerName, "_blank", null);
-					}    							
+     				if(set.size()>0){
+						for(String pickerId : set){		
+		     				com.google.gwt.user.client.Window.open(host + "Venice/PickingListSOExportServlet?warehouseId="+warehouseComboBox.getValue().toString()+"&pickerId=" + pickerId, "_blank", null);
+						}    			
+     				}else{
+     					SC.say("There is no package assigned to export, please assigned a picker to package first");
+     				}
      			}
      		});
         
@@ -421,17 +425,23 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
  	 					if(i != selectedRecords.length -1) sb.append(", ");
  					}
  				}
- 				
- 				if(sb.length()>0){
- 					SC.ask("Package "+sb+" has already been assigned, are you sure you want to reassign the picker?", new BooleanCallback() {
-						@Override
-						public void execute(Boolean value) {
-						    if (value != null && value == true) {	 
-						    		buildAssignPickerWindow(warehouseComboBox.getDisplayValue().toString()).show();
-						        }	                      
-						    }	
-						});	
- 				}
+ 				 				
+ 				if(selectedRecords.length>0){
+ 	 				if(sb.length()>0){
+	 					SC.ask("Package "+sb+" has already been assigned, are you sure you want to reassign the picker?", new BooleanCallback() {
+							@Override
+							public void execute(Boolean value) {
+							    if (value != null && value == true) {	 
+							    		buildAssignPickerWindow(warehouseComboBox.getDisplayValue().toString()).show();
+							        }	                      
+							    }	
+							});	
+ 	 				}else{
+ 	 					buildAssignPickerWindow(warehouseComboBox.getDisplayValue().toString()).show();
+ 	 				}
+ 				}else{
+ 					SC.say("Please select the package you want to assign");
+ 				} 
 			}
 		});
 

@@ -1,7 +1,5 @@
 package com.gdn.venice.client.app.inventory.data;
 
-import java.util.HashMap;
-
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.presenter.PutawayCreatePresenter;
 import com.gdn.venice.client.data.RafDataSource;
@@ -10,7 +8,6 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
 import com.smartgwt.client.data.fields.DataSourceDateField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
-import com.smartgwt.client.types.DSOperationType;
 
 /**
  * @author Roland
@@ -29,17 +26,11 @@ public class PutawayData {
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
-				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayGRNItemData&type=DataSource&limit="+limit+"&page="+page,
+				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayGRNItemData&type=DataSource&limit="+limit+"&page="+page+"&warehouseId="+warehouseId,
 				null,
 				null,
 				null, 
 				dataSourceFields);
-		HashMap<String, String> params = new HashMap<String, String>();
-		
-		if(warehouseId != null) {
-			params.put(DataNameTokens.INV_WAREHOUSE_ID, warehouseId);
-			dataSource.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
-		}
 
 		return dataSource;		 
 	}
@@ -56,17 +47,11 @@ public class PutawayData {
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
-				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayData&type=DataSource&limit="+limit+"&page="+page,
+				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayData&type=DataSource&limit="+limit+"&page="+page+"&warehouseId="+warehouseId,
 				null,
 				null,
 				null, 
 				dataSourceFields);
-		HashMap<String, String> params = new HashMap<String, String>();
-		
-		if(warehouseId != null) {
-			params.put(DataNameTokens.INV_WAREHOUSE_ID, warehouseId);
-			dataSource.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
-		}
 
 		return dataSource;		 
 	}	
@@ -83,17 +68,11 @@ public class PutawayData {
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
-				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayDetailGRNItemData&type=DataSource&limit="+limit+"&page="+page,
+				GWT.getHostPageBaseURL() + PutawayCreatePresenter.putawayManagementPresenterServlet + "?method=fetchPutawayDetailGRNItemData&type=DataSource&limit="+limit+"&page="+page+"&grnId="+grnId,
 				null,
 				null,
 				null, 
 				dataSourceFields);
-		HashMap<String, String> params = new HashMap<String, String>();
-		
-		if(grnId != null) {
-			params.put(DataNameTokens.INV_PUTAWAY_GRN_ID, grnId);
-			dataSource.getOperationBinding(DSOperationType.FETCH).setDefaultParams(params);
-		}
 
 		return dataSource;		 
 	}
