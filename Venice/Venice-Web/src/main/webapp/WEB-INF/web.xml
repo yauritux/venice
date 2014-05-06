@@ -19,6 +19,7 @@
       <url-pattern>/LogisticsChangeShippingNotificationServlet</url-pattern>
       <url-pattern>/TransactionFeeAndSettlementUpdaterJavaServlet</url-pattern>
       <url-pattern>/VeniceStatusRepublisherServlet</url-pattern>
+      <url-pattern>/spring</url-pattern>
     </web-resource-collection>
   </security-constraint>
   <login-config>
@@ -32,6 +33,17 @@
   <security-role>
     <role-name>VeniceUsers</role-name>
   </security-role>
+  <servlet>
+    <servlet-name>spring</servlet-name>
+    <servlet-class>
+      org.springframework.web.servlet.DispatcherServlet
+    </servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
   <servlet>
     <display-name>TestRestDataSourceServlet</display-name>
     <servlet-name>TestRestDataSourceServlet</servlet-name>
