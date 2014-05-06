@@ -2798,6 +2798,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
 						tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
 						tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
+
 					}
 				}
 
@@ -2900,6 +2901,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			VenOrderPayment venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(sourceVenOrderPaymentId);
 			
 			
+
 			//if (venOrderPaymentList.isEmpty()) {
 			if (venOrderPayment == null) {
 				throw new EJBException(

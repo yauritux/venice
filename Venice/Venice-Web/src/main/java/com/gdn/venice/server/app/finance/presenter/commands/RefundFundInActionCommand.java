@@ -103,9 +103,12 @@ public class RefundFundInActionCommand implements RafRpcCommand{
 					if(cancelRefund.equals("FALSE")){
 						List<FinArFundsInReconRecord> reconRecordListTemp = fundsInReconRecordHome
 						.queryByRange("select o from FinArFundsInReconRecord o where o.reconciliationRecordId = " + reconciliationRecordId+" and o.finArFundsInActionApplied.actionAppliedId<>"+VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED, 0, 0);				
-		
+						
 						if(!reconRecordListTemp.isEmpty()){
-							if(reconRecordListTemp.get(0).getProviderReportPaidAmount().subtract(reconRecordListTemp.get(0).getRefundAmount()).subtract(new BigDecimal(refundAmount)).compareTo(new BigDecimal(0))>=0){
+							
+							BigDecimal savedRefundAmount = reconRecordListTemp.get(0).getRefundAmount() != null ? reconRecordListTemp.get(0).getRefundAmount() : new BigDecimal(0);
+							
+							if(reconRecordListTemp.get(0).getProviderReportPaidAmount().subtract(savedRefundAmount).subtract(new BigDecimal(refundAmount)).compareTo(new BigDecimal(0))>=0){
 								sessionHome.postRefundJournalTransaction(reconciliationRecordId, refundAmount, fee, account,false);
 							}else{
 								errorMsg="Refund Amount harus lebih kecil atau sama dengan Paid Amount!";

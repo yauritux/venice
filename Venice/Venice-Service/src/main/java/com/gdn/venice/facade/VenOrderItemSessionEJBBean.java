@@ -217,9 +217,14 @@ public class VenOrderItemSessionEJBBean implements VenOrderItemSessionEJBRemote,
                 Hibernate.initialize(venOrderItem.getVenOrder().getVenCustomer().getVenParty().getVenContactDetails());
             }
         }
+        
+        em.clear();
+        
         Long endTime = System.currentTimeMillis();
         Long duration = startTime - endTime;
         _log.debug("queryByRange() duration:" + duration + "ms");
+        em.flush();
+        em.clear();
         return returnList;
     }
 
@@ -672,6 +677,7 @@ public class VenOrderItemSessionEJBBean implements VenOrderItemSessionEJBRemote,
             Long endTime = System.currentTimeMillis();
             Long duration = startTime - endTime;
             _log.debug("findByVenOrderItemLike() duration:" + duration + "ms");
+            
             return venOrderItemList;
         } else {
             String errMsg = "A query has been initiated with null criteria.";
@@ -732,6 +738,8 @@ public class VenOrderItemSessionEJBBean implements VenOrderItemSessionEJBRemote,
             Long endTime = System.currentTimeMillis();
             Long duration = startTime - endTime;
             _log.debug("findByVenOrderItemLike() duration:" + duration + "ms");
+            em.flush();
+            em.clear();
             return fr;
         } else {
             String errMsg = "A query has been initiated with null criteria.";
@@ -758,6 +766,10 @@ public class VenOrderItemSessionEJBBean implements VenOrderItemSessionEJBRemote,
         Long endTime = System.currentTimeMillis();
         Long duration = startTime - endTime;
         _log.debug("queryByRangeWithNativeQuery() duration:" + duration + "ms");
+        
+        em.flush();
+        em.clear();
+        
         return returnList+"";
     }
 

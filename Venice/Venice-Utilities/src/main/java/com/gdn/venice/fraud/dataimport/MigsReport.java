@@ -1,7 +1,9 @@
-package com.gdn.venice.server.app.fraud.dataimport;
+package com.gdn.venice.fraud.dataimport;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+import com.gdn.venice.hssf.PojoInterface;
 
 public class MigsReport implements PojoInterface {
 	private String transactionId;

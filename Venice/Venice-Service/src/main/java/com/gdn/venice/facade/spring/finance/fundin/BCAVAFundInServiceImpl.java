@@ -248,10 +248,8 @@ public class BCAVAFundInServiceImpl extends AbstractFundInService {
 			fundInRecon.setOrderDate(order.getOrderDate());
 			fundInRecon.setWcsOrderId(order.getWcsOrderId());
 			fundInRecon.setRemainingBalanceAmount(getRemainingBalanceAfterPayment(fundInRecon, paymentAmount));
-			
 		}else{
-			BigDecimal remainingAmount = fundInRecon.getRemainingBalanceAmount()!=null?fundInRecon.getRemainingBalanceAmount(): new BigDecimal(0);
-			fundInRecon.setRemainingBalanceAmount(remainingAmount.subtract(paymentAmount));
+			fundInRecon.setRemainingBalanceAmount(paymentAmount.negate());
 			fundInRecon.setNomorReff(accountNumber);
 		}
 		
