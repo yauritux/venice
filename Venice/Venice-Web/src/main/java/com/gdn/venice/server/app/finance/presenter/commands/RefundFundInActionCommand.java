@@ -167,6 +167,9 @@ public class RefundFundInActionCommand implements RafRpcCommand{
 											finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
 											}
 										}
+										if(itemRefundList.size()==1 || itemRefundList.size()==0){
+											finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
+										}
 									}									
 								List<FinArFundsInAllocatePayment> itemAllocate = finArFundsInAllocateHome.queryByRange("select o from FinArFundsInAllocatePayment o where o.idReconRecordSource="+reconciliationRecordId, 0, 0);
 								if(itemAllocate!=null && itemAllocate.size()>0){

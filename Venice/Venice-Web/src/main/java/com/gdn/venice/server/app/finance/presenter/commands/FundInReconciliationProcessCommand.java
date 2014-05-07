@@ -159,7 +159,7 @@ public class FundInReconciliationProcessCommand implements RafRpcCommand {
 
 		Locator<FinanceJournalPosterSessionEJBRemote> financeJournalPosterLocator = null;
 		Locator<Object> locator = null;
-		if (method.equals("approveFundInReconRecord") || approvedFundInReconRecordList.size()>0) {
+		if (method.equals("approveFundInReconRecord") || method.equals("submitForApproval") || approvedFundInReconRecordList.size()>0) {
 			try {
 				financeJournalPosterLocator = new Locator<FinanceJournalPosterSessionEJBRemote>();
 				FinanceJournalPosterSessionEJBRemote sessionHome = (FinanceJournalPosterSessionEJBRemote) financeJournalPosterLocator

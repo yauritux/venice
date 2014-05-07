@@ -283,10 +283,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 						finJournalApprovalGroup
 								.setFinApprovalStatus(finApprovalStatus);
-
 						finJournalApprovalGroup
 								.setFinJournal(finJournalCashReceive);
-
 						finJournalApprovalGroup
 								.setJournalGroupDesc("Cash Received Journal for :"
 										+ sdf.format(new Date()));
@@ -510,14 +508,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 							 * diubah menjadi submitted agar tidak ikut ke
 							 * rollup
 							 */
-							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
+							finJournalApprovalGroup = new FinJournalApprovalGroup();
+							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 							finJournalApprovalGroup
 									.setFinApprovalStatus(finApprovalStatuss);
 							SimpleDateFormat sdf = new SimpleDateFormat(
 									"yyyy-MMM-dd");
 							finJournalApprovalGroup
+															.setFinJournal(finJournalCashReceive);
+							finJournalApprovalGroup
 									.setJournalGroupDesc("VA Real Time - Cash Received Journal for :"
 											+ sdf.format(new Date()));
+							finJournalApprovalGroup
+									.setJournalGroupTimestamp(new Timestamp(System
+											.currentTimeMillis()));
 							/*finJournalApprovalGroup = journalApprovalGroupHome
 									.mergeFinJournalApprovalGroup(finJournalApprovalGroup);*/
 							if (!em.contains(finJournalApprovalGroup)) {
@@ -568,14 +572,19 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.compareTo(
 												reconRecord.getRefundAmount()) != 0) {
 
-									FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
+									FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 									finJournalApprovalGroup
 											.setFinApprovalStatus(finApprovalStatuss);
 									SimpleDateFormat sdf = new SimpleDateFormat(
 											"yyyy-MMM-dd");
 									finJournalApprovalGroup
-											.setJournalGroupDesc("Refund - Cash Received Journal for :"
+																	.setFinJournal(finJournalCashReceive);
+									finJournalApprovalGroup
+											.setJournalGroupDesc("Cash Received Journal for :"
 													+ sdf.format(new Date()));
+									finJournalApprovalGroup
+									.setJournalGroupTimestamp(new Timestamp(System
+											.currentTimeMillis()));
 									if (!em.contains(finJournalApprovalGroup)) {
 										CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
 										finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
@@ -737,15 +746,24 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() != FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
-
-							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
+							
+							finJournalApprovalGroup = new FinJournalApprovalGroup();
+							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 							finJournalApprovalGroup
 									.setFinApprovalStatus(finApprovalStatuss);
 							SimpleDateFormat sdf = new SimpleDateFormat(
 									"yyyy-MMM-dd");
+
+
 							finJournalApprovalGroup
-									.setJournalGroupDesc("Allocated - Cash Received Journal for :"
+															.setFinJournal(finJournalCashReceive);
+							
+							finJournalApprovalGroup
+									.setJournalGroupDesc("Cash Received Journal for :"
 											+ sdf.format(new Date()));
+							finJournalApprovalGroup
+							.setJournalGroupTimestamp(new Timestamp(System
+									.currentTimeMillis()));
 							if (!em.contains(finJournalApprovalGroup)) {
 								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
 								finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
