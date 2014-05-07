@@ -49,7 +49,7 @@ public class FetchGRNDataCommand implements RafDsCommand {
         		asnService = new ASNManagementService();
                 InventoryPagingWrapper<GoodReceivedNote> grnWrapper = grnService.getGRNDataList(request);
                 if(grnWrapper!=null && grnWrapper.isSuccess()){
-	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	 		        
 	                for(GoodReceivedNote grn : grnWrapper.getContent()){
 	                    HashMap<String, String> map = new HashMap<String, String>();
@@ -60,7 +60,6 @@ public class FetchGRNDataCommand implements RafDsCommand {
 	                    map.put(DataNameTokens.INV_ASN_NUMBER, asn.getAsnNumber());
 	                    map.put(DataNameTokens.INV_ASN_REFF_NUMBER, asn.getReferenceNumber());
 	                    
-		                //get supplier based on reff type
 	                    _log.debug("reff type: "+asn.getReferenceType().name());
 	                    _log.debug("reff number: "+asn.getReferenceNumber());
 		                String supplierCode="", supplierName="";

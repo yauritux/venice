@@ -56,7 +56,7 @@ public class GRNManagementService {
         System.out.println("getGRNDataList");
 
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "goodReceivedNote/getCreatedList?"
+                + "goodReceivedNote/findByFilter?username="+request.getParams().get("username")
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);

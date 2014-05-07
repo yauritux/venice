@@ -1,6 +1,7 @@
 package com.gdn.venice.client.app.inventory.view;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
@@ -323,12 +324,25 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
 
     @Override
     public void loadGRNData(DataSource dataSource) {
+        Map<String, String> status = new HashMap<String, String>();
+        status.put("CREATED", "Created");
+        status.put("CLOSED", "Closed");
+        dataSource.getField(DataNameTokens.INV_ASN_STATUS).setValueMap(status);
+        
+        Map<String, String> type = new HashMap<String, String>();
+        type.put("PURCHASE_ORDER", "Purchase Order");
+        type.put("CONSIGNMENT_FINAL", "Consignment Final");
+        type.put("INVENTORY_REQUEST", "Inventory Request");
+        dataSource.getField(DataNameTokens.INV_ASN_INVENTORY_TYPE).setValueMap(type);
+        
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(dataSource);
 
         grnListGrid.setDataSource(dataSource);
         grnListGrid.setAutoFetchData(true);
         grnListGrid.setFields(listGridField);
         grnListGrid.getField(DataNameTokens.INV_GRN_ID).setHidden(true);
+        grnListGrid.getField(DataNameTokens.INV_ASN_SUPPLIER_CODE).setCanFilter(false);
+        grnListGrid.getField(DataNameTokens.INV_ASN_SUPPLIER_NAME).setCanFilter(false);
         grnListGrid.setAutoFitData(Autofit.BOTH);
 
         layout.setMembers(toolStrip, grnListGrid);

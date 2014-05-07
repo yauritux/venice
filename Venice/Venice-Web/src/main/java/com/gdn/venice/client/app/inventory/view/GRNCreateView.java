@@ -3,6 +3,7 @@ package com.gdn.venice.client.app.inventory.view;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.GRNData;
@@ -305,6 +306,17 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 
     @Override
     public void loadASNData(DataSource dataSource) {
+        Map<String, String> status = new HashMap<String, String>();
+        status.put("CREATED", "Created");
+        status.put("CLOSED", "Closed");
+        dataSource.getField(DataNameTokens.INV_ASN_STATUS).setValueMap(status);
+        
+        Map<String, String> type = new HashMap<String, String>();
+        type.put("PURCHASE_ORDER", "Purchase Order");
+        type.put("CONSIGNMENT_FINAL", "Consignment Final");
+        type.put("INVENTORY_REQUEST", "Inventory Request");
+        dataSource.getField(DataNameTokens.INV_ASN_INVENTORY_TYPE).setValueMap(type);
+        
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(dataSource);
 
         asnListGrid.setDataSource(dataSource);    	
@@ -312,6 +324,10 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         asnListGrid.setFields(listGridField);
         asnListGrid.getField(DataNameTokens.INV_ASN_ID).setHidden(true);
         asnListGrid.getField(DataNameTokens.INV_ASN_DESTINATIONCODE).setHidden(true);
+        asnListGrid.getField(DataNameTokens.INV_ASN_CREATED_DATE).setHidden(true);
+        asnListGrid.getField(DataNameTokens.INV_ASN_EST_DATE).setHidden(true);
+        asnListGrid.getField(DataNameTokens.INV_ASN_SUPPLIER_CODE).setCanFilter(false);
+        asnListGrid.getField(DataNameTokens.INV_ASN_SUPPLIER_NAME).setCanFilter(false);
         asnListGrid.setAutoFitData(Autofit.BOTH);
 
         layout.setMembers(toolStrip, asnListGrid);
