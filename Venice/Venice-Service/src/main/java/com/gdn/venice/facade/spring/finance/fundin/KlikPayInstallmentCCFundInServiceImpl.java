@@ -171,6 +171,7 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 		Date tgl=SDF_yyyyMMdd_HHmmss.parse(rec.getTransDate().replaceAll("\\.", "").substring(0, 8)+" "+transactionTime);		
 		Date paymentDate = SDF_yyyy_MM_dd.parse(rec.getTransDate().substring(0, 4)+"-"+rec.getTransDate().substring(4, 6)+"-"+rec.getTransDate().substring(6, 8));
 		
+		String cardNumber = rec.getCardNo();
 		
 		if(!isFundInOkToContinue(referenceId, new java.sql.Timestamp(tgl.getTime())+"", paymentAmount, REPORT_TYPE)) {
 			return null;
@@ -223,6 +224,7 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 		fundInRecon.setReconcilliationRecordTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
 		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(tgl.getTime()));
 		fundInRecon.setRefundAmount(new BigDecimal(0));
+		fundInRecon.setCardNumber(cardNumber!=null?cardNumber:"");
 		
 		fundInRecon.setFinArReconResult(getReconResult(fundInRecon));
 		

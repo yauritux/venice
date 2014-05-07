@@ -62,11 +62,6 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 			
 			for(PojoInterface pojo : fundInData.getFundInList()){
 				fundInRecon = processEachFundIn(pojo, finArFundsInReport);
-				
-				CommonUtil.logDebug(CLASS_NAME, "fund in record adalah  : "+fundInRecon.getCardNumber());
-				
-				
-				
 				if(fundInRecon != null){
 					fundInReconReadyToPersistList.add(fundInRecon);
 					fundInData.getProcessedFundInList().add(fundInRecon.getNomorReff());
@@ -183,16 +178,6 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 		
 		String cardNumber = rec.getCardNo();
 		
-		
-		
-		
-		
-		CommonUtil.logDebug(CLASS_NAME, "Card number 1 masuk adalah : " + cardNumber);
-		
-		
-		
-		
-		
 		if(!isFundInOkToContinue(referenceId, new java.sql.Timestamp(tgl.getTime())+"", paymentAmount, REPORT_TYPE)) {
 			return null;
 		}
@@ -246,13 +231,6 @@ public class KlikPayCCFundInServiceImpl extends AbstractFundInService{
 		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(tgl.getTime()));
 		fundInRecon.setRefundAmount(new BigDecimal(0));
 		fundInRecon.setCardNumber(cardNumber!=null?cardNumber:"");
-		
-		
-		
-
-		CommonUtil.logDebug(CLASS_NAME, "Card number 2 masuk adalah : " + fundInRecon.getCardNumber());
-		
-		
 		
 		fundInRecon.setFinArReconResult(getReconResult(fundInRecon));
 		
