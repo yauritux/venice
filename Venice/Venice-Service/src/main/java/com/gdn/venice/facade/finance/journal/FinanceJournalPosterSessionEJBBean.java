@@ -41,6 +41,7 @@ import com.gdn.venice.constants.VenPromotionTypeConstants;
 import com.gdn.venice.constants.VenSettlementRecordCommissionTypeConstants;
 import com.gdn.venice.dao.FinApManualJournalTransactionDAO;
 import com.gdn.venice.dao.FinApPaymentDAO;
+import com.gdn.venice.dao.FinApprovalStatusDAO;
 import com.gdn.venice.dao.FinArFundsInAllocatePaymentDAO;
 import com.gdn.venice.dao.FinArFundsInJournalTransactionDAO;
 import com.gdn.venice.dao.FinArFundsInReconRecordDAO;
@@ -176,6 +177,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 	
 	@Autowired
 	private FinJournalDAO finJournalDAO;
+	
+	@Autowired
+	private FinApprovalStatusDAO finApprovalStatusDAO;
 	
 	private static BigDecimal GDNPPN_DIVISOR = new BigDecimal(
 			VeniceConstants.VEN_GDN_PPN_RATE).divide(new BigDecimal(100), 2,
@@ -506,9 +510,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							 * diubah menjadi submitted agar tidak ikut ke
 							 * rollup
 							 */
-							FinApprovalStatus finApprovalStatuss = new FinApprovalStatus();
-							finApprovalStatuss
-									.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
+							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
 							finJournalApprovalGroup
 									.setFinApprovalStatus(finApprovalStatuss);
 							SimpleDateFormat sdf = new SimpleDateFormat(
@@ -565,6 +567,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 								if (reconRecord.getProviderReportPaidAmount()
 										.compareTo(
 												reconRecord.getRefundAmount()) != 0) {
+
+									FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
+									finJournalApprovalGroup
+											.setFinApprovalStatus(finApprovalStatuss);
+									SimpleDateFormat sdf = new SimpleDateFormat(
+											"yyyy-MMM-dd");
+									finJournalApprovalGroup
+											.setJournalGroupDesc("Refund - Cash Received Journal for :"
+													+ sdf.format(new Date()));
+									if (!em.contains(finJournalApprovalGroup)) {
+										CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
+										finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+									}
+									
 									/*
 									 * Post the CREDIT for UANG jaminan
 									 * transaksi
@@ -721,6 +737,20 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() != FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
+
+							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
+							finJournalApprovalGroup
+									.setFinApprovalStatus(finApprovalStatuss);
+							SimpleDateFormat sdf = new SimpleDateFormat(
+									"yyyy-MMM-dd");
+							finJournalApprovalGroup
+									.setJournalGroupDesc("Allocated - Cash Received Journal for :"
+											+ sdf.format(new Date()));
+							if (!em.contains(finJournalApprovalGroup)) {
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
+								finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+							}
+							
 							/*
 							 * Post the CREDIT for UANG jaminan transaksi
 							 */
@@ -860,6 +890,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
+							finJournalApprovalGroup=finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
 							/*
 							 * Post the journal transaction for uang jaminan
 							 * transaksi
