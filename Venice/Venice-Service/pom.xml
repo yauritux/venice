@@ -91,7 +91,7 @@
             <groupId>dozer-patched-session</groupId>
             <artifactId>dozer-patched-session</artifactId>
             <version>5-3</version>
-            <classifier>4</classifier>
+            <classifier>5</classifier>
         </dependency>
         <dependency>
             <groupId>pwsatk-utils</groupId>
