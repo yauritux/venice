@@ -35,10 +35,10 @@ public class CountryServiceImpl implements CountryService {
 	private EntityManager em;
 	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public VenCountry synchronizeVenCountry(VenCountry venCountry) {
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::BEGIN,venCountry = " + venCountry);
-		VenCountry synchCountry = venCountry;
+		VenCountry synchCountry = new VenCountry();
 		if (venCountry != null && venCountry.getCountryCode() != null) {
 			try {
 				CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenCountry::countryCode=  " + venCountry.getCountryCode());
@@ -49,7 +49,11 @@ public class CountryServiceImpl implements CountryService {
 					if (!em.contains(venCountry)) {
 						//venCountry in detach mode, hence need to explicitly call save 
 						synchCountry = venCountryDAO.save(venCountry);
-					} 
+					} else {
+						synchCountry = venCountry;
+					}
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "synchronizeVenCountry::new venCountry is added successfully into DB");
 				} else {
 					synchCountry = countryList.get(0);
 				}
@@ -59,11 +63,16 @@ public class CountryServiceImpl implements CountryService {
 				CommonUtil.logAndReturnException(new VenCountrySynchronizingError("Error in synchronizing VenCountry"
 						, VeniceExceptionConstants.VEN_EX_130003), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);				
 			}
+		} else {
+			synchCountry = venCountry;
 		}
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenCountry::returning synchCountry = " + (synchCountry != null ? synchCountry.getCountryCode() : synchCountry));
 		return synchCountry;
 	}
+	
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.NOT_SUPPORTED)
 	public List<VenCountry> synchronizeVenCountryReferences(
 			List<VenCountry> countryReferences) {
 		

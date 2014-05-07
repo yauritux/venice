@@ -29,6 +29,7 @@ import com.gdn.venice.client.app.finance.view.PromotionView;
 import com.gdn.venice.client.app.finance.view.ReportsLauncherView;
 import com.gdn.venice.client.app.finance.view.SalesRecordView;
 import com.gdn.venice.client.app.fraud.presenter.BlackListMaintenancePresenter;
+import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule35Presenter;
 import com.gdn.venice.client.app.fraud.presenter.CustomerBlackListMaintenancePresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudBinCreditLimitPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCalculatePresenter;
@@ -37,11 +38,11 @@ import com.gdn.venice.client.app.fraud.presenter.FraudCaseViewerPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudCustomerWhitelistPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudDashboardPresenter;
 import com.gdn.venice.client.app.fraud.presenter.FraudParameterRule31Presenter;
-import com.gdn.venice.client.app.fraud.presenter.InstallmentBCAPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsMasterPresenter;
 import com.gdn.venice.client.app.fraud.presenter.MigsUploadPresenter;
 import com.gdn.venice.client.app.fraud.presenter.UncalculatedCreditCardOrderPresenter;
 import com.gdn.venice.client.app.fraud.view.BlackListMaintenanceView;
+import com.gdn.venice.client.app.fraud.view.FraudParameterRule35View;
 import com.gdn.venice.client.app.fraud.view.CustomerBlackListMaintenanceView;
 import com.gdn.venice.client.app.fraud.view.FraudBinCreditLimitView;
 import com.gdn.venice.client.app.fraud.view.FraudCalculateView;
@@ -50,7 +51,6 @@ import com.gdn.venice.client.app.fraud.view.FraudCaseViewerView;
 import com.gdn.venice.client.app.fraud.view.FraudCustomerWhitelistView;
 import com.gdn.venice.client.app.fraud.view.FraudDashboardView;
 import com.gdn.venice.client.app.fraud.view.FraudParameterRule31View;
-import com.gdn.venice.client.app.fraud.view.InstallmentBCAView;
 import com.gdn.venice.client.app.fraud.view.MigsMasterView;
 import com.gdn.venice.client.app.fraud.view.MigsUploadView;
 import com.gdn.venice.client.app.fraud.view.UncalculatedCreditCardOrderView;
@@ -359,6 +359,11 @@ public class VeniceClientModule extends AbstractPresenterModule {
 				FraudParameterRule31View.class,
 				FraudParameterRule31Presenter.MyProxy.class);	
 				
+		bindPresenter(FraudParameterRule35Presenter.class,
+				FraudParameterRule35Presenter.MyView.class,
+				FraudParameterRule35View.class,
+				FraudParameterRule35Presenter.MyProxy.class);
+		
 		bindPresenter(FinSalesSettlementReportPresenter.class, 
 				FinSalesSettlementReportPresenter.MyView.class,
 				FinSalesSettlementReportView.class,

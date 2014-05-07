@@ -141,6 +141,16 @@ public class DataNameTokens {
 	public static String FRDPARAMETERRULE31_ID="FrdParameterRule31.id";
 	public static String FRDPARAMETERRULE31_EMAIL="FrdParameterRule31.email";
 	public static String FRDPARAMETERRULE31_CCNUMBER="FrdParameterRule31.noCc";
+	
+	//for fraud parameter 35 (grey list)
+	public static String FRDPARAMETERRULE35_ID="FrdParameterRule35.id";
+	public static String FRDPARAMETERRULE35_ORDERID="FrdParameterRule35.orderId";
+	public static String FRDPARAMETERRULE35_NOSURAT="FrdParameterRule35.noSurat";
+	public static String FRDPARAMETERRULE35_ORDERDATE="FrdParameterRule35.orderDate";
+	public static String FRDPARAMETERRULE35_CUSTOMERNAME="FrdParameterRule35.customerName";
+	public static String FRDPARAMETERRULE35_EMAIL="FrdParameterRule35.email";
+	public static String FRDPARAMETERRULE35_CCNUMBER="FrdParameterRule35.ccNumber";
+	public static String FRDPARAMETERRULE35_REMARKS="FrdParameterRule35.remarks";
 
 	public static String MIGSUPLOAD_MIGSID = "VenMigsUploadTemporary.migsId";
 	public static String MIGSUPLOAD_TRANSACTIONID = "VenMigsUploadTemporary.transactionId";
@@ -1319,6 +1329,16 @@ public class DataNameTokens {
 		fieldClassMap.put(FRDPARAMETERRULE31_EMAIL, "java.lang.String");
 		fieldClassMap.put(FRDPARAMETERRULE31_CCNUMBER, "java.lang.String");
 
+
+		fieldClassMap.put(FRDPARAMETERRULE35_ID, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_ORDERID, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_NOSURAT, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_ORDERDATE, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_CUSTOMERNAME, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_EMAIL, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_CCNUMBER, "java.lang.String");
+		fieldClassMap.put(FRDPARAMETERRULE35_REMARKS, "java.lang.String");
+		
 		fieldClassMap.put(MIGSUPLOAD_TRANSACTIONID, "java.lang.Long");
 		fieldClassMap.put(MIGSUPLOAD_MIGSID, "java.lang.Long");
 		fieldClassMap.put(MIGSUPLOAD_TRANSACTIONDATE, "java.sql.Timestamp");

@@ -113,4 +113,16 @@ public class CommonUtil {
 	public static void logInfo(Logger logger, String message) {
 		if (logger.isInfoEnabled()) logger.info(message);
 	}
+	
+	public static void logInfo(String key, String message) {
+	    switch (veniceEnv) {
+	    case TESTING: 
+	    	return; //do nothing in testing environment
+	    default: //continue to the next line for both "DEVELOPMENT" and "PRODUCTION"
+	    }
+	    
+	    Logger logger = getLogger(key);
+	    
+		if (logger.isDebugEnabled()) logger.info(message);
+	}
 }

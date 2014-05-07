@@ -12,6 +12,8 @@ import com.gdn.venice.persistence.VenPromotion;
  */
 public interface PromotionService {
 	
-	public List<VenPromotion> synchronizeVenPromotionReferences(
-			List<VenPromotion> promotionReferences) throws VeniceInternalException;
+	public VenPromotion synchronizeVenPromotionReferences(
+			VenPromotion venPromotion) throws VeniceInternalException;
+	public List<VenPromotion> findByPromotionAndMargin(VenPromotion venPromotion)
+			throws VeniceInternalException;
 }

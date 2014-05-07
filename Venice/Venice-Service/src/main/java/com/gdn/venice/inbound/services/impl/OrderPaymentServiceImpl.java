@@ -208,23 +208,40 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 					// Set the payment type based on the WCS payment type
 					// VenPaymentType venPaymentType = new VenPaymentType();
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::mapping payment type");
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::venOrderPayment=" + venOrderPayment);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::venOrderPayment=" + payment);
 					
-					//venOrderPayment = OrderUtil.getVenOrderPaymentByWCSPaymentType(venOrderPayment, next);
 					venOrderPayment = OrderUtil.getVenOrderPaymentByWCSPaymentType(venOrderPayment, payment);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::venOrderPayment from OrderUtil=" + venOrderPayment);
+					
 					venOrderPaymentList.add(venOrderPayment);
 				}
 			}					
 			
-			CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::persist payment");
-			venOrderPaymentList = persistOrderPaymentList(venOrderPaymentList);
+			List<VenOrderPayment> updatedVenOrderPayments = new ArrayList<VenOrderPayment>();
+			
+			//check whether payment's address equal with Customer's address
+			for (VenOrderPayment orderPayment : venOrderPaymentList) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "processPayment::orderPayment.venAddress = " + orderPayment.getVenAddress());
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "processPayment::orderPayment.venAddress = " + venOrder.getVenCustomer().getVenParty().getVenPartyAddresses());				
+				if (orderPayment.getVenAddress().equals(venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress())) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "processPayment::payment's address equal with Customer's address, assign customer's address to payment's address");
+					orderPayment.setVenAddress(venOrder.getVenCustomer().getVenParty().getVenPartyAddresses().get(0).getVenAddress());		
+				}
+				updatedVenOrderPayments.add(orderPayment);
+			}
+			
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::persisting payment");
+			//venOrderPaymentList = persistOrderPaymentList(venOrderPaymentList);
+			venOrderPaymentList = persistOrderPaymentList(updatedVenOrderPayments);
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "processPayment::venOrderPaymentList members = " + (venOrderPaymentList != null ? venOrderPaymentList.size() : 0));
 
-			//paymentIterator = venOrderPaymentList.iterator();
 			int p=0;
-			//while (paymentIterator.hasNext()) {
 			for (VenOrderPayment venOrderPayment : venOrderPaymentList) {
-				//VenOrderPayment next = (VenOrderPayment) paymentIterator.next();
 
 				//Only include the allocations for non-VA payments
 				//because VA payments are already in the DB
@@ -283,8 +300,18 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 			//Later these records will be updated when the funds in
 			//reports are processed 					
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), "processPayment::create reconciliation record");
+			
+			/*
+			List<VenOrderPayment> orderPayments = new ArrayList<VenOrderPayment>();
+			
+			for (VenOrderPayment venOrderPayment : venOrderPaymentList) {
+				orderPayments.add(venOrderPayment);
+			}
+			*/
+			
 			try {
 				for (VenOrderPayment payment : venOrderPaymentList) {
+				//for (VenOrderPayment payment : orderPayments) {
 					//Only insert reconciliation records for non-VA payments here
 					//because the VA records will have been inserted when a VA payment is received.
 					if (payment.getVenPaymentType().getPaymentTypeId() != VeniceConstants.VEN_PAYMENT_TYPE_ID_VA 
@@ -436,6 +463,7 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 	 * @return the synchronized data object
 	 */	
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenOrderPayment synchronizeVenOrderPaymentReferenceData(
 			VenOrderPayment venOrderPayment) throws VeniceInternalException {
 		

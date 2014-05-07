@@ -1,7 +1,5 @@
 package com.gdn.venice.inbound.services;
 
-import java.util.List;
-
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.persistence.VenContactDetailType;
 
@@ -11,7 +9,7 @@ import com.gdn.venice.persistence.VenContactDetailType;
  *
  */
 public interface ContactDetailTypeService {
-	
-	public List<VenContactDetailType> synchronizeVenContactDetailTypeReferences(
-			List<VenContactDetailType> contactDetailTypes) throws VeniceInternalException;
+		
+	public VenContactDetailType synchronizeVenContactDetailType(
+			VenContactDetailType contactDetailType) throws VeniceInternalException;			
 }

@@ -46,12 +46,14 @@ public class RecipientServiceImpl implements RecipientService {
 	 * @return the persisted object
 	 */	
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenRecipient persistRecipient(VenRecipient venRecipient)
 			throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "persistRecipient::BEGIN, venRecipient= " + venRecipient);
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::venRecipient.recipientId = " + venRecipient.getRecipientId());
 		
-		if (venRecipient != null) {
+		if (venRecipient != null && venRecipient.getRecipientId() == null) {
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "persistRecipient::Persisting VenRecipient... :" + venRecipient.getVenParty().getFullOrLegalName());
 
@@ -62,9 +64,23 @@ public class RecipientServiceImpl implements RecipientService {
 			venPartyType.setPartyTypeId(new Long(VenPartyTypeConstants.VEN_PARTY_TYPE_RECIPIENT.code()));
 			venRecipient.getVenParty().setVenPartyType(venPartyType);
 
-			VenParty persistedParty = partyService.persistParty(venRecipient.getVenParty(), "Recipient");
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::venParty.partyId = " + venRecipient.getVenParty().getPartyId());
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::venParty.partyType = " + venRecipient.getVenParty().getVenPartyType().getPartyTypeDesc());
+			VenParty persistedParty = null;
+			if (venRecipient.getVenParty().getPartyId() != null) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::recipient's party already persisted, no need to call persist twice");
+				persistedParty = venRecipient.getVenParty();
+				VenPartyType partyType = new VenPartyType();
+				partyType.setPartyTypeId(VenPartyTypeConstants.VEN_PARTY_TYPE_RECIPIENT.code());
+				partyType.setPartyTypeDesc(VenPartyTypeConstants.VEN_PARTY_TYPE_RECIPIENT.description());
+				persistedParty.setVenPartyType(partyType);
+			} else {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::recipient's party need to be persisted");
+			    persistedParty = partyService.persistParty(venRecipient.getVenParty(), "Recipient");
+			}
 			CommonUtil.logDebug(this.getClass().getCanonicalName()
 					, "persistRecipient::persistedParty ID = " + persistedParty.getPartyId());
+			CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::persistedParty partyType = " + persistedParty.getVenPartyType().getPartyTypeDesc());
 			venRecipient.setVenParty(persistedParty);
 			// Synchronize the reference data
 			venRecipient = this.synchronizeVenRecipientReferenceData(venRecipient);
@@ -72,13 +88,18 @@ public class RecipientServiceImpl implements RecipientService {
 			
 			if (!em.contains(venRecipient)) {
 				try {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::calling save explicitly");
 					venRecipient = venRecipientDAO.save(venRecipient);
+					CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::venRecipient successfully persisted");
 				} catch (Exception e) {
 					CommonUtil.logError(this.getClass().getCanonicalName(), e);
 					throw new VeniceInternalException("Cannot persist VenRecipient", e);
 				}
 			}
 		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persistRecipient::returning venRecipient = " + venRecipient);
+		
 		return venRecipient;
 	}
 	
@@ -101,15 +122,6 @@ public class RecipientServiceImpl implements RecipientService {
 		venParties = partyService.synchronizeVenPartyReferenceData(venParties);
 
 		// Push the keys back into the record
-		/*
-		Iterator<Object> referencesIterator = references.iterator();
-		while (referencesIterator.hasNext()) {
-			Object next = referencesIterator.next();
-			if (next instanceof VenParty) {
-				venRecipient.setVenParty((VenParty) next);
-			}
-		}
-		*/
 		
 		for (VenParty party : venParties) {
 			venRecipient.setVenParty(party);

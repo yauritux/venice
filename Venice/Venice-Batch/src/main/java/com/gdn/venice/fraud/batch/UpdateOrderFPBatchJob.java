@@ -186,11 +186,6 @@ public class UpdateOrderFPBatchJob {
                                         hasCCPaymentType = true;
                                         break;
                                     }
-                                    else if(isEci5HistoryOrder(orderPaymentAllocationList.get(k).getVenOrder()) && eciCode.equals("05") ){
-                                    	//history(email, alamat, no handphone) sama, dan ecinya 7
-                                    	_log.info("update FP automatically, wcsOrderId: " + orderPaymentAllocationList.get(tempCounter).getVenOrder().getWcsOrderId());
-                                        break;
-                                    }
                                      else {
                                         //ip dan customer tidak ter blacklist
                                         //cek bin number
@@ -519,52 +514,5 @@ public class UpdateOrderFPBatchJob {
             }
         }
     	   return result;
-    }
-    
-    public boolean isEci5HistoryOrder(VenOrder venOrder) {
-    	boolean result=false;
-    	  Locator<Object> locator = null;
-          
-          try {
-              locator = new Locator<Object>();
-    	
-	    	 VenOrderAddressSessionEJBRemote orderAddressSessionHome = (VenOrderAddressSessionEJBRemote) locator.lookup(VenOrderAddressSessionEJBRemote.class, "VenOrderAddressSessionEJBBean");
-	         VenOrderContactDetailSessionEJBRemote orderContactDetailSessionHome = (VenOrderContactDetailSessionEJBRemote) locator.lookup(VenOrderContactDetailSessionEJBRemote.class, "VenOrderContactDetailSessionEJBBean");
-	         VenOrderPaymentAllocationSessionEJBRemote allocationSessionHome = (VenOrderPaymentAllocationSessionEJBRemote) locator.lookup(VenOrderPaymentAllocationSessionEJBRemote.class, "VenOrderPaymentAllocationSessionEJBBean");
-	
-	    	 List<VenOrderAddress> orderHistoryEci5Address;
-	         List<VenOrderAddress> orderEci5Address = orderAddressSessionHome.queryByRange("select o from VenOrderAddress o where o.venOrder.orderId =" + venOrder.getOrderId(), 0, 1);
-	         if(orderEci5Address.size()>0){
-	         	orderHistoryEci5Address=orderAddressSessionHome.queryByRange("select o from VenOrderAddress o where upper(o.venAddress.streetAddress1) like '%" + orderEci5Address.get(0).getVenAddress().getStreetAddress1().toUpperCase() + "%' and o.venOrder.orderId != " + venOrder.getOrderId(), 0, 1);
-	         	if(orderHistoryEci5Address.size()>0){
-	         		List<VenOrderContactDetail> orderHistoryEci5ContactDetail;	
-	         		List<VenOrderContactDetail> orderEci5ContactDetail=orderContactDetailSessionHome.queryByRange("select o from VenOrderContactDetail o where o.venOrder.orderId = " + venOrder.getOrderId() + " and (o.venContactDetail.venContactDetailType.contactDetailTypeId =" + VEN_CONTACT_DETAIL_ID_PHONE + " or o.venContactDetail.venContactDetailType.contactDetailTypeId =" + VEN_CONTACT_DETAIL_ID_MOBILE + " or o.venContactDetail.venContactDetailType.contactDetailTypeId =" + VEN_CONTACT_DETAIL_ID_EMAIL+")", 0, 1);	         		
-	         		List<VenOrderPaymentAllocation> orderHistoryEci5PaymentAllocation;
-	         		if(orderEci5ContactDetail.size()>0){
-		         		for(int i=0;i<orderHistoryEci5Address.size();i++){
-		         			for(int j=0;j<orderEci5ContactDetail.size();j++){			         			
-		         				orderHistoryEci5ContactDetail=orderContactDetailSessionHome.queryByRange("select o from VenOrderContactDetail o where o.venOrder.orderId = "+ orderEci5Address.get(i).getVenOrder().getOrderId() +" and o.venContactDetail.contactDetail = '" + orderEci5ContactDetail.get(j).getVenContactDetail().getContactDetail()+"'", 0, 1);          
-			         			orderHistoryEci5PaymentAllocation=allocationSessionHome.queryByRange("select o from VenOrderPaymentAllocation o where o.venOrder.orderId = '"+ orderHistoryEci5ContactDetail.get(i).getVenOrder().getOrderId() +"' and venOrderPayment.threeDsSecurityLevelAuth != '07'", 0, 1);
-			         			if(orderHistoryEci5PaymentAllocation.size()>0){
-			                         _log.info("Automatic FP, data equal with history data(email, address, handphone number, phone number) and ECI is not 7");
-			                         result = true;            				
-			         			}
-		         			}
-		         		}
-	         		}
-	         	}
-	         }
-          } catch (Exception ex) {
-              ex.printStackTrace();
-          } finally {
-              try {
-                  if (locator != null) {
-                      locator.close();
-                  }
-              } catch (Exception e) {
-                  e.printStackTrace();
-              }
-          }
-	    	return result;
     }
 }

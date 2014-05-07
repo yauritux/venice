@@ -31,7 +31,9 @@ import com.gdn.venice.facade.logistics.activity.parser.MSGActivityReportFilePars
 import com.gdn.venice.facade.spring.LogAirwayBillService;
 import com.gdn.venice.facade.spring.VenOrderItemService;
 import com.gdn.venice.hssf.PojoInterface;
+import com.gdn.venice.logistics.dataimport.DailyReportJNE;
 import com.gdn.venice.logistics.dataimport.DailyReportMSG;
+import com.gdn.venice.logistics.dataimport.DailyReportNCS;
 import com.gdn.venice.logistics.dataimport.LogisticsConstants;
 import com.gdn.venice.logistics.integration.AirwayBillEngineClientConnector;
 import com.gdn.venice.logistics.integration.bean.AirwayBillTransaction;
@@ -175,10 +177,15 @@ public class MSGActivityReportProcessor extends ActivityReportProcessor {
 		
 		boolean isOrderItemAfterAWBEngine = (totalAirwayBillByGDNRef == 0) && (airwayBillTransaction != null) && (airwayBillTransaction.getStatus() != null);
 		
-		if(isOrderItemAfterAWBEngine)
+		if(isOrderItemAfterAWBEngine){
+			_log.debug("existing logistic provider " +airwayBillTransaction.getKodeLogistik());
+			if(differentLogisticProvider(dailyReportOrderItem,activityReportData,airwayBillTransaction.getKodeLogistik()))
+				return;
+			
 			processOrderItemAfterAWBEngine(existingVenOrderItem, dailyReportOrderItem, activityReportData, fileUploadLog, airwayBillTransaction);
-		else
+		}else {
 			processOrderItemBeforeAWBEngine(existingVenOrderItem, dailyReportOrderItem, activityReportData, fileUploadLog);
+		}
 		
 	}
 	
@@ -480,6 +487,15 @@ public class MSGActivityReportProcessor extends ActivityReportProcessor {
 		return true;
 	}
 	
+	public boolean differentLogisticProvider(DailyReportMSG dailyReportOrderItem, ActivityReportData activityReportData, String kodeLogisticPorvider){	
+		if(!kodeLogisticPorvider.equalsIgnoreCase("MSG")){
+			addFailedRecordCausedByDifferentProviderForGdnReffException(dailyReportOrderItem,activityReportData,kodeLogisticPorvider);
+			return true;
+		}else{
+			return false;
+		}
+	};
+	
 	private String getReceiverRelation(DailyReportMSG dailyReportOrderItem){
 		if ((dailyReportOrderItem.getConsignee().equalsIgnoreCase(dailyReportOrderItem.getRecipient())) || (dailyReportOrderItem.getConsignee().contains(dailyReportOrderItem.getRecipient()))) {
 		    return "Yang bersangkutan";
@@ -551,6 +567,12 @@ public class MSGActivityReportProcessor extends ActivityReportProcessor {
 			.put("No : " + dailyReportMSG.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportMSG.getRefNo(), "System/connection problem");
 	}
 
+	private void addFailedRecordCausedByDifferentProviderForGdnReffException(DailyReportMSG dailyReportMSG, ActivityReportData activityReportData, String logisticProvider){
+
+		activityReportData.getFailedProviderForGdnReff()
+			.put("No : " + dailyReportMSG.getTrNo().replace(".0", "") + ", GDN Ref : " + dailyReportMSG.getRefNo(), logisticProvider);
+	}	
+	
 	private void addFailedRecordCausedByReceivedDateException(DailyReportMSG dailyReportMSG, ActivityReportData activityReportData, Exception e){
 		_log.error("Received Date Problem", e);
 		activityReportData.getFailedItemList()

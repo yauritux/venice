@@ -222,7 +222,7 @@ public class AddressServiceImpl implements AddressService {
 							, "persistAddress::attaching venAddress");					
 					venAddress = venAddressDAO.save(venAddress);
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
-							, "persistAddress::venAddress is attached");					
+							, "persistAddress::venAddress is attached now");					
 				}				
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistAddress::successfully merged venAddress");				
@@ -243,6 +243,7 @@ public class AddressServiceImpl implements AddressService {
 	 * @return the synchronized data object
 	 */	
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public VenAddress synchronizeVenAddressReferenceData(VenAddress venAddress)
 			throws VeniceInternalException {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -253,7 +254,6 @@ public class AddressServiceImpl implements AddressService {
 		
 		VenCity venCity = venAddress.getVenCity();
 		em.detach(venCity);
-		//VenCity synchCity = cityService.synchronizeVenCity(venAddress.getVenCity());
 		VenCity synchCity = cityService.synchronizeVenCity(venCity);		
 		venAddress.setVenCity(synchCity);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "synchronizeVenAddressReferenceData::city has been synchronized, result = " + synchCity);

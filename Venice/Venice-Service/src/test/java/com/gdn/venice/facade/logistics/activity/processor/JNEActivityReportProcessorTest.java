@@ -6,6 +6,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -132,6 +133,12 @@ public class JNEActivityReportProcessorTest {
 	}
 	
 	@Test
+	public void isEligibleForStatusChange_existingOrderItemStatusCR_returnsFalse() throws ActivityReportFileParserException{
+		boolean result = sutSpy.isEligibleForStatusChange(VeniceConstants.VEN_ORDER_STATUS_CR);
+		assertFalse(result);
+	}
+	
+	@Test
 	public void updateOrderItemStatusBeforeAirwayBillAutomation_PUtoCX_mergeOrderItemStatusInvoked2Times(){
 		VenOrderItem dummyItem = new VenOrderItem();
 		sutSpy.updateOrderItemStatusBeforeAirwayBillAutomation(dummyItem, VenOrderStatusConstants.VEN_ORDER_STATUS_PU, VenOrderStatusConstants.VEN_ORDER_STATUS_CX);
@@ -216,6 +223,33 @@ public class JNEActivityReportProcessorTest {
 	}
 	
 	@Test
+	public void differentLogisticProvider_sameGdnReffDifferentLogisticProvider_executeDifferentLogisticProvider() throws Exception{
+		ActivityReportData activityReportData = new ActivityReportData();
+		
+		LogFileUploadLog fileUploadLog = new LogFileUploadLog();
+		VenOrderItem orderItemES = new VenOrderItem();
+		orderItemES.setVenOrderStatus(VenOrderStatusES.createVenOrderStatus());
+		
+		AirwayBillTransaction awbTransaction = new AirwayBillTransaction();
+		awbTransaction.setKodeLogistik(""+VeniceConstants.VEN_LOGISTICS_PROVIDER_MSG);
+		
+		when(venOrderItemDAOMock.findWithVenOrderStatusByWcsOrderItemId(anyString()))
+			.thenReturn(orderItemES);
+		
+		when(filterMock.getWcsOrderItemId(anyString())).thenReturn("12345");
+		
+		when(logAirwayBillDAOMock.countByGdnReference(anyString()))
+			.thenReturn(1);
+		
+		when(awbConnMock.getAirwayBillTransaction(anyString()))
+			.thenReturn(awbTransaction);
+
+		sutSpy.differentLogisticProvider(getDailyReportJNEWithCXStatus(),activityReportData,""+VeniceConstants.VEN_LOGISTICS_PROVIDER_MSG);
+		
+		assertEquals(1, activityReportData.getFailedProviderForGdnReff().size());
+	}
+	
+	@Test
 	public void processEachOrderItem_orderItemAfterAirwaybillEngine_executeProcessOrderItemBeforeAWBEngine() throws Exception{
 		ActivityReportData activityReportData = new ActivityReportData();
 		
@@ -239,6 +273,7 @@ public class JNEActivityReportProcessorTest {
 			.thenReturn(awbTransaction);
 		
 		doNothing().when(sutSpy).processOrderItemAfterAWBEngine(orderItemES, getDailyReportJNEWithCXStatus(), activityReportData, fileUploadLog, awbTransaction);
+		doReturn(false).when(sutSpy).differentLogisticProvider(getDailyReportJNEWithCXStatus(),activityReportData,null);
 		
 		sutSpy.processEachOrderItem(getDailyReportJNEWithCXStatus(), activityReportData, fileUploadLog);
 		
@@ -297,7 +332,7 @@ public class JNEActivityReportProcessorTest {
 	@Test
 	public void composeLogAirwayBill_orderItemNewStatusIsCXWithInvalidReceivedDate_updateFail(){
 		ActivityReportData activityReportData = new ActivityReportData();
-		LogFileUploadLog fileUploadLog = new LogFileUploadLog();
+		LogFileUploadLog fileUploadLog = new LogFileUploadLog(); 
 		
 		VenOrderItem orderItemES = new VenOrderItem();
 		orderItemES.setVenOrderStatus(VenOrderStatusES.createVenOrderStatus());

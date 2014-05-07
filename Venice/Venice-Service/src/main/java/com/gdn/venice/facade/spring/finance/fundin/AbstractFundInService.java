@@ -53,6 +53,7 @@ public abstract class AbstractFundInService implements FundInService{
 	public static final SimpleDateFormat SDF_yyyyMMdd_HHmmss = new SimpleDateFormat("yyyyMMdd HHmmss");
 	public static final SimpleDateFormat SDF_yyyyMMdd_HHmmss2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public static final SimpleDateFormat SDF_dd_MMM_yyyy = new SimpleDateFormat("dd-MMM-yyyy");
+	public static final SimpleDateFormat SDF_yyyy_MM_dd = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@Autowired
 	VenOrderDAO venOrderDAO;
@@ -107,14 +108,14 @@ public abstract class AbstractFundInService implements FundInService{
 	}
 	
 	
-	public VenOrderPayment getRelatedPayment(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType){
+	public VenOrderPayment getRelatedPayment(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType, Date paymentDate){
 		VenOrderPayment orderPayment = null;
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
-			orderPayment = venOrderPaymentDAO.findByReferenceIdAndAmount(referenceId, paymentAmount);
+			orderPayment = venOrderPaymentDAO.findByReferenceIdAndAmountAndDatePayment(referenceId, paymentAmount,paymentDate);
 		}
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB||
@@ -152,13 +153,13 @@ public abstract class AbstractFundInService implements FundInService{
 		}
 	}
 	
-	public boolean isOrderPaymentExist(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType){
-		VenOrderPayment orderPayment = getRelatedPayment(referenceId, paymentAmount, reportType);
+	public boolean isOrderPaymentExist(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType, Date paymentDate){
+		VenOrderPayment orderPayment = getRelatedPayment(referenceId, paymentAmount, reportType,paymentDate);
 		
 		return (orderPayment != null);
 	}
 	
-	public VenOrderPaymentAllocation getPaymentAllocationByRelatedPayment(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType){
+	public VenOrderPaymentAllocation getPaymentAllocationByRelatedPayment(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType,Date paymentDate){
 		VenOrderPaymentAllocation orderPaymentAllocation = null;
 		
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC ||
@@ -166,7 +167,7 @@ public abstract class AbstractFundInService implements FundInService{
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
 			
-			List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findWithVenOrderPaymentFinArFundsInReconRecordByCreditCardDetail(referenceId, paymentAmount);
+			List<VenOrderPaymentAllocation> orderPaymentAllocationList = venOrderPaymentAllocationDAO.findWithVenOrderPaymentFinArFundsInReconRecordByCreditCardDetail(referenceId, paymentAmount,paymentDate);
 			orderPaymentAllocation = orderPaymentAllocationList.size() > 0 ? orderPaymentAllocationList.get(0) : null;
 		}
 		
@@ -211,8 +212,8 @@ public abstract class AbstractFundInService implements FundInService{
 		return orderPaymentAllocation;
 	}
 	
-	public VenOrder getOrderByRelatedPayment(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType){
-		VenOrderPaymentAllocation orderPaymentAllocation = getPaymentAllocationByRelatedPayment(referenceId, paymentAmount, reportType);
+	public VenOrder getOrderByRelatedPayment(String referenceId, BigDecimal paymentAmount, FinArFundsInReportTypeConstants reportType,Date paymentDate){
+		VenOrderPaymentAllocation orderPaymentAllocation = getPaymentAllocationByRelatedPayment(referenceId, paymentAmount, reportType,paymentDate);
 		
 		if(orderPaymentAllocation == null){
 			CommonUtil.logDebug(this.getClass().getCanonicalName(), 
@@ -230,10 +231,9 @@ public abstract class AbstractFundInService implements FundInService{
 		if(reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC ||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC||
 		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC ||
-		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){
-			
-			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			Date uniquePaymentDate = df.parse(uniquePayment);
+		   reportType == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC){			
+	
+			Date uniquePaymentDate = SDF_yyyyMMdd_HHmmss2.parse(uniquePayment);
 			
 			fundInReconList = finArFundsInReconRecordDAO.findForCreditCardDetail(paymentIdentifier, paymentAmount, uniquePaymentDate);
 			return (fundInReconList.size() > 0);
@@ -286,7 +286,7 @@ public abstract class AbstractFundInService implements FundInService{
 			totalPaidAmount = totalPaidAmount.add(paymentAmount);
 		}
 		
-		remainingBalanceAmount = remainingBalanceAmount.subtract(totalPaidAmount);
+		remainingBalanceAmount = remainingBalanceAmount.subtract(paymentAmount);
 		
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "Paid Amount: "+ totalPaidAmount);
 		CommonUtil.logDebug(this.getClass().getCanonicalName(), "Remaining Balance: "+ remainingBalanceAmount);

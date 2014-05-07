@@ -1,7 +1,5 @@
 package com.gdn.venice.inbound.services;
 
-import java.util.List;
-
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.persistence.VenProductType;
 
@@ -12,6 +10,6 @@ import com.gdn.venice.persistence.VenProductType;
  */
 public interface ProductTypeService {
 	
-	public List<VenProductType> synchronizeVenProductTypeReferences(
-			List<VenProductType> productTypeRefs) throws VeniceInternalException;
+	public VenProductType synchronizeVenProductType(VenProductType venProductType) 
+			throws VeniceInternalException;	
 }

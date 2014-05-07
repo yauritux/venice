@@ -53,6 +53,8 @@ public interface LogisticsServletConstants {
 	public static String EXCEPTION_TEXT_AWB_STATUS_NOT_PU_PP_ES_CX_D = "Airway bill status that is not PU, PP, ES, CX, or D for order item:";
 	
 	public static String EXCEPTION_TEXT_INVOICE_NUMBER_NULL = "Invoice number has not been provided. An invoice number must be provided to upload the report!";
+
+	public static String EXCEPTION_TEXT_INVOICE_FILE_NULL = "Invoice file has not been provided. An invoice file must be provided to upload the report!";
 	
 	public static String EXCEPTION_TEXT_INVOICE_NO_EXISTS_AND_APPROVED = "An invoice with this invoice number already exists and has been approved:";
 	

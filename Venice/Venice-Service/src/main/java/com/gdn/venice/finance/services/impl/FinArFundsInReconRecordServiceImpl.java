@@ -42,7 +42,11 @@ public class FinArFundsInReconRecordServiceImpl implements FinArFundsInReconReco
 			try {
 				if (!em.contains(reconRecord)) {
 					//reconRecord in detach mode, hence call save explicitly
-					persistedReconRecord = finArFundsInReconRecordDAO.saveAndFlush(reconRecord);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persist::calling finArFundsInReconRecordDA.save explicitly");
+					persistedReconRecord = finArFundsInReconRecordDAO.save(reconRecord);
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persist::reconRecord ID = " + persistedReconRecord.getReconciliationRecordId());
 				}
 			} catch (Exception e) {
 				CommonUtil.logError(this.getClass().getCanonicalName(), e);
@@ -52,6 +56,7 @@ public class FinArFundsInReconRecordServiceImpl implements FinArFundsInReconReco
 			}
 		}
 		
+		CommonUtil.logDebug(this.getClass().getCanonicalName(), "persist::returning persistedReconRecord = " + persistedReconRecord);
 		return persistedReconRecord;
 	}
 

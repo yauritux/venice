@@ -14,4 +14,6 @@ import com.gdn.venice.persistence.VenProductCategory;
 public interface VenProductCategoryDAO extends JpaRepository<VenProductCategory, Long>{
 
 	public List<VenProductCategory> findByProductCategory(String productCategory);
+	
+	public List<VenProductCategory> findByProductCategoryAndLevel(String productCategory, Integer level);
 }

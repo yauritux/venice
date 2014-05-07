@@ -53,7 +53,7 @@ public class FetchOrderHistory implements RafDsCommand {
 			
 			if (criteria == null) {
 				String query="select o from VenOrderPaymentAllocation o join fetch o.venOrder oi join fetch oi.venOrderItems oe  ";			
-				venOrderPaymentAllocationList = orderAllocationSessionHome.queryByRange(query,0, 50);
+				venOrderPaymentAllocationList = orderAllocationSessionHome.queryByRange(query,0, 20);
 			} else {
 				String query="select o from VenOrderPaymentAllocation o join fetch o.venOrder oi join fetch oi.venOrderItems oe where ";	
 				List<JPQLSimpleQueryCriteria> simpleCriteriaList = criteria.getSimpleCriteria();

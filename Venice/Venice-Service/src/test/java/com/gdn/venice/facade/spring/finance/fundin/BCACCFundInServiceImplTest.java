@@ -1,7 +1,13 @@
 package com.gdn.venice.facade.spring.finance.fundin;
 
-import static junit.framework.Assert.*;
-import static org.mockito.Mockito.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -294,6 +300,47 @@ public class BCACCFundInServiceImplTest {
 		FinArReconResult reconResult = sut.getReconResult(fundInRecon);
 		
 		assertEquals(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id(), reconResult.getReconResultId().longValue());
+	}
+	
+	@Test
+	public void getRemainingBalanceAfterPayment_paymentNotYetPaid_returns0() {
+		
+		FinArFundsInReconRecord fundInNotYetPaid = new FinArFundsInReconRecord();
+		fundInNotYetPaid.setRemainingBalanceAmount(new BigDecimal("10000"));
+		
+		BigDecimal paymentAmount = new BigDecimal("10000");
+		
+		BigDecimal result = sut.getRemainingBalanceAfterPayment(fundInNotYetPaid, paymentAmount);
+		
+		assertEquals(new BigDecimal(0), result);
+	}
+	
+	@Test
+	public void getRemainingBalanceAfterPayment_paymentPaidPartialy_returns0() {
+		
+		FinArFundsInReconRecord fundInPaidPartialy = new FinArFundsInReconRecord();
+		fundInPaidPartialy.setRemainingBalanceAmount(new BigDecimal("5000"));
+		fundInPaidPartialy.setProviderReportPaidAmount(new BigDecimal("5000"));
+		
+		BigDecimal paymentAmount = new BigDecimal("5000");
+		
+		BigDecimal result = sut.getRemainingBalanceAfterPayment(fundInPaidPartialy, paymentAmount);
+		
+		assertEquals(new BigDecimal(0), result);
+	}
+	
+	@Test
+	public void getRemainingBalanceAfterPayment_overPaid_returnsExcessAmount() {
+		
+		FinArFundsInReconRecord fundInPaidPartialy = new FinArFundsInReconRecord();
+		fundInPaidPartialy.setRemainingBalanceAmount(new BigDecimal("5000"));
+		fundInPaidPartialy.setProviderReportPaidAmount(new BigDecimal("5000"));
+		
+		BigDecimal paymentAmount = new BigDecimal("10000");
+		
+		BigDecimal result = sut.getRemainingBalanceAfterPayment(fundInPaidPartialy, paymentAmount);
+		
+		assertEquals(new BigDecimal(-5000), result);
 	}
 	
 	@After

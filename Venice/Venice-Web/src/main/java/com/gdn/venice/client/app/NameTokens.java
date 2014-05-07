@@ -31,6 +31,7 @@ public class NameTokens {
 	public static final String fraudUncalculatedCreditCardOrder = "!fraudUncalculatedCreditCardOrder";
 	public static final String fraudParameterRule31Page = "!fraudParameterRule31Page";
 	public static final String fraudInstallmentBCA = "!fraudInstallmentBCAPage";
+	public static final String fraudParameterRule35Page = "!fraudParameterRule35Page";
 	
 	public static final String logisticDashboardPage = "!logisticDashboardPage";
 	public static final String logisticDeliveryStatusTrackingPage = "!logisticDeliveryStatusTrackingPage";

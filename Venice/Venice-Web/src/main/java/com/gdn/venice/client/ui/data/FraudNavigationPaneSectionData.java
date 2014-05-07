@@ -30,6 +30,7 @@ public class FraudNavigationPaneSectionData {
 		  new NavigationPaneTreeNodeRecord("14", "11", "Customer White List", NameTokens.fraudCustomerWhiteListMaintenancePage, "FR13", DataWidgetNameTokens.FRD_CUSTOMERWHITELISTMAINTENANCETREENODE),
 		  new NavigationPaneTreeNodeRecord("15", "11", "BIN Credit Limit", NameTokens.fraudBinCreditLimitPage, "FR7", DataWidgetNameTokens.FRD_FRAUDBINCREDITLIMIT),
 		  new NavigationPaneTreeNodeRecord("16", "11", "Genuine List", NameTokens.fraudParameterRule31Page,  "FR15", DataWidgetNameTokens.FRD_FRAUDPARAMETERRULE31TREENODE),
+		  new NavigationPaneTreeNodeRecord("17", "11", "Customer Grey List", NameTokens.fraudParameterRule35Page, "FR17", DataWidgetNameTokens.FRD_FRAUDPARAMETERRULE35TREENODE),
 		};
 	  }
 }

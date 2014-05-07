@@ -981,14 +981,16 @@ public class AWBReconciliation {
 //					invoiceReconRecordHome.removeLogInvoiceReconRecordList(logInvoiceReconRecordList);
 //			}
 
-            //If logistic partner charge us more than what's saved on engine
-            //report that there's problem exist, other's marked as OK
+            //If logistic partner charge us more than what's saved on engine.
+            //report that there's problem exist, other's marked as OK.
             Boolean problemExists = false;
+            
 
             // 01 - Weight Mismatch
             BigDecimal correctWeight = new BigDecimal("0");
             correctWeight = correctWeight.setScale(2, RoundingMode.UP);
             correctWeight = BigDecimal.valueOf(0);
+
             for( AirwayBillTransactionItemResource airwayBillTransactionItemResourceList:  mtaAirwayBill.getItems()){
             	 correctWeight = correctWeight.add(BigDecimal.valueOf(airwayBillTransactionItemResourceList.getPrintedWeight()));
             }

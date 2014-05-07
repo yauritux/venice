@@ -16,7 +16,6 @@ import com.gdn.venice.constants.VenPartyTypeConstants;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenCustomerDAO;
 import com.gdn.venice.exception.CannotPersistCustomerException;
-import com.gdn.venice.exception.InvalidOrderException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.CustomerService;
 import com.gdn.venice.inbound.services.PartyService;
@@ -66,11 +65,17 @@ public class CustomerServiceImpl implements CustomerService {
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
 						, "persistCustomer::Persisting VenCustomer... :" + venCustomer.getCustomerUserName());
 				// If the customer already exists then return it, else persist everything
+				
 				VenCustomer existingVenCustomer = findByWcsCustomerId(venCustomer.getWcsCustomerId());
 				if (existingVenCustomer != null) {
 					CommonUtil.logDebug(this.getClass().getCanonicalName()
 							, "persistCustomer::existingVenCustomer NOT NULL --> " + existingVenCustomer);
+					/*
 					venCustomer.setCustomerId(existingVenCustomer.getCustomerId());
+					*/
+					venCustomer = existingVenCustomer;
+					CommonUtil.logDebug(this.getClass().getCanonicalName()
+							, "persistCustomer::venCustomer.customerId = "+ venCustomer.getCustomerId());	
 				}
 
 				CommonUtil.logDebug(this.getClass().getCanonicalName()
@@ -93,7 +98,7 @@ public class CustomerServiceImpl implements CustomerService {
 						, "persistCustomer::Customer's party successfully set");
 				venCustomer.setVenParty(partyService.persistParty(party, "Customer"));
 				// Synchronize the reference data
-				//venCustomer = synchronizeVenCustomerReferenceData(venCustomer);
+				venCustomer = synchronizeVenCustomerReferenceData(venCustomer);
 
 				// Persist the object
 				VenCustomer customer = venCustomer;
@@ -147,15 +152,6 @@ public class CustomerServiceImpl implements CustomerService {
 		references = partyService.synchronizeVenPartyReferenceData(references);
 
 		// Push the keys back into the record
-		/*
-		Iterator<Object> referencesIterator = references.iterator();
-		while (referencesIterator.hasNext()) {
-			Object next = referencesIterator.next();
-			if (next instanceof VenParty) {
-				venCustomer.setVenParty((VenParty) next);
-			}
-		}
-		*/
 		
 		for (VenParty venParty : references) { // weird, isn't it ? Got what I mean here ? VenCustomer should merely refer to one VenParty (1-1 relation)
 			venCustomer.setVenParty(venParty); // thus, why do we need to do the logic in the loop ? 

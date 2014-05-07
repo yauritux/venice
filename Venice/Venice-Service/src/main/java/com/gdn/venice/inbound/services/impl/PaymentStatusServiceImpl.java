@@ -12,6 +12,7 @@ import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenPaymentStatusDAO;
 import com.gdn.venice.exception.PaymentStatusNotFoundException;
+import com.gdn.venice.exception.VenPaymentStatusSynchronizingError;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.PaymentStatusService;
 import com.gdn.venice.persistence.VenPaymentStatus;
@@ -35,19 +36,32 @@ public class PaymentStatusServiceImpl implements PaymentStatusService {
 		CommonUtil.logDebug(this.getClass().getCanonicalName()
 				, "synchronizeVenPaymentStatus::BEGIN, venPaymentStatus = " + venPaymentStatus);
 		VenPaymentStatus synchPaymentStatus = venPaymentStatus;
-		if (venPaymentStatus != null && venPaymentStatus.getPaymentStatusCode() != null) {
-			CommonUtil.logDebug(this.getClass().getCanonicalName()
-					, "synchronizeVenPaymentStatus::venPaymentStatus code = " + venPaymentStatus.getPaymentStatusCode());
-			List<VenPaymentStatus> paymentStatusList = venPaymentStatusDAO.findByPaymentStatusCode(venPaymentStatus.getPaymentStatusCode());
-			if (paymentStatusList == null || paymentStatusList.isEmpty()) {
-				throw CommonUtil.logAndReturnException(new PaymentStatusNotFoundException(
-						"Payment Status does not exist!", VeniceExceptionConstants.VEN_EX_400001)
-				   , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
-			} else {
-				synchPaymentStatus = paymentStatusList.get(0);
+		if (venPaymentStatus != null && venPaymentStatus.getPaymentStatusCode() != null && venPaymentStatus.getPaymentStatusId() == null) {
+			try {
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenPaymentStatus::venPaymentStatus.paymentStatusId = " + venPaymentStatus.getPaymentStatusId());
+				CommonUtil.logDebug(this.getClass().getCanonicalName()
+						, "synchronizeVenPaymentStatus::venPaymentStatus.paymentStatusCode = " + venPaymentStatus.getPaymentStatusCode());
+				List<VenPaymentStatus> paymentStatusList = venPaymentStatusDAO.findByPaymentStatusCode(venPaymentStatus.getPaymentStatusCode());
+				if (paymentStatusList == null || paymentStatusList.isEmpty()) {
+					throw CommonUtil.logAndReturnException(new PaymentStatusNotFoundException(
+							"Payment Status does not exist!", VeniceExceptionConstants.VEN_EX_400001)
+					, CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+				} else {
+					synchPaymentStatus = paymentStatusList.get(0);
+				}
+			} catch (Exception e) {
+				CommonUtil.logError(this.getClass().getCanonicalName(), e);
+				throw CommonUtil.logAndReturnException(new VenPaymentStatusSynchronizingError("cannot synchronize VenPaymentStatus!"
+						, VeniceExceptionConstants.VEN_EX_130011), CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
 			}
-			return synchPaymentStatus;
+		} else {
+			CommonUtil.logDebug(this.getClass().getCanonicalName()
+					, "synchronizeVenPaymentStatus::paymentStatus already synchronized, no need to do it twice");
 		}
+		
+		CommonUtil.logDebug(this.getClass().getCanonicalName()
+				, "synchronizeVenPaymentStatus::returning synchPaymentStatus = " + synchPaymentStatus);
 		return synchPaymentStatus;
 	}
 	
