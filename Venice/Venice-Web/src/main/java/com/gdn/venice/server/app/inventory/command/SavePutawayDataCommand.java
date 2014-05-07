@@ -80,7 +80,12 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 						grnItemId = value;
 					}
 					if(key.equals(DataNameTokens.INV_PUTAWAY_GRN_QTY)){
-						putawayItem.setQuantity(Integer.parseInt(value));
+						if(value!=null){
+							putawayItem.setQuantity(Integer.parseInt(value));
+						}else{
+							System.out.println("quantity item is null");
+							putawayItem.setQuantity(0);
+						}
 					}
 					if(key.equals(DataNameTokens.INV_PUTAWAY_GRN_TYPE)){
 						type = value;
@@ -141,7 +146,7 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 				return putawayWrapper.getError();
 			}
 		} catch (Exception e) {
-			return "Failed saving putaway, try again later. If error persist please contact administrator";
+			return "Failed saving putaway.";
 		}
 		
 		return "0";

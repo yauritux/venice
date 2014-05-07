@@ -66,11 +66,15 @@ public class FetchPickingListIRDetailDataCommand implements RafDsCommand {
 					String shelfCode="";
                     if(whItem!=null){
     					System.out.println("whItem Id: "+whItem.getId());
-                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
+                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
+                    	System.out.println("storageStockList size: "+storageStockList.size());
                     	for(WarehouseItemStorageStock storageStock : storageStockList){
+                    		System.out.println("loop: "+shelfCode);
                     		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getQuantity();
                     		shelfCode+=", ";
                     	}
+                    	
+                    	System.out.println("shelfCode size: "+shelfCode.length());
                     	if(shelfCode.length()>1){
                     		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
                     	}else{
@@ -78,6 +82,9 @@ public class FetchPickingListIRDetailDataCommand implements RafDsCommand {
                     	}
                     	
                     	map.put(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, shelfCode);
+                    }else{
+                    	shelfCode="-";
+                    	_log.error("Warehouse item not found");
                     }   
                     
                     dataList.add(map);

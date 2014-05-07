@@ -52,7 +52,7 @@ public class ASNManagementService{
 		System.out.println("getASNDataList");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "advanceShipNotice/getActiveList?"
+                + "advanceShipNotice/findByFilter?username="+request.getParams().get("username")
                 + "&page=" + request.getParams().get("page")
                 + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);

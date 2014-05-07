@@ -48,7 +48,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
     ListGrid grnListGrid;
 
     ToolStrip toolStrip;
-    ToolStripButton submitButton, printButton;
+    ToolStripButton submitButton;
     VLayout headerLayout;
     ComboBoxItem warehouseComboBox, putawayTypeComboBox;
     DynamicForm headerForm;
@@ -63,15 +63,8 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 		submitButton.setTooltip("Submit");
 		submitButton.setTitle("Submit");
 		submitButton.setDisabled(true);
-
-		printButton = new ToolStripButton();
-		printButton.setIcon("[SKIN]/icons/printer.png");
-		printButton.setTooltip("Print");
-		printButton.setTitle("Print");
-		printButton.setDisabled(true);
 		
         toolStrip.addButton(submitButton);
-        toolStrip.addButton(printButton);
 
         layout = new RafViewLayout();
         
@@ -126,13 +119,6 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 	        	 }
 	         }
 	    });
-        
-        printButton.addClickHandler(new ClickHandler() {
- 			@Override
- 			public void onClick(ClickEvent event) {
- 				printPutawayData();						
- 			}
- 		});
     }
     
 	private void buildGrnListGrid(String warehouseId, String type) {
@@ -186,7 +172,6 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 			public void onChanged(ChangedEvent event) {
 				buildGrnListGrid(warehouseComboBox.getValue().toString(), putawayTypeComboBox.getValue().toString());
 				submitButton.setDisabled(false);
-				printButton.setDisabled(false);
 			}
 		});
         

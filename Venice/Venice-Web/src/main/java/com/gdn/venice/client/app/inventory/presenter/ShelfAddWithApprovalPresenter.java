@@ -77,7 +77,7 @@ public class ShelfAddWithApprovalPresenter extends Presenter<ShelfAddWithApprova
         super(eventBus, view, proxy);
         getView().setUiHandlers(this);
         ((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-        getView().loadApprovalAddShelfData(ShelfData.getAllShelfInProcessData(MainPagePresenter.signedInUser, 1, 50, "Create"));
+        getView().loadApprovalAddShelfData(ShelfData.getAllShelfInProcessData(MainPagePresenter.signedInUser, 1, 100, "Create"));
         this.dispatcher = dispatcher;
     }
         

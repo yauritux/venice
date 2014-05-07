@@ -45,7 +45,7 @@ public class FetchASNDataCommand implements RafDsCommand {
         		asnService = new ASNManagementService();
                 InventoryPagingWrapper<AdvanceShipNotice> asnWrapper = asnService.getASNDataList(request);
                 if(asnWrapper!=null && asnWrapper.isSuccess()){
-	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	 		        
 	                for(AdvanceShipNotice asn : asnWrapper.getContent()){
 	                    HashMap<String, String> map = new HashMap<String, String>();
@@ -73,7 +73,7 @@ public class FetchASNDataCommand implements RafDsCommand {
 	                    	}else{
 	                    		_log.error("CFF not found");
 	                    	}
-	                   }
+	                    }
 	                    
 		                map.put(DataNameTokens.INV_ASN_CREATED_DATE, sdf.format(asn.getCreatedDate()));
 		                map.put(DataNameTokens.INV_ASN_EST_DATE, sdf.format(asn.getEstimatedDate()));

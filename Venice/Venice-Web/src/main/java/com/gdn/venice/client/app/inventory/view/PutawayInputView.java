@@ -175,7 +175,7 @@ public class PutawayInputView extends ViewWithUiHandlers<PutawayInputUiHandler> 
         grnListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
         grnListGrid.setSaveLocally(true);
         
-        DataSource grnItemData = PutawayData.getPutawayDetailGRNItemData(record.getAttribute(DataNameTokens.INV_PUTAWAY_GRN_ID), 1, 20);
+        DataSource grnItemData = PutawayData.getPutawayDetailGRNItemData(record.getAttribute(DataNameTokens.INV_PUTAWAY_GRN_ID), 1, 100);
 		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
 		
 		ListGridField storageItem = new ListGridField(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT, "Input Storage Code");
@@ -212,21 +212,25 @@ public class PutawayInputView extends ViewWithUiHandlers<PutawayInputUiHandler> 
 					itemRowMap.put(DataNameTokens.INV_PUTAWAY_ID, record.getAttributeAsString(DataNameTokens.INV_PUTAWAY_ID));
 					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMID));
 					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));
-					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT));
-					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT));
+					
+					
 					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID));
 									
 					if(itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT)==null){
 						SC.say("Please input storage code for item "+itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));
 						return;
+					}else{
+						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT));
 					}
 					
-					if(!itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY).equals(itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT))){
+					if(itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT)==null || itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT).equals("0")){
 						SC.say("Please check quantity for item "+itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));
 						return;
-					}else{    						
-						itemDataMap.put("ITEM"+i, itemRowMap.toString());
+					}else{  
+						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT));						
 					}
+					
+					itemDataMap.put("ITEM"+i, itemRowMap.toString());
 				}	
 				
 	        	SC.ask("Are you sure you want to save this data?", new BooleanCallback() {

@@ -73,6 +73,9 @@ public class FetchPickingListSODetailDataCommand implements RafDsCommand {
                     	}
                     	
                     	map.put(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, shelfCode);
+                    }else{
+                    	shelfCode="-";
+                    	_log.error("Warehouse item not found");
                     }   
                     
                     dataList.add(map);

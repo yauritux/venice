@@ -1,5 +1,8 @@
 package com.gdn.venice.client.app.inventory.view;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.ASNData;
 import com.gdn.venice.client.app.inventory.presenter.ASNListPresenter;
@@ -176,7 +179,7 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
     	itemListGrid.setShowRowNumbers(true);
     	itemListGrid.setShowFilterEditor(false);
 
-    	DataSource asnItemData = ASNData.getASNItemData(asnId, 1, 20);
+    	DataSource asnItemData = ASNData.getASNItemData(asnId, 1, 100);
 		itemListGrid.setDataSource(asnItemData);
 		itemListGrid.setFields(Util.getListGridFieldsFromDataSource(asnItemData));
 		        
@@ -191,7 +194,18 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
     }
 
     @Override
-    public void loadASNData(DataSource dataSource) {
+    public void loadASNData(DataSource dataSource) {        
+        Map<String, String> status = new HashMap<String, String>();
+        status.put("CREATED", "Created");
+        status.put("CLOSED", "Closed");
+        dataSource.getField(DataNameTokens.INV_ASN_STATUS).setValueMap(status);
+
+        Map<String, String> type = new HashMap<String, String>();
+        type.put("PURCHASE_ORDER", "Purchase Order");
+        type.put("CONSIGNMENT_FINAL", "Consignment Final");
+        type.put("INVENTORY_REQUEST", "Inventory Request");
+        dataSource.getField(DataNameTokens.INV_ASN_INVENTORY_TYPE).setValueMap(type);
+        
         ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(dataSource);
 
         asnListGrid.setDataSource(dataSource);    	
@@ -200,6 +214,9 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
         asnListGrid.setDataSource(dataSource);
         asnListGrid.getField(DataNameTokens.INV_ASN_ID).setHidden(true);
         asnListGrid.getField(DataNameTokens.INV_ASN_SPECIAL_NOTES).setHidden(true);
+        asnListGrid.getField(DataNameTokens.INV_ASN_REFF_DATE).setHidden(true);
+        asnListGrid.getField(DataNameTokens.INV_ASN_SUPPLIER_CODE).setCanFilter(false);
+        asnListGrid.getField(DataNameTokens.INV_ASN_SUPPLIER_NAME).setCanFilter(false);
         asnListGrid.setAutoFitData(Autofit.BOTH);
 
         layout.setMembers(toolStrip, asnListGrid);

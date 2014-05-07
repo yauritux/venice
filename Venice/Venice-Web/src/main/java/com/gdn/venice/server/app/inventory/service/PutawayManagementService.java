@@ -301,7 +301,7 @@ public class PutawayManagementService{
         }
 	}
 	
-	public Putaway getPutawayByGrnId(String grnId) throws HttpException, IOException{
+	public List<Putaway> getPutawayByGrnId(String grnId) throws HttpException, IOException{
 		System.out.println("getPutawayByGrnId");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
@@ -320,7 +320,7 @@ public class PutawayManagementService{
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<Putaway>() {});
+            return mapper.readValue(sb.toString(), new TypeReference<List<Putaway>>() {});
         } else {
         	return null;
         }

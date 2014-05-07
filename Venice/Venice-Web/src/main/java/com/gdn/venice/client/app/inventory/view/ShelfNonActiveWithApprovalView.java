@@ -198,7 +198,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
             storageType.put("pallet", "Pallet");
             storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
     	}else{
-        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 20);
+        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 100);
     		storageListGrid.setDataSource(storageData);
     		storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
     		
@@ -232,10 +232,10 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
         shelfListGrid.setDataSource(dataSource);
         shelfListGrid.setAutoFetchData(Boolean.TRUE);
         shelfListGrid.setFields(listGridField);
-        shelfListGrid.getField(DataNameTokens.INV_SHELF_ID).setHidden(Boolean.TRUE);
-        shelfListGrid.getField(DataNameTokens.INV_SHELF_CODE).setHidden(Boolean.TRUE);
-        shelfListGrid.getField(DataNameTokens.INV_SHELF_ORIGINID).setHidden(Boolean.TRUE);
-        shelfListGrid.getField(DataNameTokens.INV_SHELF_DESCRIPTION).setCanFilter(Boolean.FALSE);
+        shelfListGrid.getField(DataNameTokens.INV_SHELF_ID).setHidden(true);
+        shelfListGrid.getField(DataNameTokens.INV_SHELF_ORIGINID).setCanFilter(false);
+        shelfListGrid.getField(DataNameTokens.INV_SHELF_CODE).setCanFilter(true);
+        shelfListGrid.getField(DataNameTokens.INV_SHELF_DESCRIPTION).setCanFilter(true);
         shelfListGrid.setAutoFitData(Autofit.BOTH);
 
         shelfApprovalAddLayout.setMembers(shelfListToolStrip, shelfListGrid);

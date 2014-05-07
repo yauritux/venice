@@ -97,8 +97,8 @@ public class PutawayExportServlet extends HttpServlet {
 	    		asnService = new ASNManagementService(); 
 	        	GoodReceivedNoteItem grnItem = grnItemWrapper.getContent();
 	        	
-	        	Putaway putaway = putawayService.getPutawayByGrnId(Long.toString(grnItem.getGoodReceivedNote().getId()));
-	        	putawayDate = putaway.getCreatedDate().toString();
+	        	List<Putaway> putawayList = putawayService.getPutawayByGrnId(Long.toString(grnItem.getGoodReceivedNote().getId()));
+	        	putawayDate = putawayList.get(0).getCreatedDate().toString();
 	        	putawayPrint.setReffNo(String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
 	        	putawayPrint.setWarehouseCode(grnItem.getGoodReceivedNote().getReceivedWarehouse().getCode());
 	        	
@@ -132,8 +132,15 @@ public class PutawayExportServlet extends HttpServlet {
 	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
 	                    		qty+=storageStock.getQuantity();
 	                    	}
-	                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
-	                    }
+	                    	if(shelfCode.length()>1){
+	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+	                    	}else{
+	                    		shelfCode="-";
+	                    	}
+	                    }else{
+	                    	shelfCode="-";
+	                		System.out.println("Warehouse item not found");
+	                	}
 	                    
 	                    putawayPrint.setStorageCode(shelfCode);
 	                    putawayPrint.setQty(String.valueOf(qty));
@@ -174,8 +181,15 @@ public class PutawayExportServlet extends HttpServlet {
 	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
 	                    		qty+=storageStock.getQuantity();
 	                    	}
-	                    	if(shelfCode.length()>1) shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
-	                    }
+	                    	if(shelfCode.length()>1){ 
+	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+	                    	}else{
+	                    		shelfCode="-";
+	                    	}
+	                    }else{
+	                    	shelfCode="-";
+	                		System.out.println("Warehouse item not found");
+	                	}
 	                    putawayPrint.setStorageCode(shelfCode);
 	                    putawayPrint.setQty(String.valueOf(qty));
 	                        	                    
@@ -200,7 +214,6 @@ public class PutawayExportServlet extends HttpServlet {
 				HSSFWorkbook wb = new HSSFWorkbook(); 
 				HSSFSheet sheet = wb.createSheet("Picking List");				
 				 
-				//style
 				CellStyle headerCellstyle = wb.createCellStyle();
 				headerCellstyle.setBorderBottom(CellStyle.BORDER_THIN);
 				headerCellstyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
@@ -252,13 +265,11 @@ public class PutawayExportServlet extends HttpServlet {
 				headerRow.createCell(startCol+5).setCellValue(new HSSFRichTextString("Storage/Shelf Code"));
 				headerRow.createCell(startCol+6).setCellValue(new HSSFRichTextString("Qty"));
 					   
-				//set style for header
 				for(int i=startCol; i<=startCol+6; i++){
 					HSSFCell cell = headerRow.getCell(i);
 					cell.setCellStyle(headerCellstyle);
 				}    
 										
-				//Looping for generating excel rows
 				HSSFRow detailRow = null;
 				for (int i = 0; i < putawayPrintList.size(); i++) {
 					System.out.println("looping data");					
@@ -276,7 +287,6 @@ public class PutawayExportServlet extends HttpServlet {
 					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(pl.getStorageCode()));
 					cell = detailRow.createCell(startCol+6);cell.setCellValue(new HSSFRichTextString(pl.getQty()));
 					
-					//set style for list
 					for(int l=startCol; l<=startCol+6; l++){
 						HSSFCell cell2 = detailRow.getCell(l);
 						cell2.setCellStyle(detailCellstyle);
@@ -303,7 +313,6 @@ public class PutawayExportServlet extends HttpServlet {
 					cell2.setCellStyle(detailCellstyle);
 				}
 				
-				//set style for list
 				for(int l=startCol; l<=startCol+6; l++){
 					sheet.autoSizeColumn(l);
 				}	
