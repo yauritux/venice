@@ -45,7 +45,7 @@ public interface VenOrderAddressDAO extends JpaRepository<VenOrderAddress, Long>
 	"SELECT o " +
 	"FROM VenOrderAddress o " +
 	"INNER JOIN FETCH o.venAddress a " +
-	"WHERE UPPER(a.streetAddress1) LIKE UPPER('%?1%') " +
+	"WHERE a.streetAddress1=?1 " +
 	"AND o.venOrder != ?2";
 	
 	public List<VenOrderAddress> findByVenOrder(VenOrder order);
