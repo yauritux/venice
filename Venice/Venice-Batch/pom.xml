@@ -49,6 +49,11 @@
             <artifactId>postgresql</artifactId>
             <version>8.4-702.jdbc4</version>
         </dependency>
+        <dependency>
+            <groupId>com.gdn.app</groupId>
+  			<artifactId>GdnJiraClient</artifactId>
+  			<version>0.0.4-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -490,7 +495,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>generate_Seattle_Status_Order_Payment_Approval</id>
+						<id>generate_Seattle_Status_Actual_Delivery_Time</id>
 						<phase>install</phase>
 						<goals>
 							<goal>run</goal>
@@ -512,7 +517,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>generate_Seattle_Status_Order_Payment_Approval</id>
+						<id>generate_Seattle_Status_Actual_Pickup_Time</id>
 						<phase>install</phase>
 						<goals>
 							<goal>run</goal>
@@ -522,7 +527,7 @@
 								<jar
 									destfile="${project.build.directory}/batch-jars/SeattleStatusActualPickupTimeBatchJob.jar">
 									<fileset dir="${project.build.directory}/classes">
-										<include name="**/SeattleStatusOrderPaymentApprovalBatchJob.class" />
+										<include name="**/SeattleStatusActualPickupTimeBatchJob.class" />
 									</fileset>
 									<manifest>
 										<attribute name="Class-Path" value="${classpath}" />
@@ -534,7 +539,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>generate_Seattle_Status_Order_Payment_Approval</id>
+						<id>generate_Seattle_Status_Selected_Pickup_Time</id>
 						<phase>install</phase>
 						<goals>
 							<goal>run</goal>
@@ -542,14 +547,14 @@
 						<configuration>
 							<target>
 								<jar
-									destfile="${project.build.directory}/batch-jars/SeattleStatusOrderPaymentApprovalBatchJob.jar">
+									destfile="${project.build.directory}/batch-jars/SeattleStatusSelectedPickupTimeBatchJob.jar">
 									<fileset dir="${project.build.directory}/classes">
-										<include name="**/SeattleStatusOrderPaymentApprovalBatchJob.class" />
+										<include name="**/SeattleStatusSelectedPickupTimeBatchJob.class" />
 									</fileset>
 									<manifest>
 										<attribute name="Class-Path" value="${classpath}" />
 										<attribute name="Main-Class"
-											value="com.gdn.venice.seattle.batch.SeattleStatusOrderPaymentApprovalBatchJob" />
+											value="com.gdn.venice.seattle.batch.SeattleStatusSelectedPickupTimeBatchJob" />
 									</manifest>
 								</jar>
 							</target>
