@@ -60,7 +60,7 @@ public class SeattleStatusOrderFulfillBatchJob {
 	private static final String STATUS_ORDER_BY_STATUS_ID = "select sosh.seat_order_status_history_id , vo.wcs_order_id ,voi.wcs_order_item_id," +
 	" vos.order_status_code, sosh.update_status_date, soe.etd_max, soe.start_date,soe.end_date, soe.logisticsetd, vo.order_timestamp,vos.order_status_id,sof.order_fulfillment_id,sof.issue_id," +
 	"soe.diff_etd,sost.seat_order_status_tracking_id,sost.issue_id as issue_id2,sof.etd_order_complete,sof.new_etd_max_order," +
-	"sof.order_process_late_time,sost.status_issue,srst.result_status_tracking_desc,voi.logistics_service_id,sof.order_status_dec,sof.created_date" +
+	"sof.order_process_late_time,sost.status_issue,srst.result_status_tracking_desc,srst2.result_status_tracking_desc as result_status_tracking_desc2 ,voi.logistics_service_id,sof.order_status_dec,sof.created_date" +
 	" from seat_order_status_history sosh" +
 	" left join ven_order vo on vo.order_id=sosh.order_id" +
 	" left join ven_order_payment_allocation vopa on vopa.order_id=vo.order_id" +
@@ -68,6 +68,8 @@ public class SeattleStatusOrderFulfillBatchJob {
 	" left join ven_order_status vos on vos.order_status_id=sosh.order_status_id" +
 	" left join seat_order_etd soe on soe.order_etd_id=sosh.order_etd_id" +
 	" left join seat_order_fulfillment sof on sof.seat_order_status_history_id=sosh.seat_order_status_history_id" +
+	" left join seat_fulfillment_in_percentage sfip on sfip.fulfillment_in_percentage_id=sof.fulfillment_in_percentage_id" +
+	" left join seat_result_status_tracking srst2 on srst2.result_status_tracking_id=sfip.result_status_tracking_id" +	
 	" left join seat_order_status_tracking sost on sost.seat_order_status_history_id=sosh.seat_order_status_history_id and vos.order_status_code=sost.status_desc" +
 	" left join seat_sla_status_percentage sssp on sssp.seat_sla_status_percentage_id=sost.seat_sla_status_percentage_id" +
 	" left join seat_result_status_tracking srst on srst.result_status_tracking_id=sssp.result_status_tracking_id" +			
@@ -222,7 +224,8 @@ public class SeattleStatusOrderFulfillBatchJob {
 	            	item.setOrderTimestamp(rsSeattletList.getTimestamp("order_timestamp"));
 	            	item.setOrderStatusId(rsSeattletList.getLong("order_status_id"));
 	            	item.setOrderfulfillmentId(rsSeattletList.getLong("order_fulfillment_id"));	    
-	            	item.setIssueId(rsSeattletList.getString("issue_id"));       
+	            	item.setIssueId(rsSeattletList.getString("issue_id"));   
+	            	item.setResultStatus(rsSeattletList.getString("result_status_tracking_desc2"));
 	            	item.setDiffEtd(rsSeattletList.getBigDecimal("diff_etd"));            	
 	            	item.setOrderStatusTrackingtId(rsSeattletList.getLong("seat_order_status_tracking_id"));	 
 	            	item.setIssueStatusId(rsSeattletList.getString("issue_id2"));	  
@@ -709,7 +712,11 @@ public class SeattleStatusOrderFulfillBatchJob {
 						_log.info("Query returns: " + totalResultStatusList + " row(s)");
 			            for (int i=0; i<totalResultStatusList;i++) {
 			            	item.setResultStatusId(rsResultStatusList.getLong("fulfillment_in_percentage_id"));
-			            	item.setResultStatus(rsResultStatusList.getString("result_status_tracking_desc"));
+			            	if(item.getResultStatus()!=null && item.getResultStatus().equals(rsResultStatusList.getString("result_status_tracking_desc"))){
+			            		item.setResultStatus(rsResultStatusList.getString("result_status_tracking_desc")+"2");
+			            	}else{
+			            		item.setResultStatus(rsResultStatusList.getString("result_status_tracking_desc"));
+			            	}			            	
 			            	item.setLate("0");
 			            	item.setLateSecond(0);
 							if(item.getResultStatus().contains("Late")){
