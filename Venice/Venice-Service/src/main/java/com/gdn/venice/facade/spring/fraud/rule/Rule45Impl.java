@@ -21,9 +21,9 @@ import com.gdn.venice.util.CommonUtil;
 public class Rule45Impl implements Rule  {
 
 
-    private static final String VEN_CONTACT_DETAIL_ID_PHONE = "0";
-    private static final String VEN_CONTACT_DETAIL_ID_MOBILE = "1";
-    private static final String VEN_CONTACT_DETAIL_ID_EMAIL = "3";
+    private static final long VEN_CONTACT_DETAIL_ID_PHONE = 0;
+    private static final long VEN_CONTACT_DETAIL_ID_MOBILE = 1;
+    private static final long VEN_CONTACT_DETAIL_ID_EMAIL = 3;
 	
 	private static final String CLASS_NAME = Rule45Impl.class.getCanonicalName();
 	
@@ -69,20 +69,28 @@ public class Rule45Impl implements Rule  {
     	List<VenOrderAddress> orderHistoryEci5Address;
         List<VenOrderAddress> orderEci5Address = venOrderAddressDAO.findWithVenAddressesByVenOrder(venOrder);
         if(orderEci5Address.size()>0){
-         orderHistoryEci5Address=venOrderAddressDAO.findByVenAddressStreetAddress1AndVenOrderOrderId(orderEci5Address.get(0).getVenAddress().getStreetAddress1().toUpperCase(),venOrder);
+    		CommonUtil.logInfo(CLASS_NAME, "orderEci5Address>0" );
+         orderHistoryEci5Address=venOrderAddressDAO.findByVenAddressStreetAddress1AndVenOrderOrderId(orderEci5Address.get(0).getVenAddress().getStreetAddress1(),venOrder);
         	if(orderHistoryEci5Address.size()>0){
+        		CommonUtil.logInfo(CLASS_NAME, "orderHistoryEci5Address>0" );
         		List<VenOrderContactDetail> orderHistoryEci5ContactDetail;	
         		
         		List<VenOrderContactDetail> orderEci5ContactDetail=venOrderContactDetailDAO.findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(venOrder,VEN_CONTACT_DETAIL_ID_PHONE,VEN_CONTACT_DETAIL_ID_MOBILE,VEN_CONTACT_DETAIL_ID_EMAIL);
         		List<VenOrderPaymentAllocation> orderHistoryEci5PaymentAllocation;
         		
         		if(orderEci5ContactDetail.size()>0){
+            		CommonUtil.logInfo(CLASS_NAME, "orderEci5ContactDetail>0" );
 	        		for(int i=0;i<orderHistoryEci5Address.size();i++){
-	        			for(int j=0;j<orderEci5ContactDetail.size();j++){			         			
-	        				orderHistoryEci5ContactDetail=venOrderContactDetailDAO.findByVenOrderOrderIdAndVenContactDetailContactDetail(orderEci5Address.get(i).getVenOrder(),orderEci5ContactDetail.get(j).getVenContactDetail().getContactDetail());
-		        			orderHistoryEci5PaymentAllocation=venOrderPaymentAllocationDAO.findByVenOrderAndVenOrderPaymentThreeDsSecurityAuthIsNot(orderHistoryEci5ContactDetail.get(i).getVenOrder(),"07");
-		        			if(orderHistoryEci5PaymentAllocation.size()>0){
-		                        result = true;            				
+	            		CommonUtil.logInfo(CLASS_NAME, "orderHistoryEci5Address>0" );
+	        			for(int j=0;j<orderEci5ContactDetail.size();j++){		
+	                		CommonUtil.logInfo(CLASS_NAME, "orderEci5ContactDetail>0" );	         			
+	        				orderHistoryEci5ContactDetail=venOrderContactDetailDAO.findByVenOrderOrderIdAndVenContactDetailContactDetail(orderHistoryEci5Address.get(i).getVenOrder(),orderEci5ContactDetail.get(j).getVenContactDetail().getContactDetail());
+		        			if(orderHistoryEci5ContactDetail.size()>0){
+		        				orderHistoryEci5PaymentAllocation=venOrderPaymentAllocationDAO.findByVenOrderAndVenOrderPaymentThreeDsSecurityAuthIsNot(orderHistoryEci5ContactDetail.get(0).getVenOrder(),"07");
+		        				if(orderHistoryEci5PaymentAllocation.size()>0){
+			                		CommonUtil.logInfo(CLASS_NAME, "orderHistoryEci5PaymentAllocation>0" );
+			                        result = true;            				
+			        			}
 		        			}
 	        			}
 	        		}
