@@ -9633,6 +9633,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
 			}
 
+			CommonUtil.logDebug(this.getClass().getCanonicalName(),
+					"postPaymentRefundJournalTransaction:: adalah 1 "+finArFundsInRefundList.get(0).getFinArFundsInReconRecord().getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeId());
+			CommonUtil.logDebug(this.getClass().getCanonicalName(),
+					"postPaymentRefundJournalTransaction:: adalah 2 "+finArFundsInRefundList.get(0).getFinArFundsInReconRecord().getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeDesc());
+			
+			
 			Timestamp time = new Timestamp(System.currentTimeMillis());
 			for (FinArFundsInRefund finArFundsInRefund : finArFundsInRefundList) {
 				BigDecimal amountBiaya = null;
@@ -9640,6 +9646,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 				Long accountIdRefund = null;
 				Long finTransactionTypeID = null;
 
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postPaymentRefundJournalTransaction:: adalah 3 "+finArFundsInRefund.getFinArFundsInReconRecord()
+						.getFinArFundsInReport()
+						.getFinArFundsInReportType()
+						.getPaymentReportTypeId());
+				
+				
 				long accountNumberBank = 0;
 				if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()

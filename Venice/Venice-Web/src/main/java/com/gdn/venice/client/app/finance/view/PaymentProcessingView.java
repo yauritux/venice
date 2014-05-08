@@ -696,6 +696,11 @@ PaymentProcessingPresenter.MyView {
 						if (refundPaymentRecords[i].getAttributeAsString(DataNameTokens.FINAPPAYMENT_FINAPMANUALJOURNALTRANSACTIONS)!=null && 
 								!refundPaymentRecords[i].getAttributeAsString(DataNameTokens.FINAPPAYMENT_FINAPMANUALJOURNALTRANSACTIONS).isEmpty()) {
 							refundPaymentMap.put("FINAPMANUALJOURNALIDS", refundPaymentRecords[i].getAttributeAsString(DataNameTokens.FINAPPAYMENT_FINAPMANUALJOURNALTRANSACTIONS));
+							
+
+							SC.warn("Tes adalah : "+refundPaymentRecords[i].getAttributeAsString(DataNameTokens.FINAPPAYMENT_FINAPMANUALJOURNALTRANSACTIONS));	
+							
+							
 						}
 						refundPaymentMap.put("BANKACCOUNTID", refundPaymentRecords[i].getAttributeAsString(DataNameTokens.FINAPPAYMENT_FINACCOUNT_ACCOUNTID));
 						refundPaymentMap.put("AMOUNT", refundPaymentRecords[i].getAttributeAsString(DataNameTokens.FINAPPAYMENT_AMOUNT));
