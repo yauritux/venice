@@ -179,7 +179,7 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
     	itemListGrid.setShowRowNumbers(true);
     	itemListGrid.setShowFilterEditor(false);
 
-    	DataSource asnItemData = ASNData.getASNItemData(asnId, 1, 100);
+    	DataSource asnItemData = ASNData.getASNItemData(asnId, 1, 20);
 		itemListGrid.setDataSource(asnItemData);
 		itemListGrid.setFields(Util.getListGridFieldsFromDataSource(asnItemData));
 		        

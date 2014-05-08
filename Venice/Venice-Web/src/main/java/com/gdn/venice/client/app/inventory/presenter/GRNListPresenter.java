@@ -55,7 +55,7 @@ public class GRNListPresenter extends Presenter<GRNListPresenter.MyView, GRNList
 		getView().setUiHandlers(this);
 		
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		getView().loadGRNData(GRNData.getGRNData(1, 100));
+		getView().loadGRNData(GRNData.getGRNData(1, 20));
 		this.dispatcher = dispatcher;
 	}
 

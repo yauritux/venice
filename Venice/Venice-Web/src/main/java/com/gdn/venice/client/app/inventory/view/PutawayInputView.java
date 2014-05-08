@@ -175,7 +175,7 @@ public class PutawayInputView extends ViewWithUiHandlers<PutawayInputUiHandler> 
         grnListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
         grnListGrid.setSaveLocally(true);
         
-        DataSource grnItemData = PutawayData.getPutawayDetailGRNItemData(record.getAttribute(DataNameTokens.INV_PUTAWAY_GRN_ID), 1, 100);
+        DataSource grnItemData = PutawayData.getPutawayDetailGRNItemData(record.getAttribute(DataNameTokens.INV_PUTAWAY_GRN_ID), 1, 20);
 		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
 		
 		ListGridField storageItem = new ListGridField(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT, "Input Storage Code");

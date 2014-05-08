@@ -49,7 +49,7 @@ public class ASNListPresenter extends Presenter<ASNListPresenter.MyView, ASNList
 		getView().setUiHandlers(this);
 		
 		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		getView().loadASNData(ASNData.getASNData(1, 100));
+		getView().loadASNData(ASNData.getASNData(1, 20));
 		this.dispatcher = dispatcher;
 	}
 

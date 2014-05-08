@@ -449,7 +449,7 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
     }
     
     private void buildPackageListGrid(String warehouseId) {
-    	DataSource packageData = PickingListData.getPickingListSOData(warehouseId, 1, 50);   
+    	DataSource packageData = PickingListData.getPickingListSOData(warehouseId, 1, 20);          
     	packageListGrid.setDataSource(packageData); 
     	
     	ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(packageData);

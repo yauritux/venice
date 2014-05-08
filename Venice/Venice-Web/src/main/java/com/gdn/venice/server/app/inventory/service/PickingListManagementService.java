@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.Picker;
 import com.gdn.inventory.exchange.entity.WarehouseItem;
@@ -192,6 +193,19 @@ public class PickingListManagementService{
         Map<String, Object> searchMap = new HashMap<String, Object>();
         searchMap.put("status", InventoryRequestStatus.PICK_PACKAGE_CREATED.toString());
         searchMap.put("warehouseId", request.getParams().get("warehouseId"));
+        
+        if (request.getCriteria() != null) {
+            for (JPQLSimpleQueryCriteria criteria : request.getCriteria().getSimpleCriteria()) {
+                System.out.println("adding criteria:" + criteria.getFieldName() + ", " + criteria.getValue());
+                searchMap.put(criteria.getFieldName(), criteria.getValue());
+            }
+            String json = mapper.writeValueAsString(searchMap);
+            System.out.println("json: " + json);
+            httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+            httpPost.setRequestHeader("Content-Type", "application/json");
+        } else {
+            System.out.println("No criteria");
+        }
                 
         String json = mapper.writeValueAsString(searchMap);
         System.out.println("json: "+json);
@@ -394,6 +408,19 @@ public class PickingListManagementService{
         Map<String, Object> searchMap = new HashMap<String, Object>();
         searchMap.put("status", SOStatus.PICK_PACKAGE_CREATED.toString());
         searchMap.put("warehouseId", request.getParams().get("warehouseId"));
+        
+        if (request.getCriteria() != null) {
+            for (JPQLSimpleQueryCriteria criteria : request.getCriteria().getSimpleCriteria()) {
+                System.out.println("adding criteria:" + criteria.getFieldName() + ", " + criteria.getValue());
+                searchMap.put(criteria.getFieldName(), criteria.getValue());
+            }
+            String json = mapper.writeValueAsString(searchMap);
+            System.out.println("json: " + json);
+            httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+            httpPost.setRequestHeader("Content-Type", "application/json");
+        } else {
+            System.out.println("No criteria");
+        }
                 
         String json = mapper.writeValueAsString(searchMap);
         System.out.println("json: "+json);

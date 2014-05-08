@@ -1,7 +1,9 @@
 package com.gdn.venice.client.app.inventory.view;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.client.app.inventory.data.PickingListData;
@@ -449,7 +451,21 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
     }
     
     private void buildPackageListGrid(String warehouseId) {
-    	DataSource packageData = PickingListData.getPickingListIRData(warehouseId, 1, 50);   
+    	DataSource packageData = PickingListData.getPickingListIRData(warehouseId, 1, 20); 
+    	
+        Map<String, String> type = new HashMap<String, String>();
+        type.put("CONSIGNMENT_COMMISION", "Consignment Commission");
+        type.put("TRADING", "Trading");
+        type.put("CONSIGNMENT_TRADING", "Consignment Trading");
+        packageData.getField(DataNameTokens.INV_PICKINGLISTIR_INVENTORYTYPE).setValueMap(type);
+        
+        Map<String, String> irType = new HashMap<String, String>();
+        irType.put("EXPENSE_ASSET", "Expense Asset");
+        irType.put("TRANSFER_WAREHOUSE", "Transfer Warehouse");
+        irType.put("CONVERT_SKU_ASSEMBLY", "Convert SKU Assembly");
+        irType.put("CONVERT_SKU_DISASSEMBLY", "Convert SKU Disassembly");
+        packageData.getField(DataNameTokens.INV_PICKINGLISTIR_IRTYPE).setValueMap(irType);
+        
     	packageListGrid.setDataSource(packageData); 
     	
     	ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(packageData);
