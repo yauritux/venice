@@ -98,9 +98,7 @@ public class PutawayExportServlet extends HttpServlet {
 	        	GoodReceivedNoteItem grnItem = grnItemWrapper.getContent();
 	        	
 	        	List<Putaway> putawayList = putawayService.getPutawayByGrnId(Long.toString(grnItem.getGoodReceivedNote().getId()));
-	        	putawayDate = putawayList.get(0).getCreatedDate().toString();
-	        	putawayPrint.setReffNo(String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
-	        	putawayPrint.setWarehouseCode(grnItem.getGoodReceivedNote().getReceivedWarehouse().getCode());
+	        	putawayDate = putawayList.get(0).getCreatedDate().toString();	        	
 	        	
 	        	RafDsRequest rafDsRequest = new RafDsRequest();
 	            HashMap<String, String> params = new HashMap<String, String>();
@@ -112,10 +110,7 @@ public class PutawayExportServlet extends HttpServlet {
             		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(rafDsRequest, asnItem.getReferenceNumber().toString());
                 	if(poItemWrapper!=null && poItemWrapper.isSuccess()){
                 		PurchaseRequisitionItem prItem = poItemWrapper.getContent().getPurchaseRequisitionItem();
-                		System.out.println("PO item found, code:"+prItem.getItem().getCode());    
-                		                   				             
-                		putawayPrint.setWarehouseSkuId(prItem.getItem().getCode());
-                		putawayPrint.setItemName(prItem.getItem().getDescription());   
+                		System.out.println("PO item found, code:"+prItem.getItem().getCode());                    		                   			 
 	                    
 	                    System.out.println("item id "+prItem.getItem().getId());
 	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
@@ -124,28 +119,31 @@ public class PutawayExportServlet extends HttpServlet {
 	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
 	                    		poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId(), StockType.TRADING);
 	                    
-	                    String shelfCode="";
-	                    int qty=0;
 	                    if(whItem!=null){
-	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
-	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
-	                    		qty+=storageStock.getQuantity();
-	                    	}
-	                    	if(shelfCode.length()>1){
-	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
+	                    	if(storageStockList.size()>0){
+		                    	for(WarehouseItemStorageStock storageStock : storageStockList){
+		                    		putawayPrint.setReffNo(String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+		            	        	putawayPrint.setWarehouseCode(grnItem.getGoodReceivedNote().getReceivedWarehouse().getCode());
+		                    		putawayPrint.setWarehouseSkuId(prItem.getItem().getCode());
+		                    		putawayPrint.setItemName(prItem.getItem().getDescription()); 
+		    	                    putawayPrint.setStorageCode(storageStock.getStorage().getCode()!=null?storageStock.getStorage().getCode():"-");
+		    	                    putawayPrint.setQty(String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
+		    	                    putawayPrintList.add(putawayPrint);
+		                    	}
 	                    	}else{
-	                    		shelfCode="-";
+	                    		putawayPrint.setReffNo(String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+	            	        	putawayPrint.setWarehouseCode(grnItem.getGoodReceivedNote().getReceivedWarehouse().getCode());
+	                    		putawayPrint.setWarehouseSkuId(prItem.getItem().getCode());
+	                    		putawayPrint.setItemName(prItem.getItem().getDescription()); 
+	    	                    putawayPrint.setStorageCode("-");
+	    	                    putawayPrint.setQty(String.valueOf("0"));
+	    	                    putawayPrintList.add(putawayPrint);
 	                    	}
 	                    }else{
-	                    	shelfCode="-";
 	                		System.out.println("Warehouse item not found");
 	                	}
-	                    
-	                    putawayPrint.setStorageCode(shelfCode);
-	                    putawayPrint.setQty(String.valueOf(qty));
-	                    
-	                    putawayPrintList.add(putawayPrint);
+	                    	                    
                 	}else{
                 		System.out.println("PO item not found");
                 	}   
@@ -155,9 +153,6 @@ public class PutawayExportServlet extends HttpServlet {
                 	if(cffItemWrapper!=null && cffItemWrapper.isSuccess()){
                 		ConsignmentApprovalItem cafItem = cffItemWrapper.getContent().getConsignmentApprovalItem();
                 		System.out.println("CFF item found, code:"+cafItem.getItem().getCode());    
-                		                   				             
-                		putawayPrint.setWarehouseSkuId(cafItem.getItem().getCode());
-                		putawayPrint.setItemName(cafItem.getItem().getDescription());
 	                        
 	                    StockType st = null;
 	                    if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.COMMISSION.name())){
@@ -173,27 +168,30 @@ public class PutawayExportServlet extends HttpServlet {
 	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
 	                    		cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId(), st);
 	                    
-	                    String shelfCode="";
-	                    int qty=0;
 	                    if(whItem!=null){
-	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
-	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
-	                    		qty+=storageStock.getQuantity();
-	                    	}
-	                    	if(shelfCode.length()>1){ 
-	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());   
+	                    	if(storageStockList.size()>0){
+		                    	for(WarehouseItemStorageStock storageStock : storageStockList){	   	                    		
+		                    		putawayPrint.setReffNo(String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+		            	        	putawayPrint.setWarehouseCode(grnItem.getGoodReceivedNote().getReceivedWarehouse().getCode());
+		                    		putawayPrint.setWarehouseSkuId(cafItem.getItem().getCode());
+		                    		putawayPrint.setItemName(cafItem.getItem().getDescription());	                    		
+		    	                    putawayPrint.setStorageCode(storageStock.getStorage().getCode()!=null?storageStock.getStorage().getCode():"-");
+		    	                    putawayPrint.setQty(String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");	    	                        	                   
+		    	                    putawayPrintList.add(putawayPrint);
+		                    	}
 	                    	}else{
-	                    		shelfCode="-";
+	                    		putawayPrint.setReffNo(String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+	            	        	putawayPrint.setWarehouseCode(grnItem.getGoodReceivedNote().getReceivedWarehouse().getCode());
+	                    		putawayPrint.setWarehouseSkuId(cafItem.getItem().getCode());
+	                    		putawayPrint.setItemName(cafItem.getItem().getDescription());	                    		
+	    	                    putawayPrint.setStorageCode("-");
+	    	                    putawayPrint.setQty("0");	    	                        	                   
+	    	                    putawayPrintList.add(putawayPrint);
 	                    	}
 	                    }else{
-	                    	shelfCode="-";
 	                		System.out.println("Warehouse item not found");
 	                	}
-	                    putawayPrint.setStorageCode(shelfCode);
-	                    putawayPrint.setQty(String.valueOf(qty));
-	                        	                    
-	                    putawayPrintList.add(putawayPrint);
                 	}else{
                 		System.out.println("CFF item not found");
                 	} 

@@ -54,32 +54,18 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
         try {
         	putawayService = new PutawayManagementService();
         	
-        	InventoryPagingWrapper<GoodReceivedNoteItem> grnItemWrapper = null;
-        	if(request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID)!=null){
-        		System.out.println("fetch grn item for add putaway");
-        		grnItemWrapper = putawayService.getGRNItemDataListByWarehouseId(request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
-        	}else if(request.getParams().get(DataNameTokens.INV_PUTAWAY_GRN_ID)!=null){
-        		System.out.println("fetch grn item for input putaway location");
-        		grnItemWrapper = putawayService.getGRNItemDataListByGrnId(request.getParams().get(DataNameTokens.INV_PUTAWAY_GRN_ID));
-        	}
+        	InventoryPagingWrapper<GoodReceivedNoteItem> grnItemWrapper = putawayService.getGRNItemDataListByGrnId(request.getParams().get(DataNameTokens.INV_PUTAWAY_GRN_ID));
+        	
         	if(grnItemWrapper!=null && grnItemWrapper.isSuccess()){                 	
 	    		asnService = new ASNManagementService(); 
             	for(GoodReceivedNoteItem grnItem : grnItemWrapper.getContent()){  
-            		
-    				HashMap<String, String> map = new HashMap<String, String>(); 
-    				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
-    				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
-    				
 	            	AdvanceShipNoticeItem asnItem = grnItem.getAdvanceShipNoticeItem();
 	            	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
                 		_log.info("reff type: purchase order");                		                		
                 		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
                     	if(poItemWrapper!=null && poItemWrapper.isSuccess()){
                     		PurchaseRequisitionItem prItem = poItemWrapper.getContent().getPurchaseRequisitionItem();
-                    		_log.debug("PO item found, code:"+prItem.getItem().getCode());    
-                    		                   				             
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, prItem.getItem().getCode());
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, prItem.getItem().getDescription());   
+                    		_log.debug("PO item found, code:"+prItem.getItem().getCode());                        		   
     	                    
     	                    System.out.println("item id "+prItem.getItem().getId());
     	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
@@ -88,28 +74,36 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId(), StockType.TRADING);
     	                    
-    	                    String shelfCode="";
-    	                    int qty=0;
     	                    if(whItem!=null){
-    	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
-    	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-    	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
-    	                    		qty+=storageStock.getQuantity();
-    	                    	}
-    	                    	if(shelfCode.length()>1){
-    	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
+    	                    	if(storageStockList.size()>0){
+	    	                    	for(WarehouseItemStorageStock storageStock : storageStockList){    	            				
+	    	                    		HashMap<String, String> map = new HashMap<String, String>(); 
+	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
+	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, prItem.getItem().getCode());
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, prItem.getItem().getDescription());      	                    		
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageStock.getStorage().getCode()!=null?storageStock.getStorage().getCode():"-");
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
+	
+	    	    	                    dataList.add(map);
+	    	                    	}
     	                    	}else{
-    	                    		shelfCode="-";
+    	                    		HashMap<String, String> map = new HashMap<String, String>(); 
+    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
+    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, prItem.getItem().getCode());
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, prItem.getItem().getDescription());      	                    		
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, "-");
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, "0");
+
+    	    	                    dataList.add(map);
     	                    	}
     	                    }else{
-    	                    	shelfCode="-";
     	                    	_log.error("Warehouse item not found");
-    	                    }
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
-   	                    
-    	                    dataList.add(map);
+    	                    }   	                    
                     	}else{
                     		_log.error("PO item not found");
                     	}   
@@ -119,9 +113,6 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
                     	if(cffItemWrapper!=null && cffItemWrapper.isSuccess()){
                     		ConsignmentApprovalItem cafItem = cffItemWrapper.getContent().getConsignmentApprovalItem();
                     		_log.debug("CFF item found, code:"+cafItem.getItem().getCode());    
-                    		                   				             
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, cafItem.getItem().getCode());
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, cafItem.getItem().getDescription());
     	                        
     	                    StockType st = null;
     	                    if(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getConsignmentType().name().equals(ConsignmentType.COMMISSION.name())){
@@ -137,28 +128,36 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId(), st);
     	                    
-    	                    String shelfCode="";
-    	                    int qty=0;
     	                    if(whItem!=null){
-    	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
-    	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-    	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
-    	                    		qty+=storageStock.getQuantity();
-    	                    	}
-    	                    	if(shelfCode.length()>1){
-    	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());  
+    	                    	if(storageStockList.size()>0){
+	    	                    	for(WarehouseItemStorageStock storageStock : storageStockList){    	                    		
+	    	                    		HashMap<String, String> map = new HashMap<String, String>();    
+	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
+	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, cafItem.getItem().getCode());
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, cafItem.getItem().getDescription());    	                    		
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageStock.getStorage().getCode()!=null?storageStock.getStorage().getCode():"-");
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
+	    	    	                        	                    
+	    	    	                    dataList.add(map);
+	    	                    	}
     	                    	}else{
-    	                    		shelfCode="-";
+    	                    		HashMap<String, String> map = new HashMap<String, String>();    
+    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
+    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, cafItem.getItem().getCode());
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, cafItem.getItem().getDescription());    	                    		
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, "-");
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, "0");
+    	    	                        	                    
+    	    	                    dataList.add(map);
     	                    	}
     	                    }else{
-    	                    	shelfCode="-";
     	                    	_log.error("Warehouse item not found");
     	                    }
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
-    	                        	                    
-    	                    dataList.add(map);
                     	}else{
                     		_log.error("CFF item not found");
                     	} 

@@ -371,7 +371,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
         packageDetailListGrid.setSortField(0);
         packageDetailListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
         packageDetailListGrid.setSelectionType(SelectionStyle.SIMPLE);
-        packageDetailListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE).setWidth("40%");
+        packageDetailListGrid.getField(DataNameTokens.INV_PICKINGLISTIR_STORAGECODE).setWidth("40%");
         
         pickingListDetailWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {

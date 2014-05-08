@@ -1296,7 +1296,8 @@ public class DataNameTokens {
     	public static String INV_PICKINGLISTIR_WAREHOUSESKUID = "warehouseItemSKU";
     	public static String INV_PICKINGLISTIR_WAREHOUSESKUNAME = "warehouseItemSKUName";
     	public static String INV_PICKINGLISTIR_QTY = "qty";
-    	public static String INV_PICKINGLISTIR_SHELFCODE = "shelfCode";
+    	public static String INV_PICKINGLISTIR_STORAGECODE = "storageCode";
+    	public static String INV_PICKINGLISTIR_QTYSTORAGE = "qtyStorage";
     	
     	public static String INV_PICKINGLISTSO_PACKAGEID = "packageId";
     	public static String INV_PICKINGLISTSO_DETAIL = "Detail";
@@ -1308,13 +1309,14 @@ public class DataNameTokens {
     	public static String INV_PICKINGLISTSO_WAREHOUSESKUID = "warehouseItemSKU";
     	public static String INV_PICKINGLISTSO_WAREHOUSESKUNAME = "warehouseItemSKUName";
     	public static String INV_PICKINGLISTSO_QTY = "qty";
-    	public static String INV_PICKINGLISTSO_SHELFCODE = "shelfCode";
+    	public static String INV_PICKINGLISTSO_STORAGECODE = "storageCode";
+    	public static String INV_PICKINGLISTSO_QTYSTORAGE = "qtyStorage";
     	
     	public static String INV_PUTAWAY_GRN_ITEMID = "grnItemId";
     	public static String INV_PUTAWAY_GRN_GRNNUMBER = "grnNumber";
     	public static String INV_PUTAWAY_GRN_ITEMCODE = "itemCode";
     	public static String INV_PUTAWAY_GRN_ITEMDESC = "itemDescription";
-    	public static String INV_PUTAWAY_GRN_SHELFCODE = "shelfCode";
+    	public static String INV_PUTAWAY_GRN_STORAGECODE = "storageCode";
     	public static String INV_PUTAWAY_GRN_QTY = "quantity";
     	public static String INV_PUTAWAY_GRN_TYPE = "type";
     	public static String INV_PUTAWAY_GRN_WAREHOUSEITEMID = "warehouseItemId";

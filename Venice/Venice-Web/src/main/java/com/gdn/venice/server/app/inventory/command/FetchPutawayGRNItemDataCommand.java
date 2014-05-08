@@ -81,25 +81,25 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId(), StockType.TRADING);
     	                    
-    	                    String shelfCode="";
+    	                    String storageCode="";
     	                    int qty=0;
     	                    if(whItem!=null){
     	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
     	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-    	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
+    	                    		storageCode+=storageStock.getStorage().getCode()+",";
     	                    		qty+=storageStock.getQuantity();
     	                    	}
-    	                    	if(shelfCode.length()>1){
-    	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	if(storageCode.length()>1){
+    	                    		storageCode=storageCode.substring(0, storageCode.lastIndexOf(","));
     	                    	}else{
-    	                    		shelfCode="-";
+    	                    		storageCode="-";
     	                    	}
     	                    }else{
-    	                    	shelfCode="-";
+    	                    	storageCode="-";
     	                    	_log.error("Warehouse item not found");
     	                    }
     	                    
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);
+    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageCode);
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
    	                    
     	                    dataList.add(map);
@@ -130,24 +130,24 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId(), st);
     	                    
-    	                    String shelfCode="";
+    	                    String storageCode="";
     	                    int qty=0;
     	                    if(whItem!=null){
     	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
     	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-    	                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getStorage().getShelf().getCode()+",";
+    	                    		storageCode+=storageStock.getStorage().getCode()+",";
     	                    		qty+=storageStock.getQuantity();
     	                    	}
-    	                    	if(shelfCode.length()>1){ 
-    	                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+    	                    	if(storageCode.length()>1){ 
+    	                    		storageCode=storageCode.substring(0, storageCode.lastIndexOf(","));
     	                    	}else{
-    	                    		shelfCode="-";
+    	                    		storageCode="-";
     	                    	}
     	                    }else{
-    	                    	shelfCode="-";
+    	                    	storageCode="-";
     	                    	_log.error("Warehouse item not found");
     	                    }
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, shelfCode);
+    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageCode);
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
     	                        	                    
     	                    dataList.add(map);

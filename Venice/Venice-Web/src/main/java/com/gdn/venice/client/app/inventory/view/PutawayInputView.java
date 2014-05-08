@@ -212,9 +212,7 @@ public class PutawayInputView extends ViewWithUiHandlers<PutawayInputUiHandler> 
 				for (int i=0;i<itemRecords.length;i++) {    
 					itemRowMap.put(DataNameTokens.INV_PUTAWAY_ID, record.getAttributeAsString(DataNameTokens.INV_PUTAWAY_ID));
 					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMID));
-					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));
-					
-					
+					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));									
 					itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID));
 									
 					if(itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE_INPUT)==null){

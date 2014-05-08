@@ -369,7 +369,7 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
         packageDetailListGrid.setSortField(0);
         packageDetailListGrid.setSelectionAppearance(SelectionAppearance.ROW_STYLE);
         packageDetailListGrid.setSelectionType(SelectionStyle.SIMPLE);
-        packageDetailListGrid.getField(DataNameTokens.INV_PICKINGLISTSO_SHELFCODE).setWidth("40%");
+        packageDetailListGrid.getField(DataNameTokens.INV_PICKINGLISTSO_STORAGECODE).setWidth("40%");
         
         pickingListDetailWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {

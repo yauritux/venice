@@ -107,7 +107,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMID));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE));
+	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY));
 	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_TYPE, putawayTypeComboBox.getValue().toString());
 	          						itemDataMap.put("ITEM"+i, itemRowMap.toString());					
@@ -131,7 +131,7 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 	        grnListGrid.setFields(finalListGridField);
 	        grnListGrid.getField(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE).setCanFilter(false);
 	        grnListGrid.getField(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC).setCanFilter(false);
-	        grnListGrid.getField(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE).setCanFilter(false);
+	        grnListGrid.getField(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE).setCanFilter(false);
 	        grnListGrid.setAutoFitData(Autofit.BOTH);
 	        refreshPutawayData();
 		}

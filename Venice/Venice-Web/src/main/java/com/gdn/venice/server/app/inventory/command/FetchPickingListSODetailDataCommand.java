@@ -47,38 +47,40 @@ public class FetchPickingListSODetailDataCommand implements RafDsCommand {
         	ResultListWrapper<PickPackageSalesOrder> pickPackageWrapper = pickingListService.getPickingListSODetail(request.getParams().get("username"), request.getParams().get(DataNameTokens.INV_PICKINGLISTSO_PACKAGEID));
         	
         	if(pickPackageWrapper!=null && pickPackageWrapper.isSuccess()){
-        		for(PickPackageSalesOrder ppso : pickPackageWrapper.getContents()){        			    	
-	        		HashMap<String, String> map = new HashMap<String, String>(); 
-					map.put(DataNameTokens.INV_PICKINGLISTSO_SALESORDERCODE, ppso.getSalesOrder().getSalesOrderNumber());
-					map.put(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUID, ppso.getSalesOrder().getAssignedItem().getCode());
-					map.put(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUNAME, ppso.getSalesOrder().getAssignedItem().getName());
-					map.put(DataNameTokens.INV_PICKINGLISTSO_QTY, Long.toString(ppso.getSalesOrder().getQuantity()));
-					
+        		for(PickPackageSalesOrder ppso : pickPackageWrapper.getContents()){        			    						
 					WarehouseItem whItem = putawayService.getWarehouseItemData(ppso.getSalesOrder().getAssignedItem().getId(), 
 							ppso.getSalesOrder().getWarehouse().getId(), 
 							ppso.getSalesOrder().getSupplier().getId(), ppso.getSalesOrder().getStockType());
 					
-					String shelfCode="";
                     if(whItem!=null){
     					System.out.println("whItem Id: "+whItem.getId());
-                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
-                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-                    		shelfCode+=storageStock.getStorage().getCode()+" / "+storageStock.getQuantity();
-                    		shelfCode+=", ";
-                    	}
-                    	if(shelfCode.length()>1){
-                    		shelfCode=shelfCode.substring(0, shelfCode.lastIndexOf(","));
+                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    
+                    	if(storageStockList.size()>0){
+	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
+	        	        		HashMap<String, String> map = new HashMap<String, String>(); 
+	        					map.put(DataNameTokens.INV_PICKINGLISTSO_SALESORDERCODE, ppso.getSalesOrder().getSalesOrderNumber());
+	        					map.put(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUID, ppso.getSalesOrder().getAssignedItem().getCode());
+	        					map.put(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUNAME, ppso.getSalesOrder().getAssignedItem().getName());
+	        					map.put(DataNameTokens.INV_PICKINGLISTSO_QTY, Long.toString(ppso.getSalesOrder().getQuantity()));
+	                    		map.put(DataNameTokens.INV_PICKINGLISTSO_STORAGECODE, storageStock.getStorage().getCode()!=null?storageStock.getStorage().getCode():"-");
+	                    		map.put(DataNameTokens.INV_PICKINGLISTSO_QTYSTORAGE, String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
+	
+	                            dataList.add(map);
+	                    	} 
                     	}else{
-                    		shelfCode="-";
+        	        		HashMap<String, String> map = new HashMap<String, String>(); 
+        					map.put(DataNameTokens.INV_PICKINGLISTSO_SALESORDERCODE, ppso.getSalesOrder().getSalesOrderNumber());
+        					map.put(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUID, ppso.getSalesOrder().getAssignedItem().getCode());
+        					map.put(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUNAME, ppso.getSalesOrder().getAssignedItem().getName());
+        					map.put(DataNameTokens.INV_PICKINGLISTSO_QTY, Long.toString(ppso.getSalesOrder().getQuantity()));
+                    		map.put(DataNameTokens.INV_PICKINGLISTSO_STORAGECODE, "-");
+                    		map.put(DataNameTokens.INV_PICKINGLISTSO_QTYSTORAGE, "0");
+
+                            dataList.add(map);
                     	}
-                    	
-                    	map.put(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, shelfCode);
                     }else{
-                    	shelfCode="-";
                     	_log.error("Warehouse item not found");
-                    }   
-                    
-                    dataList.add(map);
+                    }                       
         		}
         	}
         	

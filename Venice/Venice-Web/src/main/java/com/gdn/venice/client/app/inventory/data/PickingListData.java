@@ -42,7 +42,8 @@ public class PickingListData {
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUID, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_WAREHOUSESKUNAME, "Item Name"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_QTY, "Qty"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_SHELFCODE, "Shelf Code/Qty")};
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_STORAGECODE, "Storage Code"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTIR_QTYSTORAGE, "Qty Storage")};
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",
@@ -83,7 +84,8 @@ public class PickingListData {
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUID, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_WAREHOUSESKUNAME, "Item Name"),
 				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_QTY, "Qty"),
-				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_SHELFCODE, "Shelf Code/Qty")};
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_STORAGECODE, "Storage Code"),
+				new DataSourceTextField(DataNameTokens.INV_PICKINGLISTSO_QTYSTORAGE, "Qty Storage")};
 		dataSourceFields[0].setPrimaryKey(true);
 
 		RafDataSource dataSource = new RafDataSource("/response/data/*",

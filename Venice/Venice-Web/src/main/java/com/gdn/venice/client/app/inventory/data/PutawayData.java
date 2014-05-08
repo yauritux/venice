@@ -6,7 +6,6 @@ import com.gdn.venice.client.data.RafDataSource;
 import com.google.gwt.core.client.GWT;
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.DataSourceField;
-import com.smartgwt.client.data.fields.DataSourceDateField;
 import com.smartgwt.client.data.fields.DataSourceTextField;
 
 /**
@@ -20,7 +19,7 @@ public class PutawayData {
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, "Reff No"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, "Item Desc"),
-				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, "Storage/Shelf Code"),
+				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, "Storage Code"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_QTY, "Qty")};
 
 		dataSourceFields[0].setPrimaryKey(true);
@@ -39,7 +38,7 @@ public class PutawayData {
 		DataSourceField[] dataSourceFields = {
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_ID, "Putaway ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_NUMBER, "Putaway Number"),
-				new DataSourceDateField(DataNameTokens.INV_PUTAWAY_CREATEDDATE, "Created Date"),
+				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_CREATEDDATE, "Created Date"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_TYPE, "Putaway Type"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_STATUS, "Putaway Status"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ID, "GRN ID")};
@@ -61,7 +60,7 @@ public class PutawayData {
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, "GRN Item ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, "Item Desc"),
-				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE, "Storage/Shelf Code"),
+				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, "Storage Code"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_QTY, "Qty"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, "Warehouse Item ID")};
 
