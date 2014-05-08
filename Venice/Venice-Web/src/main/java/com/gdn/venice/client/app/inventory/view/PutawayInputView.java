@@ -92,6 +92,13 @@ public class PutawayInputView extends ViewWithUiHandlers<PutawayInputUiHandler> 
     
 	private void buildPutawayListGrid(String warehouseId) {
 		DataSource putawayData = PutawayData.getPutawayData(warehouseId, 1, 20);
+        LinkedHashMap<String, String> type = new LinkedHashMap<String, String>();
+        type.put("GRN", "GRN");
+        type.put("PICKING_LIST", "Picking List");
+        type.put("PACKING_LIST", "Packing List");
+        
+        putawayData.getField(DataNameTokens.INV_PUTAWAY_TYPE).setValueMap(type);
+        
 		ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(putawayData);
         ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3]};
 
@@ -99,12 +106,6 @@ public class PutawayInputView extends ViewWithUiHandlers<PutawayInputUiHandler> 
         putawayListGrid.setFields(finalListGridField);
         putawayListGrid.setAutoFitData(Autofit.BOTH);
         
-        LinkedHashMap<String, String> type = new LinkedHashMap<String, String>();
-        type.put("GRN", "GRN");
-        type.put("PICKING_LIST", "Picking List");
-        type.put("PACKING_LIST", "Packing List");
-        
-        putawayListGrid.getField(DataNameTokens.INV_PUTAWAY_TYPE).setValueMap(type);
         refreshPutawayData();
 	}
                     

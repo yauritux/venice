@@ -187,7 +187,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
     }
 
     private ListGrid buildItemListGrid(String grnId) {
-        DataSource grnItemData = GRNData.getGRNItemData(grnId, 1, 100);
+        DataSource grnItemData = GRNData.getGRNItemData(grnId, 1, 20);
 
         final ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
         ListGridField attributeField = new ListGridField("ATTRIBUTEFIELD", "View Attribute");
@@ -245,7 +245,7 @@ public class GRNListView extends ViewWithUiHandlers<GRNListUiHandler> implements
         itemListGrid.setHeight100();
         itemListGrid.setShowAllRecords(true);
         itemListGrid.setSortField(0);
-        itemListGrid.setShowFilterEditor(true);
+        itemListGrid.setShowFilterEditor(false);
         itemListGrid.setCanResizeFields(true);
         itemListGrid.setShowRowNumbers(true);
         itemListGrid.setAutoFetchData(true);

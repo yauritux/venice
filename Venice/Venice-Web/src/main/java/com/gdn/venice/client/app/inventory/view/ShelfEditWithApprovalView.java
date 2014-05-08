@@ -252,7 +252,7 @@ public class ShelfEditWithApprovalView extends ViewWithUiHandlers<ShelfEditWithA
     	storageListGrid.setShowFilterEditor(true);
     	storageListGrid.setCanResizeFields(true);
     	storageListGrid.setShowRowNumbers(true);
-    	storageListGrid.setShowFilterEditor(true);
+    	storageListGrid.setShowFilterEditor(false);
     	    	
     	if(shelfId==null){
     		ListGridField codeField = new ListGridField(DataNameTokens.INV_STORAGE_CODE, "Code"); 
@@ -268,7 +268,7 @@ public class ShelfEditWithApprovalView extends ViewWithUiHandlers<ShelfEditWithA
             storageType.put("pallet", "Pallet");
             storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
     	}else{
-        	DataSource storageData = ShelfData.getStorageInProcessData(shelfId, 1, 100);
+        	DataSource storageData = ShelfData.getStorageInProcessData(shelfId, 1, 20);
     		storageListGrid.setDataSource(storageData);
     		storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
     		

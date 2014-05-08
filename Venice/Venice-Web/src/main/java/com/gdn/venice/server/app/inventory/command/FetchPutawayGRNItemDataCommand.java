@@ -53,7 +53,7 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         try {
         	putawayService = new PutawayManagementService();
-        	InventoryPagingWrapper<GoodReceivedNoteItem> grnItemWrapper = putawayService.getGRNItemDataListByWarehouseId(request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
+        	InventoryPagingWrapper<GoodReceivedNoteItem> grnItemWrapper = putawayService.getGRNItemDataListByWarehouseId(request, request.getParams().get(DataNameTokens.INV_WAREHOUSE_ID));
         	if(grnItemWrapper!=null && grnItemWrapper.isSuccess()){     
             	
 	    		asnService = new ASNManagementService(); 

@@ -183,7 +183,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
     	storageListGrid.setShowFilterEditor(true);
     	storageListGrid.setCanResizeFields(true);
     	storageListGrid.setShowRowNumbers(true);
-    	storageListGrid.setShowFilterEditor(true);
+    	storageListGrid.setShowFilterEditor(false);
     	    	
     	if(shelfId==null){
     		ListGridField codeField = new ListGridField(DataNameTokens.INV_STORAGE_CODE, "Code");  
@@ -198,7 +198,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
             storageType.put("pallet", "Pallet");
             storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
     	}else{
-        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 100);
+        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 20);
     		storageListGrid.setDataSource(storageData);
     		storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
     		

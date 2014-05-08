@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -17,6 +19,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.inventory.exchange.entity.Item;
 import com.gdn.inventory.exchange.entity.PutawayRequest;
@@ -29,6 +32,7 @@ import com.gdn.inventory.exchange.entity.module.inbound.PutawayItem;
 import com.gdn.inventory.exchange.type.StockType;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
+import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
 
 /**
@@ -79,13 +83,29 @@ public class PutawayManagementService{
         }
 	}	
 	
-	public InventoryPagingWrapper<GoodReceivedNoteItem> getGRNItemDataListByWarehouseId(String warehouseId) throws HttpException, IOException{
+	public InventoryPagingWrapper<GoodReceivedNoteItem> getGRNItemDataListByWarehouseId(RafDsRequest request, String warehouseId) throws HttpException, IOException{
 		System.out.println("getGRNItemDataListByWarehouseId");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "goodReceivedNote/findItemByWarehouseId?warehouseId=" +warehouseId;
+                + "goodReceivedNote/findItemByWarehouseId?warehouseId=" +warehouseId
+                + "&page=" + request.getParams().get("page")
+                + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
         System.out.println("url: "+url);
+        
+        if (request.getCriteria() != null) {
+            Map<String, Object> searchMap = new HashMap<String, Object>();
+            for (JPQLSimpleQueryCriteria criteria : request.getCriteria().getSimpleCriteria()) {
+                System.out.println("adding criteria:" + criteria.getFieldName() + ", " + criteria.getValue());
+                searchMap.put(criteria.getFieldName(), criteria.getValue());
+            }
+            String json = mapper.writeValueAsString(searchMap);
+            System.out.println("json: " + json);
+            httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+            httpPost.setRequestHeader("Content-Type", "application/json");
+        } else {
+            System.out.println("No criteria");
+        }
     	        
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println("response code: "+httpCode);
@@ -190,13 +210,29 @@ public class PutawayManagementService{
         }
 	}
 	
-	public InventoryPagingWrapper<Putaway> getPutawayListByWarehouseId(String warehouseId) throws HttpException, IOException{
+	public InventoryPagingWrapper<Putaway> getPutawayListByWarehouseId(RafDsRequest request, String warehouseId) throws HttpException, IOException{
 		System.out.println("getPutawayListByWarehouseId");
 		
 		String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "putaway/getPutawayListByWarehouse?warehouseId=" +warehouseId;
+                + "putaway/getPutawayListByWarehouse?warehouseId=" +warehouseId
+                + "&page=" + request.getParams().get("page")
+                + "&limit=" + request.getParams().get("limit");
         PostMethod httpPost = new PostMethod(url);
         System.out.println("url: "+url);
+        
+        if (request.getCriteria() != null) {
+            Map<String, Object> searchMap = new HashMap<String, Object>();
+            for (JPQLSimpleQueryCriteria criteria : request.getCriteria().getSimpleCriteria()) {
+                System.out.println("adding criteria:" + criteria.getFieldName() + ", " + criteria.getValue());
+                searchMap.put(criteria.getFieldName(), criteria.getValue());
+            }
+            String json = mapper.writeValueAsString(searchMap);
+            System.out.println("json: " + json);
+            httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
+            httpPost.setRequestHeader("Content-Type", "application/json");
+        } else {
+            System.out.println("No criteria");
+        }
     	        
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println("response code: "+httpCode);

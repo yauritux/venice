@@ -129,7 +129,9 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 	
 	        grnListGrid.setDataSource(grnItemData);         
 	        grnListGrid.setFields(finalListGridField);
-	
+	        grnListGrid.getField(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE).setCanFilter(false);
+	        grnListGrid.getField(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC).setCanFilter(false);
+	        grnListGrid.getField(DataNameTokens.INV_PUTAWAY_GRN_SHELFCODE).setCanFilter(false);
 	        grnListGrid.setAutoFitData(Autofit.BOTH);
 	        refreshPutawayData();
 		}
