@@ -17,6 +17,7 @@ import com.gdn.venice.server.command.RafDsCommand;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
 import com.gdn.venice.server.util.DateToXsdDatetimeFormatter;
+import com.gdn.venice.util.CommonUtil;
 import com.gdn.venice.util.VeniceConstants;
 
 public class FetchJournalDetailDataCommand implements RafDsCommand {
@@ -78,6 +79,8 @@ public class FetchJournalDetailDataCommand implements RafDsCommand {
 				}				
 			}		
 			String selectMethod ="";
+			
+			
 			for (int i=0;i<finJournalTransactionList.size();i++) {
 				HashMap<String, String> map = new HashMap<String, String>();
 				
@@ -131,24 +134,17 @@ public class FetchJournalDetailDataCommand implements RafDsCommand {
 				map.put(DataNameTokens.FINJOURNALTRANSACTION_FINTRANSACTIONSTATUS_TRANSACTIONSTATUSDESC, 
 						(finJournalTransaction.getFinTransactionStatus()!=null)?
 								finJournalTransaction.getFinTransactionStatus().getTransactionStatusDesc():"");
+
 				
-				map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, (finArFundsInReconRecordList.get(0).getComment())!=null?finArFundsInReconRecordList.get(0).getComment():"");
-				
-				/*
-				if(finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Cash Receive Journal") || finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Refund Journal") || finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Allocation Journal")) {
-					if((finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Payment Not Recognized") || finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Refunded"))) {
-						if(i==0) {
-							map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, finArFundsInReconRecordList.get(0).getComment());
-						}
-					}
-					else {
-						map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, finJournalTransaction.getComments());
+				for(int a=0;a<finArFundsInReconRecordList.size();a++) {
+					if(finJournalTransaction.getWcsOrderID().equals(finArFundsInReconRecordList.get(a).getWcsOrderId())) {
+						map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS,
+								(finArFundsInReconRecordList.get(a).getComment())!=null?finArFundsInReconRecordList.get(a).getComment():"");
+						break;
 					}
 				}
-				else {
-					map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, finJournalTransaction.getComments());
-				}
-				*/
+				
+				//map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS, finJournalTransaction.getComments());
 				
 				map.put(DataNameTokens.FINJOURNALTRANSACTION_GROUP_JOURNAL, mapGroup.get(finJournalTransaction.getGroupJournal()+""));
 				
