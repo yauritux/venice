@@ -1453,6 +1453,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setJournalGroupDesc("Cash Received Journal for :"
 							+ sdf.format(time));
 			finJournalApprovalGroup.setJournalGroupTimestamp(time);
+			if (!em.contains(finJournalApprovalGroup)) {
+				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
+				finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
+			}
 			//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			int count = 0;

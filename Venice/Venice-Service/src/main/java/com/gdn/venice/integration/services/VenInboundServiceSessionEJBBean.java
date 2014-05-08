@@ -3202,11 +3202,11 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                     venOrderItem.setVenOrderStatus(venOrderStatus);
 
                     // Synchronize the reference data then merge the status
-                    venOrderItem = this.synchronizeVenOrderItemReferenceData(venOrderItem);
+                   venOrderItem = this.synchronizeVenOrderItemReferenceData(venOrderItem);
 
                     List<VenOrderItem> venOrderItems = venOrder.getVenOrderItems();
 //                    List<VenOrderItemAdjustment> venOrderItemAdjustmentNewSpreadList = new ArrayList<VenOrderItemAdjustment>();
-                    _log.debug("Total Order Item : " + venOrderItems.size());
+//                    _log.debug("Total Order Item : " + venOrderItems.size());
 
 //                    BigDecimal totalPromo = new BigDecimal(0);
 
