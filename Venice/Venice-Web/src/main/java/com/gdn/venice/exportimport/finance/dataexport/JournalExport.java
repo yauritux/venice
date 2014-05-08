@@ -196,27 +196,16 @@ public class JournalExport {
 					
 					
 					nameCell = row.createCell(startCol + 7);
-					if(finJournalTransaction.getFinJournalApprovalGroup().getFinJournal().getJournalDesc().equals("Cash Receive Journal")) {
-						if((finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Payment Not Recognized") || finArFundsInReconRecordList.get(0).getFinArReconResult().getReconResultDesc().equals("Refunded"))) {
-							if(i==0) {
-								nameCell.setCellValue(new HSSFRichTextString(
-										finArFundsInReconRecordList.get(0).getComment()));
-							}
-							else {
-								nameCell.setCellValue(new HSSFRichTextString(
-										""));
-							}
-						}
-						else {
-							nameCell.setCellValue(new HSSFRichTextString(
-									finJournalTransaction.getComments()));
-						}
-					}
-					else {
+					/*
 						nameCell.setCellValue(new HSSFRichTextString(
 								finJournalTransaction.getComments()));
+					*/
+					for(int a=0;a<finArFundsInReconRecordList.size();a++) {
+						if(finJournalTransaction.getWcsOrderID().equals(finArFundsInReconRecordList.get(a).getWcsOrderId())) {
+							nameCell.setCellValue(new HSSFRichTextString(finArFundsInReconRecordList.get(a).getComment()!=null?finArFundsInReconRecordList.get(a).getComment():""));
+							break;
+						}
 					}
-
 					
 					for (int j = startCol; j < 8 + startCol; j++) {
 						HSSFCell cells = row.getCell(j);

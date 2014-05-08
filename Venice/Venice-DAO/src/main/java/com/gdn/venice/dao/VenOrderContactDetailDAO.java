@@ -44,6 +44,23 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 		"JOIN FETCH o.venContactDetail cd " +
 		"WHERE cd.venContactDetailType.contactDetailTypeId = 1 " +
 		"AND o.venOrder = ?1";
+
+	public static final String FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILVENCONTACTDETAILTYPECONTACTDETAILTYPEID =
+	"SELECT o " +
+	"FROM VenOrderContactDetail o " +
+	"JOIN FETCH o.venContactDetail cd " +
+	"WHERE o.venOrder = ?1 " +
+	"AND (cd.venContactDetailType.contactDetailTypeId = ?2 " +
+	"OR cd.venContactDetailType.contactDetailTypeId = ?3 " +
+	"OR cd.venContactDetailType.contactDetailTypeId = ?4)";
+	
+	public static final String FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILCONTACTDETAIL=
+	"SELECT o " +
+	"FROM VenOrderContactDetail o " +
+	"JOIN FETCH o.venContactDetail cd " +
+	"WHERE o.venOrder = ?1 " +
+	"AND cd.contactDetail = ?2";
+		
 	
 	@Query(FIND_BY_CONTACTTYPEEMAIL_VENORDER)
 	public VenOrderContactDetail findByContactEmailVenOrder(long orderId);
@@ -56,4 +73,10 @@ public interface VenOrderContactDetailDAO extends JpaRepository<VenOrderContactD
 	
 	@Query(FIND_BY_CONTACTTYPEMOBILE_VENORDER)
 	public List<VenOrderContactDetail> findByContactMobileVenOrder(VenOrder order);
+	
+	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILVENCONTACTDETAILTYPECONTACTDETAILTYPEID)
+	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailVenContactDetailTypeContactDetailTypeId(VenOrder order, long  phone, long  mobile, long email);
+
+	@Query(FIND_BY_VENORDERORDERID_AND_VENCONTACTDETAILCONTACTDETAIL)
+	public List<VenOrderContactDetail> findByVenOrderOrderIdAndVenContactDetailContactDetail(VenOrder order, String contactDetail);
 }
