@@ -537,12 +537,14 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId()
 										.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER.id())) {
+
 							Long type = reconRecord
 									.getFinArFundsInActionApplied()
 									.getActionAppliedId()
 									.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id()) ? FinAccountConstants.FIN_ACCOUNT_2170002.id()
 									: FinAccountConstants.FIN_ACCOUNT_2170001.id();
 							if (!finArFundsInJournalTransactionList.isEmpty()) {
+
 								/*
 								List<FinArFundsInRefund> refundAmountList = refundRecordHome
 										.queryByRange(
@@ -571,7 +573,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 								if (reconRecord.getProviderReportPaidAmount()
 										.compareTo(
 												reconRecord.getRefundAmount()) != 0) {
-
 									FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 									finJournalApprovalGroup
 											.setFinApprovalStatus(finApprovalStatuss);
@@ -652,7 +653,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 											.setGroupJournal(accountNumberBank);
 									// Persist the cash received journal
 									// transaction
-									CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI )");
 									/*journalTransactionHome
 											.persistFinJournalTransaction(cashReceiveJournalTransaction);*/
 									if (!em.contains(cashReceiveJournalTransaction)) {
@@ -666,6 +666,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 								/*
 								 * Post the journal transaction for Refund
 								 */
+
+								CommonUtil.logDebug(this.getClass().getCanonicalName(), "Post the journal transaction for Refund");
 								FinJournalTransaction refundJournalTransaction = new FinJournalTransaction();
 								refundJournalTransaction.setComments("");
 								refundJournalTransaction
@@ -908,6 +910,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
+
 							finJournalApprovalGroup=finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
 							/*
 							 * Post the journal transaction for uang jaminan
@@ -1056,6 +1059,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// set WCSOrderID
 							if (!itemsAllocate.isEmpty()
 									&& itemsAllocate != null) {
+
 								/*
 								List<FinArFundsInReconRecord> destItems = fundsInReconRecordHome
 										.queryByRange(
@@ -1101,6 +1105,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
+
 							/*
 							 * Post the journal transaction for uang jaminan
 							 * transaksi
@@ -1253,6 +1258,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// set WCSOrderID
 							if (!itemsAllocate.isEmpty()
 									&& itemsAllocate != null) {
+
 								/*
 								List<FinArFundsInReconRecord> destItems = fundsInReconRecordHome
 										.queryByRange(
@@ -1283,6 +1289,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 							}
 							transactionList.add(cashReceiveJournalTransaction);
 						} else {
+
+							CommonUtil.logDebug(this.getClass().getCanonicalName(), "BEBAN DAN LAIN-LAIN");
 							/*
 							 * Post the journal transaction for PENGHASILAN
 							 * BEBAN DAN LAIN-LAIN

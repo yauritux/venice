@@ -3245,7 +3245,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 //                        }
 //                    }
 
-                    int totalOrderItemAfterCR = venOrderItems.size() - 1;
+//                    int totalOrderItemAfterCR = venOrderItems.size() - 1;
 //                    BigDecimal adjustmentSpread = new BigDecimal(0);
 //
 //                    if (totalOrderItemAfterCR > 0) {
@@ -3253,7 +3253,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
 //                    }
 
 //                    _log.debug("Total Promo : " + totalPromo);
-                    _log.debug("Total Order Item : " + totalOrderItemAfterCR);
+//                    _log.debug("Total Order Item : " + totalOrderItemAfterCR);
 //                    _log.debug("Adjustment Spread : " + adjustmentSpread);
 
                     //merge all non free shipping adjustment with the new adjustment spread
