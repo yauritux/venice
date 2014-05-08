@@ -13,6 +13,7 @@ import com.gdn.venice.client.data.RafDataSource;
 import com.gdn.venice.client.presenter.MainPagePresenter;
 import com.gdn.venice.client.util.Util;
 import com.gdn.venice.client.widgets.RafViewLayout;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -287,6 +288,13 @@ public class GoodIssuedNoteView extends ViewWithUiHandlers<GoodIssuedNoteUiHandl
         printGinButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                String host = GWT.getHostPageBaseURL();
+                if (host.contains("8889")) {
+                    host = "http://localhost:8090/Venice/";
+                }
+
+                com.google.gwt.user.client.Window.open(host + "PrintGINServlet"
+                        + "?method=printGrn&type=RPC&ginId=" + record.getAttribute(DataNameTokens.INV_GIN_ID), "_blank", null);
             }
         });
 
