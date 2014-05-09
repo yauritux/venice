@@ -52,12 +52,11 @@ public class FetchPickingListIRDetailDataCommand implements RafDsCommand {
         		InventoryRequest inventoryRequest = pickPackageWrapper.getContent().getInventoryRequest();
         		
         		ResultListWrapper<InventoryRequestItem> irItemWrapper = pickingListService.getIRItemByIRId(Long.toString(inventoryRequest.getId()));
-        		for(InventoryRequestItem irItem : irItemWrapper.getContents()){	        		
-
-					
+        		for(InventoryRequestItem irItem : irItemWrapper.getContents()){	        							
 					WarehouseItem whItem = putawayService.getWarehouseItemData(irItem.getItem().getId(), 
 							irItem.getInventoryRequest().getFromWarehouse().getId(), 
-							irItem.getInventoryRequest().getSupplier().getId(), irItem.getInventoryRequest().getInventoryType());
+							irItem.getInventoryRequest().getSupplier()!=null?irItem.getInventoryRequest().getSupplier().getId():new Long(0)
+									, irItem.getInventoryRequest().getInventoryType());
 					
                     if(whItem!=null){
     					System.out.println("whItem Id: "+whItem.getId());
@@ -87,8 +86,7 @@ public class FetchPickingListIRDetailDataCommand implements RafDsCommand {
                     	}
                     }else{
                     	_log.error("Warehouse item not found");
-                    }   
-                    
+                    }                       
         		}
         	}
         	

@@ -107,7 +107,7 @@ public class FetchItemAttributeDataCommand implements RafDsCommand {
 
                 whi.setSupplier(supplier);
                 
-        		WarehouseItem whItem = grnService.findWarehouseItem(itemId, whi.getWarehouse().getId().toString(), whi.getSupplier().getId().toString(), whi.getStockType());        		
+        		WarehouseItem whItem = grnService.findWarehouseItem(itemId, whi.getWarehouse().getId().toString(), whi.getSupplier().getId()!=null?whi.getSupplier().getId().toString():"", whi.getStockType());        		
         		
         		if(whItem!=null){
         			System.out.println("warehouseItem found");
