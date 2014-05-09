@@ -9637,6 +9637,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 					"postPaymentRefundJournalTransaction:: adalah 1 "+finArFundsInRefundList.get(0).getFinArFundsInReconRecord().getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeId());
 			CommonUtil.logDebug(this.getClass().getCanonicalName(),
 					"postPaymentRefundJournalTransaction:: adalah 2 "+finArFundsInRefundList.get(0).getFinArFundsInReconRecord().getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeDesc());
+
+			CommonUtil.logDebug(this.getClass().getCanonicalName(),
+					"postPaymentRefundJournalTransaction:: ID BCA adalah :  "+FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB.id());
+			
+			CommonUtil.logDebug(this.getClass().getCanonicalName(),
+					"postPaymentRefundJournalTransaction:: KlikPay CC adalah :  "+FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC.id());
 			
 			
 			Timestamp time = new Timestamp(System.currentTimeMillis());
@@ -9652,6 +9658,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.getFinArFundsInReportType()
 						.getPaymentReportTypeId());
 				
+				CommonUtil.logDebug(this.getClass().getCanonicalName(),
+						"postPaymentRefundJournalTransaction:: adalah 4 "+finArFundsInRefund.getFinArFundsInReconRecord()
+						.getFinArFundsInReport()
+						.getFinArFundsInReportType()
+						.getPaymentReportTypeDesc());
+				
 				
 				long accountNumberBank = 0;
 				if (finArFundsInRefund.getFinArFundsInReconRecord()
@@ -9661,6 +9673,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
 								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB.id()) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),"TesBCA");
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120104.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
@@ -9677,6 +9690,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
 								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC.id()) {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),"Tes Klikpay");
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120105.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
 						.getFinArFundsInReport().getFinArFundsInReportType()
@@ -9703,6 +9717,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB.id()) {
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1121001.id();
 				} else {
+					CommonUtil.logDebug(this.getClass().getCanonicalName(),"Masuk sini");
 					throw new EJBException(
 							"Account number not available for the payment, please add account number to fin account and venice constants");
 				}

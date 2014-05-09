@@ -90,8 +90,8 @@
         <dependency>
             <groupId>dozer-patched-session</groupId>
             <artifactId>dozer-patched-session</artifactId>
-            <version>5-3</version>
-            <classifier>4</classifier>
+            <version>5-4</version>
+            <classifier>1</classifier>
         </dependency>
         <dependency>
             <groupId>pwsatk-utils</groupId>
