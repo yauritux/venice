@@ -67,8 +67,8 @@ public class FetchGRNDataCommand implements RafDsCommand {
 		                	ResultWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber());
 		                  	if(poWrapper!=null && poWrapper.isSuccess()){
 		                   		PurchaseOrder po = poWrapper.getContent();
-		                   		supplierCode = po.getSupplier().getCode();
-		                   		supplierName = po.getSupplier().getName();
+		                   		supplierCode = po.getSupplier()!=null?po.getSupplier().getCode():"";
+		                   		supplierName = po.getSupplier()!=null?po.getSupplier().getName():"";
 		                   	}else{
 		                   		_log.error("PO not found");
 		                   	}                    	
@@ -76,8 +76,8 @@ public class FetchGRNDataCommand implements RafDsCommand {
 		                	   ResultWrapper<ConsignmentFinalForm> cffWrapper = asnService.getCFFData(request, asn.getReferenceNumber());
 		                   	if(cffWrapper!=null && cffWrapper.isSuccess()){
 		                  		ConsignmentFinalForm cff = cffWrapper.getContent();
-		                   		supplierCode = cff.getConsignmentApprovalForm().getSupplier().getCode();
-		                   		supplierName = cff.getConsignmentApprovalForm().getSupplier().getName();
+		                   		supplierCode = cff.getConsignmentApprovalForm().getSupplier()!=null?cff.getConsignmentApprovalForm().getSupplier().getCode():"";
+		                   		supplierName = cff.getConsignmentApprovalForm().getSupplier()!=null?cff.getConsignmentApprovalForm().getSupplier().getName():"";
 		                   	}else{
 		                   		_log.error("CFF not found");
 		                   	}

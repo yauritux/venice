@@ -128,8 +128,8 @@ public class PickingListIRExportServlet extends HttpServlet {
 					
 					System.out.println("processing row: "+i+" packageId: "+pl.getPickPackage().getCode());
 					HSSFCell cell = detailRow.createCell(startCol);cell.setCellValue(new HSSFRichTextString(pl.getPickPackage().getCode()));
-					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier().getCode()));
-					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier().getName()));	
+					cell = detailRow.createCell(startCol+1);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier()!=null?pl.getInventoryRequest().getSupplier().getCode():""));
+					cell = detailRow.createCell(startCol+2);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getSupplier()!=null?pl.getInventoryRequest().getSupplier().getName():""));	
 					cell = detailRow.createCell(startCol+3);cell.setCellValue(new HSSFRichTextString(pl.getPickPackage().getAssignedPicker().getName()));
 					cell = detailRow.createCell(startCol+4);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getInventoryType().name()));
 					cell = detailRow.createCell(startCol+5);cell.setCellValue(new HSSFRichTextString(pl.getInventoryRequest().getIrNumber()));

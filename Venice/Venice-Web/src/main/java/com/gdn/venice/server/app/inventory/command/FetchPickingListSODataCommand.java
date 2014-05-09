@@ -49,7 +49,7 @@ public class FetchPickingListSODataCommand implements RafDsCommand {
 	                    map.put(DataNameTokens.INV_PICKINGLISTSO_PACKAGECODE, pp.getCode());
 	                    
 	                    ResultListWrapper<PickPackageSalesOrder> ppso = pickingListService.getPickingListSODetail(request.getParams().get("username"), pp.getId().toString());
-	                    map.put(DataNameTokens.INV_PICKINGLISTSO_MERCHANTNAME, ppso!=null?ppso.getContents().get(0).getSalesOrder().getSupplier().getName():"");
+	                    map.put(DataNameTokens.INV_PICKINGLISTSO_MERCHANTNAME, ppso!=null?ppso.getContents().get(0).getSalesOrder().getSupplier()!=null?ppso.getContents().get(0).getSalesOrder().getSupplier().getName():"":"");
 	                    map.put(DataNameTokens.INV_PICKINGLISTSO_PICKERID, pp.getAssignedPicker()!=null?Long.toString(pp.getAssignedPicker().getId()):"");
 	                    map.put(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME, pp.getAssignedPicker()!=null?pp.getAssignedPicker().getName():"");
 	                    	                    	                  

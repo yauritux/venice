@@ -114,10 +114,10 @@ public class PutawayExportServlet extends HttpServlet {
 	                    
 	                    System.out.println("item id "+prItem.getItem().getId());
 	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
-	                    System.out.println("supplier: "+poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId());
+	                    System.out.println("supplier: "+poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():"");
 	                    WarehouseItem whItem = putawayService.getWarehouseItemData(prItem.getItem().getId(), 
 	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
-	                    		poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId()!=null?poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():new Long(0), StockType.TRADING);
+	                    		poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():new Long(0), StockType.TRADING);
 	                    
 	                    if(whItem!=null){
 	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());
@@ -163,10 +163,10 @@ public class PutawayExportServlet extends HttpServlet {
 	                    
 	                    System.out.println("item id "+cafItem.getItem().getId());
 	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
-	                    System.out.println("supplier: "+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId());
+	                    System.out.println("supplier: "+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():"");
 	                    WarehouseItem whItem = putawayService.getWarehouseItemData(cafItem.getItem().getId(), 
 	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
-	                    		cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId()!=null?cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():new Long(0), st);
+	                    		cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():new Long(0), st);
 	                    
 	                    if(whItem!=null){
 	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());   
