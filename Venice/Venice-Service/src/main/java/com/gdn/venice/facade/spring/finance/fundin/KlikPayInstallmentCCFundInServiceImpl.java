@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.gdn.venice.constants.FinApprovalStatusConstants;
 import com.gdn.venice.constants.FinArFundsInActionAppliedConstants;
 import com.gdn.venice.constants.FinArFundsInReportTypeConstants;
+import com.gdn.venice.constants.FinArReconResultConstants;
 import com.gdn.venice.dto.FundInData;
 import com.gdn.venice.exception.FundInFileAlreadyUploadedException;
 import com.gdn.venice.exception.FundInFileParserException;
@@ -25,6 +26,7 @@ import com.gdn.venice.persistence.FinArFundsInActionApplied;
 import com.gdn.venice.persistence.FinArFundsInReconRecord;
 import com.gdn.venice.persistence.FinArFundsInReport;
 import com.gdn.venice.persistence.VenOrder;
+import com.gdn.venice.persistence.VenOrderPayment;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
 import com.gdn.venice.util.CommonUtil;
 
@@ -62,6 +64,16 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 			}
 			
 			finArFundsInReconRecordDAO.save(fundInReconReadyToPersistList);
+			
+			for(int i=0;i<fundInReconReadyToPersistList.size();i++)	{	
+					if(fundInReconReadyToPersistList.get(i).getFinArReconResult()!=null){
+							if(!(fundInReconReadyToPersistList.get(i).getFinArReconResult().getReconResultId().equals(FinArReconResultConstants.FIN_AR_RECON_RESULT_NOT_RECOGNIZED.id()))) {
+								VenOrderPayment venOrderPayment = fundInReconReadyToPersistList.get(i).getVenOrderPayment();
+								venOrderPayment.setCardNumber(fundInReconReadyToPersistList.get(i).getCardNumber());
+								venOrderPaymentDAO.save(venOrderPayment);
+							}			
+					}
+			}
 			
 			return constructSuccessMessage(fundInData);
 			
@@ -159,6 +171,7 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 		Date tgl=SDF_yyyyMMdd_HHmmss.parse(rec.getTransDate().replaceAll("\\.", "").substring(0, 8)+" "+transactionTime);		
 		Date paymentDate = SDF_yyyy_MM_dd.parse(rec.getTransDate().substring(0, 4)+"-"+rec.getTransDate().substring(4, 6)+"-"+rec.getTransDate().substring(6, 8));
 		
+		String cardNumber = rec.getCardNo();
 		
 		if(!isFundInOkToContinue(referenceId, new java.sql.Timestamp(tgl.getTime())+"", paymentAmount, REPORT_TYPE)) {
 			return null;
@@ -211,6 +224,7 @@ public class KlikPayInstallmentCCFundInServiceImpl extends AbstractFundInService
 		fundInRecon.setReconcilliationRecordTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
 		fundInRecon.setProviderReportPaymentDate(new java.sql.Timestamp(tgl.getTime()));
 		fundInRecon.setRefundAmount(new BigDecimal(0));
+		fundInRecon.setCardNumber(cardNumber!=null?cardNumber:"");
 		
 		fundInRecon.setFinArReconResult(getReconResult(fundInRecon));
 		

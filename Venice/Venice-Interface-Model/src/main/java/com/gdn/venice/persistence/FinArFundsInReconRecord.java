@@ -73,6 +73,9 @@ public class FinArFundsInReconRecord implements Serializable {
 	//updated Arifin
 	@Column(name="unique_payment", length=100)
 	private String uniquePayment;	
+	
+	@Column(name="card_number", length=100)
+	private String cardNumber;
 
 	//bi-directional many-to-one association to FinArFundsInReconComment
 	@OneToMany(mappedBy="finArFundsInReconRecord")
@@ -344,6 +347,14 @@ public class FinArFundsInReconRecord implements Serializable {
 	public void setFinArFundsInActionAppliedHistory(
 			List<FinArFundsInActionAppliedHistory> finArFundsInActionAppliedHistory) {
 		this.finArFundsInActionAppliedHistory = finArFundsInActionAppliedHistory;
+	}
+
+	public void setCardNumber(String cardNumber) {
+		this.cardNumber = cardNumber;
+	}
+
+	public String getCardNumber() {
+		return cardNumber;
 	}
 
 }

@@ -116,8 +116,6 @@ public class RefundFundInActionCommand implements RafRpcCommand{
 							}			
 						}								
 					}else{
-				
-						
 						List<FinArFundsInReconRecord> reconRecordListTemp = fundsInReconRecordHome
 						.queryByRange("select o from FinArFundsInReconRecord o where o.reconciliationRecordId = " + reconciliationRecordId+" and o.finArFundsInActionApplied.actionAppliedId<>"+VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED, 0, 0);				
 						if(!reconRecordListTemp.isEmpty() && reconRecordListTemp.size()>0){
@@ -151,22 +149,27 @@ public class RefundFundInActionCommand implements RafRpcCommand{
 								}else{
 									finApprovalStatus.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
 								}
+								//finApprovalStatus.setApprovalStatusId(VeniceConstants.FIN_APPROVAL_STATUS_NEW);
 								item.setFinApprovalStatus(finApprovalStatus);
 								
 								FinArFundsInActionApplied finArFundsInActionApplied = new FinArFundsInActionApplied();	
-									List<FinArFundsInRefund> itemRefundList = refundHome.queryByRange("select o from FinArFundsInRefund o where o.finArFundsInReconRecord.reconciliationRecordId="+reconciliationRecordId+" order by o.refundRecordId desc", 0, 0);
+									List<FinArFundsInRefund> itemRefundList = refundHome.queryByRange("select o from FinArFundsInRefund o where o.finArFundsInReconRecord.reconciliationRecordId="+reconciliationRecordId+" order by o.refundRecordId asc", 0, 0);
 									for(FinArFundsInRefund n : itemRefundList){
 										if(n.getRefundRecordId().equals(idRefund)){											
 											n.setApAmount(new BigDecimal(0));
-											 refundHome.mergeFinArFundsInRefund(n);
+											refundHome.mergeFinArFundsInRefund(n);
+											finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
 										}else if(finArFundsInActionApplied.getActionAppliedId()==null && n.getApAmount().compareTo(new BigDecimal(0))>0){
 											if((n.getRefundType()!=null?n.getRefundType():"").contains("Bank")){
 													finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK);	
-											}else{
+											}else if((n.getRefundType()!=null?n.getRefundType():"").contains("Customer")){
 												    finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER);	
+											}else{
+											finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
 											}
 										}
-									}									
+										finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_NONE);
+									}		
 								List<FinArFundsInAllocatePayment> itemAllocate = finArFundsInAllocateHome.queryByRange("select o from FinArFundsInAllocatePayment o where o.idReconRecordSource="+reconciliationRecordId, 0, 0);
 								if(itemAllocate!=null && itemAllocate.size()>0){
 									finArFundsInActionApplied.setActionAppliedId(VeniceConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED);												
