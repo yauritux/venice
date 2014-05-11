@@ -9828,7 +9828,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 				} else {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(),"Masuk sini");
 					throw new EJBException(
-							"Account number not available for the payment, please add account number to fin account and venice constants");
+							"Account number not available for the payment, please add account number to fin account and venice constants"); 
 				}
 
 				if (finArFundsInRefund.getRefundType().contains("Bank")) {
