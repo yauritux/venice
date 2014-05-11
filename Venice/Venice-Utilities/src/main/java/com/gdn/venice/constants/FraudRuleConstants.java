@@ -49,7 +49,9 @@ public enum FraudRuleConstants {
 	FRAUD_RULE_42("Rule 42 - Cek Dana Fund In MIGS"),
 	FRAUD_RULE_43("Rule 43 - Total Payment < 1jt"),
 	FRAUD_RULE_44("Rule 44 - Slow moving product category"),
-	FRAUD_RULE_45("Rule 45 - Order History ECI 5");
+	FRAUD_RULE_45("Rule 45 - Order History ECI 5"),
+	FRAUD_RULE_46("Rule 46 - Order History Within 1 Month"),
+	FRAUD_RULE_47("Rule 47 - Order History More Than 1 Month");
 	
 	private String title;
 	

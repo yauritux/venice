@@ -50,6 +50,22 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 	    " OR (o.venCustomer = ?2 " +
 		" AND cast(o.orderDate as date) BETWEEN ?3 AND ?4)";
 	
+	public static final String FIND_BY_VENCUSTOMEREMAIL_WITH_ORDER_IN_AMONTH =
+		"SELECT o " +
+		"FROM VenOrder o " +
+		"INNER JOIN FETCH o.venCustomer c " +
+		"INNER JOIN FETCH c.venParty p " +
+		"WHERE o.orderDate >= ?2 "+
+	    " AND o.venCustomer = ?1 ";
+	
+	public static final String FIND_BY_VENCUSTOMEREMAIL_WITH_ORDER_OUT_OF_AMONTH=
+		"SELECT o " +
+		"FROM VenOrder o " +
+		"INNER JOIN FETCH o.venCustomer c " +
+		"INNER JOIN FETCH c.venParty p " +
+		"WHERE o.orderDate < ?2 "+
+	    " AND o.venCustomer = ?1 ";
+	
 	public VenOrder findByWcsOrderId(String wcsOrderId);
 	
 	public VenOrder findByOrderId(Long orderId);
@@ -68,5 +84,11 @@ public interface VenOrderDAO extends JpaRepository<VenOrder, Long>{
 	
 	@Query(GET_AMOUNTSUM_BY_ORDER_OR_CUSTOMER_ORDERDATERANGE)
 	public BigDecimal getAmountSumByOrderOrCustomerOrderDateRange(VenOrder order, VenCustomer customer, Date startDate, Date endDate);
+	
+	@Query(FIND_BY_VENCUSTOMEREMAIL_WITH_ORDER_IN_AMONTH)
+	public List<VenOrder> findByVenCustomerEmailWithOrderInAMonth(VenCustomer customer, Date date);
+	
+	@Query(FIND_BY_VENCUSTOMEREMAIL_WITH_ORDER_OUT_OF_AMONTH)
+	public List<VenOrder> findByVenCustomerEmailWithOrderOutOfAMonth(VenCustomer customer, Date date);
 	
 }
