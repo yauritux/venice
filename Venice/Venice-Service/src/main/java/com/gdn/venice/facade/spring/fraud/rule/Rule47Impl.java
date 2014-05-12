@@ -11,7 +11,6 @@ import com.gdn.venice.dao.FrdParameterRule47DAO;
 import com.gdn.venice.dao.VenCustomerDAO;
 import com.gdn.venice.dao.VenOrderDAO;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
-import com.gdn.venice.persistence.FrdParameterRule47;
 import com.gdn.venice.persistence.VenCustomer;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
@@ -46,11 +45,11 @@ public class Rule47Impl implements Rule{
 		int totalDifferenCC=0;
 		int totalRiskPoint=0;
 		
-		 List<VenOrder> venOrders = venOrderDAO.findByVenCustomerEmailWithOrderInAMonth(customer,minusOneMonth(order.getOrderDate()));
+		 List<VenOrder> venOrders = venOrderDAO.findByVenCustomerEmailWithOrderOutOfAMonth(customer,minusOneMonth(order.getOrderDate()));
 		 
 		 for(VenOrder venOrder:venOrders){
 			 List<VenOrderPaymentAllocation> orderAllocationInAMonth = venOrderPaymentAllocationDAO.findByVenOrder(venOrder);
-			 if(orderAllocationInAMonth.get(0).getVenOrderPayment().getMaskedCreditCardNumber().equals(orderAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber())){
+			 if(venOrder!=order && orderAllocationInAMonth.get(0).getVenOrderPayment().getMaskedCreditCardNumber().equals(orderAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber())){
 				 totalSameCC=totalSameCC+1;
 			 }
 		 }

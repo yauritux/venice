@@ -11,7 +11,6 @@ import com.gdn.venice.dao.FrdParameterRule46DAO;
 import com.gdn.venice.dao.VenCustomerDAO;
 import com.gdn.venice.dao.VenOrderDAO;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
-import com.gdn.venice.persistence.FrdParameterRule46;
 import com.gdn.venice.persistence.VenCustomer;
 import com.gdn.venice.persistence.VenOrder;
 import com.gdn.venice.persistence.VenOrderPaymentAllocation;
@@ -50,7 +49,7 @@ public class Rule46Impl implements Rule{
 		 
 		 for(VenOrder venOrder:venOrders){
 			 List<VenOrderPaymentAllocation> orderAllocationInAMonth = venOrderPaymentAllocationDAO.findByVenOrder(venOrder);
-			 if(orderAllocationInAMonth.get(0).getVenOrderPayment().getMaskedCreditCardNumber().equals(orderAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber())){
+			 if(venOrder!= order && orderAllocationInAMonth.get(0).getVenOrderPayment().getMaskedCreditCardNumber().equals(orderAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber())){
 				 totalSameCC=totalSameCC+1;
 			 }
 		 }
