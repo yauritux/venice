@@ -3196,13 +3196,6 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                         _log.error(errMsg);
                         throw new EJBException(errMsg);
                     }
-                    else if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_PU)
-                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_ES)
-                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_BP)) {
-                        String errMsg = "updateOrderItemStatus: message received CR status change request for order item that is not status PU or ES or BP: illegal state transition";
-                        _log.error(errMsg);
-                        throw new EJBException(errMsg);
-                    }
                     
                     VenOrderStatus venOrderStatus = new VenOrderStatus();
                     venOrderStatus.setOrderStatusCode("CR");
