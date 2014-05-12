@@ -1286,7 +1286,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                 _log.info("order item with status OS found, order item id: " + venOrderItemList.get(i).getWcsOrderItemId());
             }
             if (venOrderItemList.get(i).getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_CR) {
-                osFound = true;
+            	crFound = true;
                 _log.info("order item with status CR found, order item id: " + venOrderItemList.get(i).getWcsOrderItemId());
             }
         }
@@ -3196,6 +3196,15 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
                         _log.error(errMsg);
                         throw new EJBException(errMsg);
                     }
+                    
+                    if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_PU)
+                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_ES)
+                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_BP)) {
+                        String errMsg = "updateOrderItemStatus: message received CR status change request for order item that is not status PU or ES or BP: illegal state transition";
+                        _log.error(errMsg);
+                        throw new EJBException(errMsg);
+                    }
+                    
                     VenOrderStatus venOrderStatus = new VenOrderStatus();
                     venOrderStatus.setOrderStatusCode("CR");
                     venOrderStatus.setOrderStatusId(VEN_ORDER_STATUS_CR);
