@@ -95,7 +95,7 @@ public class FundInReconciliationProcessCommand implements RafRpcCommand {
 				} else if (method.equals("rejectFundInReconRecord")) {
 					approvalStatus.setApprovalStatusId(DataConstantNameTokens.FINAPPROVALSTATUS_APPROVALSTATUSID_REJECTED);
 				} else if (method.equals("submitForApproval")) {					
-					/*if(fundInReconRecord.getVenOrderPayment()!=null?
+					if(fundInReconRecord.getVenOrderPayment()!=null?
 							fundInReconRecord.getVenOrderPayment().getVenWcsPaymentType().getWcsPaymentTypeCode().equals(VeniceConstants.VEN_WCS_PAYMENT_TYPE_VirtualAccount) : 
 								fundInReconRecord.getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeId().equals(VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA) || 
 								fundInReconRecord.getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeId().equals(VeniceConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA)){
@@ -107,10 +107,10 @@ public class FundInReconciliationProcessCommand implements RafRpcCommand {
 						approvalStatus.setApprovalStatusId(DataConstantNameTokens.FINAPPROVALSTATUS_APPROVALSTATUSID_SUBMITTED);	
 						count++;
 						param.put(ProcessNameTokens.FUNDINRECONRECORDID+(count), fundInReconRecordId);	
-					}else{*/					
+					}else{			
 						approvalStatus.setApprovalStatusId(DataConstantNameTokens.FINAPPROVALSTATUS_APPROVALSTATUSID_APPROVED);
 						approvedFundInReconRecordList.add(new Long(fundInReconRecordId));						
-			//		}
+					}
 				}
 
 				fundInReconRecord.setFinApprovalStatus(approvalStatus);

@@ -41,13 +41,11 @@ import com.gdn.venice.constants.VenPromotionTypeConstants;
 import com.gdn.venice.constants.VenSettlementRecordCommissionTypeConstants;
 import com.gdn.venice.dao.FinApManualJournalTransactionDAO;
 import com.gdn.venice.dao.FinApPaymentDAO;
-import com.gdn.venice.dao.FinApprovalStatusDAO;
 import com.gdn.venice.dao.FinArFundsInAllocatePaymentDAO;
 import com.gdn.venice.dao.FinArFundsInJournalTransactionDAO;
 import com.gdn.venice.dao.FinArFundsInReconRecordDAO;
 import com.gdn.venice.dao.FinArFundsInRefundDAO;
 import com.gdn.venice.dao.FinJournalApprovalGroupDAO;
-import com.gdn.venice.dao.FinJournalDAO;
 import com.gdn.venice.dao.FinJournalTransactionDAO;
 import com.gdn.venice.dao.FinSalesRecordDAO;
 import com.gdn.venice.dao.LogProviderAgreementDAO;
@@ -175,12 +173,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 	@Autowired
 	private VenSettlementRecordDAO venSettlementRecordDAO;
 	
-	@Autowired
-	private FinJournalDAO finJournalDAO;
-	
-	@Autowired
-	private FinApprovalStatusDAO finApprovalStatusDAO;
-	
 	private static BigDecimal GDNPPN_DIVISOR = new BigDecimal(
 			VeniceConstants.VEN_GDN_PPN_RATE).divide(new BigDecimal(100), 2,
 			RoundingMode.HALF_UP).add(new BigDecimal(1));
@@ -226,8 +218,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			}
 
 			FinJournalApprovalGroup finJournalApprovalGroup = null;
-			//FinJournal finJournalCashReceive = new FinJournal();
-			FinJournal finJournalCashReceive = finJournalDAO.findByJournalId(FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id());
+			FinJournal finJournalCashReceive = new FinJournal();
 			// FinJournalApprovalGroup finJournalApprovalGroups = null;
 			int count = 0;
 
@@ -272,9 +263,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 
 					if (finJournalApprovalGroup == null
 							&& finArFundsInJournalTransactionList.isEmpty()) {
-						/*finJournalCashReceive
+						finJournalCashReceive
 								.setJournalId(FinJournalConstants.FIN_JOURNAL_CASH_RECEIVE.id());
-*/
+
 						SimpleDateFormat sdf = new SimpleDateFormat(
 								"yyyy-MMM-dd");
 						finJournalApprovalGroup = new FinJournalApprovalGroup();
@@ -283,8 +274,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
 						finJournalApprovalGroup
 								.setFinApprovalStatus(finApprovalStatus);
+
 						finJournalApprovalGroup
 								.setFinJournal(finJournalCashReceive);
+
 						finJournalApprovalGroup
 								.setJournalGroupDesc("Cash Received Journal for :"
 										+ sdf.format(new Date()));
@@ -508,20 +501,16 @@ public class FinanceJournalPosterSessionEJBBean implements
 							 * diubah menjadi submitted agar tidak ikut ke
 							 * rollup
 							 */
-							finJournalApprovalGroup = new FinJournalApprovalGroup();
-							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
+							FinApprovalStatus finApprovalStatuss = new FinApprovalStatus();
+							finApprovalStatuss
+									.setApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_SUBMITTED.id());
 							finJournalApprovalGroup
 									.setFinApprovalStatus(finApprovalStatuss);
 							SimpleDateFormat sdf = new SimpleDateFormat(
 									"yyyy-MMM-dd");
 							finJournalApprovalGroup
-															.setFinJournal(finJournalCashReceive);
-							finJournalApprovalGroup
 									.setJournalGroupDesc("VA Real Time - Cash Received Journal for :"
 											+ sdf.format(new Date()));
-							finJournalApprovalGroup
-									.setJournalGroupTimestamp(new Timestamp(System
-											.currentTimeMillis()));
 							/*finJournalApprovalGroup = journalApprovalGroupHome
 									.mergeFinJournalApprovalGroup(finJournalApprovalGroup);*/
 							if (!em.contains(finJournalApprovalGroup)) {
@@ -537,14 +526,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId()
 										.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_CUSTOMER.id())) {
-
 							Long type = reconRecord
 									.getFinArFundsInActionApplied()
 									.getActionAppliedId()
 									.equals(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REFUNDED_BANK.id()) ? FinAccountConstants.FIN_ACCOUNT_2170002.id()
 									: FinAccountConstants.FIN_ACCOUNT_2170001.id();
 							if (!finArFundsInJournalTransactionList.isEmpty()) {
-
 								/*
 								List<FinArFundsInRefund> refundAmountList = refundRecordHome
 										.queryByRange(
@@ -573,24 +560,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 								if (reconRecord.getProviderReportPaidAmount()
 										.compareTo(
 												reconRecord.getRefundAmount()) != 0) {
-									FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
-									finJournalApprovalGroup
-											.setFinApprovalStatus(finApprovalStatuss);
-									SimpleDateFormat sdf = new SimpleDateFormat(
-											"yyyy-MMM-dd");
-									finJournalApprovalGroup
-																	.setFinJournal(finJournalCashReceive);
-									finJournalApprovalGroup
-											.setJournalGroupDesc("Cash Received Journal for :"
-													+ sdf.format(new Date()));
-									finJournalApprovalGroup
-									.setJournalGroupTimestamp(new Timestamp(System
-											.currentTimeMillis()));
-									if (!em.contains(finJournalApprovalGroup)) {
-										CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
-										finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
-									}
-									
 									/*
 									 * Post the CREDIT for UANG jaminan
 									 * transaksi
@@ -653,6 +622,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 											.setGroupJournal(accountNumberBank);
 									// Persist the cash received journal
 									// transaction
+									CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::Save ( FIN_TRANSACTION_TYPE_UANG_JAMINAN_TRANSAKSI )");
 									/*journalTransactionHome
 											.persistFinJournalTransaction(cashReceiveJournalTransaction);*/
 									if (!em.contains(cashReceiveJournalTransaction)) {
@@ -666,8 +636,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 								/*
 								 * Post the journal transaction for Refund
 								 */
-
-								CommonUtil.logDebug(this.getClass().getCanonicalName(), "Post the journal transaction for Refund");
 								FinJournalTransaction refundJournalTransaction = new FinJournalTransaction();
 								refundJournalTransaction.setComments("");
 								refundJournalTransaction
@@ -748,29 +716,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() != FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
-							
-							finJournalApprovalGroup = new FinJournalApprovalGroup();
-							FinApprovalStatus finApprovalStatuss = finApprovalStatusDAO.findByApprovalStatusId(FinApprovalStatusConstants.FIN_APPROVAL_STATUS_APPROVED.id());
-							finJournalApprovalGroup
-									.setFinApprovalStatus(finApprovalStatuss);
-							SimpleDateFormat sdf = new SimpleDateFormat(
-									"yyyy-MMM-dd");
-
-
-							finJournalApprovalGroup
-															.setFinJournal(finJournalCashReceive);
-							
-							finJournalApprovalGroup
-									.setJournalGroupDesc("Cash Received Journal for :"
-											+ sdf.format(new Date()));
-							finJournalApprovalGroup
-							.setJournalGroupTimestamp(new Timestamp(System
-									.currentTimeMillis()));
-							if (!em.contains(finJournalApprovalGroup)) {
-								CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
-								finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
-							}
-							
 							/*
 							 * Post the CREDIT for UANG jaminan transaksi
 							 */
@@ -910,8 +855,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
-
-							finJournalApprovalGroup=finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
 							/*
 							 * Post the journal transaction for uang jaminan
 							 * transaksi
@@ -1059,7 +1002,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// set WCSOrderID
 							if (!itemsAllocate.isEmpty()
 									&& itemsAllocate != null) {
-
 								/*
 								List<FinArFundsInReconRecord> destItems = fundsInReconRecordHome
 										.queryByRange(
@@ -1105,7 +1047,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 								&& (reconRecord
 										.getFinArFundsInActionApplied()
 										.getActionAppliedId() == FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_ALLOCATED.id())) {
-
 							/*
 							 * Post the journal transaction for uang jaminan
 							 * transaksi
@@ -1258,7 +1199,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 							// set WCSOrderID
 							if (!itemsAllocate.isEmpty()
 									&& itemsAllocate != null) {
-
 								/*
 								List<FinArFundsInReconRecord> destItems = fundsInReconRecordHome
 										.queryByRange(
@@ -1289,8 +1229,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 							}
 							transactionList.add(cashReceiveJournalTransaction);
 						} else {
-
-							CommonUtil.logDebug(this.getClass().getCanonicalName(), "BEBAN DAN LAIN-LAIN");
 							/*
 							 * Post the journal transaction for PENGHASILAN
 							 * BEBAN DAN LAIN-LAIN
@@ -1461,10 +1399,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 					.setJournalGroupDesc("Cash Received Journal for :"
 							+ sdf.format(time));
 			finJournalApprovalGroup.setJournalGroupTimestamp(time);
-			if (!em.contains(finJournalApprovalGroup)) {
-				CommonUtil.logDebug(this.getClass().getCanonicalName(), "postCashReceiveJournalTransactions::calling finJournalApprovalGroupDAO.save explicitly.");
-				finJournalApprovalGroup = finJournalApprovalGroupDAO.save(finJournalApprovalGroup);
-			}
 			//finJournalApprovalGroup = journalApprovalGroupHome.persistFinJournalApprovalGroup(finJournalApprovalGroup);
 
 			int count = 0;
@@ -2674,7 +2608,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getOrderDate());
 					newRecord.setNomorReff(payment.getNomorReff());
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(
-							System.currentTimeMillis()));
+							System.currentTimeMillis()));		
 					
 					if(payment.getCardNumber()!=null)
 					{
@@ -2683,7 +2617,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						venOrderPayment.setCardNumber(cardNumber);
 						destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
 					}
-					
+		
 					newRecord.setVenOrderPayment(destinationVenOrderPayment
 							.getVenOrderPayment());
 					newRecord.setFinArFundsInReport(payment
@@ -2751,6 +2685,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						newRecord = finArFundsInReconRecordDAO.save(newRecord);
 					}
 					
+
 					FinArFundsInActionApplied finArFundsInActionAppliedss = new FinArFundsInActionApplied();
 					finArFundsInActionAppliedss
 							.setActionAppliedId(FinArFundsInActionAppliedConstants.FIN_AR_FUNDS_IN_ACTION_APPLIED_REMOVED.id());
@@ -2762,11 +2697,11 @@ public class FinanceJournalPosterSessionEJBBean implements
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::destinationVenOrderPayment is not in attach mode");
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::calling finArFundsInReconRecordDAO.save explicitly");
 						destinationVenOrderPayment = finArFundsInReconRecordDAO.save(destinationVenOrderPayment);
+						
+						VenOrderPayment tempVenOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
+						tempVenOrderPayment.setCardNumber(destinationVenOrderPayment.getCardNumber()!=null?destinationVenOrderPayment.getCardNumber():"");
+						tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
 					}
-					
-					VenOrderPayment tempVenOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
-					tempVenOrderPayment.setCardNumber(destinationVenOrderPayment.getCardNumber()!=null?destinationVenOrderPayment.getCardNumber():"");
-					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
 				} else {
 					newRecord = destinationVenOrderPayment;
 
@@ -2814,7 +2749,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 							0) : newRecord.getRemainingBalanceAmount();
 							
 					newRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
-							
+
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
 								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
@@ -2832,11 +2767,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 					if (!em.contains(newRecord)) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::newRecord is not in attach mode");
 						newRecord = finArFundsInReconRecordDAO.save(newRecord);
+						
+						VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
+						tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
+						tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
+
 					}
-					
-					VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
-					tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
-					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
 				}
 
 				FinArFundsInAllocatePayment finArFundsInAllocates = new FinArFundsInAllocatePayment();
@@ -3008,7 +2944,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					Date d = new Date();
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(d
 							.getTime()));
-				
+							
 					if(payment.getCardNumber()!=null)
 					{
 						String cardNumber = payment.getCardNumber();
@@ -3016,7 +2952,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						venOrderPaymentDest.setCardNumber(cardNumber);
 						newRecord.setVenOrderPayment(venOrderPaymentDest);
 					}
-					
+
 					newRecord.setVenOrderPayment(tempRecord
 							.getVenOrderPayment());
 					newRecord.setFinArFundsInReport(payment
@@ -3092,9 +3028,15 @@ public class FinanceJournalPosterSessionEJBBean implements
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Allocate and  reconciliation record persisted id:"
 							+ newRecord.getReconciliationRecordId());
 					
+					
+					
+					
+					
+
 					VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
 					tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
 					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
+					
 					
 				} else {
 					BigDecimal paidAmount = (tempRecord
@@ -3145,9 +3087,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getRemainingBalanceAmount().abs()
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : tempRecord.getRemainingBalanceAmount();
+
+						
+							tempRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
 							
-					tempRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
-					
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
 								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
@@ -3173,7 +3116,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					VenOrderPayment tempVenOrderPayment = tempRecord.getVenOrderPayment();
 					tempVenOrderPayment.setCardNumber(tempRecord.getCardNumber()!=null?tempRecord.getCardNumber():"");
 					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
-
+					
 				}
 			} else {
 				throw new EJBException(
