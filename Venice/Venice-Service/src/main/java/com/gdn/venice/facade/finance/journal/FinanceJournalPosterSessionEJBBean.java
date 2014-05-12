@@ -9740,19 +9740,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 				}
 			} else {
 				finJournalApprovalGroup = finJournalApprovalGroupList.get(0);
-			}
-
-			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"postPaymentRefundJournalTransaction:: adalah 1 "+finArFundsInRefundList.get(0).getFinArFundsInReconRecord().getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeId());
-			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"postPaymentRefundJournalTransaction:: adalah 2 "+finArFundsInRefundList.get(0).getFinArFundsInReconRecord().getFinArFundsInReport().getFinArFundsInReportType().getPaymentReportTypeDesc());
-
-			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"postPaymentRefundJournalTransaction:: ID BCA adalah :  "+FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB.id());
-			
-			CommonUtil.logDebug(this.getClass().getCanonicalName(),
-					"postPaymentRefundJournalTransaction:: KlikPay CC adalah :  "+FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_CC.id());
-			
+			}			
 			
 			Timestamp time = new Timestamp(System.currentTimeMillis());
 			for (FinArFundsInRefund finArFundsInRefund : finArFundsInRefundList) {
@@ -9760,47 +9748,33 @@ public class FinanceJournalPosterSessionEJBBean implements
 				Long accountIdForBiaya = null;
 				Long accountIdRefund = null;
 				Long finTransactionTypeID = null;
-
-				CommonUtil.logDebug(this.getClass().getCanonicalName(),
-						"postPaymentRefundJournalTransaction:: adalah 3 "+finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport()
-						.getFinArFundsInReportType()
-						.getPaymentReportTypeId());
-				
-				CommonUtil.logDebug(this.getClass().getCanonicalName(),
-						"postPaymentRefundJournalTransaction:: adalah 4 "+finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport()
-						.getFinArFundsInReportType()
-						.getPaymentReportTypeDesc());
-				
 				
 				long accountNumberBank = 0;
 				if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC.id()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
 								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC.id())
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_CC.id())
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
 								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_IB.id())) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName(),"TesBCA");
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120104.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA.id()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA.id())) {
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BCA_VA.id())) {
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120102.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB.id()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
@@ -9810,8 +9784,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getFinArFundsInReportType()
 								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB.id())
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAY_IB.id())
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
@@ -9820,31 +9794,49 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
 								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_KLIKPAYINST_CC.id())) {
-					CommonUtil.logDebug(this.getClass().getCanonicalName(),"Tes Klikpay");
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120105.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA.id()) {
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA.id()
+						|| finArFundsInRefund.getFinArFundsInReconRecord()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_VA.id())) {
 					accountNumberBank = VeniceConstants.FIN_ACCOUNT_1120301;
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB.id()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB.id()
 						|| finArFundsInRefund.getFinArFundsInReconRecord()
 								.getFinArFundsInReport()
 								.getFinArFundsInReportType()
-								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC.id()) {
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC.id()
+						|| finArFundsInRefund.getFinArFundsInReconRecord()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRI_IB.id())
+						|| finArFundsInRefund.getFinArFundsInReconRecord()
+								.getFinArFundsInReport()
+								.getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_MANDIRIINSTALLMENT_CC.id())) {
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120302.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB.id()) {
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB.id()
+						|| finArFundsInRefund.getFinArFundsInReconRecord()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_NIAGA_IB.id())) {
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120402.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB.id()) {
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB.id()
+						|| finArFundsInRefund.getFinArFundsInReconRecord()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_XL_IB.id())) {
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1120888.id();
 				} else if (finArFundsInRefund.getFinArFundsInReconRecord()
-						.getFinArFundsInReport().getFinArFundsInReportType()
-						.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB.id()) {
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId() == FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB.id()
+						|| finArFundsInRefund.getFinArFundsInReconRecord()
+								.getFinArFundsInReport().getFinArFundsInReportType()
+								.getPaymentReportTypeId().equals(FinArFundsInReportTypeConstants.FIN_AR_FUNDS_IN_REPORT_TYPE_BRI_IB.id())) {
 					accountNumberBank = FinAccountConstants.FIN_ACCOUNT_1121001.id();
 				} else {
 					CommonUtil.logDebug(this.getClass().getCanonicalName(),"Masuk sini");
