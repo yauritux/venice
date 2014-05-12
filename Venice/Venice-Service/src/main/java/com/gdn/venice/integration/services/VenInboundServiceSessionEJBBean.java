@@ -1321,15 +1321,14 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         if (venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF || venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_CR) {
             if(venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF) {
             	_log.info("the order item found, is in PF status, so update it");
-                // Set the status of the adjusted order to FP
-                venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
             }
             else {
             	_log.info("the order item found, is in CR status, so update it");
-                // Set the status of the adjusted order to CR
-                venOrderItem.setVenOrderStatus(VenOrderStatusCR.createVenOrderStatus());
             }
 
+            // Set the status of the adjusted order to FP
+            venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
+            
             mapExistingOrderItemWithNewOrderItem(venOrderItem, orderItem);
 
             //update shipping address
