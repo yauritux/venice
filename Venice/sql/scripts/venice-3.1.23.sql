@@ -32,3 +32,15 @@ insert into frd_parameter_rule_47 values (4,'different CC, order history>2',-15)
 --rollback delete from frd_parameter_rule_47 where id=2;
 --rollback delete from frd_parameter_rule_47 where id=3;
 --rollback delete from frd_parameter_rule_47 where id=4;
+
+
+--liquibase formatted sql
+--changeset daniel:1
+ALTER TABLE venice.venice.ven_order_item ADD COLUMN logisticsEtd NUMERIC(10) NULL;
+--rollback ALTER TABLE venice.venice.ven_order_item DROP COLUMN logisticsEtd
+
+
+
+
+
+
