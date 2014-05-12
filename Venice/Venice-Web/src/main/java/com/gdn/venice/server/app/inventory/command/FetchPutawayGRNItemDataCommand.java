@@ -87,8 +87,8 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    if(whItem!=null){
     	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
     	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-    	                    		storageCode+=storageStock.getStorage().getCode()+",";
-    	                    		qty+=storageStock.getQuantity();
+    	                    		qty=storageStock.getQuantity()>0?storageStock.getQuantity():0;
+    	                    		storageCode+=storageStock.getStorage().getCode()+" / "+qty+",";    	                    		
     	                    	}
     	                    	if(storageCode.length()>1){
     	                    		storageCode=storageCode.substring(0, storageCode.lastIndexOf(","));
@@ -101,7 +101,6 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    }
     	                    
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageCode);
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
    	                    
     	                    dataList.add(map);
                     	}else{
@@ -136,8 +135,8 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    if(whItem!=null){
     	                    	List<WarehouseItemStorageStock> storageStockList = putawayService.getWarehouseItemStorageList(whItem.getId());    	                    	
     	                    	for(WarehouseItemStorageStock storageStock : storageStockList){
-    	                    		storageCode+=storageStock.getStorage().getCode()+",";
-    	                    		qty+=storageStock.getQuantity();
+    	                    		qty=storageStock.getQuantity()>0?storageStock.getQuantity():0;
+    	                    		storageCode+=storageStock.getStorage().getCode()+" / "+qty+",";  
     	                    	}
     	                    	if(storageCode.length()>1){ 
     	                    		storageCode=storageCode.substring(0, storageCode.lastIndexOf(","));
@@ -149,7 +148,6 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    	_log.error("Warehouse item not found");
     	                    }
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageCode);
-    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(qty));
     	                        	                    
     	                    dataList.add(map);
                     	}else{

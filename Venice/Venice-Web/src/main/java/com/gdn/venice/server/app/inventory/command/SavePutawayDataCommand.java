@@ -80,14 +80,6 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 						putawayItem.setPutaway(putaway);
 						grnItemId = value;
 					}
-					if(key.equals(DataNameTokens.INV_PUTAWAY_GRN_QTY)){
-						if(value!=null){
-							putawayItem.setQuantity(Integer.parseInt(value));
-						}else{
-							System.out.println("quantity item is null");
-							putawayItem.setQuantity(0);
-						}
-					}
 					if(key.equals(DataNameTokens.INV_PUTAWAY_GRN_TYPE)){
 						if(value.equals("GRN")){
 							pt = PutawayType.GRN;
