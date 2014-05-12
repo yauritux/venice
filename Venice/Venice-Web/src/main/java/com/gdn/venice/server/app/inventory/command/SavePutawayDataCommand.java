@@ -58,9 +58,10 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 			asnService = new ASNManagementService();
 			ResultWrapper<GoodReceivedNoteItem> grni = null;
 								
-			String grnItemId="", type="";
+			String grnItemId="";
 			System.out.println("itemMap.entrySet() size: "+itemMap.entrySet().size());
-			for(Map.Entry<String, String> entry : itemMap.entrySet()){				
+			for(Map.Entry<String, String> entry : itemMap.entrySet()){	
+				PutawayType pt = null;
 				Putaway putaway = new Putaway();			
 				putaway.setCreatedBy(username);				
 				PutawayItem putawayItem = new PutawayItem();
@@ -88,11 +89,21 @@ public class SavePutawayDataCommand implements RafRpcCommand {
 						}
 					}
 					if(key.equals(DataNameTokens.INV_PUTAWAY_GRN_TYPE)){
-						type = value;
+						if(value.equals("GRN")){
+							pt = PutawayType.GRN;
+						}else if(value.equals("PICKING_LIST")){
+							pt = PutawayType.PICKING_LIST;
+						}else if(value.equals("PACKING_LIST")){
+							pt = PutawayType.PACKING_LIST;
+						}
+						
+						putaway.setPutawayType(pt);	
 					}
 				}
 
 				grni = grnService.findItemByGRNItemId(grnItemId);
+				putaway.setGoodReceivedNote(grni.getContent().getGoodReceivedNote());
+				
 				AdvanceShipNoticeItem asnItem = grni.getContent().getAdvanceShipNoticeItem();
 
 				Long itemId=null;
@@ -120,24 +131,12 @@ public class SavePutawayDataCommand implements RafRpcCommand {
                 	}else{
                 		System.out.println("CFF item not found");
                 	} 
-            	}            	
-            	
+            	}    
+				            	
 				Item item = new Item();
 				item = putawayService.findItemById(username, itemId);
 				putawayItem.setItem(item);
-				itemList.add(putawayItem);
-				
-				PutawayType pt = null;
-				if(type.equals("GRN")){
-					pt = PutawayType.GRN;
-				}else if(type.equals("PICKING_LIST")){
-					pt = PutawayType.PICKING_LIST;
-				}else if(type.equals("PACKING_LIST")){
-					pt = PutawayType.PACKING_LIST;
-				}
-				
-				putaway.setPutawayType(pt);	
-				putaway.setGoodReceivedNote(grni.getContent().getGoodReceivedNote());
+				itemList.add(putawayItem);				
 			}
 									
 			System.out.println("item size: "+itemList.size());			

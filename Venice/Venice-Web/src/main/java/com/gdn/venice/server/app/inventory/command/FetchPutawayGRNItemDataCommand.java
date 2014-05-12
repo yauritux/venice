@@ -65,18 +65,18 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     				
 	            	AdvanceShipNoticeItem asnItem = grnItem.getAdvanceShipNoticeItem();
 	            	if(asnItem.getAdvanceShipNotice().getReferenceType().name().equals(ASNReferenceType.PURCHASE_ORDER.name())){
-                		_log.info("reff type: purchase order");                		                		
+	            		_log.info("reff type: purchase order");                		                		
                 		ResultWrapper<PurchaseOrderItem> poItemWrapper = asnService.getPOItemData(request, asnItem.getReferenceNumber().toString());
                     	if(poItemWrapper!=null && poItemWrapper.isSuccess()){
                     		PurchaseRequisitionItem prItem = poItemWrapper.getContent().getPurchaseRequisitionItem();
-                    		_log.debug("PO item found, code:"+prItem.getItem().getCode());    
+                    		_log.info("PO item found, code:"+prItem.getItem().getCode());    
                     		                   				             
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, prItem.getItem().getCode());
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, prItem.getItem().getDescription());   
     	                    
-    	                    System.out.println("item id "+prItem.getItem().getId());
+    	                    System.out.println("item id: "+prItem.getItem().getId());
     	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
-    	                    System.out.println("supplier: "+poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():"");
+    	                    System.out.println(poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?"supplier id: "+poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():"supplier id: null");
     	                    WarehouseItem whItem = putawayService.getWarehouseItemData(prItem.getItem().getId(), 
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():new Long(0), 
@@ -112,7 +112,7 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
                 		ResultWrapper<ConsignmentFinalItem> cffItemWrapper = asnService.getCFFItemData(request, asnItem.getReferenceNumber());
                     	if(cffItemWrapper!=null && cffItemWrapper.isSuccess()){
                     		ConsignmentApprovalItem cafItem = cffItemWrapper.getContent().getConsignmentApprovalItem();
-                    		_log.debug("CFF item found, code:"+cafItem.getItem().getCode());    
+                    		_log.info("CFF item found, code:"+cafItem.getItem().getCode());    
                     		                   				             
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, cafItem.getItem().getCode());
     	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, cafItem.getItem().getDescription());
@@ -124,9 +124,9 @@ public class FetchPutawayGRNItemDataCommand implements RafDsCommand {
     	                    	st = StockType.CONSIGNMENT_TRADING;
     	                    }
     	                    
-    	                    System.out.println("item id "+cafItem.getItem().getId());
+    	                    System.out.println("item id: "+cafItem.getItem().getId());
     	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
-    	                    System.out.println("supplier: "+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():"");
+    	                    System.out.println("supplier id:"+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?"supplier id: "+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():"supplier id: null");
     	                    WarehouseItem whItem = putawayService.getWarehouseItemData(cafItem.getItem().getId(), 
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():new Long(0), st);
