@@ -1321,14 +1321,13 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
         if (venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF || venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_CR) {
             if(venOrderItem.getVenOrderStatus().getOrderStatusId() == VEN_ORDER_STATUS_PF) {
             	_log.info("the order item found, is in PF status, so update it");
-                // Set the status of the adjusted order to FP
-                venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
             }
             else {
             	_log.info("the order item found, is in CR status, so update it");
-                // Set the status of the adjusted order to CR
-                venOrderItem.setVenOrderStatus(VenOrderStatusCR.createVenOrderStatus());
             }
+            
+            // Set the status of the adjusted order to FP
+            venOrderItem.setVenOrderStatus(VenOrderStatusFP.createVenOrderStatus());
 
             mapExistingOrderItemWithNewOrderItem(venOrderItem, orderItem);
 
@@ -3191,9 +3190,7 @@ public class VenInboundServiceSessionEJBBean implements VenInboundServiceSession
              // ***** Case CR
                 if (order.getOrderItems().get(0).getStatus().equals("CR")) {
                     // Enforce the state transition rules
-                    if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_FP) || (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_PU)
-                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_ES)
-                            && !venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_BP))) {
+                    if (!venOrderItem.getVenOrderStatus().getOrderStatusId().equals(VEN_ORDER_STATUS_FP)) {
                         String errMsg = "updateOrderItemStatus: message received CR status change request for order item that is not status FP or PU or ES or BP: illegal state transition";
                         _log.error(errMsg);
                         throw new EJBException(errMsg);
