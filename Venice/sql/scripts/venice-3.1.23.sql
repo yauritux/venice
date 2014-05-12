@@ -1,7 +1,7 @@
 --liquibase formatted sql
 --changeset daniel:1
 CREATE TABLE frd_parameter_rule_46
-(
+( 
   id bigint NOT NULL,
   description character varying(40),
   "value" integer,
