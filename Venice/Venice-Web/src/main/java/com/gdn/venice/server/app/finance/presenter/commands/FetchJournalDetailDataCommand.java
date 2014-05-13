@@ -137,10 +137,12 @@ public class FetchJournalDetailDataCommand implements RafDsCommand {
 
 				
 				for(int a=0;a<finArFundsInReconRecordList.size();a++) {
-					if(finJournalTransaction.getWcsOrderID().equals(finArFundsInReconRecordList.get(a).getWcsOrderId())) {
-						map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS,
-								(finArFundsInReconRecordList.get(a).getComment())!=null?finArFundsInReconRecordList.get(a).getComment():"");
-						break;
+					if(finJournalTransaction.getWcsOrderID()!=null){
+						if(finJournalTransaction.getWcsOrderID().equals(finArFundsInReconRecordList.get(a).getWcsOrderId())) {
+							map.put(DataNameTokens.FINJOURNALTRANSACTION_FINARFUNDSINRECONRECORDS_COMMENTS,
+									(finArFundsInReconRecordList.get(a).getComment())!=null?finArFundsInReconRecordList.get(a).getComment():"");
+							break;
+						}
 					}
 				}
 				

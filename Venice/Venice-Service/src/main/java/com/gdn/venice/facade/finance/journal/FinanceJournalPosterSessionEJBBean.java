@@ -2423,7 +2423,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-
 	public Boolean allocatePaymentAndpostAllocationJournalTransaction(
 			Long sourceVenWCSOrderId, Long sourceVenOrderPaymentId,
 			Long fundsInReconRecordId, Long destinationVenOrderPaymentId,
@@ -2572,7 +2571,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ payment.getWcsOrderId()
 									+ " menerima dana dari Reff :"
 									+ payment.getNomorReff()
-									+ " yang belum di approved! Approved terlebnih dahulu Reff :"
+									+ " yang belum di approved! Approved terlebih dahulu Reff :"
 									+ payment.getNomorReff());
 				}
 
@@ -2608,16 +2607,13 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getOrderDate());
 					newRecord.setNomorReff(payment.getNomorReff());
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(
-							System.currentTimeMillis()));		
+							System.currentTimeMillis()));
 					
-					if(payment.getCardNumber()!=null)
-					{
-						String cardNumber = payment.getCardNumber();
-						VenOrderPayment venOrderPayment = payment.getVenOrderPayment();
-						venOrderPayment.setCardNumber(cardNumber);
-						destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
-					}
-		
+					String cardNumber = payment.getCardNumber();
+					VenOrderPayment venOrderPayment = payment.getVenOrderPayment();
+					venOrderPayment.setCardNumber(cardNumber);
+					destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
+					
 					newRecord.setVenOrderPayment(destinationVenOrderPayment
 							.getVenOrderPayment());
 					newRecord.setFinArFundsInReport(payment
@@ -2641,6 +2637,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord
 							.setRemainingBalanceAmount(destinationVenOrderPayment
 									.getPaymentAmount().subtract(paidAmount));
+					
+					
 
 					if (payment.getUniquePayment() != null) {
 						newRecord.setUniquePayment(payment.getUniquePayment());
@@ -2697,10 +2695,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::destinationVenOrderPayment is not in attach mode");
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::calling finArFundsInReconRecordDAO.save explicitly");
 						destinationVenOrderPayment = finArFundsInReconRecordDAO.save(destinationVenOrderPayment);
-						
-						VenOrderPayment tempVenOrderPayment = destinationVenOrderPayment.getVenOrderPayment();
-						tempVenOrderPayment.setCardNumber(destinationVenOrderPayment.getCardNumber()!=null?destinationVenOrderPayment.getCardNumber():"");
-						tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
 					}
 				} else {
 					newRecord = destinationVenOrderPayment;
@@ -2747,9 +2741,9 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getRemainingBalanceAmount().abs()
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : newRecord.getRemainingBalanceAmount();
-							
-					newRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
 
+							newRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
+							
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
 								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
@@ -2762,16 +2756,10 @@ public class FinanceJournalPosterSessionEJBBean implements
 								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_OVERPAID.id());
 					}
 					newRecord.setFinArReconResult(finArReconResult);
-
 					//newRecord = fundsInReconRecordHome.mergeFinArFundsInReconRecord(newRecord);
 					if (!em.contains(newRecord)) {
 						CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::newRecord is not in attach mode");
 						newRecord = finArFundsInReconRecordDAO.save(newRecord);
-						
-						VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
-						tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
-						tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
-
 					}
 				}
 
@@ -2872,9 +2860,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 									+ sourceVenOrderPaymentId, 0, 0);
 			*/
 			VenOrderPayment venOrderPayment = venOrderPaymentDAO.findByOrderPaymentId(sourceVenOrderPaymentId);
-			
-			
-
 			//if (venOrderPaymentList.isEmpty()) {
 			if (venOrderPayment == null) {
 				throw new EJBException(
@@ -2944,7 +2929,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					Date d = new Date();
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(d
 							.getTime()));
-							
+					
 					if(payment.getCardNumber()!=null)
 					{
 						String cardNumber = payment.getCardNumber();
@@ -2952,7 +2937,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 						venOrderPaymentDest.setCardNumber(cardNumber);
 						newRecord.setVenOrderPayment(venOrderPaymentDest);
 					}
-
+					
 					newRecord.setVenOrderPayment(tempRecord
 							.getVenOrderPayment());
 					newRecord.setFinArFundsInReport(payment
@@ -3005,6 +2990,8 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.getRemainingBalanceAmount().abs()
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : newRecord.getRemainingBalanceAmount();
+							
+					tempRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
 
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
@@ -3027,17 +3014,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 					}
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Allocate and  reconciliation record persisted id:"
 							+ newRecord.getReconciliationRecordId());
-					
-					
-					
-					
-					
-
-					VenOrderPayment tempVenOrderPayment = newRecord.getVenOrderPayment();
-					tempVenOrderPayment.setCardNumber(newRecord.getCardNumber()!=null?newRecord.getCardNumber():"");
-					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
-					
-					
 				} else {
 					BigDecimal paidAmount = (tempRecord
 							.getProviderReportPaidAmount() != null ? tempRecord
@@ -3088,9 +3064,6 @@ public class FinanceJournalPosterSessionEJBBean implements
 							.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 							0) : tempRecord.getRemainingBalanceAmount();
 
-						
-							tempRecord.setCardNumber(payment.getCardNumber()!=null?payment.getCardNumber():null);
-							
 					if (remainingBalanceAmoun.compareTo(new BigDecimal(0)) == 0) {
 						finArReconResult
 								.setReconResultId(FinArReconResultConstants.FIN_AR_RECON_RESULT_ALL.id());
@@ -3112,11 +3085,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 					}
 					CommonUtil.logDebug(this.getClass().getCanonicalName(), "postAllocationJournalTransaction::Allocate and  reconciliation record merge id:"
 							+ tempRecord.getReconciliationRecordId());
-					
-					VenOrderPayment tempVenOrderPayment = tempRecord.getVenOrderPayment();
-					tempVenOrderPayment.setCardNumber(tempRecord.getCardNumber()!=null?tempRecord.getCardNumber():"");
-					tempVenOrderPayment=venOrderPaymentDAO.save(tempVenOrderPayment);
-					
+
 				}
 			} else {
 				throw new EJBException(
@@ -3148,7 +3117,7 @@ public class FinanceJournalPosterSessionEJBBean implements
 			BigDecimal oldRemainingBalance = oldRemainingBalanceAmount.abs()
 					.compareTo(VeniceConstants.TRACEHOLD_RECEIVED) <= 0 ? new BigDecimal(
 					0) : oldRemainingBalanceAmount;
-					
+
 			if (oldRemainingBalance.compareTo(new BigDecimal(0)) == 0) {
 				payment.setRemainingBalanceAmount(new BigDecimal(0));
 				payment.setProviderReportPaidAmount(new BigDecimal(0));
