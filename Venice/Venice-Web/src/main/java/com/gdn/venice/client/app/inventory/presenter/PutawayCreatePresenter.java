@@ -1,8 +1,10 @@
 package com.gdn.venice.client.app.inventory.presenter;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 
+import com.gdn.inventory.exchange.entity.AttributeName;
 import com.gdn.venice.client.app.NameTokens;
 import com.gdn.venice.client.app.inventory.view.PutawayCreateView;
 import com.gdn.venice.client.app.inventory.view.handler.PutawayCreateUiHandler;
@@ -88,12 +90,19 @@ public class PutawayCreatePresenter extends Presenter<PutawayCreatePresenter.MyV
 	}
 	
 	@Override
-	public void onSubmitClicked(HashMap<String, String> itemDataMap) {
-		RPCRequest request=new RPCRequest();		
-		String itemMap = Util.formXMLfromHashMap(itemDataMap);		
-		request.setData(itemMap);
+	public void onSubmitClicked(HashSet<String> grnNumberSet, String putawayType) {
+		RPCRequest request=new RPCRequest();
+		StringBuilder grnNumberSb = new StringBuilder();
 		
-		request.setActionURL(GWT.getHostPageBaseURL() + putawayManagementPresenterServlet + "?method=savePutawayData&type=RPC");
+		for(String grnNumber : grnNumberSet){
+			grnNumberSb.append(grnNumber);
+			grnNumberSb.append(";");
+		}
+		
+		String grnNumbers =grnNumberSb.substring(0, grnNumberSb.lastIndexOf(";"));		
+		request.setData(grnNumbers);
+		
+		request.setActionURL(GWT.getHostPageBaseURL() + putawayManagementPresenterServlet + "?method=savePutawayData&type=RPC&putawayType="+putawayType);
 		request.setHttpMethod("POST");
 		request.setUseSimpleHttp(true);
 		request.setWillHandleError(true);
