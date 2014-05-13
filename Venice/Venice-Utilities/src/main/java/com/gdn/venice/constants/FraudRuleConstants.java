@@ -51,7 +51,8 @@ public enum FraudRuleConstants {
 	FRAUD_RULE_44("Rule 44 - Slow moving product category"),
 	FRAUD_RULE_45("Rule 45 - Order History ECI 5"),
 	FRAUD_RULE_46("Rule 46 - Order History Within 1 Month"),
-	FRAUD_RULE_47("Rule 47 - Order History More Than 1 Month");
+	FRAUD_RULE_47("Rule 47 - Order History More Than 1 Month"),
+	FRAUD_RULE_48("Rule 48 - Payment attempts (Approving) related Blacklist");
 	
 	private String title;
 	
