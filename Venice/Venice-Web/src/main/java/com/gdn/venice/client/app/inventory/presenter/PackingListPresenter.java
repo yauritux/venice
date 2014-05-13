@@ -131,7 +131,6 @@ public class PackingListPresenter extends Presenter<PackingListPresenter.MyView,
                         }
                         getView().buildAttributeWindow(salesOrderId, Integer.parseInt(quantity), dataSourceFields).show();
                         getView().getAttributeGrid().startEditingNew();
-
                     }
                 });
     }
@@ -173,12 +172,14 @@ public class PackingListPresenter extends Presenter<PackingListPresenter.MyView,
     }
 
     @Override
-    public void onSavePacking(String username, String awbInfoId) {
+    public void onSavePacking(String username, String pickPackageId, String awbNumber) {
         try {
             RPCRequest request = new RPCRequest();
 
             request.setActionURL(GWT.getHostPageBaseURL() + packingListPresenterServlet
-                    + "?method=savePacking&type=RPC&username=" + username + "&awbInfoId=" + awbInfoId);
+                    + "?method=savePacking&type=RPC&username=" + username
+                    + "&pickPackageId=" + pickPackageId
+                    + "&awbNumber=" + awbNumber);
             request.setHttpMethod("POST");
             request.setUseSimpleHttp(true);
             request.setWillHandleError(true);

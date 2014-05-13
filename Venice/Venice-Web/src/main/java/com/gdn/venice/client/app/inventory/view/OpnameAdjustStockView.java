@@ -38,6 +38,8 @@ import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.EditCompleteEvent;
 import com.smartgwt.client.widgets.grid.events.EditCompleteHandler;
+import com.smartgwt.client.widgets.grid.events.EditorEnterEvent;
+import com.smartgwt.client.widgets.grid.events.EditorEnterHandler;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitEvent;
 import com.smartgwt.client.widgets.grid.events.FilterEditorSubmitHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -231,6 +233,12 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
                 if (event.getDsResponse().getStatus() == 0) {
                     SC.say("Data Added/Edited");
                 }
+            }
+        });
+
+        opnameDetailGrid.addEditorEnterHandler(new EditorEnterHandler() {
+            @Override
+            public void onEditorEnter(EditorEnterEvent event) {
                 opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMCATEGORY).setCanEdit(false);
                 opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMNAME).setCanEdit(false);
                 opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_ITEMSKU).setCanEdit(false);
@@ -240,7 +248,7 @@ public class OpnameAdjustStockView extends ViewWithUiHandlers<OpnameAdjustStockU
                 opnameDetailGrid.getField(DataNameTokens.INV_OPNAME_ITEMSTORAGE_STORAGECODE).setCanEdit(false);
             }
         });
-
+        
         addRowButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

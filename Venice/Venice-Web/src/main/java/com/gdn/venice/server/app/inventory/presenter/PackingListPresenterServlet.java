@@ -6,7 +6,7 @@ package com.gdn.venice.server.app.inventory.presenter;
 
 import com.gdn.venice.server.app.inventory.command.FetchAttributeNameDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchReadyPackingDataCommand;
-import com.gdn.venice.server.app.inventory.command.FetchSalesOrderAWBInfoDetailDataCommand;
+import com.gdn.venice.server.app.inventory.command.FetchSalesOrderPackingDetailDataCommand;
 import com.gdn.venice.server.app.inventory.command.RejectPackingDataCommand;
 import com.gdn.venice.server.app.inventory.command.SaveAttributeDataCommand;
 import com.gdn.venice.server.app.inventory.command.SavePackingDataCommand;
@@ -67,7 +67,7 @@ public class PackingListPresenterServlet extends HttpServlet {
                 rafDsCommand = new FetchReadyPackingDataCommand(rafDsRequest);
             } else if (method.equals("fetchSalesData")) {
                 System.out.println("fetchSalesData");
-                rafDsCommand = new FetchSalesOrderAWBInfoDetailDataCommand(request.getParameter("awbInfoId"), username);
+                rafDsCommand = new FetchSalesOrderPackingDetailDataCommand(request.getParameter("pickPackageId"), username);
             }
 
             if (rafDsCommand != null) {
@@ -87,7 +87,9 @@ public class PackingListPresenterServlet extends HttpServlet {
                 RafRpcCommand saveAttributeCommand = new SaveAttributeDataCommand(username, request.getParameter("salesOrderId"), Util.extractRequestBody(request));
                 retVal = saveAttributeCommand.execute();
             } else if (method.equals("savePacking")) {
-                RafRpcCommand savePackingCommand = new SavePackingDataCommand(username, request.getParameter("awbInfoId"));
+                RafRpcCommand savePackingCommand = new SavePackingDataCommand(username, 
+                        request.getParameter("pickPackageId"),
+                        request.getParameter("awbNumber"));
                 retVal = savePackingCommand.execute();
             }else if (method.equals("rejectPacking")) {
                 RafRpcCommand rejectPackingCommand = new RejectPackingDataCommand(username, request.getParameter("salesOrderId"));

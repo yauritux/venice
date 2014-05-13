@@ -50,7 +50,6 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
     RafViewLayout shelfApprovalAddLayout;
     ListGrid shelfListGrid, storageListGrid;
     Window shelfDetailWindow;
-
     ToolStrip shelfListToolStrip;
 
     @Inject
@@ -82,19 +81,19 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
                 buildShelfDetailWindow(record).show();
             }
         });
-        
-        shelfListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {			
-			@Override
-			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
-				refreshAllShelfData();
-			}
-		});
+
+        shelfListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
+            @Override
+            public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
+                refreshAllShelfData();
+            }
+        });
     }
 
     private Window buildShelfDetailWindow(final ListGridRecord record) {
         shelfDetailWindow = new Window();
         shelfDetailWindow.setWidth(600);
-		shelfDetailWindow.setHeight(375);
+        shelfDetailWindow.setHeight(375);
         shelfDetailWindow.setTitle("Shelf Detail");
         shelfDetailWindow.setShowMinimizeButton(false);
         shelfDetailWindow.setIsModal(true);
@@ -115,8 +114,12 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
         shelfDetailForm.setPadding(5);
 
         final String id = record.getAttribute(DataNameTokens.INV_SHELF_ID);
-        
+
         final String originId = record.getAttribute(DataNameTokens.INV_SHELF_ORIGINID);
+
+        final TextItem warehouse = new TextItem(DataNameTokens.INV_SHELF_WAREHOUSE, "Warehouse");
+        warehouse.setValue(record.getAttribute(DataNameTokens.INV_SHELF_WAREHOUSE));
+        warehouse.setDisabled(true);
 
         final TextItem whCode = new TextItem(DataNameTokens.INV_SHELF_CODE, "Shelf Code");
         whCode.setValue(record.getAttribute(DataNameTokens.INV_SHELF_CODE));
@@ -124,12 +127,12 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
 
         final TextAreaItem whDescription = new TextAreaItem(DataNameTokens.INV_SHELF_DESCRIPTION, "Shelf Description");
         whDescription.setValue(record.getAttribute(DataNameTokens.INV_SHELF_DESCRIPTION));
-       
-        shelfDetailForm.setFields(whCode, whDescription);
-        
-		Label storageLabel = new Label("<b>Storage Bin:</b>");
-		storageLabel.setHeight(10);
-        
+
+        shelfDetailForm.setFields(warehouse, whCode, whDescription);
+
+        Label storageLabel = new Label("<b>Storage Bin:</b>");
+        storageLabel.setHeight(10);
+
         storageListGrid = buildStorageListGrid(originId);
         storageListGrid.setCanEdit(false);
 
@@ -172,49 +175,49 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
 
         return shelfDetailWindow;
     }
-    
-    private ListGrid buildStorageListGrid(String shelfId){
-    	storageListGrid = new ListGrid();
-    	storageListGrid.setWidth100();
-    	storageListGrid.setHeight100();
-    	storageListGrid.setShowAllRecords(true);
-    	storageListGrid.setSortField(0);
 
-    	storageListGrid.setShowFilterEditor(true);
-    	storageListGrid.setCanResizeFields(true);
-    	storageListGrid.setShowRowNumbers(true);
-    	storageListGrid.setShowFilterEditor(false);
-    	    	
-    	if(shelfId==null){
-    		ListGridField codeField = new ListGridField(DataNameTokens.INV_STORAGE_CODE, "Code");  
-            ListGridField descField = new ListGridField(DataNameTokens.INV_STORAGE_DESCRIPTION, "Description");  
-            ListGridField typeField = new ListGridField(DataNameTokens.INV_STORAGE_TYPE, "Type");  
-                        
+    private ListGrid buildStorageListGrid(String shelfId) {
+        storageListGrid = new ListGrid();
+        storageListGrid.setWidth100();
+        storageListGrid.setHeight100();
+        storageListGrid.setShowAllRecords(true);
+        storageListGrid.setSortField(0);
+
+        storageListGrid.setShowFilterEditor(true);
+        storageListGrid.setCanResizeFields(true);
+        storageListGrid.setShowRowNumbers(true);
+        storageListGrid.setShowFilterEditor(false);
+
+        if (shelfId == null) {
+            ListGridField codeField = new ListGridField(DataNameTokens.INV_STORAGE_CODE, "Code");
+            ListGridField descField = new ListGridField(DataNameTokens.INV_STORAGE_DESCRIPTION, "Description");
+            ListGridField typeField = new ListGridField(DataNameTokens.INV_STORAGE_TYPE, "Type");
+
             storageListGrid.setFields(codeField, descField, typeField);
-            
+
             Map<String, String> storageType = new HashMap<String, String>();
             storageType.put("bin", "Bin");
             storageType.put("carton", "Carton");
             storageType.put("pallet", "Pallet");
             storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
-    	}else{
-        	DataSource storageData = ShelfData.getStorageData(shelfId, 1, 20);
-    		storageListGrid.setDataSource(storageData);
-    		storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
-    		
+        } else {
+            DataSource storageData = ShelfData.getStorageData(shelfId, 1, 20);
+            storageListGrid.setDataSource(storageData);
+            storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
+
             Map<String, String> storageType = new HashMap<String, String>();
             storageType.put("bin", "Bin");
             storageType.put("carton", "Carton");
             storageType.put("pallet", "Pallet");
             storageData.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
-            
-        	storageListGrid.setAutoFetchData(true);
+
+            storageListGrid.setAutoFetchData(true);
             storageListGrid.getField(DataNameTokens.INV_STORAGE_ID).setHidden(true);
             storageListGrid.getField(DataNameTokens.INV_STORAGE_CODE).setCanFilter(false);
             storageListGrid.getField(DataNameTokens.INV_STORAGE_DESCRIPTION).setCanFilter(false);
-            storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setCanFilter(false);            
-    	}
-		        
+            storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setCanFilter(false);
+        }
+
         return storageListGrid;
     }
 
@@ -243,7 +246,7 @@ public class ShelfNonActiveWithApprovalView extends ViewWithUiHandlers<ShelfNonA
 
     @Override
     public void refreshAllShelfData() {
-    	DSCallback callBack = new DSCallback() {
+        DSCallback callBack = new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {
                 shelfListGrid.setData(response.getData());

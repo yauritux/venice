@@ -7,86 +7,96 @@ import java.util.Map;
 
 import com.gdn.inventory.exchange.entity.ShelfWIP;
 import com.gdn.inventory.exchange.entity.Storage;
+import com.gdn.inventory.exchange.entity.Warehouse;
 import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.inventory.wrapper.ResultWrapper;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.service.ShelfManagementService;
+import com.gdn.venice.server.app.inventory.service.WarehouseManagementService;
 import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.util.Util;
 import com.gdn.venice.util.InventoryUtil;
 
 public class SaveShelfWIPDataCommand implements RafRpcCommand {
 
-	HashMap<String, String> shelfMap;
-	HashMap<String, String> storageMap;
-	String username, url;
-	ShelfManagementService shelfService;
+    HashMap<String, String> shelfMap;
+    HashMap<String, String> storageMap;
+    String username, url;
+    ShelfManagementService shelfService;
+    WarehouseManagementService warehouseService;
 
-	public SaveShelfWIPDataCommand(String username, String data) {
-		String[] split = data.split("#");
-		System.out.println("split 0: "+split[0]);
-		System.out.println("split 1: "+split[1]);
-		
-		shelfMap = Util.formHashMapfromXML(split[0]);
-		storageMap = Util.formHashMapfromXML(split[1]);
-		System.out.println("shelfMap size: "+shelfMap.size());
-		System.out.println("storageMap size: "+storageMap.size());
-		
-		this.username = username;
-	}
+    public SaveShelfWIPDataCommand(String username, String data) {
+        String[] split = data.split("#");
+        System.out.println("split 0: " + split[0]);
+        System.out.println("split 1: " + split[1]);
 
-	@Override
-	public String execute() {
-		System.out.println("SaveShelfWIPDataCommand");
-		ShelfWIP shelf = new ShelfWIP();
-		List<Storage> storageList = new ArrayList<Storage>();
-		ResultWrapper<ShelfWIP> shelfWrapper = new ResultWrapper<ShelfWIP>();
-		try {
-			shelfService = new ShelfManagementService();
-			shelf = new ShelfWIP();	
-			shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));		
-			shelf.setApprovalStatus(ApprovalStatus.CREATED);
-			shelf.setApprovalType(ApprovalStatus.APPROVAL_CREATE);					
-			
-			System.out.println("save storage");		
-			for(Map.Entry<String, String> entry : storageMap.entrySet()){
-				String key = entry.getKey();
-				String value = entry.getValue();
-				System.out.println("storage key: "+key);
-				System.out.println("storage value: "+value);
-				
-				Storage storage = new Storage();
-				HashMap<String, String> map = InventoryUtil.convertToHashMap(value);
-				for(Map.Entry<String, String> e : map.entrySet()){
-					String k = e.getKey();
-					String v = e.getValue();
-					System.out.println("storage k: "+k);
-					System.out.println("storage v: "+v);
-					
-					if(k.equals(DataNameTokens.INV_STORAGE_DESCRIPTION)){
-						System.out.println("set description");
-						storage.setDescription(v);
-					}
-					if(k.equals(DataNameTokens.INV_STORAGE_TYPE)){
-						System.out.println("set type");
-						storage.setType(v);
-					}
-				}	
+        shelfMap = Util.formHashMapfromXML(split[0]);
+        storageMap = Util.formHashMapfromXML(split[1]);
+        System.out.println("shelfMap size: " + shelfMap.size());
+        System.out.println("storageMap size: " + storageMap.size());
 
-				System.out.println("add list");
-				storageList.add(storage);
-			}
-			
-			System.out.println("storage size: "+storageList.size());
-			
-			shelfWrapper = shelfService.saveShelfWIP(username, shelf, storageList);
-			if(shelfWrapper==null || !shelfWrapper.isSuccess()){
-				return shelfWrapper.getError();
-			}
+        this.username = username;
+    }
 
-		} catch (Exception e) {
-			return "Failed saving shelf, try again later. If error persist please contact administrator";
-		}
-		return "0";
-	}
+    @Override
+    public String execute() {
+        System.out.println("SaveShelfWIPDataCommand");
+        ShelfWIP shelf = new ShelfWIP();
+        List<Storage> storageList = new ArrayList<Storage>();
+        ResultWrapper<ShelfWIP> shelfWrapper = new ResultWrapper<ShelfWIP>();
+        try {
+            warehouseService = new WarehouseManagementService();
+            ResultWrapper<Warehouse> wrapper = warehouseService.findByCode(shelfMap.get(DataNameTokens.INV_SHELF_WAREHOUSE));
+            if (wrapper.isSuccess() && wrapper.getContent() != null) {
+                shelfService = new ShelfManagementService();
+                shelf = new ShelfWIP();
+                shelf.setDescription(shelfMap.get(DataNameTokens.INV_SHELF_DESCRIPTION));
+                shelf.setApprovalStatus(ApprovalStatus.CREATED);
+                shelf.setApprovalType(ApprovalStatus.APPROVAL_CREATE);
+                shelf.setWarehouse(wrapper.getContent());
+
+                System.out.println("save storage");
+                for (Map.Entry<String, String> entry : storageMap.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    System.out.println("storage key: " + key);
+                    System.out.println("storage value: " + value);
+
+                    Storage storage = new Storage();
+                    HashMap<String, String> map = InventoryUtil.convertToHashMap(value);
+                    for (Map.Entry<String, String> e : map.entrySet()) {
+                        String k = e.getKey();
+                        String v = e.getValue();
+                        System.out.println("storage k: " + k);
+                        System.out.println("storage v: " + v);
+
+                        if (k.equals(DataNameTokens.INV_STORAGE_DESCRIPTION)) {
+                            System.out.println("set description");
+                            storage.setDescription(v);
+                        }
+                        if (k.equals(DataNameTokens.INV_STORAGE_TYPE)) {
+                            System.out.println("set type");
+                            storage.setType(v);
+                        }
+                    }
+
+                    System.out.println("add list");
+                    storageList.add(storage);
+                }
+
+                System.out.println("storage size: " + storageList.size());
+
+                shelfWrapper = shelfService.saveShelfWIP(username, shelf, storageList);
+                if (shelfWrapper == null || !shelfWrapper.isSuccess()) {
+                    return shelfWrapper.getError();
+                }
+            } else {
+                return "Warehouse invalid";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed saving shelf, try again later. If error persist please contact administrator";
+        }
+        return "0";
+    }
 }
