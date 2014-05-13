@@ -58,7 +58,7 @@ public class GRNCreatePresenter extends Presenter<GRNCreatePresenter.MyView, GRN
 		public Window getGrnCreateWindow();
 		public ListGrid getAttributeGrid();
 		public Window getAttributeWindow();
-		public Window buildAttributeWindow(String itemId, String asnItemId, int quantity, DataSourceField[] dataSourceFields, String fieldName);
+		public Window buildAttributeWindow(String asnStatus, String itemId, String asnItemId, int quantity, DataSourceField[] dataSourceFields, String fieldName);
 	}
 
 	@Inject

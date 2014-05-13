@@ -28,7 +28,6 @@ import com.gdn.inventory.exchange.entity.WarehouseItemStorageStock;
 import com.gdn.inventory.exchange.entity.module.inbound.GoodReceivedNoteItem;
 import com.gdn.inventory.exchange.entity.module.inbound.Putaway;
 import com.gdn.inventory.exchange.entity.module.inbound.PutawayDetail;
-import com.gdn.inventory.exchange.entity.module.inbound.PutawayItem;
 import com.gdn.inventory.exchange.type.StockType;
 import com.gdn.inventory.paging.InventoryPagingWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
@@ -149,23 +148,17 @@ public class PutawayManagementService{
         }
 	}
 	
-	public ResultWrapper<Putaway> savePutaway(String username, List<PutawayItem> putawayItemList) 
+	public ResultWrapper<Putaway> savePutawayGRN(String username, List<String> grnNumberList) 
 			throws JsonGenerationException, JsonMappingException, IOException {
-		System.out.println("savePutaway");
+		System.out.println("savePutawayGRN");
 		String url=InventoryUtil.getStockholmProperties().getProperty("address")
 				+ "putaway/addPutaway?username=" + username;
 		System.out.println("url: "+url);
-		PostMethod httpPost = new PostMethod(url);
+		PostMethod httpPost = new PostMethod(url);	
 		
-		PutawayItem[] item = putawayItemList.toArray(new PutawayItem[0]);
-		
-		PutawayRequest putawayRequest = new PutawayRequest();
-		putawayRequest.setPutawayItem(item);
-		
-		String json = mapper.writeValueAsString(putawayRequest);
+		String json = mapper.writeValueAsString(grnNumberList);
 		System.out.println("json: "+json);
 		httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-
 		httpPost.setRequestHeader("Content-Type", "application/json");
 
 		int httpCode = httpClient.executeMethod(httpPost);

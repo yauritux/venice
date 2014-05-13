@@ -1,6 +1,6 @@
 package com.gdn.venice.client.app.inventory.view.handler;
 
-import java.util.HashMap;
+import java.util.HashSet;
 
 import com.gwtplatform.mvp.client.UiHandlers;
 
@@ -12,5 +12,5 @@ import com.gwtplatform.mvp.client.UiHandlers;
 public interface PutawayCreateUiHandler extends UiHandlers {
 
 	void onFetchWarehouseComboBoxData();
-	void onSubmitClicked(HashMap<String, String> itemDataMap);
+	void onSubmitClicked(HashSet<String> grnNumberSet, String putawayType);
 }

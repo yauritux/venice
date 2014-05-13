@@ -50,7 +50,8 @@ public class FetchPickingListSODetailDataCommand implements RafDsCommand {
         		for(PickPackageSalesOrder ppso : pickPackageWrapper.getContents()){        			    						
 					WarehouseItem whItem = putawayService.getWarehouseItemData(ppso.getSalesOrder().getAssignedItem().getId(), 
 							ppso.getSalesOrder().getWarehouse().getId(), 
-							ppso.getSalesOrder().getSupplier().getId(), ppso.getSalesOrder().getStockType());
+							ppso.getSalesOrder().getSupplier()!=null?ppso.getSalesOrder().getSupplier().getId():new Long(0), 
+							ppso.getSalesOrder().getStockType());
 					
                     if(whItem!=null){
     					System.out.println("whItem Id: "+whItem.getId());

@@ -211,7 +211,6 @@ public class ASNListView extends ViewWithUiHandlers<ASNListUiHandler> implements
         asnListGrid.setDataSource(dataSource);    	
         asnListGrid.setAutoFetchData(true);
         asnListGrid.setFields(listGridField);
-        asnListGrid.setDataSource(dataSource);
         asnListGrid.getField(DataNameTokens.INV_ASN_ID).setHidden(true);
         asnListGrid.getField(DataNameTokens.INV_ASN_SPECIAL_NOTES).setHidden(true);
         asnListGrid.getField(DataNameTokens.INV_ASN_REFF_DATE).setHidden(true);

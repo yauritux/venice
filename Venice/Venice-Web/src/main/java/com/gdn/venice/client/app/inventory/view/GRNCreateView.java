@@ -120,7 +120,10 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         IButton saveButton = new IButton("Save");
         HLayout buttonSet = new HLayout(5);
         buttonSet.setAlign(Alignment.LEFT);
-        buttonSet.setMembers(saveButton);
+        
+        if(record.getAttribute(DataNameTokens.INV_ASN_STATUS).equalsIgnoreCase("created")){
+        	buttonSet.setMembers(saveButton);
+        }
                 
         createGRNWindow.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClientEvent event) {
@@ -176,7 +179,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         asnDetailForm.setFields(asnNumberItem, reffDateItem, reffNumberItem, inventoryTypeItem, supplierCodeItem, 
         		destinationItem, supplierNameItem, doNumberItem);   
         
-        itemListGrid = buildItemListGrid(id);   
+        itemListGrid = buildItemListGrid(id, record.getAttribute(DataNameTokens.INV_ASN_STATUS));   
                         
         saveButton.addClickHandler(new ClickHandler() {
 	          @Override
@@ -226,7 +229,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
         return createGRNWindow;
     }
             
-    private ListGrid buildItemListGrid(String asnId){  	
+    private ListGrid buildItemListGrid(String asnId, final String asnStatus){  	
     	final DataSource grnItemData = GRNData.getASNItemData(asnId, 1, 20);
     	
     	final ListGridField listGridField[] = Util.getListGridFieldsFromDataSource(grnItemData);
@@ -265,7 +268,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 					                        for (int i = 0; i < fieldName.length; i++) {
 					                            dataSourceFields[i] = new DataSourceTextField(fieldName[i].trim(), fieldName[i].trim());
 					                        }
-					                        buildAttributeWindow(record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields, rawData.toString()).show();
+					                        buildAttributeWindow(asnStatus, record.getAttribute(DataNameTokens.INV_POCFF_ITEMID), record.getAttribute(DataNameTokens.INV_ASN_ITEM_ID), Integer.parseInt(record.getAttribute(DataNameTokens.INV_ASN_ITEM_QTY)), dataSourceFields, rawData.toString()).show();
 					                    }
 					                });
 						}
@@ -334,7 +337,7 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
     }
     
     @Override
-    public Window buildAttributeWindow(final String itemId, final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields, String fieldName) {
+    public Window buildAttributeWindow(String asnStatus, final String itemId, final String asnItemId, final int quantity, final DataSourceField[] dataSourceFields, String fieldName) {
         records = 0;
         attributeWindow = new Window();
         attributeWindow.setWidth(600);
@@ -352,6 +355,11 @@ public class GRNCreateView extends ViewWithUiHandlers<GRNCreateUiHandler> implem
 		ToolStripButton removeButton = new ToolStripButton();
 		removeButton.setIcon("[SKIN]/icons/business_users_delete.png");
 		removeButton.setTitle("Remove");
+		
+        if(asnStatus.equalsIgnoreCase("closed")){
+        	addButton.setDisabled(true);
+        	removeButton.setDisabled(true);
+        }
 		
 		ToolStrip attributeToolStrip = new ToolStrip();
 		attributeToolStrip.setWidth100();

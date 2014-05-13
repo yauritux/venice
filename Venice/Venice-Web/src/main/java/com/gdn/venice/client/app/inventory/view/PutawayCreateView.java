@@ -1,6 +1,6 @@
 package com.gdn.venice.client.app.inventory.view;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 import com.gdn.venice.client.app.DataNameTokens;
@@ -96,23 +96,16 @@ public class PutawayCreateView extends ViewWithUiHandlers<PutawayCreateUiHandler
 					SC.say("Please select GRN");
 					return;
 	        	  }else{	        	  
-		        	  SC.ask("Are you sure you want to submit this data?", new BooleanCallback() {
+		        	  SC.ask("All GRN item for this Reff No will be submitted, are you sure you want to continue?", new BooleanCallback() {
 	                      @Override
 	                      public void execute(Boolean value) {
-	                          if (value != null && value == true) {	                        	            					
-	          		            HashMap<String, String> itemDataMap = new HashMap<String, String>();
-	          					HashMap<String, String> itemRowMap = new HashMap<String, String>();
-	          										
-	          					for (int i=0;i<itemRecords.length;i++) {
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMID));
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER));
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE));
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE));
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_QTY));
-	          						itemRowMap.put(DataNameTokens.INV_PUTAWAY_GRN_TYPE, putawayTypeComboBox.getValue().toString());
-	          						itemDataMap.put("ITEM"+i, itemRowMap.toString());					
+	                          if (value != null && value == true) {	                        	     
+	          					HashSet<String> grnNumberSet = new HashSet<String>();
+	          						          										
+	          					for (int i=0;i<itemRecords.length;i++) {	
+	          						grnNumberSet.add(itemRecords[i].getAttributeAsString(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER));
 	          					}	          					
-	          					getUiHandlers().onSubmitClicked(itemDataMap);
+	          					getUiHandlers().onSubmitClicked(grnNumberSet, putawayTypeComboBox.getValue().toString());
 	                          }	                      
 	                      }	
 		        	  });	

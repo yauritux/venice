@@ -59,8 +59,8 @@ public class FetchASNDataCommand implements RafDsCommand {
 	                    	ResultWrapper<PurchaseOrder> poWrapper = asnService.getPOData(request, asn.getReferenceNumber().toString());
 	                    	if(poWrapper!=null && poWrapper.isSuccess()){
 	                    		PurchaseOrder po = poWrapper.getContent();
-	                    		supplierCode = po.getSupplier().getCode();
-	                    		supplierName = po.getSupplier().getName();
+	                    		supplierCode = po.getSupplier()!=null?po.getSupplier().getCode():"";
+	                    		supplierName = po.getSupplier()!=null?po.getSupplier().getName():"";
 	                    	}else{
 	                    		_log.error("PO not found");
 	                    	}                    	
@@ -68,8 +68,8 @@ public class FetchASNDataCommand implements RafDsCommand {
 	                    	ResultWrapper<ConsignmentFinalForm> cffWrapper = asnService.getCFFData(request, asn.getReferenceNumber());
 	                    	if(cffWrapper!=null && cffWrapper.isSuccess()){
 	                    		ConsignmentFinalForm cff = cffWrapper.getContent();
-	                    		supplierCode = cff.getConsignmentApprovalForm().getSupplier().getCode();
-	                    		supplierName = cff.getConsignmentApprovalForm().getSupplier().getName();
+	                    		supplierCode = cff.getConsignmentApprovalForm().getSupplier()!=null?cff.getConsignmentApprovalForm().getSupplier().getCode():"";
+	                    		supplierName = cff.getConsignmentApprovalForm().getSupplier()!=null?cff.getConsignmentApprovalForm().getSupplier().getName():"";
 	                    	}else{
 	                    		_log.error("CFF not found");
 	                    	}
@@ -91,7 +91,7 @@ public class FetchASNDataCommand implements RafDsCommand {
 	
 	                rafDsResponse.setStatus(0);
 	                rafDsResponse.setStartRow(request.getStartRow());
-	                rafDsResponse.setTotalRows((int) asnWrapper.getTotalElements());
+	                rafDsResponse.setTotalRows(dataList.size());
 	                rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
             }
         } catch (Throwable e) {
