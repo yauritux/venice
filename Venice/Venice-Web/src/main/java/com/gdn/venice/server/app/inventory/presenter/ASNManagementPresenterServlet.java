@@ -8,13 +8,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.gdn.inventory.exchange.type.ApprovalStatus;
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.command.FetchASNDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchASNItemDataCommand;
-import com.gdn.venice.server.app.inventory.command.FetchStorageDataCommand;
 import com.gdn.venice.server.command.RafDsCommand;
-import com.gdn.venice.server.command.RafRpcCommand;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
 import com.gdn.venice.server.util.Util;
@@ -63,8 +60,8 @@ public class ASNManagementPresenterServlet extends HttpServlet{
 			
 			String method = request.getParameter("method");
 			
-			if(method.equals("fetchASNData")){				
-				System.out.println("fetchASNData");
+			if(method.equals("fetchASNData")){		
+				System.out.println("fetchASNData servlet");
 				RafDsCommand fetchASNDataCommand = new FetchASNDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchASNDataCommand.execute();
 				try{
@@ -73,7 +70,6 @@ public class ASNManagementPresenterServlet extends HttpServlet{
 					e.printStackTrace();
 				}
 			}else if(method.equals("fetchASNItemData")){
-				System.out.println("fetchASNItemData");
 				RafDsCommand fetchASNItemDataCommand = new FetchASNItemDataCommand(rafDsRequest);
 				RafDsResponse rafDsResponse = fetchASNItemDataCommand.execute();
 				try{

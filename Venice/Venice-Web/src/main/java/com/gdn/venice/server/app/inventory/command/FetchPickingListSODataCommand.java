@@ -58,7 +58,7 @@ public class FetchPickingListSODataCommand implements RafDsCommand {
 	                
 	                rafDsResponse.setStatus(0);
 	                rafDsResponse.setStartRow(request.getStartRow());
-	                rafDsResponse.setTotalRows((int) pickPackageWrapper.getTotalElements());
+	                rafDsResponse.setTotalRows(dataList.size());
 	                rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
             }
         } catch (Throwable e) {

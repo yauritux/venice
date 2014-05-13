@@ -96,7 +96,7 @@ public class FetchGRNDataCommand implements RafDsCommand {
 	
 	                rafDsResponse.setStatus(0);
 	                rafDsResponse.setStartRow(request.getStartRow());
-	                rafDsResponse.setTotalRows((int) grnWrapper.getTotalElements());
+	                rafDsResponse.setTotalRows(dataList.size());
 	                rafDsResponse.setEndRow(request.getStartRow() + dataList.size());
             }
         } catch (Throwable e) {
