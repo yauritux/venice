@@ -18,4 +18,6 @@ public interface OrderPaymentAllocationService {
 	public List<VenOrderPaymentAllocation> persistOrderPaymentAllocationList(
 			List<VenOrderPaymentAllocation> venOrderPaymentAllocationList) throws VeniceInternalException;	
 	public Boolean removeOrderPaymentAllocationList(VenOrder venOrder);	
+	public List<VenOrderPaymentAllocation> findByFraudSuspicionCaseId(Long fraudSuspicionCaseId)
+			  throws VeniceInternalException;
 }

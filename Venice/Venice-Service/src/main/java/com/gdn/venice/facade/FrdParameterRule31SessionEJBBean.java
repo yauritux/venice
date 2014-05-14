@@ -28,6 +28,7 @@ import com.gdn.venice.facade.callback.SessionCallback;
 import com.gdn.venice.facade.finder.FinderReturn;
 import com.gdn.venice.fraud.services.FrdParameterRule31Service;
 import com.gdn.venice.persistence.FrdParameterRule31;
+import com.gdn.venice.util.CommonUtil;
 
 /**
  * Session Bean implementation class FrdParameterRule31SessionEJBBean
@@ -157,12 +158,16 @@ public class FrdParameterRule31SessionEJBBean implements FrdParameterRule31Sessi
 
 	}
 	
-	@Override
 	public List<FrdParameterRule31> findByEmailAndNoCc(String email, String noCc) {
 		List<FrdParameterRule31> frdParameterRule31Lst = null;
 		try {
-			
+			frdParameterRule31Lst = frdParameterRule31Service.findByEmailAndNoCc(email, noCc);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			throw new EJBException(e);
 		}
+		
+		return frdParameterRule31Lst;
 	}
 
 	/*

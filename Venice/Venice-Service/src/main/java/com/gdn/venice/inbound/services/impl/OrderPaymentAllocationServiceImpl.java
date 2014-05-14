@@ -15,6 +15,7 @@ import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenOrderPaymentAllocationDAO;
 import com.gdn.venice.exception.CannotPersistOrderPaymentAllocationException;
+import com.gdn.venice.exception.VenOrderPaymentAllocationNotFoundException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.OrderPaymentAllocationService;
 import com.gdn.venice.persistence.VenOrder;
@@ -111,5 +112,23 @@ public class OrderPaymentAllocationServiceImpl implements OrderPaymentAllocation
 		
 		return Boolean.TRUE;		
 	}
+	
+	@Override
+	public List<VenOrderPaymentAllocation> findByFraudSuspicionCaseId(
+			Long fraudSuspicionCaseId) throws VeniceInternalException {
+		
+		List<VenOrderPaymentAllocation> venOrderPaymentAllocations = new ArrayList<VenOrderPaymentAllocation>();
+		
+		try {
+			venOrderPaymentAllocations = venOrderPaymentAllocationDAO.findByFraudSuspicionCaseId(fraudSuspicionCaseId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			CommonUtil.logAndReturnException(new VenOrderPaymentAllocationNotFoundException("Cannot find VenOrderPaymentAllocation with fraudSuspicionCaseId="
+					+ fraudSuspicionCaseId, VeniceExceptionConstants.VEN_EX_000125), CommonUtil.getLogger(this.getClass().getCanonicalName())
+					, LoggerLevel.ERROR);
+		}
+		
+		return venOrderPaymentAllocations;
+	}	
 
 }

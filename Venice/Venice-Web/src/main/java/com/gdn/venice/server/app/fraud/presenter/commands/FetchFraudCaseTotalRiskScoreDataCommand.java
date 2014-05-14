@@ -26,11 +26,6 @@ import com.gdn.venice.server.util.Util;
 public class FetchFraudCaseTotalRiskScoreDataCommand implements RafDsCommand {
 	
 	private RafDsRequest request;
-	/*
-	private FrdFraudSuspicionCaseService frdFraudSuspicionCaseService = new FrdFraudSuspicionCaseServiceImpl();	
-	private FrdParameterRule31Service frdParameterRule31Service = new FrdParameterRule31ServiceImpl();
-	private OrderPaymentAllocationService orderPaymentAllocationService = new OrderPaymentAllocationServiceImpl();
-	*/
 	
 	public FetchFraudCaseTotalRiskScoreDataCommand(RafDsRequest request) {
 		this.request = request;
@@ -53,7 +48,6 @@ public class FetchFraudCaseTotalRiskScoreDataCommand implements RafDsCommand {
 			
 		    //List<FrdFraudSuspicionCase> fraudSuspicionCaseList = fraudCaseSessionHome.queryByRange("select o from FrdFraudSuspicionCase o where o.fraudSuspicionCaseId = " + fraudCaseId, 0, 0);
 			FrdFraudSuspicionCase fraudSuspicionCase = fraudCaseSessionHome.findByPK(new Long(fraudCaseId));
-			
 			//FrdFraudSuspicionCase fraudSuspicionCase = frdFraudSuspicionCaseService.findByPK(new Long(fraudCaseId));
 					
 			/*
@@ -63,7 +57,7 @@ public class FetchFraudCaseTotalRiskScoreDataCommand implements RafDsCommand {
 				totalScore=Util.isNull(list.getFraudTotalPoints(), "").toString();
 
 			}
-			*/			
+		    */		
 			String totalScore = Util.isNull(fraudSuspicionCase.getFraudTotalPoints(), "").toString();
 			
 			
@@ -76,7 +70,8 @@ public class FetchFraudCaseTotalRiskScoreDataCommand implements RafDsCommand {
 			
 			if(itemAllocation.get(0)!=null?(itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber()!=null?true:false):false){
 					//List<FrdParameterRule31> genuineList = genuineSessionHome.queryByRange("select o from FrdParameterRule31 o where o.email ='"+itemAllocation.get(0).getVenOrder().getVenCustomer().getCustomerUserName()+"' and o.noCc ='"+itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber()+"' ", 0, 0);
-				    List<FrdParameterRule31> genuineList = frdParameterRule31Service.findByEmailAndNoCc(itemAllocation.get(0).getVenOrder().getVenCustomer().getCustomerUserName(), itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber());
+				    List<FrdParameterRule31> genuineList = genuineSessionHome.findByEmailAndNoCc(itemAllocation.get(0).getVenOrder().getVenCustomer().getCustomerUserName(), itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber());
+				    //List<FrdParameterRule31> genuineList = frdParameterRule31Service.findByEmailAndNoCc(itemAllocation.get(0).getVenOrder().getVenCustomer().getCustomerUserName(), itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber());
 					if(!genuineList.isEmpty()){
 						map.put(DataNameTokens.FRDFRAUDSUSPICIONCASE_GENUINE,"true");
 					}else{

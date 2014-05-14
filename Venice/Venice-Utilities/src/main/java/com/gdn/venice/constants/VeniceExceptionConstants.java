@@ -59,6 +59,7 @@ public enum VeniceExceptionConstants {
 	VEN_EX_140001("Error occured while performing query on VenPromotion"),
 	VEN_EX_200001("Bank does not exist"),
 	VEN_EX_300001("Fraud Check Value does not exist"),
+	VEN_EX_300011("Fraud Case History does not exist"),
 	VEN_EX_300002("FrdParameterRule31 does not exist"),
 	VEN_EX_400001("Payment Status does not exist"),
 	VEN_EX_400002("Payment Type does not exist"),

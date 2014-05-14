@@ -11,6 +11,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 
 @Local
 public interface FrdParameterRule31SessionEJBLocal {
+	
+	public List<FrdParameterRule31> findByEmailAndNoCc(String email, String noCc);
 
 	/*
 	 * (non-Javadoc)

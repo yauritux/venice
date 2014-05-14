@@ -158,7 +158,6 @@ public class FrdFraudSuspicionCaseSessionEJBBean implements FrdFraudSuspicionCas
 
 	}
 	
-	@Override
 	public FrdFraudSuspicionCase findByPK(Long fraudSuspicionCaseId) {
 		FrdFraudSuspicionCase frdFraudSuspicionCase = null;
 		try {

@@ -107,6 +107,7 @@ public class FetchFraudCaseDataCommand implements RafDsCommand {
 				map.put(DataNameTokens.FRDFRAUDSUSPICIONCASE_FRAUDTOTALPOINTS, Util.isNull(list.getFraudTotalPoints(), "").toString());
 				
 				fraudCaseHistoryList = historySessionHome.queryByRange("select o from FrdFraudCaseHistory o join fetch o.frdFraudSuspicionCase where o.frdFraudSuspicionCase.fraudSuspicionCaseId = " + list.getFraudSuspicionCaseId(), 0, 0);
+				//historySessionHome.find
 				String taskStatus = "Open";
 				String lastAction = "Calculated by System";
 				Boolean isAbleToModifyAfterCompleted = false;

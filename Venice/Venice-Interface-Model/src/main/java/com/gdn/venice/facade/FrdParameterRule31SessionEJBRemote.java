@@ -12,6 +12,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 @Remote
 public interface FrdParameterRule31SessionEJBRemote {
 
+	public List<FrdParameterRule31> findByEmailAndNoCc(String email, String noCc);
+	
 	/**
 	 * queryByRange - allows querying by range/block
 	 * 
