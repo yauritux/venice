@@ -59,8 +59,9 @@ public class PutawayData {
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, "GRN Item ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, "Warehouse SKU ID"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, "Item Desc"),
+				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_QTY_GRNITEM, "Qty GRN Item"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, "Storage Code"),
-				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_QTY, "Qty"),
+				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_QTY_STORAGE, "Qty"),
 				new DataSourceTextField(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, "Warehouse Item ID")};
 
 		dataSourceFields[0].setPrimaryKey(true);

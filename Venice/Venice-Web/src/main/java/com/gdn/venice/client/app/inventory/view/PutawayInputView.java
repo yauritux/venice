@@ -183,7 +183,7 @@ public class PutawayInputView extends ViewWithUiHandlers<PutawayInputUiHandler> 
 		ListGridField qtyItem = new ListGridField(DataNameTokens.INV_PUTAWAY_GRN_QTY_INPUT, "Input Qty");
 		storageItem.setCanEdit(true);
 		qtyItem.setCanEdit(true);
-        ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3], listGridField[4], storageItem, qtyItem};
+        ListGridField finalListGridField[] = {listGridField[1], listGridField[2], listGridField[3], listGridField[4], listGridField[5], storageItem, qtyItem};
 
         grnListGrid.setDataSource(grnItemData);         
         grnListGrid.setFields(finalListGridField);

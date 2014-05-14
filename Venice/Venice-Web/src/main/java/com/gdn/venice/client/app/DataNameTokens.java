@@ -1314,10 +1314,11 @@ public class DataNameTokens {
     	
     	public static String INV_PUTAWAY_GRN_ITEMID = "grnItemId";
     	public static String INV_PUTAWAY_GRN_GRNNUMBER = "grnNumber";
+    	public static String INV_PUTAWAY_GRN_QTY_GRNITEM = "grnItemQuantity";
     	public static String INV_PUTAWAY_GRN_ITEMCODE = "itemCode";
     	public static String INV_PUTAWAY_GRN_ITEMDESC = "itemDescription";
     	public static String INV_PUTAWAY_GRN_STORAGECODE = "storageCode";
-    	public static String INV_PUTAWAY_GRN_QTY = "quantity";
+    	public static String INV_PUTAWAY_GRN_QTY_STORAGE = "quantity";
     	public static String INV_PUTAWAY_GRN_TYPE = "type";
     	public static String INV_PUTAWAY_GRN_WAREHOUSEITEMID = "warehouseItemId";
     	

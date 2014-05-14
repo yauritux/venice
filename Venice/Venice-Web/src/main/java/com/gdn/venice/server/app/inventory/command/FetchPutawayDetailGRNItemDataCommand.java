@@ -69,7 +69,7 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    
     	                    System.out.println("item id "+prItem.getItem().getId());
     	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
-    	                    System.out.println("supplier: "+poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():"");
+    	                    System.out.println(poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?"supplier: "+poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():"supplier: null");
     	                    WarehouseItem whItem = putawayService.getWarehouseItemData(prItem.getItem().getId(), 
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		poItemWrapper.getContent().getPurchaseOrder().getSupplier()!=null?poItemWrapper.getContent().getPurchaseOrder().getSupplier().getId():new Long(0), 
@@ -82,11 +82,12 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
 	    	                    		HashMap<String, String> map = new HashMap<String, String>(); 
 	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
 	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_GRNITEM, String.valueOf(grnItem.getQuantity()));
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, prItem.getItem().getCode());
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, prItem.getItem().getDescription());      	                    		
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageStock.getStorage().getCode()!=null?storageStock.getStorage().getCode():"-");
-	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_STORAGE, String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
 	
 	    	    	                    dataList.add(map);
 	    	                    	}
@@ -94,11 +95,12 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    		HashMap<String, String> map = new HashMap<String, String>(); 
     	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
     	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_GRNITEM, String.valueOf(grnItem.getQuantity()));
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, prItem.getItem().getCode());
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, prItem.getItem().getDescription());      	                    		
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, "-");
-    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, "0");
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_STORAGE, "0");
 
     	    	                    dataList.add(map);
     	                    	}
@@ -124,7 +126,7 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    
     	                    System.out.println("item id: "+cafItem.getItem().getId());
     	                    System.out.println("destination: "+asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId());
-    	                    System.out.println("supplier: "+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():"");
+    	                    System.out.println(cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?"supplier: "+cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():"supplier: null");
     	                    WarehouseItem whItem = putawayService.getWarehouseItemData(cafItem.getItem().getId(), 
     	                    		asnItem.getAdvanceShipNotice().getDestinationWarehouse().getId(), 
     	                    		cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier()!=null?cffItemWrapper.getContent().getConsignmentFinalForm().getConsignmentApprovalForm().getSupplier().getId():new Long(0), st);
@@ -136,11 +138,12 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
 	    	                    		HashMap<String, String> map = new HashMap<String, String>();    
 	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
 	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+	    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_GRNITEM, String.valueOf(grnItem.getQuantity()));
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, cafItem.getItem().getCode());
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, cafItem.getItem().getDescription());    	                    		
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
 	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, storageStock.getStorage().getCode()!=null?storageStock.getStorage().getCode():"-");
-	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
+	    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_STORAGE, String.valueOf(storageStock.getQuantity())!=null?String.valueOf(storageStock.getQuantity()):"0");
 	    	    	                        	                    
 	    	    	                    dataList.add(map);
 	    	                    	}
@@ -148,11 +151,12 @@ public class FetchPutawayDetailGRNItemDataCommand implements RafDsCommand {
     	                    		HashMap<String, String> map = new HashMap<String, String>();    
     	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMID, String.valueOf(grnItem.getId()));
     	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_GRNNUMBER, String.valueOf(grnItem.getGoodReceivedNote().getGrnNumber()));
+    	            				map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_GRNITEM, String.valueOf(grnItem.getQuantity()));
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMCODE, cafItem.getItem().getCode());
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_ITEMDESC, cafItem.getItem().getDescription());    	                    		
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_WAREHOUSEITEMID, whItem.getId().toString());
     	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_STORAGECODE, "-");
-    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY, "0");
+    	    	                    map.put(DataNameTokens.INV_PUTAWAY_GRN_QTY_STORAGE, "0");
     	    	                        	                    
     	    	                    dataList.add(map);
     	                    	}
