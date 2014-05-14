@@ -140,6 +140,9 @@ public class VenOrderItem implements Serializable {
         @Column(name="cx_mta_date")
 	private Timestamp cxMtaDate;
         
+	@Column(name="logisticsetd")
+	private BigDecimal logisticsEtd;
+        
 	//bi-directional many-to-one association to FinSalesRecord
 	@OneToMany(mappedBy="venOrderItem")
 	private List<FinSalesRecord> finSalesRecords;
@@ -658,4 +661,18 @@ public class VenOrderItem implements Serializable {
     public void setCxMtaDate(Timestamp cxMtaDate) {
         this.cxMtaDate = cxMtaDate;
     }
+
+	/**
+	 * @param logisticsEtd the logisticsEtd to set
+	 */
+	public void setLogisticsEtd(BigDecimal logisticsEtd) {
+		this.logisticsEtd = logisticsEtd;
+	}
+
+	/**
+	 * @return the logisticsEtd
+	 */
+	public BigDecimal getLogisticsEtd() {
+		return logisticsEtd;
+	}
 }
