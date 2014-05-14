@@ -46,7 +46,7 @@ public class FetchFraudCasePaymentSummaryDataCommand implements RafDsCommand {
 			//Calling facade for fraud case
 			fraudCaseList = fraudCaseSessionHome.queryByRange(query, 0, 0);
 			*/
-			FrdFraudSuspicionCase frdFraudSuspicionCase = fraudCaseSessionHome.findByPK(fraudCaseId);
+			FrdFraudSuspicionCase frdFraudSuspicionCase = fraudCaseSessionHome.findByPK(new Long(fraudCaseId));
 			
 			//Find ven order id
 			/*
@@ -64,7 +64,7 @@ public class FetchFraudCasePaymentSummaryDataCommand implements RafDsCommand {
 			
 			//Calling facade for order item
 			//orderItemList = orderItemSessionHome.queryByRange(query, 0, 0);
-			orderItemList = orderItemSessionHome.findByVenOrderId(orderId);
+			orderItemList = orderItemSessionHome.findByVenOrderId(new Long(orderId));
 			
 			//Find multiple shipping address by looping through order item
 			//Only if order item more than one
@@ -87,7 +87,7 @@ public class FetchFraudCasePaymentSummaryDataCommand implements RafDsCommand {
 			
 			//Calling facade for order payment allocation
 			//orderPaymentAllocationList = orderPaymentAllocationSessionHome.queryByRange(query, 0, 0);
-			orderPaymentAllocationList = orderPaymentAllocationSessionHome.findByVenOrderId(orderId);
+			orderPaymentAllocationList = orderPaymentAllocationSessionHome.findByVenOrderId(new Long(orderId));
 			
 			//Find at least one shipping address and billing address are match
 			boolean isShipppingAddressAndBillingAddressAreMatch = false;
