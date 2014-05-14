@@ -47,8 +47,8 @@ public class FetchPickingListIRDataCommand implements RafDsCommand {
 	                    map.put(DataNameTokens.INV_PICKINGLISTIR_PACKAGECODE, pp.getCode());
 	                    map.put(DataNameTokens.INV_PICKINGLISTIR_INVENTORYTYPE, pp.getInventoryRequest().getInventoryType().name());
 	                    map.put(DataNameTokens.INV_PICKINGLISTIR_IRTYPE, pp.getInventoryRequest().getType().name());
-	                    map.put(DataNameTokens.INV_PICKINGLISTIR_PICKERID, pp.getAssignedPicker()!=null?Long.toString(pp.getAssignedPicker().getId()):"");
-	                    map.put(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME, pp.getAssignedPicker()!=null?pp.getAssignedPicker().getName():"");
+	                    map.put(DataNameTokens.INV_PICKINGLISTIR_PICKERID, pp.getAssignedPicker()!=null?Long.toString(pp.getAssignedPicker().getId()):"-");
+	                    map.put(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME, pp.getAssignedPicker()!=null?pp.getAssignedPicker().getName():"-");
 	                    	                    	                  
 	                    dataList.add(map);
 	                }

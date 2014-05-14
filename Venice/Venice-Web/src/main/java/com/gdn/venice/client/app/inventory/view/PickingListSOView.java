@@ -137,7 +137,7 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
      				HashSet<String> set = new HashSet<String>();
      				for (int i = 0; i < records.length; i++) {
      					ListGridRecord selectedRecord = records[i];  
-     					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).isEmpty()){     						
+     					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).equals("-")){     						
      						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERID));
      					}
      				}
@@ -420,7 +420,7 @@ public class PickingListSOView extends ViewWithUiHandlers<PickingListSOUiHandler
 				
  				for (int i = 0; i < selectedRecords.length; i++) {
  					ListGridRecord selectedRecord = selectedRecords[i];
- 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).isEmpty()){
+ 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PICKERNAME).equals("-")){
  	 					sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTSO_PACKAGECODE));
  	 					if(i != selectedRecords.length -1) sb.append(", ");
  					}

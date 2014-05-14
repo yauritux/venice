@@ -137,9 +137,9 @@ public class PickingListSOExportServlet extends HttpServlet {
 					cell = detailRow.createCell(startCol+6);cell.setCellValue(new HSSFRichTextString(pl.getWarehouseSkuId()));
 					cell = detailRow.createCell(startCol+7);cell.setCellValue(new HSSFRichTextString(pl.getItemName()));
 					cell = detailRow.createCell(startCol+8);cell.setCellValue(new HSSFRichTextString(pl.getQty()));
-					cell = detailRow.createCell(startCol+9);cell.setCellValue(new HSSFRichTextString(pl.getShelfCode()));
-					cell = detailRow.createCell(startCol+10);cell.setCellValue(new HSSFRichTextString(pl.getStorageCode()));
-					cell = detailRow.createCell(startCol+11);cell.setCellValue(new HSSFRichTextString(pl.getQtyStorage()));
+					cell = detailRow.createCell(startCol+9);cell.setCellValue(new HSSFRichTextString(pl.getShelfCode()!=null?pl.getShelfCode():""));
+					cell = detailRow.createCell(startCol+10);cell.setCellValue(new HSSFRichTextString(pl.getStorageCode()!=null?pl.getStorageCode():""));
+					cell = detailRow.createCell(startCol+11);cell.setCellValue(new HSSFRichTextString(pl.getQtyStorage()!=null?pl.getQtyStorage():""));
 					cell = detailRow.createCell(startCol+12);cell.setCellValue(new HSSFRichTextString(""));
 					cell = detailRow.createCell(startCol+13);cell.setCellValue(new HSSFRichTextString(""));
 					

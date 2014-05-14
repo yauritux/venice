@@ -139,7 +139,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
      				HashSet<String> set = new HashSet<String>();
      				for (int i = 0; i < records.length; i++) {
      					ListGridRecord selectedRecord = records[i];  
-     					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){     						
+     					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).equals("-")){     						
      						set.add(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERID));
      					}
      				}
@@ -422,7 +422,7 @@ public class PickingListIRView extends ViewWithUiHandlers<PickingListIRUiHandler
 				
  				for (int i = 0; i < selectedRecords.length; i++) {
  					ListGridRecord selectedRecord = selectedRecords[i];
- 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).isEmpty()){
+ 					if(!selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PICKERNAME).equals("-")){
  	 					sb.append(selectedRecord.getAttributeAsString(DataNameTokens.INV_PICKINGLISTIR_PACKAGECODE));
  	 					if(i != selectedRecords.length -1) sb.append(", ");
  					}
