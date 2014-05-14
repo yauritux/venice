@@ -19,9 +19,10 @@ import com.gdn.venice.server.util.Util;
 import com.lombardisoftware.webapi.Task;
 
 public class FetchClaimedFraudCaseDataCommand implements RafDsCommand {
-	RafDsRequest request;
-	String userName;
-	String password;
+	
+	private RafDsRequest request;
+	private String userName;
+	private String password;
 	
 	public FetchClaimedFraudCaseDataCommand(RafDsRequest request, String userName, String password) {
 		this.request = request;

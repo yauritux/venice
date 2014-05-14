@@ -696,5 +696,21 @@ public class OrderServiceImpl implements OrderService {
 		
 		return synchronizedOrderReferences;
 	}
+	
+	@Override
+	public VenOrder findByWcsOrderId(String wcsOrderId) throws VeniceInternalException {
+		VenOrder venOrder = null;
+		
+		try {
+			venOrder = venOrderDAO.findByWcsOrderId(wcsOrderId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			CommonUtil.logAndReturnException(new OrderNotFoundException(
+					"Cannot found Order with WCS Order ID=" + wcsOrderId, VeniceExceptionConstants.VEN_EX_000020)
+			   , CommonUtil.getLogger(this.getClass().getCanonicalName()), LoggerLevel.ERROR);
+		}
+		
+		return venOrder;
+	}
 
 }

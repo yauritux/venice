@@ -26,4 +26,5 @@ public interface OrderService {
 	public VenOrder synchronizeVenOrder(VenOrder venOrder) throws VeniceInternalException;
 	public List<VenOrder> synchronizeVenOrderReferences(List<VenOrder> orderReferences) 
 	        throws VeniceInternalException;
+	public VenOrder findByWcsOrderId(String wcsOrderId) throws VeniceInternalException;
 }

@@ -12,6 +12,8 @@ import com.gdn.venice.persistence.VenOrderPayment;
 
 @Remote
 public interface VenOrderSessionEJBRemote {
+	
+	public VenOrder findByWcsOrderId(String wcsOrderId);
 
 	/**
 	 * queryByRange - allows querying by range/block

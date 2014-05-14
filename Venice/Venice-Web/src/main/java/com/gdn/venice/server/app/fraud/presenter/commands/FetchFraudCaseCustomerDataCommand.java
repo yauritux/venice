@@ -16,7 +16,8 @@ import com.gdn.venice.server.util.DateToXsdDatetimeFormatter;
 import com.gdn.venice.server.util.Util;
 
 public class FetchFraudCaseCustomerDataCommand implements RafDsCommand {
-	RafDsRequest request;
+	
+	private RafDsRequest request;
 	
 	public FetchFraudCaseCustomerDataCommand(RafDsRequest request){
 		this.request = request;
@@ -35,20 +36,24 @@ public class FetchFraudCaseCustomerDataCommand implements RafDsCommand {
 			//Lookup into EJB for customer entity
 			VenOrderSessionEJBRemote orderSessionHome = (VenOrderSessionEJBRemote) locator.lookup(VenOrderSessionEJBRemote.class, "VenOrderSessionEJBBean");
 			
-			List<VenOrder> orderList = orderSessionHome.queryByRange("select o from VenOrder o  where o.wcsOrderId = '"+orderId+"'", 0, 1);
+			//List<VenOrder> orderList = orderSessionHome.queryByRange("select o from VenOrder o  where o.wcsOrderId = '"+orderId+"'", 0, 1);
+			VenOrder venOrder = orderSessionHome.findByWcsOrderId(orderId);
 			HashMap<String, String> map = new HashMap<String, String>();
 			
 			//Set result
 			DateToXsdDatetimeFormatter formatter =  new DateToXsdDatetimeFormatter();
-			if (orderList.size() > 0  && orderList.get(0).getVenCustomer()!=null) {
-				VenCustomer customer = orderList.get(0).getVenCustomer();			
+			//if (orderList.size() > 0  && orderList.get(0).getVenCustomer()!=null) {
+			if (venOrder != null && venOrder.getVenCustomer() != null) {
+				//VenCustomer customer = orderList.get(0).getVenCustomer();	
+				VenCustomer customer = venOrder.getVenCustomer();
 				map.put(DataNameTokens.VENCUSTOMER_WCSCUSTOMERID, Util.isNull(customer.getWcsCustomerId(), "").toString());
 				map.put(DataNameTokens.VENCUSTOMER_VENPARTY_FULLORLEGALNAME, customer.getVenParty()!=null && customer.getVenParty().getFullOrLegalName()!=null?customer.getVenParty().getFullOrLegalName().toString():"");
 				map.put(DataNameTokens.VENCUSTOMER_CUSTOMERUSERNAME, Util.isNull(customer.getCustomerUserName(), "").toString());
 				map.put(DataNameTokens.VENCUSTOMER_USERTYPE, Util.isNull(customer.getUserType(), "").equals("R")?"Registered shopper":"Unregistered shopper");
 				map.put(DataNameTokens.VENCUSTOMER_DATEOFBIRTH, formatter.format(customer.getDateOfBirth()));
 				map.put(DataNameTokens.VENCUSTOMER_FIRSTTIMETRANSACTIONFLAG, Util.isNull(customer.getFirstTimeTransactionFlag(), "false").toString());	
-				map.put(DataNameTokens.VENORDER_IPADDRESS, Util.isNull(orderList.get(0).getIpAddress(), "").toString());
+				//map.put(DataNameTokens.VENORDER_IPADDRESS, Util.isNull(orderList.get(0).getIpAddress(), "").toString());
+				map.put(DataNameTokens.VENORDER_IPADDRESS, Util.isNull(venOrder.getIpAddress(), "").toString());
 				dataList.add(map);
 				
 				//Set DSResponse's properties
