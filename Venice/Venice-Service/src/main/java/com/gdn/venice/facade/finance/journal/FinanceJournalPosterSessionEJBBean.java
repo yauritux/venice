@@ -2609,10 +2609,12 @@ public class FinanceJournalPosterSessionEJBBean implements
 					newRecord.setReconcilliationRecordTimestamp(new Timestamp(
 							System.currentTimeMillis()));
 					
-					String cardNumber = payment.getCardNumber();
-					VenOrderPayment venOrderPayment = payment.getVenOrderPayment();
-					venOrderPayment.setCardNumber(cardNumber);
-					destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
+					if(payment.getCardNumber()!=null){
+						String cardNumber = payment.getCardNumber();
+						VenOrderPayment venOrderPayment = payment.getVenOrderPayment();
+						venOrderPayment.setCardNumber(cardNumber);
+						destinationVenOrderPayment.setVenOrderPayment(venOrderPayment);
+					}
 					
 					newRecord.setVenOrderPayment(destinationVenOrderPayment
 							.getVenOrderPayment());
