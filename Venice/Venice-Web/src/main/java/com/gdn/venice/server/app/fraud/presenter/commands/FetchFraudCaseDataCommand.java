@@ -24,9 +24,10 @@ import com.gdn.venice.server.util.Util;
 import com.lombardisoftware.webapi.Role;
 
 public class FetchFraudCaseDataCommand implements RafDsCommand {
-	RafDsRequest request;
-	String username;
-	String password;
+	
+	private RafDsRequest request;
+	private String username;
+	private String password;
 	
 	public FetchFraudCaseDataCommand(RafDsRequest request, String username, String password) {
 		this.request = request;
@@ -106,7 +107,8 @@ public class FetchFraudCaseDataCommand implements RafDsCommand {
 				map.put(DataNameTokens.FRDFRAUDSUSPICIONCASE_VENORDER_ORDERDATE, list.getVenOrder()!=null && list.getVenOrder().getOrderDate()!=null?list.getVenOrder().getOrderDate().toString():"");
 				map.put(DataNameTokens.FRDFRAUDSUSPICIONCASE_FRAUDTOTALPOINTS, Util.isNull(list.getFraudTotalPoints(), "").toString());
 				
-				fraudCaseHistoryList = historySessionHome.queryByRange("select o from FrdFraudCaseHistory o join fetch o.frdFraudSuspicionCase where o.frdFraudSuspicionCase.fraudSuspicionCaseId = " + list.getFraudSuspicionCaseId(), 0, 0);
+				//fraudCaseHistoryList = historySessionHome.queryByRange("select o from FrdFraudCaseHistory o join fetch o.frdFraudSuspicionCase where o.frdFraudSuspicionCase.fraudSuspicionCaseId = " + list.getFraudSuspicionCaseId(), 0, 0);
+				fraudCaseHistoryList = historySessionHome.findByFraudSuspicionCaseId(list.getFraudSuspicionCaseId());
 				//historySessionHome.find
 				String taskStatus = "Open";
 				String lastAction = "Calculated by System";

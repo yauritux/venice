@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gdn.venice.constants.LoggerLevel;
+import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.FrdFraudCaseHistoryDAO;
+import com.gdn.venice.exception.FrdFraudCaseHistoryNotFoundException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.fraud.services.FrdFraudCaseHistoryService;
 import com.gdn.venice.persistence.FrdFraudCaseHistory;
@@ -34,6 +37,10 @@ public class FrdFraudCaseHistoryServiceImpl implements FrdFraudCaseHistoryServic
 			frdFraudCaseHistoryLst = frdFraudCaseHistoryDAO.findByFraudSuspicionCaseId(fraudCaseId);
 		} catch (Exception e) {
 			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			CommonUtil.logAndReturnException(new FrdFraudCaseHistoryNotFoundException(
+					"Cannot found FraudCaseHistory for fraudCaseId=" + fraudCaseId, 
+					VeniceExceptionConstants.VEN_EX_300011), CommonUtil.getLogger(this.getClass().getCanonicalName()),
+					LoggerLevel.ERROR);
 		}
 		
 		return frdFraudCaseHistoryLst;

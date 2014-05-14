@@ -9,6 +9,7 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -17,13 +18,19 @@ import javax.persistence.Query;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 
-import com.gdn.venice.facade.callback.SessionCallback;
-import com.gdn.venice.facade.finder.FinderReturn;
-import com.gdn.venice.persistence.FrdFraudCaseHistory;
 import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
 import com.djarum.raf.utilities.JPQLQueryStringBuilder;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.venice.constants.VeniceExceptionConstants;
+import com.gdn.venice.exception.FrdFraudCaseHistoryNotFoundException;
+import com.gdn.venice.facade.callback.SessionCallback;
+import com.gdn.venice.facade.finder.FinderReturn;
+import com.gdn.venice.fraud.services.FrdFraudCaseHistoryService;
+import com.gdn.venice.persistence.FrdFraudCaseHistory;
+import com.gdn.venice.util.CommonUtil;
 
 /**
  * Session Bean implementation class FrdFraudCaseHistorySessionEJBBean
@@ -36,10 +43,14 @@ import com.djarum.raf.utilities.Log4jLoggerFactory;
  * <b>since:</b> 2011
  * 
  */
+@Interceptors(SpringBeanAutowiringInterceptor.class)
 @Stateless(mappedName = "FrdFraudCaseHistorySessionEJBBean")
 public class FrdFraudCaseHistorySessionEJBBean implements FrdFraudCaseHistorySessionEJBRemote,
 		FrdFraudCaseHistorySessionEJBLocal {
 
+	@Autowired
+	private FrdFraudCaseHistoryService frdFraudCaseHistoryService;
+	
 	/*
 	 * Implements an IOC model for pre/post callbacks to persist, merge, and
 	 * remove operations. The onPrePersist, onPostPersist, onPreMerge,
@@ -147,6 +158,18 @@ public class FrdFraudCaseHistorySessionEJBBean implements FrdFraudCaseHistorySes
 			}
 		return Boolean.TRUE;
 
+	}
+	
+	@Override
+	public List<FrdFraudCaseHistory> findByFraudSuspicionCaseId(Long fraudCaseId) {
+		List<FrdFraudCaseHistory> frdFraudCaseHistories = new ArrayList<FrdFraudCaseHistory>();
+		try {
+			frdFraudCaseHistories = frdFraudCaseHistoryService.findByFraudSuspicionCaseId(fraudCaseId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			throw new EJBException(e);
+		}
+		return frdFraudCaseHistories;
 	}
 
 	/*

@@ -11,6 +11,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 
 @Local
 public interface FrdFraudCaseHistorySessionEJBLocal {
+	
+	public List<FrdFraudCaseHistory> findByFraudSuspicionCaseId(Long fraudCaseId);
 
 	/*
 	 * (non-Javadoc)
