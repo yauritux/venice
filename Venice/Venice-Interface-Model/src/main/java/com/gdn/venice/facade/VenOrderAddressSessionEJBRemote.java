@@ -11,6 +11,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 
 @Remote
 public interface VenOrderAddressSessionEJBRemote {
+	
+	public List<VenOrderAddress> findByVenOrderWcsOrderId(String wcsOrderId);
 
 	/**
 	 * queryByRange - allows querying by range/block

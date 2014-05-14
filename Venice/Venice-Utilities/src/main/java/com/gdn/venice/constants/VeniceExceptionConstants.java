@@ -28,6 +28,7 @@ public enum VeniceExceptionConstants {
 	VEN_EX_000019("Duplicate WCS Order ID"),
 	VEN_EX_000020("Order does not exist"),
 	VEN_EX_000120("Order Item does not exist"),
+	VEN_EX_000220("VenOrderAddress does not exist"),
 	VEN_EX_000021("Error occured while persisting Order Item"),
 	VEN_EX_000022("Error occured while persisting Order Item Adjustment"),
 	VEN_EX_000023("Error occured while persisting Order Payment"),

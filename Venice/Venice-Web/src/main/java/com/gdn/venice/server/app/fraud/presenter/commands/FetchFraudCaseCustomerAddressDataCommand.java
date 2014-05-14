@@ -17,7 +17,8 @@ import com.gdn.venice.server.data.RafDsResponse;
 import com.gdn.venice.server.util.Util;
 
 public class FetchFraudCaseCustomerAddressDataCommand implements RafDsCommand {
-	RafDsRequest request;	
+	
+	private RafDsRequest request;	
 	
 	public FetchFraudCaseCustomerAddressDataCommand(RafDsRequest request) {
 		this.request = request;
@@ -34,7 +35,8 @@ public class FetchFraudCaseCustomerAddressDataCommand implements RafDsCommand {
 			String orderId=request.getParams().get(DataNameTokens.VENORDER_ORDERID);			
 			VenOrderAddressSessionEJBRemote orderAddressSessionHome = (VenOrderAddressSessionEJBRemote) locator.lookup(VenOrderAddressSessionEJBRemote.class, "VenOrderAddressSessionEJBBean");			
 			VenPartyAddressSessionEJBRemote partyAddressSessionHome = (VenPartyAddressSessionEJBRemote) locator.lookup(VenPartyAddressSessionEJBRemote.class, "VenPartyAddressSessionEJBBean");			
-			List<VenOrderAddress> orderAddressList = orderAddressSessionHome.queryByRange("select o from VenOrderAddress o where o.venOrder.wcsOrderId = '"+orderId+"'", 0, 1);
+			//List<VenOrderAddress> orderAddressList = orderAddressSessionHome.queryByRange("select o from VenOrderAddress o where o.venOrder.wcsOrderId = '"+orderId+"'", 0, 1);
+			List<VenOrderAddress> orderAddressList = orderAddressSessionHome.findByVenOrderWcsOrderId(orderId);
 			VenAddress address =null;
 				if (orderAddressList.size()>0) {
 					address = orderAddressList.get(0).getVenAddress();

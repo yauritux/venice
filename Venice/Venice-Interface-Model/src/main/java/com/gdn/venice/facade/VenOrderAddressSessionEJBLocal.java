@@ -11,6 +11,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 
 @Local
 public interface VenOrderAddressSessionEJBLocal {
+	
+	public List<VenOrderAddress> findByVenOrderWcsOrderId(String wcsOrderId);
 
 	/*
 	 * (non-Javadoc)

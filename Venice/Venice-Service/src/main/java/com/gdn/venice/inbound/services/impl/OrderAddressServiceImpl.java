@@ -1,5 +1,8 @@
 package com.gdn.venice.inbound.services.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -59,6 +62,23 @@ public class OrderAddressServiceImpl implements OrderAddressService {
 				, "persist::EOM, returning persistedOrderAddress = " + persistedOrderAddress);
 		
 		return persistedOrderAddress;
+	}
+	
+	@Autowired
+	public List<VenOrderAddress> findByVenOrderWcsOrderId(String wcsOrderId) {
+		List<VenOrderAddress> orderAddresses = new ArrayList<VenOrderAddress>();
+		
+		try {
+			orderAddresses = venOrderAddressDAO.findByVenOrderWcsOrderId(wcsOrderId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			CommonUtil.logAndReturnException(new VenOrderAddressNotFoundException(
+					"Cannot found VenOrderAddress for wcsOrderId=" + wcsOrderId, 
+					VeniceExceptionConstants.VEN_EX_000220), CommonUtil.getLogger(this.getClass().getCanonicalName()), 
+					LoggerLevel.ERROR);
+		}
+		
+		return orderAddresses;
 	}
 
 }

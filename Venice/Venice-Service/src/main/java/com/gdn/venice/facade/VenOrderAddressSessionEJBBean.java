@@ -9,6 +9,7 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -17,13 +18,17 @@ import javax.persistence.Query;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 
-import com.gdn.venice.facade.callback.SessionCallback;
-import com.gdn.venice.facade.finder.FinderReturn;
-import com.gdn.venice.persistence.VenOrderAddress;
 import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
 import com.djarum.raf.utilities.JPQLQueryStringBuilder;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.venice.facade.callback.SessionCallback;
+import com.gdn.venice.facade.finder.FinderReturn;
+import com.gdn.venice.inbound.services.OrderAddressService;
+import com.gdn.venice.persistence.VenOrderAddress;
+import com.gdn.venice.util.CommonUtil;
 
 /**
  * Session Bean implementation class VenOrderAddressSessionEJBBean
@@ -36,9 +41,13 @@ import com.djarum.raf.utilities.Log4jLoggerFactory;
  * <b>since:</b> 2011
  * 
  */
+@Interceptors(SpringBeanAutowiringInterceptor.class)
 @Stateless(mappedName = "VenOrderAddressSessionEJBBean")
 public class VenOrderAddressSessionEJBBean implements VenOrderAddressSessionEJBRemote,
 		VenOrderAddressSessionEJBLocal {
+	
+	@Autowired
+	private OrderAddressService orderAddressService;
 
 	/*
 	 * Implements an IOC model for pre/post callbacks to persist, merge, and
@@ -147,6 +156,20 @@ public class VenOrderAddressSessionEJBBean implements VenOrderAddressSessionEJBR
 			}
 		return Boolean.TRUE;
 
+	}
+	
+	@Autowired
+	public List<VenOrderAddress> findByVenOrderWcsOrderId(String wcsOrderId) {
+		List<VenOrderAddress> orderAddresses = new ArrayList<VenOrderAddress>();
+		
+		try {
+			orderAddresses = orderAddressService.findByVenOrderWcsOrderId(wcsOrderId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			throw new EJBException(e);
+		}
+		
+		return orderAddresses;
 	}
 
 	/*

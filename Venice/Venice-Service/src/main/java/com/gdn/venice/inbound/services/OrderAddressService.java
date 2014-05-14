@@ -12,4 +12,6 @@ public interface OrderAddressService {
 	
 	public VenOrderAddress persist(VenOrderAddress venOrderAddress) 
 	   throws VeniceInternalException;
+	
+	public List<VenOrderAddress> findByVenOrderWcsOrderId(String wcsOrderId);
 }
