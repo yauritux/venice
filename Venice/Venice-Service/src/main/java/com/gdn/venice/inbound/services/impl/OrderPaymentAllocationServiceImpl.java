@@ -130,5 +130,21 @@ public class OrderPaymentAllocationServiceImpl implements OrderPaymentAllocation
 		
 		return venOrderPaymentAllocations;
 	}	
+	
+	@Override
+	public List<VenOrderPaymentAllocation> findByVenOrderId(Long orderId) throws VeniceInternalException {
+		List<VenOrderPaymentAllocation> orderPaymentAllocations = new ArrayList<VenOrderPaymentAllocation>();
+		
+		try {
+			orderPaymentAllocations = venOrderPaymentAllocationDAO.findByVenOrderId(orderId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			CommonUtil.logAndReturnException(new VenOrderPaymentAllocationNotFoundException("Cannot find VenOrderPaymentAllocation with orderId="
+					+ orderId, VeniceExceptionConstants.VEN_EX_000125), CommonUtil.getLogger(this.getClass().getCanonicalName())
+					, LoggerLevel.ERROR);
+		}
+		
+		return orderPaymentAllocations;
+	}
 
 }

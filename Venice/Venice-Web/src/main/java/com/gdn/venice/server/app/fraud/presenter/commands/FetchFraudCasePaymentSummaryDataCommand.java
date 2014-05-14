@@ -18,7 +18,8 @@ import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.server.data.RafDsResponse;
 
 public class FetchFraudCasePaymentSummaryDataCommand implements RafDsCommand {
-	RafDsRequest request;	
+	
+	private RafDsRequest request;	
 
 	public FetchFraudCasePaymentSummaryDataCommand(RafDsRequest request) {
 		this.request = request;
@@ -38,25 +39,32 @@ public class FetchFraudCasePaymentSummaryDataCommand implements RafDsCommand {
 			//Lookup into EJB for fraud case
 			locator = new Locator<Object>();
 			FrdFraudSuspicionCaseSessionEJBRemote fraudCaseSessionHome = (FrdFraudSuspicionCaseSessionEJBRemote) locator.lookup(FrdFraudSuspicionCaseSessionEJBRemote.class, "FrdFraudSuspicionCaseSessionEJBBean");
+			/*
 			List<FrdFraudSuspicionCase> fraudCaseList = null;
 			String query = "select o from FrdFraudSuspicionCase o where o.fraudSuspicionCaseId = " + fraudCaseId;
 			
 			//Calling facade for fraud case
 			fraudCaseList = fraudCaseSessionHome.queryByRange(query, 0, 0);
+			*/
+			FrdFraudSuspicionCase frdFraudSuspicionCase = fraudCaseSessionHome.findByPK(fraudCaseId);
 			
 			//Find ven order id
+			/*
 			String orderId = "";
 			for (int i = 0; i < fraudCaseList.size(); i++) {
 				orderId = fraudCaseList.get(i).getVenOrder().getOrderId() == null ? "" : fraudCaseList.get(i).getVenOrder().getOrderId().toString();
 			}
+			*/
+			String orderId = frdFraudSuspicionCase.getVenOrder().getOrderId() == null ? "" : frdFraudSuspicionCase.getVenOrder().getOrderId().toString();
 			
 			//Lookup into EJB for order item
 			VenOrderItemSessionEJBRemote orderItemSessionHome = (VenOrderItemSessionEJBRemote) locator.lookup(VenOrderItemSessionEJBRemote.class, "VenOrderItemSessionEJBBean");
 			List<VenOrderItem> orderItemList = null;
-			query = "select o from VenOrderItem o where o.venOrder.orderId = " + orderId;
+			//query = "select o from VenOrderItem o where o.venOrder.orderId = " + orderId;
 			
 			//Calling facade for order item
-			orderItemList = orderItemSessionHome.queryByRange(query, 0, 0);
+			//orderItemList = orderItemSessionHome.queryByRange(query, 0, 0);
+			orderItemList = orderItemSessionHome.findByVenOrderId(orderId);
 			
 			//Find multiple shipping address by looping through order item
 			//Only if order item more than one
@@ -75,10 +83,11 @@ public class FetchFraudCasePaymentSummaryDataCommand implements RafDsCommand {
 			//Lookup into EJB for order payment allocation
 			VenOrderPaymentAllocationSessionEJBRemote orderPaymentAllocationSessionHome = (VenOrderPaymentAllocationSessionEJBRemote) locator.lookup(VenOrderPaymentAllocationSessionEJBRemote.class, "VenOrderPaymentAllocationSessionEJBBean");
 			List<VenOrderPaymentAllocation> orderPaymentAllocationList = null;
-			query = "select o from VenOrderPaymentAllocation o where o.venOrder.orderId = " + orderId;
+			//query = "select o from VenOrderPaymentAllocation o where o.venOrder.orderId = " + orderId;
 			
 			//Calling facade for order payment allocation
-			orderPaymentAllocationList = orderPaymentAllocationSessionHome.queryByRange(query, 0, 0);
+			//orderPaymentAllocationList = orderPaymentAllocationSessionHome.queryByRange(query, 0, 0);
+			orderPaymentAllocationList = orderPaymentAllocationSessionHome.findByVenOrderId(orderId);
 			
 			//Find at least one shipping address and billing address are match
 			boolean isShipppingAddressAndBillingAddressAreMatch = false;

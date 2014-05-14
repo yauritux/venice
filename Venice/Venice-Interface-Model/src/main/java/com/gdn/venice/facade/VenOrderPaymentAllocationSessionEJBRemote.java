@@ -14,6 +14,8 @@ public interface VenOrderPaymentAllocationSessionEJBRemote {
 
 	public List<VenOrderPaymentAllocation> findByFraudSuspicionCaseId(Long fraudCaseId);
 	
+	public List<VenOrderPaymentAllocation> findByVenOrderId(Long orderId);
+	
 	/**
 	 * queryByRange - allows querying by range/block
 	 * 

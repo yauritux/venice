@@ -121,6 +121,9 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 		   "SELECT o FROM VenOrderPaymentAllocation o WHERE o.venOrder.orderId = (" + 
 		   "SELECT u.venOrder.orderId FROM FrdFraudSuspicionCase u where u.fraudSuspicionCaseId = ?1)";
 	
+	public static final String FIND_BY_VENORDERID = 
+			"SELECT o FROM VenOrderPaymentAllocation o WHERE o.venOrder.orderId = ?1";
+	
 	@Query(FIND_BY_VEN_ORDER)
 	public List<VenOrderPaymentAllocation> findByVenOrder(VenOrder venOrder);
 	
@@ -159,4 +162,7 @@ public interface VenOrderPaymentAllocationDAO extends JpaRepository<VenOrderPaym
 	
 	@Query(FIND_BY_FRDSUSPICIONCASEID)
 	public List<VenOrderPaymentAllocation> findByFraudSuspicionCaseId(Long fraudSuspicionCaseId);
+	
+	@Query(FIND_BY_VENORDERID)
+	public List<VenOrderPaymentAllocation> findByVenOrderId(Long orderId);
 }

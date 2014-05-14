@@ -14,6 +14,8 @@ public interface VenOrderPaymentAllocationSessionEJBLocal {
 
 	public List<VenOrderPaymentAllocation> findByFraudSuspicionCaseId(Long fraudCaseId);
 	
+	public List<VenOrderPaymentAllocation> findByVenOrderId(Long orderId);
+	
 	/*
 	 * (non-Javadoc)
 	 * 

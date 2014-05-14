@@ -171,6 +171,19 @@ public class VenOrderPaymentAllocationSessionEJBBean implements VenOrderPaymentA
 		
 		return venOrderPaymentAllocationLst;
 	}
+	
+	@Override
+	public List<VenOrderPaymentAllocation> findByVenOrderId(Long orderId) {
+		List<VenOrderPaymentAllocation> orderPaymentAllocations = new ArrayList<VenOrderPaymentAllocation>();
+		try {
+			orderPaymentAllocations = orderPaymentAllocationService.findByVenOrderId(orderId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			throw new EJBException(e);
+		}
+		
+		return orderPaymentAllocations;
+	}
 
 	/*
 	 * (non-Javadoc)

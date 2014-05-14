@@ -14,6 +14,7 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -26,6 +27,8 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.hibernate.ejb.EntityManagerImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 
 import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
 import com.djarum.raf.utilities.JPQLQueryStringBuilder;
@@ -33,8 +36,10 @@ import com.djarum.raf.utilities.Log4jLoggerFactory;
 import com.gdn.venice.facade.callback.SessionCallback;
 import com.gdn.venice.facade.callback.VenOrderItemSessionEJBCallback;
 import com.gdn.venice.facade.finder.FinderReturn;
+import com.gdn.venice.inbound.services.OrderItemService;
 import com.gdn.venice.integration.outbound.Publisher;
 import com.gdn.venice.persistence.VenOrderItem;
+import com.gdn.venice.util.CommonUtil;
 
 /**
  * Session Bean implementation class VenOrderItemSessionEJBBean
@@ -43,10 +48,14 @@ import com.gdn.venice.persistence.VenOrderItem;
  * <p> <b>version:</b> 1.0 <p> <b>since:</b> 2011
  *
  */
+@Interceptors(SpringBeanAutowiringInterceptor.class)
 @Stateless(mappedName = "VenOrderItemSessionEJBBean")
 public class VenOrderItemSessionEJBBean implements VenOrderItemSessionEJBRemote,
         VenOrderItemSessionEJBLocal {
 
+	@Autowired
+	private OrderItemService orderItemService;
+	
     /*
      * Implements an IOC model for pre/post callbacks to persist, merge, and
      * remove operations. The onPrePersist, onPostPersist, onPreMerge,
@@ -163,6 +172,20 @@ public class VenOrderItemSessionEJBBean implements VenOrderItemSessionEJBRemote,
         }
         return Boolean.TRUE;
 
+    }
+    
+    @Override
+    public List<VenOrderItem> findByVenOrderId(Long orderId) {
+    	List<VenOrderItem> orderItems = new ArrayList<VenOrderItem>();
+    	
+    	try {
+    		orderItems = orderItemService.findByVenOrderId(orderId);
+    	} catch (Exception e) {
+    		CommonUtil.logError(this.getClass().getCanonicalName(), e);
+    		throw new EJBException(e);
+    	}
+    	
+    	return orderItems;
     }
 
     /*
