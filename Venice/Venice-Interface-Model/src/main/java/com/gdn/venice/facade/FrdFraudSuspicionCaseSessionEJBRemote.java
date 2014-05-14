@@ -12,6 +12,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 @Remote
 public interface FrdFraudSuspicionCaseSessionEJBRemote {
 
+	public FrdFraudSuspicionCase findByPK(Long fraudSuspicionCaseId);
+	
 	/**
 	 * queryByRange - allows querying by range/block
 	 * 

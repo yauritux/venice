@@ -12,6 +12,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 @Local
 public interface FrdFraudSuspicionCaseSessionEJBLocal {
 
+	public FrdFraudSuspicionCase findByPK(Long fraudSuspicionCaseId);
+	
 	/*
 	 * (non-Javadoc)
 	 * 

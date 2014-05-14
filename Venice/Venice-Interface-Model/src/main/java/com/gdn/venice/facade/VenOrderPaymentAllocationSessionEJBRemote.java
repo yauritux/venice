@@ -12,6 +12,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 @Remote
 public interface VenOrderPaymentAllocationSessionEJBRemote {
 
+	public List<VenOrderPaymentAllocation> findByFraudSuspicionCaseId(Long fraudCaseId);
+	
 	/**
 	 * queryByRange - allows querying by range/block
 	 * 

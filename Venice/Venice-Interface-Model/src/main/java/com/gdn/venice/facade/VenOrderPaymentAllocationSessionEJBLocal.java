@@ -12,6 +12,8 @@ import com.gdn.venice.facade.finder.FinderReturn;
 @Local
 public interface VenOrderPaymentAllocationSessionEJBLocal {
 
+	public List<VenOrderPaymentAllocation> findByFraudSuspicionCaseId(Long fraudCaseId);
+	
 	/*
 	 * (non-Javadoc)
 	 * 

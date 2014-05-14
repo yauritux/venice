@@ -9,6 +9,7 @@ import javax.ejb.EJBException;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.interceptor.Interceptors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -17,13 +18,16 @@ import javax.persistence.Query;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ejb.interceptor.SpringBeanAutowiringInterceptor;
 
-import com.gdn.venice.facade.callback.SessionCallback;
-import com.gdn.venice.facade.finder.FinderReturn;
-import com.gdn.venice.persistence.FrdParameterRule31;
 import com.djarum.raf.utilities.JPQLAdvancedQueryCriteria;
 import com.djarum.raf.utilities.JPQLQueryStringBuilder;
 import com.djarum.raf.utilities.Log4jLoggerFactory;
+import com.gdn.venice.facade.callback.SessionCallback;
+import com.gdn.venice.facade.finder.FinderReturn;
+import com.gdn.venice.fraud.services.FrdParameterRule31Service;
+import com.gdn.venice.persistence.FrdParameterRule31;
 
 /**
  * Session Bean implementation class FrdParameterRule31SessionEJBBean
@@ -36,10 +40,14 @@ import com.djarum.raf.utilities.Log4jLoggerFactory;
  * <b>since:</b> 2011
  * 
  */
+@Interceptors(SpringBeanAutowiringInterceptor.class)
 @Stateless(mappedName = "FrdParameterRule31SessionEJBBean")
 public class FrdParameterRule31SessionEJBBean implements FrdParameterRule31SessionEJBRemote,
 		FrdParameterRule31SessionEJBLocal {
 
+	@Autowired
+	private FrdParameterRule31Service frdParameterRule31Service;
+	
 	/*
 	 * Implements an IOC model for pre/post callbacks to persist, merge, and
 	 * remove operations. The onPrePersist, onPostPersist, onPreMerge,
@@ -147,6 +155,14 @@ public class FrdParameterRule31SessionEJBBean implements FrdParameterRule31Sessi
 			}
 		return Boolean.TRUE;
 
+	}
+	
+	@Override
+	public List<FrdParameterRule31> findByEmailAndNoCc(String email, String noCc) {
+		List<FrdParameterRule31> frdParameterRule31Lst = null;
+		try {
+			
+		}
 	}
 
 	/*

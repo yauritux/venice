@@ -24,7 +24,13 @@ import com.gdn.venice.server.util.Util;
  */
 
 public class FetchFraudCaseTotalRiskScoreDataCommand implements RafDsCommand {
-	RafDsRequest request;	
+	
+	private RafDsRequest request;
+	/*
+	private FrdFraudSuspicionCaseService frdFraudSuspicionCaseService = new FrdFraudSuspicionCaseServiceImpl();	
+	private FrdParameterRule31Service frdParameterRule31Service = new FrdParameterRule31ServiceImpl();
+	private OrderPaymentAllocationService orderPaymentAllocationService = new OrderPaymentAllocationServiceImpl();
+	*/
 	
 	public FetchFraudCaseTotalRiskScoreDataCommand(RafDsRequest request) {
 		this.request = request;
@@ -45,22 +51,32 @@ public class FetchFraudCaseTotalRiskScoreDataCommand implements RafDsCommand {
 			FrdParameterRule31SessionEJBRemote genuineSessionHome = (FrdParameterRule31SessionEJBRemote) locator.lookup(FrdParameterRule31SessionEJBRemote.class, "FrdParameterRule31SessionEJBBean");
 			VenOrderPaymentAllocationSessionEJBRemote allocationSessionHome = (VenOrderPaymentAllocationSessionEJBRemote) locator.lookup(VenOrderPaymentAllocationSessionEJBRemote.class, "VenOrderPaymentAllocationSessionEJBBean");
 			
-			List<FrdFraudSuspicionCase> fraudSuspicionCaseList = fraudCaseSessionHome.queryByRange("select o from FrdFraudSuspicionCase o where o.fraudSuspicionCaseId = " + fraudCaseId, 0, 0);
-		
+		    //List<FrdFraudSuspicionCase> fraudSuspicionCaseList = fraudCaseSessionHome.queryByRange("select o from FrdFraudSuspicionCase o where o.fraudSuspicionCaseId = " + fraudCaseId, 0, 0);
+			FrdFraudSuspicionCase fraudSuspicionCase = fraudCaseSessionHome.findByPK(new Long(fraudCaseId));
+			
+			//FrdFraudSuspicionCase fraudSuspicionCase = frdFraudSuspicionCaseService.findByPK(new Long(fraudCaseId));
+					
+			/*
 			String totalScore = "";			
 			for (int i=0;i<fraudSuspicionCaseList.size();i++) {					
 				FrdFraudSuspicionCase list = fraudSuspicionCaseList.get(i);			
 				totalScore=Util.isNull(list.getFraudTotalPoints(), "").toString();
 
-			}	
+			}
+			*/			
+			String totalScore = Util.isNull(fraudSuspicionCase.getFraudTotalPoints(), "").toString();
 			
-			List<VenOrderPaymentAllocation> itemAllocation = allocationSessionHome.queryByRange("select o from VenOrderPaymentAllocation o where o.venOrder.orderId = (select u.venOrder.orderId from FrdFraudSuspicionCase u where u.fraudSuspicionCaseId =  "+ fraudCaseId+")", 0, 0);
+			
+			//List<VenOrderPaymentAllocation> itemAllocation = allocationSessionHome.queryByRange("select o from VenOrderPaymentAllocation o where o.venOrder.orderId = (select u.venOrder.orderId from FrdFraudSuspicionCase u where u.fraudSuspicionCaseId =  "+ fraudCaseId+")", 0, 0);
+			List<VenOrderPaymentAllocation> itemAllocation = allocationSessionHome.findByFraudSuspicionCaseId(new Long(fraudCaseId));
+			//List<VenOrderPaymentAllocation> itemAllocation = orderPaymentAllocationService.findByFraudSuspicionCaseId(new Long(fraudCaseId));
 			
 			HashMap<String, String> map = new HashMap<String, String>();
 			map.put(DataNameTokens.FRDFRAUDSUSPICIONCASE_SUMMARY_TOTALRISKSCORE, totalScore);				
 			
 			if(itemAllocation.get(0)!=null?(itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber()!=null?true:false):false){
-					List<FrdParameterRule31> genuineList = genuineSessionHome.queryByRange("select o from FrdParameterRule31 o where o.email ='"+itemAllocation.get(0).getVenOrder().getVenCustomer().getCustomerUserName()+"' and o.noCc ='"+itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber()+"' ", 0, 0);
+					//List<FrdParameterRule31> genuineList = genuineSessionHome.queryByRange("select o from FrdParameterRule31 o where o.email ='"+itemAllocation.get(0).getVenOrder().getVenCustomer().getCustomerUserName()+"' and o.noCc ='"+itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber()+"' ", 0, 0);
+				    List<FrdParameterRule31> genuineList = frdParameterRule31Service.findByEmailAndNoCc(itemAllocation.get(0).getVenOrder().getVenCustomer().getCustomerUserName(), itemAllocation.get(0).getVenOrderPayment().getMaskedCreditCardNumber());
 					if(!genuineList.isEmpty()){
 						map.put(DataNameTokens.FRDFRAUDSUSPICIONCASE_GENUINE,"true");
 					}else{

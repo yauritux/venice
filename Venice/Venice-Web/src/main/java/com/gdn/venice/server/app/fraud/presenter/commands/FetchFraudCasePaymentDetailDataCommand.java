@@ -21,7 +21,7 @@ import com.gdn.venice.server.data.RafDsResponse;
 import com.gdn.venice.server.util.Util;
 
 public class FetchFraudCasePaymentDetailDataCommand implements RafDsCommand {
-	RafDsRequest request;	
+	private RafDsRequest request;	
 	
 	public FetchFraudCasePaymentDetailDataCommand(RafDsRequest request) {
 		this.request = request;
