@@ -21,4 +21,5 @@ public interface OrderItemService {
 			VenOrder venOrder, List<VenOrderItem> venOrderItemList) throws VeniceInternalException;	
 	public VenOrderItem synchronizeVenOrderItemReferenceData(
 			VenOrderItem venOrderItem) throws VeniceInternalException;	
+	public List<VenOrderItem> findByVenOrderId(Long orderId) throws VeniceInternalException;
 }

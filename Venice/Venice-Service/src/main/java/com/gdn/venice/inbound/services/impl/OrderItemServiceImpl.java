@@ -17,6 +17,7 @@ import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenContactDetailDAO;
 import com.gdn.venice.dao.VenOrderItemDAO;
 import com.gdn.venice.exception.CannotPersistOrderItemException;
+import com.gdn.venice.exception.OrderNotFoundException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.AddressService;
 import com.gdn.venice.inbound.services.ContactDetailService;
@@ -340,5 +341,20 @@ public class OrderItemServiceImpl implements OrderItemService {
 				, "synchronizeVenOrderItemReferenceData::EOM, returning venOrderItem = " + venOrderItem
 				+ ", merchantProduct = " + venOrderItem.getVenMerchantProduct());
 		return venOrderItem;
+	}
+	
+	@Override
+	public List<VenOrderItem> findByVenOrderId(Long orderId) throws VeniceInternalException {
+		List<VenOrderItem> orderItems = new ArrayList<VenOrderItem>();
+		try {
+			orderItems = venOrderItemDAO.findByVenOrderId(orderId);
+		} catch (Exception e) {
+			CommonUtil.logError(this.getClass().getCanonicalName(), e);
+			CommonUtil.logAndReturnException(new OrderNotFoundException("Cannot found VenOrderItem with orderId=" + orderId
+					, VeniceExceptionConstants.VEN_EX_000120), CommonUtil.getLogger(this.getClass().getCanonicalName()),
+					LoggerLevel.ERROR);
+		}
+		
+		return orderItems;
 	}
 }

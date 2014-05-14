@@ -79,6 +79,9 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 		"WHERE o.venOrder = ?1 " +
 		"AND UPPER(a.streetAddress1) LIKE %?2%";
 	
+	public static final String FIND_BY_VENORDERID = 
+		"SELECT o FROM VenOrderItem o WHERE o.venOrder.orderId = ?1";
+	
 	@Query(COUNT_BY_WCSORDERITEMID_SQL)
     public int countByWcsOrderItemId(String wcsOrderItemId);
 	
@@ -114,4 +117,7 @@ public interface VenOrderItemDAO extends JpaRepository<VenOrderItem, Long>{
 	
 	@Query(FIND_BY_VENORDER_ADDRESSSTREET_SQL)
 	public List<VenOrderItem> findByVenOrderAddressStreet(VenOrder order, String address);
+	
+	@Query(FIND_BY_VENORDERID)
+	public List<VenOrderItem> findByVenOrderId(Long orderId);
 }
