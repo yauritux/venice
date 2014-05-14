@@ -20,7 +20,7 @@ public class FetchShelfDataCommand implements RafDsCommand {
 
     private RafDsRequest request;
     ShelfManagementService shelfService;
-    
+
     public FetchShelfDataCommand(RafDsRequest request) {
         this.request = request;
     }
@@ -31,19 +31,20 @@ public class FetchShelfDataCommand implements RafDsCommand {
         List<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         System.out.println("fetch shelf command");
         try {
-        		shelfService = new ShelfManagementService();
-                InventoryPagingWrapper<Shelf> shelfWrapper = shelfService.getShelfData(request);
-                if(shelfWrapper!=null && shelfWrapper.isSuccess()){
+            shelfService = new ShelfManagementService();
+            InventoryPagingWrapper<Shelf> shelfWrapper = shelfService.getShelfData(request);
+            if (shelfWrapper != null && shelfWrapper.isSuccess()) {
 
                 System.out.println(shelfWrapper.getContent().size());
-                for(Shelf shelf : shelfWrapper.getContent()){
+                for (Shelf shelf : shelfWrapper.getContent()) {
                     HashMap<String, String> map = new HashMap<String, String>();
                     map.put(DataNameTokens.INV_SHELF_ID, shelf.getId().toString());
                     map.put(DataNameTokens.INV_SHELF_CODE, shelf.getCode());
                     map.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelf.getDescription());
                     map.put(DataNameTokens.INV_SHELF_ACTIVESTATUS, shelf.isActive() ? "Active" : "Non Active");
                     map.put(DataNameTokens.INV_SHELF_APPROVAL_IN_PROCESS, shelf.isApprovalInProcess() ? "true" : "false");
-                    
+                    map.put(DataNameTokens.INV_SHELF_WAREHOUSE, shelf.getWarehouse() != null ? shelf.getWarehouse().getName() : "");
+
                     dataList.add(map);
                 }
 

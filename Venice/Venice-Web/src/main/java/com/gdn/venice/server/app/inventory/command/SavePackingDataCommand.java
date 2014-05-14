@@ -11,12 +11,13 @@ import com.gdn.venice.server.command.RafRpcCommand;
  */
 public class SavePackingDataCommand implements RafRpcCommand {
 
-    String awbInfoId, username;
+    String pickPackageId, username, awbNumber;
     PackingListService packingService;
 
-    public SavePackingDataCommand(String username, String awbInfoId) {
+    public SavePackingDataCommand(String username, String pickPackageId, String awbNumber) {
         this.username = username;
-        this.awbInfoId = awbInfoId;
+        this.pickPackageId = pickPackageId;
+        this.awbNumber = awbNumber;
     }
 
     /* (non-Javadoc)
@@ -28,17 +29,17 @@ public class SavePackingDataCommand implements RafRpcCommand {
         try {
             packingService = new PackingListService();
 
-            wrapper = packingService.savePacking(username, awbInfoId);
+            wrapper = packingService.savePacking(username, pickPackageId, awbNumber);
             if (wrapper != null) {
                 if (!wrapper.isSuccess()) {
                     return wrapper.getError();
                 }
             } else {
-                return "Failed saving attribute, error connection";
+                return "Failed saving packing data, error connection";
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return "Failed saving attribute, try again later. If error persist please contact administrator";
+            return "Failed saving packing data, try again later. If error persist please contact administrator";
         }
         return "0";
     }

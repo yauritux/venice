@@ -6,7 +6,6 @@ package com.gdn.venice.server.app.inventory.presenter;
 
 import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.app.inventory.command.AddOpnameDetailDataCommand;
-import com.gdn.venice.server.app.inventory.command.FetchAllWarehouseComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemCategoryComboBoxDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemStorageDataCommand;
 import com.gdn.venice.server.app.inventory.command.FetchItemUomComboBoxDataCommand;

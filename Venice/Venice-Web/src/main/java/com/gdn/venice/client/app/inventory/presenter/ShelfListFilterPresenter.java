@@ -30,146 +30,167 @@ import com.smartgwt.client.rpc.RPCResponse;
 import com.smartgwt.client.types.PromptStyle;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.form.fields.ComboBoxItem;
+import java.util.LinkedHashMap;
 
 /**
  * Presenter for Shelf List Filter
- * 
+ *
  * @author Roland
  */
 public class ShelfListFilterPresenter extends Presenter<ShelfListFilterPresenter.MyView, ShelfListFilterPresenter.MyProxy>
-		implements ShelfListFilterUiHandler {
-	
-	ShelfListFilterView providerView;
-	
-	public static final String shelfManagementPresenterServlet = "ShelfManagementPresenterServlet";
-	
-	protected final DispatchAsync dispatcher;
+        implements ShelfListFilterUiHandler {
 
-	@ProxyCodeSplit
-	@NameToken(NameTokens.shelfListFilterPage)
-	public interface MyProxy extends Proxy<ShelfListFilterPresenter>, Place {
-	}
+    ShelfListFilterView providerView;
+    public static final String shelfManagementPresenterServlet = "ShelfManagementPresenterServlet";
+    protected final DispatchAsync dispatcher;
 
-	public interface MyView extends View, HasUiHandlers<ShelfListFilterUiHandler> {
-		public void loadShelfData(DataSource dataSource);
-		public void refreshShelfData();
-	}
+    @ProxyCodeSplit
+    @NameToken(NameTokens.shelfListFilterPage)
+    public interface MyProxy extends Proxy<ShelfListFilterPresenter>, Place {
+    }
 
-	@Inject
-	public ShelfListFilterPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
-		super(eventBus, view, proxy);
-		getView().setUiHandlers(this);
-		
-		((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
-		getView().loadShelfData(ShelfData.getShelfData(1, 20));
-		this.dispatcher = dispatcher;
-	}
+    public interface MyView extends View, HasUiHandlers<ShelfListFilterUiHandler> {
 
-	@Override
-	protected void revealInParent() {
-		RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetContextArea, this);
-	}
+        public void loadShelfData(DataSource dataSource);
 
-	@Override
-	public void onSaveShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, final Window window) {
-		RPCRequest request=new RPCRequest();
-		
-		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
-		String storageMap = Util.formXMLfromHashMap(storageDataMap);
-		
-		request.setData(shelfMap+"#"+storageMap);
-		
-		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=saveShelfData&type=RPC");
-		request.setHttpMethod("POST");
-		request.setUseSimpleHttp(true);
-		request.setWillHandleError(true);
-		RPCManager.setPromptStyle(PromptStyle.DIALOG);
-		RPCManager.setDefaultPrompt("Saving records...");
-		RPCManager.setShowPrompt(true);
-		
-		RPCManager.sendRequest(request, new RPCCallback () {
-					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
-						String rpcResponse = rawData.toString();
-						
-						if (rpcResponse.startsWith("0")) {
-                            SC.say("Shelf added and need approval for changes to take place");
-                            window.destroy();
-							getView().refreshShelfData();
-						} else {
-							String[] split = rpcResponse.split(":");
-							if(split.length>1){
-								SC.warn(split[1]);
-							}else {
-								SC.warn(rpcResponse);
-							}
-						}
-					}
-		});		
-	}
-	
-	@Override
-	public void onNonActiveShelfClicked(HashMap<String, String> shelfDataMap, final Window window) {
-		RPCRequest request=new RPCRequest();
-		
-		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
-		
-		request.setData(shelfMap);		
-		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=nonActiveShelf&type=RPC");
-		request.setHttpMethod("POST");
-		request.setUseSimpleHttp(true);
-		request.setWillHandleError(true);
-		RPCManager.setPromptStyle(PromptStyle.DIALOG);
-		RPCManager.setDefaultPrompt("Saving records...");
-		RPCManager.setShowPrompt(true);
-		
-		RPCManager.sendRequest(request, new RPCCallback () {
-					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
-						String rpcResponse = rawData.toString();
-						
-						if (rpcResponse.startsWith("0")) {
-                            SC.say("Shelf updated and need approval for changes to take place");
-                            window.destroy();
-							getView().refreshShelfData();
-						} else {
-							String[] split = rpcResponse.split(":");
-							if(split.length>1){
-								SC.warn(split[1]);
-							}else{
-								SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
-							}
-						}
-					}
-		});		
-	}
-	
-	@Override
-	public void onEditShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, final Window window) {
-		RPCRequest request=new RPCRequest();
-		
-		String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
-		String storageMap = Util.formXMLfromHashMap(storageDataMap);
-		
-		request.setData(shelfMap+"#"+storageMap);		
-		request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=editShelfData&type=RPC");
-		request.setHttpMethod("POST");
-		request.setUseSimpleHttp(true);
-		request.setWillHandleError(true);
-		RPCManager.setPromptStyle(PromptStyle.DIALOG);
-		RPCManager.setDefaultPrompt("Saving records...");
-		RPCManager.setShowPrompt(true);
-		
-		RPCManager.sendRequest(request, new RPCCallback () {
-					public void execute(RPCResponse response, Object rawData, RPCRequest request) {
-						String rpcResponse = rawData.toString();
-						
-						if (rpcResponse.startsWith("0")) {
-                            SC.say("Shelf edited and need approval for changes to take place");
-                            window.destroy();
-							getView().refreshShelfData();
-						} else {
-							SC.warn("Edit shelf failed");
-						}
-					}
-		});		
-	}
+        public void refreshShelfData();
+
+        public void setWarehouseMap(LinkedHashMap<String, String> warehouseMap);
+    }
+
+    @Inject
+    public ShelfListFilterPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher) {
+        super(eventBus, view, proxy);
+        getView().setUiHandlers(this);
+        ((RafViewLayout) getView().asWidget()).setViewPageName(getProxy().getNameToken());
+        getView().loadShelfData(ShelfData.getShelfData(1, 20));
+        loadWarehouseComboboxData();
+        this.dispatcher = dispatcher;
+    }
+
+    @Override
+    protected void revealInParent() {
+        RevealContentEvent.fire(this, MainPagePresenter.TYPE_SetContextArea, this);
+    }
+
+    @Override
+    public void onSaveShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, final Window window) {
+        RPCRequest request = new RPCRequest();
+
+        String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
+        String storageMap = Util.formXMLfromHashMap(storageDataMap);
+
+        request.setData(shelfMap + "#" + storageMap);
+
+        request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=saveShelfData&type=RPC");
+        request.setHttpMethod("POST");
+        request.setUseSimpleHttp(true);
+        request.setWillHandleError(true);
+        RPCManager.setPromptStyle(PromptStyle.DIALOG);
+        RPCManager.setDefaultPrompt("Saving records...");
+        RPCManager.setShowPrompt(true);
+
+        RPCManager.sendRequest(request, new RPCCallback() {
+            public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+                String rpcResponse = rawData.toString();
+
+                if (rpcResponse.startsWith("0")) {
+                    SC.say("Shelf added and need approval for changes to take place");
+                    window.destroy();
+                    getView().refreshShelfData();
+                } else {
+                    String[] split = rpcResponse.split(":");
+                    if (split.length > 1) {
+                        SC.warn(split[1]);
+                    } else {
+                        SC.warn(rpcResponse);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onNonActiveShelfClicked(HashMap<String, String> shelfDataMap, final Window window) {
+        RPCRequest request = new RPCRequest();
+
+        String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
+
+        request.setData(shelfMap);
+        request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=nonActiveShelf&type=RPC");
+        request.setHttpMethod("POST");
+        request.setUseSimpleHttp(true);
+        request.setWillHandleError(true);
+        RPCManager.setPromptStyle(PromptStyle.DIALOG);
+        RPCManager.setDefaultPrompt("Saving records...");
+        RPCManager.setShowPrompt(true);
+
+        RPCManager.sendRequest(request, new RPCCallback() {
+            public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+                String rpcResponse = rawData.toString();
+
+                if (rpcResponse.startsWith("0")) {
+                    SC.say("Shelf updated and need approval for changes to take place");
+                    window.destroy();
+                    getView().refreshShelfData();
+                } else {
+                    String[] split = rpcResponse.split(":");
+                    if (split.length > 1) {
+                        SC.warn(split[1]);
+                    } else {
+                        SC.warn(DataMessageTokens.GENERAL_ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onEditShelfClicked(HashMap<String, String> shelfDataMap, HashMap<String, String> storageDataMap, final Window window) {
+        RPCRequest request = new RPCRequest();
+
+        String shelfMap = Util.formXMLfromHashMap(shelfDataMap);
+        String storageMap = Util.formXMLfromHashMap(storageDataMap);
+
+        request.setData(shelfMap + "#" + storageMap);
+        request.setActionURL(GWT.getHostPageBaseURL() + shelfManagementPresenterServlet + "?method=editShelfData&type=RPC");
+        request.setHttpMethod("POST");
+        request.setUseSimpleHttp(true);
+        request.setWillHandleError(true);
+        RPCManager.setPromptStyle(PromptStyle.DIALOG);
+        RPCManager.setDefaultPrompt("Saving records...");
+        RPCManager.setShowPrompt(true);
+
+        RPCManager.sendRequest(request, new RPCCallback() {
+            public void execute(RPCResponse response, Object rawData, RPCRequest request) {
+                String rpcResponse = rawData.toString();
+
+                if (rpcResponse.startsWith("0")) {
+                    SC.say("Shelf edited and need approval for changes to take place");
+                    window.destroy();
+                    getView().refreshShelfData();
+                } else {
+                    SC.warn(rpcResponse);
+                }
+            }
+        });
+    }
+    
+    private void loadWarehouseComboboxData() {
+        RPCRequest request = new RPCRequest();
+        request.setActionURL(GWT.getHostPageBaseURL() + "WarehouseManagementPresenterServlet"
+                + "?method=fetchAllWarehouseComboBoxData&type=RPC");
+        request.setHttpMethod("POST");
+        request.setUseSimpleHttp(true);
+        RPCManager.sendRequest(request,
+                new RPCCallback() {
+                    @Override
+                    public void execute(RPCResponse response,
+                            Object rawData, RPCRequest request) {
+                        String rpcResponse = rawData.toString();
+                        getView().setWarehouseMap(Util.formComboBoxMap(Util.formHashMapfromXML(rpcResponse)));
+                    }
+                });
+    }
 }

@@ -5,12 +5,15 @@
 package com.gdn.venice.server.app.inventory.service;
 
 import com.djarum.raf.utilities.JPQLSimpleQueryCriteria;
+import com.gdn.inventory.exchange.dto.PackingList;
 import com.gdn.inventory.exchange.entity.AttributeName;
 import com.gdn.inventory.exchange.entity.module.outbound.AWBInfo;
-import com.gdn.inventory.exchange.entity.module.outbound.SalesOrderAWBInfo;
-import com.gdn.inventory.paging.InventoryPagingWrapper;
+import com.gdn.inventory.exchange.entity.module.outbound.PickPackageSalesOrder;
+import com.gdn.inventory.exchange.type.PickPackageStatus;
 import com.gdn.inventory.wrapper.HeaderAndDetailWrapper;
+import com.gdn.inventory.wrapper.ResultListWrapper;
 import com.gdn.inventory.wrapper.ResultWrapper;
+import com.gdn.venice.client.app.DataNameTokens;
 import com.gdn.venice.server.data.RafDsRequest;
 import com.gdn.venice.util.InventoryUtil;
 import java.io.BufferedReader;
@@ -18,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,28 +47,24 @@ public class PackingListService {
         mapper = new ObjectMapper();
     }
 
-    public InventoryPagingWrapper<AWBInfo> getReadyPackingData(RafDsRequest request) throws IOException {
+    public ResultListWrapper<PackingList> getReadyPackingData(RafDsRequest request) throws IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "packingList/getPackingList?warehouseId=" + request.getParams().get("warehouseId")
-                + "&page=" + request.getParams().get("page")
-                + "&limit=" + request.getParams().get("limit");
-        PostMethod httpPost = new PostMethod(url);
-        System.out.println(url);
+                + "packingList/getPackingList?warehouseId=" + request.getParams().get("warehouseId");
 
         if (request.getCriteria() != null) {
             System.out.println("criteria not null");
-            Map<String, Object> searchMap = new HashMap<String, Object>();
             for (JPQLSimpleQueryCriteria criteria : request.getCriteria().getSimpleCriteria()) {
-                System.out.println("adding criteria:" + criteria.getFieldName() + ", " + criteria.getValue());
-                searchMap.put(criteria.getFieldName(), criteria.getValue());
+                if (DataNameTokens.INV_PACKING_PICKPACKAGE_CONTAINERID.equalsIgnoreCase(criteria.getFieldName())) {
+                    url += "&containerId=" + criteria.getValue();
+                } else if (DataNameTokens.INV_PACKING_PICKPACKAGE_STATUS.equalsIgnoreCase(criteria.getFieldName())) {
+                    url += "&ppStatus=" + PickPackageStatus.valueOf(criteria.getValue());
+                }
             }
-            String json = mapper.writeValueAsString(searchMap);
-            System.out.println(json);
-            httpPost.setRequestEntity(new ByteArrayRequestEntity(json.getBytes(), "application/json"));
-            httpPost.setRequestHeader("Content-Type", "application/json");
         } else {
             System.out.println("No criteria");
         }
+        PostMethod httpPost = new PostMethod(url);
+        System.out.println(url);
 
         int httpCode = httpClient.executeMethod(httpPost);
         System.out.println(httpCode);
@@ -79,16 +77,16 @@ public class PackingListService {
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<InventoryPagingWrapper<AWBInfo>>() {
+            return mapper.readValue(sb.toString(), new TypeReference<ResultListWrapper<PackingList>>() {
             });
         } else {
             return null;
         }
     }
 
-    public HeaderAndDetailWrapper<String, SalesOrderAWBInfo> getDetailPackingData(String awbInfoId, String username) throws IOException {
+    public HeaderAndDetailWrapper<String, PickPackageSalesOrder> getDetailPackingData(String pickPackageId, String username) throws IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "packingList/getDetail?awbInfoId=" + awbInfoId
+                + "packingList/getDetail?pickPackageId=" + pickPackageId
                 + "&username=" + username;
         PostMethod httpPost = new PostMethod(url);
         System.out.println(url);
@@ -104,7 +102,7 @@ public class PackingListService {
             }
             System.out.println(sb.toString());
             is.close();
-            return mapper.readValue(sb.toString(), new TypeReference<HeaderAndDetailWrapper<String, SalesOrderAWBInfo>>() {
+            return mapper.readValue(sb.toString(), new TypeReference<HeaderAndDetailWrapper<String, PickPackageSalesOrder>>() {
             });
         } else {
             return null;
@@ -164,9 +162,11 @@ public class PackingListService {
         }
     }
 
-    public ResultWrapper<AWBInfo> savePacking(String username, String awbInfoId) throws IOException {
+    public ResultWrapper<AWBInfo> savePacking(String username, String pickPackageId, String awbNumber) throws IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")
-                + "packingList/submitPacking?username=" + username + "&awbInfoId=" + awbInfoId;
+                + "packingList/submitPacking?username=" + username
+                + "&pickPackageId=" + pickPackageId
+                + "&awbNumber=" + awbNumber;
         System.out.println(url);
         PostMethod httpPost = new PostMethod(url);
 
@@ -187,8 +187,6 @@ public class PackingListService {
             return null;
         }
     }
-    
-    
 
     public ResultWrapper<AWBInfo> rejectPacking(String username, String salesOrderId) throws JsonGenerationException, JsonMappingException, IOException {
         String url = InventoryUtil.getStockholmProperties().getProperty("address")

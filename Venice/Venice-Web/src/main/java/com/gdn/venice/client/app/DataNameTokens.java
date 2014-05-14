@@ -1208,6 +1208,7 @@ public class DataNameTokens {
         public static String INV_SHELF_DESCRIPTION="description";
         public static String INV_SHELF_ACTIVESTATUS="activeStatus";
         public static String INV_SHELF_APPROVALTYPE="approvalType";
+        public static String INV_SHELF_WAREHOUSE="warehouse";
         public static String INV_SHELF_APPROVALSTATUS="approvalStatus";
         public static String INV_SHELF_APPROVAL_IN_PROCESS="approvalInProcess";
         public static String INV_SHELF_ORIGINID="originId";
@@ -1340,6 +1341,17 @@ public class DataNameTokens {
         public static String INV_AWB_STATUS = "status";
         public static String INV_AWB_OFFLINE = "awbOffline";
         public static String INV_AWB_CLAIMEDBY = "claimedBy";
+        
+        public static String INV_PACKING_PICKPACKAGE_ID = "pickPackageId";
+        public static String INV_PACKING_PICKPACKAGE_CONTAINERID = "containerId";
+        public static String INV_PACKING_PICKPACKAGE_CODE = "code";
+        public static String INV_PACKING_PICKPACKAGE_HANDLING = "handling";
+        public static String INV_PACKING_PICKPACKAGE_PICKER = "picker";
+        public static String INV_PACKING_PICKPACKAGE_STATUS = "ppStatus";
+        public static String INV_PACKING_PICKPACKAGE_WAREHOUSE = "warehouse";
+        public static String INV_PACKING_PICKPACKAGE_CLAIMEDBY = "claimedBy";
+        public static String INV_PACKING_AWB_NUMBER = "awbNumber";
+        public static String INV_PACKING_AWB_LOGISTIC = "logistic";
         
         //Inventory Sales Order
         public static String INV_SO_ID = "soId";

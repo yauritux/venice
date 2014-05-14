@@ -51,9 +51,8 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
     RafViewLayout shelfApprovalAddLayout;
     ListGrid shelfListGrid, storageListGrid;
     Window shelfDetailWindow;
-
     ToolStrip shelfListToolStrip;
-	ToolStripButton addStorageButton;
+    ToolStripButton addStorageButton;
 
     @Inject
     public ShelfAddWithApprovalView() {
@@ -84,19 +83,19 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
                 buildShelfDetailWindow(record).show();
             }
         });
-        
-        shelfListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {			
-			@Override
-			public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
-				refreshAllShelfData();
-			}
-		});
+
+        shelfListGrid.addFilterEditorSubmitHandler(new FilterEditorSubmitHandler() {
+            @Override
+            public void onFilterEditorSubmit(FilterEditorSubmitEvent event) {
+                refreshAllShelfData();
+            }
+        });
     }
 
     private Window buildShelfDetailWindow(final ListGridRecord record) {
         shelfDetailWindow = new Window();
         shelfDetailWindow.setWidth(600);
-		shelfDetailWindow.setHeight(375);
+        shelfDetailWindow.setHeight(375);
         shelfDetailWindow.setTitle("Shelf Detail");
         shelfDetailWindow.setShowMinimizeButton(false);
         shelfDetailWindow.setIsModal(true);
@@ -117,6 +116,10 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
         shelfDetailForm.setPadding(5);
 
         final String id = record.getAttribute(DataNameTokens.INV_SHELF_ID);
+        
+        final TextItem warehouse = new TextItem(DataNameTokens.INV_SHELF_WAREHOUSE, "Warehouse");
+        warehouse.setValue(record.getAttribute(DataNameTokens.INV_SHELF_WAREHOUSE));
+        warehouse.setDisabled(true);
 
         final TextItem shelfCode = new TextItem(DataNameTokens.INV_SHELF_CODE, "Shelf Code");
         shelfCode.setValue(record.getAttribute(DataNameTokens.INV_SHELF_CODE));
@@ -125,16 +128,16 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
         final TextAreaItem shelfDescItem = new TextAreaItem(DataNameTokens.INV_SHELF_DESCRIPTION, "Shelf Description");
         shelfDescItem.setValue(record.getAttribute(DataNameTokens.INV_SHELF_DESCRIPTION));
         shelfDescItem.setDisabled(true);
-        
-        shelfDetailForm.setFields(shelfCode, shelfDescItem);
+
+        shelfDetailForm.setFields(warehouse, shelfCode, shelfDescItem);
         shelfDetailForm.setDisabled(true);
-        
-		Label storageLabel = new Label("<b>Storage Bin:</b>");
-		storageLabel.setHeight(10);
-        
+
+        Label storageLabel = new Label("<b>Storage Bin:</b>");
+        storageLabel.setHeight(10);
+
         storageListGrid = buildStorageListGrid(id);
         storageListGrid.setCanEdit(false);
-        
+
         HLayout buttonSet = new HLayout(5);
 
         final IButton editButton = new IButton("Edit");
@@ -142,36 +145,36 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
         correctionButton.setAutoFit(true);
         IButton approveButton = new IButton("Approve");
         IButton rejectButton = new IButton("Reject");
-       
+
         editButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-            	if(editButton.getTitle().equals("Edit")){
-            		shelfDetailForm.setDisabled(false);
-            		storageListGrid.setCanEdit(true);
-            		addStorageButton.setDisabled(false);
-            		shelfDescItem.setDisabled(false);
-            		editButton.setTitle("Save");
-            	} else {
-            		if(shelfDetailForm.validate()){
-    	                HashMap<String, String> shelfRowMap = new HashMap<String, String>();    	 
-    	                
-    	                shelfRowMap.put(DataNameTokens.INV_SHELF_ID, id);
-    	                shelfRowMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());   
-    	                
-    	            	ListGridRecord[] storageRecords = storageListGrid.getRecords();
-    	                HashMap<String, String> storageDataMap = new HashMap<String, String>();
-    					HashMap<String, String> storageRowMap = new HashMap<String, String>();
-    										
-    					for (int i=0;i<storageRecords.length;i++) {
-    						storageRowMap.put(DataNameTokens.INV_STORAGE_ID, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_ID));
-    						storageRowMap.put(DataNameTokens.INV_STORAGE_DESCRIPTION, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_DESCRIPTION));
-    						storageRowMap.put(DataNameTokens.INV_STORAGE_TYPE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_TYPE));
-    						storageDataMap.put("STORAGE" + i, storageRowMap.toString());
-    					}
-        	            getUiHandlers().onEditShelfAddClicked(shelfRowMap, storageDataMap, shelfDetailWindow);
-            		}
-            	}
+                if (editButton.getTitle().equals("Edit")) {
+                    shelfDetailForm.setDisabled(false);
+                    storageListGrid.setCanEdit(true);
+                    addStorageButton.setDisabled(false);
+                    shelfDescItem.setDisabled(false);
+                    editButton.setTitle("Save");
+                } else {
+                    if (shelfDetailForm.validate()) {
+                        HashMap<String, String> shelfRowMap = new HashMap<String, String>();
+
+                        shelfRowMap.put(DataNameTokens.INV_SHELF_ID, id);
+                        shelfRowMap.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelfDescItem.getValueAsString());
+
+                        ListGridRecord[] storageRecords = storageListGrid.getRecords();
+                        HashMap<String, String> storageDataMap = new HashMap<String, String>();
+                        HashMap<String, String> storageRowMap = new HashMap<String, String>();
+
+                        for (int i = 0; i < storageRecords.length; i++) {
+                            storageRowMap.put(DataNameTokens.INV_STORAGE_ID, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_ID));
+                            storageRowMap.put(DataNameTokens.INV_STORAGE_DESCRIPTION, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_DESCRIPTION));
+                            storageRowMap.put(DataNameTokens.INV_STORAGE_TYPE, storageRecords[i].getAttributeAsString(DataNameTokens.INV_STORAGE_TYPE));
+                            storageDataMap.put("STORAGE" + i, storageRowMap.toString());
+                        }
+                        getUiHandlers().onEditShelfAddClicked(shelfRowMap, storageDataMap, shelfDetailWindow);
+                    }
+                }
             }
         });
 
@@ -209,7 +212,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
         });
 
         buttonSet.setAlign(Alignment.CENTER);
-        if (!record.getAttribute(DataNameTokens.INV_SHELF_APPROVALSTATUS).equals("Need Correction") 
+        if (!record.getAttribute(DataNameTokens.INV_SHELF_APPROVALSTATUS).equals("Need Correction")
                 && MainPagePresenter.getSignedInUserRole().toLowerCase().contains("inv_wh_approver")) {
             buttonSet.addMember(approveButton);
             buttonSet.addMember(correctionButton);
@@ -217,75 +220,75 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
         } else if (record.getAttribute(DataNameTokens.INV_SHELF_APPROVALSTATUS).equals("Need Correction")) {
             buttonSet.addMember(editButton);
         }
-        
-        addStorageButton = new ToolStripButton();
-	    addStorageButton.setIcon("[SKIN]/icons/business_users_add.png");  
-	    addStorageButton.setTooltip("Add Storage Bin");
-	    addStorageButton.setTitle("Add Storage Bin");
-	    addStorageButton.setDisabled(true);
-              
-		ToolStrip storageToolStrip = new ToolStrip();
-		storageToolStrip.setWidth100();
-		
-		storageToolStrip.addButton(addStorageButton);
 
-		addStorageButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				storageListGrid.startEditingNew();
-			}
-		});
-        
+        addStorageButton = new ToolStripButton();
+        addStorageButton.setIcon("[SKIN]/icons/business_users_add.png");
+        addStorageButton.setTooltip("Add Storage Bin");
+        addStorageButton.setTitle("Add Storage Bin");
+        addStorageButton.setDisabled(true);
+
+        ToolStrip storageToolStrip = new ToolStrip();
+        storageToolStrip.setWidth100();
+
+        storageToolStrip.addButton(addStorageButton);
+
+        addStorageButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                storageListGrid.startEditingNew();
+            }
+        });
+
         shelfDetailLayout.setMembers(shelfDetailForm, buttonSet, storageLabel, storageToolStrip, storageListGrid);
         shelfDetailWindow.addItem(shelfDetailLayout);
 
         return shelfDetailWindow;
     }
-    
-    private ListGrid buildStorageListGrid(String shelfId){
-    	storageListGrid = new ListGrid();
-    	storageListGrid.setWidth100();
-    	storageListGrid.setHeight100();
-    	storageListGrid.setShowAllRecords(true);
-    	storageListGrid.setSortField(0);
-    	storageListGrid.setSaveLocally(true);
 
-    	storageListGrid.setShowFilterEditor(true);
-    	storageListGrid.setCanResizeFields(true);
-    	storageListGrid.setShowRowNumbers(true);
-    	storageListGrid.setShowFilterEditor(false);
-    	    	
-    	if(shelfId==null){
-    		ListGridField codeField = new ListGridField(DataNameTokens.INV_STORAGE_CODE, "Code");  
-    		codeField.setCanEdit(false);
-            ListGridField descField = new ListGridField(DataNameTokens.INV_STORAGE_DESCRIPTION, "Description");  
-            ListGridField typeField = new ListGridField(DataNameTokens.INV_STORAGE_TYPE, "Type");  
-                        
+    private ListGrid buildStorageListGrid(String shelfId) {
+        storageListGrid = new ListGrid();
+        storageListGrid.setWidth100();
+        storageListGrid.setHeight100();
+        storageListGrid.setShowAllRecords(true);
+        storageListGrid.setSortField(0);
+        storageListGrid.setSaveLocally(true);
+
+        storageListGrid.setShowFilterEditor(true);
+        storageListGrid.setCanResizeFields(true);
+        storageListGrid.setShowRowNumbers(true);
+        storageListGrid.setShowFilterEditor(false);
+
+        if (shelfId == null) {
+            ListGridField codeField = new ListGridField(DataNameTokens.INV_STORAGE_CODE, "Code");
+            codeField.setCanEdit(false);
+            ListGridField descField = new ListGridField(DataNameTokens.INV_STORAGE_DESCRIPTION, "Description");
+            ListGridField typeField = new ListGridField(DataNameTokens.INV_STORAGE_TYPE, "Type");
+
             storageListGrid.setFields(codeField, descField, typeField);
-            
+
             Map<String, String> storageType = new HashMap<String, String>();
             storageType.put("bin", "Bin");
             storageType.put("carton", "Carton");
             storageType.put("pallet", "Pallet");
             storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
-    	}else{
-        	DataSource storageData = ShelfData.getStorageInProcessData(shelfId, 1, 20);
-    		storageListGrid.setDataSource(storageData);
-    		storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
-    		
+        } else {
+            DataSource storageData = ShelfData.getStorageInProcessData(shelfId, 1, 20);
+            storageListGrid.setDataSource(storageData);
+            storageListGrid.setFields(Util.getListGridFieldsFromDataSource(storageData));
+
             Map<String, String> storageType = new HashMap<String, String>();
             storageType.put("bin", "Bin");
             storageType.put("carton", "Carton");
             storageType.put("pallet", "Pallet");
             storageData.getField(DataNameTokens.INV_STORAGE_TYPE).setValueMap(storageType);
-            
-        	storageListGrid.setAutoFetchData(true);
+
+            storageListGrid.setAutoFetchData(true);
             storageListGrid.getField(DataNameTokens.INV_STORAGE_ID).setHidden(true);
             storageListGrid.getField(DataNameTokens.INV_STORAGE_CODE).setCanFilter(false);
             storageListGrid.getField(DataNameTokens.INV_STORAGE_CODE).setCanEdit(false);
             storageListGrid.getField(DataNameTokens.INV_STORAGE_DESCRIPTION).setCanFilter(false);
-            storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setCanFilter(false);            
-    	}
-		        
+            storageListGrid.getField(DataNameTokens.INV_STORAGE_TYPE).setCanFilter(false);
+        }
+
         return storageListGrid;
     }
 
@@ -315,7 +318,7 @@ public class ShelfAddWithApprovalView extends ViewWithUiHandlers<ShelfAddWithApp
 
     @Override
     public void refreshAllShelfData() {
-    	DSCallback callBack = new DSCallback() {
+        DSCallback callBack = new DSCallback() {
             @Override
             public void execute(DSResponse response, Object rawData, DSRequest request) {
                 shelfListGrid.setData(response.getData());

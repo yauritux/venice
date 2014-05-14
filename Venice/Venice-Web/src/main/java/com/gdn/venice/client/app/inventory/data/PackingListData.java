@@ -16,17 +16,19 @@ import com.smartgwt.client.data.fields.DataSourceTextField;
  * @author Maria Olivia
  */
 public class PackingListData {
-
     public static RafDataSource getAllPackingData(String warehouseId, int page, int limit) {
         String fetchUrl = GWT.getHostPageBaseURL() + PackingListPresenter.packingListPresenterServlet
                 + "?method=fetchPackingData&type=DataSource&warehouseId=" + warehouseId + "&limit=" + limit + "&page=" + page;
         DataSourceField[] dataSourceFields = {
-            new DataSourceTextField(DataNameTokens.INV_AWB_ID, "AWB ID"),
-            new DataSourceTextField(DataNameTokens.INV_AWB_NO, "AWB No"),
-            new DataSourceTextField(DataNameTokens.INV_AWB_PUDATE, "PU Date"),
-            new DataSourceTextField(DataNameTokens.INV_AWB_LOGNAME, "Logistic"),
-            new DataSourceTextField(DataNameTokens.INV_AWB_STATUS, "Status"),
-            new DataSourceTextField(DataNameTokens.INV_AWB_OFFLINE, "Is Offline")
+            new DataSourceTextField(DataNameTokens.INV_PACKING_PICKPACKAGE_ID, "Packing ID"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_PICKPACKAGE_CODE, "Code"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_PICKPACKAGE_CONTAINERID, "Container ID"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_PICKPACKAGE_HANDLING, "Handling"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_PICKPACKAGE_PICKER, "Picker"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_AWB_NUMBER, "Airway Bill Number"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_AWB_LOGISTIC, "Logistic"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_PICKPACKAGE_STATUS, "Status"),
+            new DataSourceTextField(DataNameTokens.INV_PACKING_PICKPACKAGE_CLAIMEDBY, "Claimed By")
         };
         dataSourceFields[0].setPrimaryKey(true);
         RafDataSource retVal = new RafDataSource(
@@ -40,9 +42,9 @@ public class PackingListData {
         return retVal;
     }
 
-    public static RafDataSource getAllSalesData(String awbInfoId, String username) {
+    public static RafDataSource getAllSalesData(String pickPackageId, String username) {
         String fetchUrl = GWT.getHostPageBaseURL() + PackingListPresenter.packingListPresenterServlet
-                + "?method=fetchSalesData&type=DataSource&awbInfoId=" + awbInfoId + "&username=" + username;
+                + "?method=fetchSalesData&type=DataSource&pickPackageId=" + pickPackageId + "&username=" + username;
         DataSourceField[] dataSourceFields = {
             new DataSourceTextField(DataNameTokens.INV_SO_ID, "SO ID"),
             new DataSourceTextField(DataNameTokens.INV_SO_ORDERID, "Order ID"),

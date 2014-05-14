@@ -38,6 +38,7 @@ public class FetchShelfInProcessDataCommand implements RafDsCommand {
 				for(ShelfWIP shelf:shelfsWrapper.getContent()){
 					HashMap<String, String> map = new HashMap<String, String>();
 					map.put(DataNameTokens.INV_SHELF_ID, shelf.getId().toString());
+                                        map.put(DataNameTokens.INV_SHELF_WAREHOUSE, shelf.getWarehouse() != null ? shelf.getWarehouse().getName() : "");
 					map.put(DataNameTokens.INV_SHELF_CODE, shelf.getCode());
 					map.put(DataNameTokens.INV_SHELF_DESCRIPTION, shelf.getDescription());
 					map.put(DataNameTokens.INV_SHELF_APPROVALSTATUS, shelf.getApprovalStatus() == ApprovalStatus.CREATED

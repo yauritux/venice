@@ -16,7 +16,7 @@ public interface PackingListUiHandler extends UiHandlers {
 
     public void onSaveAttribute(String username, String attribute, String soId);
 
-    public void onSavePacking(String username, String awbInfoId);
+    public void onSavePacking(String username, String pickPackageId, String awbNumber);
     
     public void onRejectPacking(String salesOrderId);
 }
