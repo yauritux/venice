@@ -201,9 +201,11 @@ public class JournalExport {
 								finJournalTransaction.getComments()));
 					*/
 					for(int a=0;a<finArFundsInReconRecordList.size();a++) {
-						if(finJournalTransaction.getWcsOrderID().equals(finArFundsInReconRecordList.get(a).getWcsOrderId())) {
-							nameCell.setCellValue(new HSSFRichTextString(finArFundsInReconRecordList.get(a).getComment()!=null?finArFundsInReconRecordList.get(a).getComment():""));
-							break;
+						if(finJournalTransaction.getWcsOrderID()!=null){
+							if(finJournalTransaction.getWcsOrderID().equals(finArFundsInReconRecordList.get(a).getWcsOrderId())) {
+								nameCell.setCellValue(new HSSFRichTextString(finArFundsInReconRecordList.get(a).getComment()!=null?finArFundsInReconRecordList.get(a).getComment():""));
+								break;
+							}
 						}
 					}
 					
