@@ -18,7 +18,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
-import javax.servlet.ServletException;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -254,7 +253,7 @@ public class LogInvoiceReportMDB implements MessageListener{
 			    fileUploadLog.setFailedFileUploadNameAndLoc(FILE_PATH + outputFileName) ;				    
 			} catch (Exception e)   {
 				_log.error("Exception in Excel InvoiceReportImportServlet", e);
-				throw new ServletException("Exception in Excel InvoiceReportImportServlet", e);
+				throw new Exception("Exception in Excel InvoiceReportImportServlet", e);
 		    } finally   {
 			     if (fos != null)
 			    	 fos.close();							

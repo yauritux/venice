@@ -15,6 +15,7 @@ import com.gdn.venice.constants.LoggerLevel;
 import com.gdn.venice.constants.VeniceExceptionConstants;
 import com.gdn.venice.dao.VenOrderAddressDAO;
 import com.gdn.venice.exception.CannotPersistOrderAddressException;
+import com.gdn.venice.exception.VenOrderAddressNotFoundException;
 import com.gdn.venice.exception.VeniceInternalException;
 import com.gdn.venice.inbound.services.OrderAddressService;
 import com.gdn.venice.persistence.VenOrderAddress;

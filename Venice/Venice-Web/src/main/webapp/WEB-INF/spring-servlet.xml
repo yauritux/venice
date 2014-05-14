@@ -12,11 +12,6 @@
 	    http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
 	    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
 	
-	<context:annotation-config/>
-	<context:spring-configured/>
-	<context:component-scan base-package="com.gdn.venice" />
-	<jpa:repositories base-package="com.gdn.venice" />
-	
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 	    <property name="jndiName" value="jca:/console.dbpool/GDN_Venice/JCAManagedConnectionFactory/GDN_Venice"/>
 	</bean>
@@ -41,4 +36,11 @@
 	</bean>
  
     <tx:annotation-driven transaction-manager="transactionManager"/>
+    
+    <context:annotation-config/>
+	<context:spring-configured/>
+	<context:component-scan base-package="com.gdn.venice.server.app.testrestdatasource" />
+	<context:component-scan base-package="com.gdn.venice.facade.spring" />
+	<jpa:repositories base-package="com.gdn.venice" />
+    
 </beans>

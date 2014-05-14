@@ -1,7 +1,7 @@
 package com.gdn.venice.facade.spring;
 
-import javax.annotation.Resource;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.gdn.venice.facade.processor.MergeProcessor;
@@ -9,7 +9,8 @@ import com.gdn.venice.persistence.FinSalesRecord;
 
 @Service
 public class FinSalesRecordImpl implements FinSalesRecordService {
-	@Resource(name = "finSalesRecordMergeProcessor")
+	@Autowired
+	@Qualifier("finSalesRecordMergeProcessor")
 	MergeProcessor processor;
 	
 	@Override

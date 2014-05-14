@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
@@ -38,7 +36,7 @@ public class ActivityInvoiceFailedToUploadExport {
         this.wb = wb;
     }
 
-    public HSSFWorkbook ExportExcel(ArrayList<String> failedMessage, HSSFSheet sheet) throws ServletException {
+    public HSSFWorkbook ExportExcel(ArrayList<String> failedMessage, HSSFSheet sheet) throws Exception {
         _log.info("start ActivityInvoiceFailedToUploadExport");
         try {
             int startRow = 0;
@@ -99,7 +97,7 @@ public class ActivityInvoiceFailedToUploadExport {
             }
             _log.debug("End WriteExcel ");
         } catch (Exception e) {
-            throw new ServletException("Exception in Excel Sample Servlet", e);
+            throw new Exception("Exception in Excel Sample Servlet", e);
         }
         return wb;
     }

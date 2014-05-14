@@ -100,20 +100,18 @@
             <version>1.1</version>
             <scope>provided</scope>
         </dependency>
-                    
-        <!--        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-            <version>${gwt.version}</version>
-            <scope>provided</scope>
-        </dependency>        -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-xmlbeans</artifactId>
             <version>1.5.2</version>
             <scope>provided</scope>
+            <exclusions>
+				<exclusion>
+					<artifactId>servlet-api</artifactId>
+					<groupId>javax.servlet</groupId>
+				</exclusion>
+			</exclusions>
         </dependency>        
-        
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
@@ -132,23 +130,34 @@
             <version>2.2.3</version>
             <scope>provided</scope>
         </dependency>
+<!--         <dependency> -->
+<!--             <groupId>${project.groupId}</groupId> -->
+<!--             <artifactId>Venice-Service</artifactId> -->
+<!--             <version>${project.version}</version> -->
+<!--             <scope>provided</scope> -->
+<!--             <exclusions> -->
+<!-- 				<exclusion> -->
+<!-- 					<artifactId>Venice-Interface-Model</artifactId> -->
+<!-- 					<groupId>${project.groupId}</groupId> -->
+<!-- 				</exclusion> -->
+<!-- 				<exclusion> -->
+<!-- 					<artifactId>Venice-Utilities</artifactId> -->
+<!-- 					<groupId>${project.groupId}</groupId> -->
+<!-- 				</exclusion> -->
+<!-- 			</exclusions> -->
+<!--         </dependency> -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Venice-Utilities</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>Venice-Interface-Model</artifactId>
+			<groupId>${project.groupId}</groupId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>Venice-Service</artifactId>
+            <artifactId>Venice-Utilities</artifactId>
+			<groupId>${project.groupId}</groupId>
             <version>${project.version}</version>
-        </dependency>    
+            <scope>provided</scope>
+        </dependency>
         <dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
@@ -174,6 +183,16 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		<dependency>
+	        <groupId>org.springframework.data</groupId>
+	        <artifactId>spring-data-jpa</artifactId>
+	        <version>1.4.2.RELEASE</version>
+	    </dependency>
+	    <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>${hibernate-entitymanager.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -187,35 +206,35 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.1</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${lib.dir}</outputDirectory>
-                            <silent>false</silent>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>Venice-Interface-Model</artifactId>
-                                    <version>${project.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>Venice-Utilities</artifactId>
-                                    <version>${project.version}</version>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+<!--             <plugin> -->
+<!--                 <groupId>org.apache.maven.plugins</groupId> -->
+<!--                 <artifactId>maven-dependency-plugin</artifactId> -->
+<!--                 <version>2.1</version> -->
+<!--                 <executions> -->
+<!--                     <execution> -->
+<!--                         <phase>validate</phase> -->
+<!--                         <goals> -->
+<!--                             <goal>copy</goal> -->
+<!--                         </goals> -->
+<!--                         <configuration> -->
+<!--                             <outputDirectory>${lib.dir}</outputDirectory> -->
+<!--                             <silent>false</silent> -->
+<!--                             <artifactItems> -->
+<!--                                 <artifactItem> -->
+<!--                                     <groupId>${project.groupId}</groupId> -->
+<!--                                     <artifactId>Venice-Interface-Model</artifactId> -->
+<!--                                     <version>${project.version}</version> -->
+<!--                                 </artifactItem> -->
+<!--                                 <artifactItem> -->
+<!--                                     <groupId>${project.groupId}</groupId> -->
+<!--                                     <artifactId>Venice-Utilities</artifactId> -->
+<!--                                     <version>${project.version}</version> -->
+<!--                                 </artifactItem> -->
+<!--                             </artifactItems> -->
+<!--                         </configuration> -->
+<!--                     </execution> -->
+<!--                 </executions> -->
+<!--             </plugin> -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.7</version>

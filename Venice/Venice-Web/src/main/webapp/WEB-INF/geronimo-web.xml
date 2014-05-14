@@ -21,9 +21,15 @@
                 <dep:type>car</dep:type>
             </dep:dependency>
         </dep:dependencies>
-        <dep:inverse-classloading/>
+        <dep:hidden-classes>
+		<dep:filter>org.springframework.</dep:filter>
+		<dep:filter>META-INF/spring</dep:filter>
+		<dep:filter>org.apache.commons.io</dep:filter>
+		<dep:filter>org.apache.commons.fileupload</dep:filter>
+	</dep:hidden-classes>
     </dep:environment>
     <web:context-root>/Venice</web:context-root>
+     
      <web:security-realm-name>OpenLdap</web:security-realm-name>
         <security>
         <default-principal realm-name="OpenLdap">

@@ -114,6 +114,15 @@ public class BCACCFundInServiceImplTest {
 	}
 	
 	@Test
+	public void mergeDuplicate_8FundInWith6DuplicateRefundFundIn_returns2FundIn(){
+		ArrayList<PojoInterface> fundInList = get8FundInWith6DuplicateRefundFundIn();
+		
+		FundInData fundInData = sut.mergeAndSumDuplicate(fundInList);
+		
+		assertEquals(3, fundInData.getFundInList().size());
+	}
+	
+	@Test
 	public void mergeDuplicate_1FundIn_returns1FundIn(){
 		BCA_CC_Record fundIn1 = new BCA_CC_Record();
 		fundIn1.setAuthCd("uniquefundin1");
@@ -208,6 +217,68 @@ public class BCACCFundInServiceImplTest {
 		fundInList.add(fundIn2);
 		fundInList.add(duplicateFundIn2);
 		fundInList.add(duplicateFundIn3);
+		
+		return fundInList;
+	}
+	
+	private ArrayList<PojoInterface> get8FundInWith6DuplicateRefundFundIn(){
+		BCA_CC_Record duplicateFundIn1 = new BCA_CC_Record();
+		duplicateFundIn1.setAuthCd("duplicate");
+		duplicateFundIn1.setGrossAmt("10000");
+		duplicateFundIn1.setNettAmt("10000");
+		duplicateFundIn1.setDiscAmt("0");
+		
+		BCA_CC_Record fundIn1 = new BCA_CC_Record();
+		fundIn1.setAuthCd("uniquefundin1");
+		fundIn1.setGrossAmt("10000");
+		fundIn1.setNettAmt("10000");
+		fundIn1.setDiscAmt("0");
+		
+		BCA_CC_Record fundIn2 = new BCA_CC_Record();
+		fundIn2.setAuthCd("uniquefundin2");
+		fundIn2.setGrossAmt("12000");
+		fundIn2.setNettAmt("12000");
+		fundIn2.setDiscAmt("0");
+		
+		BCA_CC_Record duplicateFundIn2 = new BCA_CC_Record();
+		duplicateFundIn2.setAuthCd("duplicate");
+		duplicateFundIn2.setGrossAmt("5000");
+		duplicateFundIn2.setNettAmt("5000");
+		duplicateFundIn2.setDiscAmt("0");
+		
+		BCA_CC_Record duplicateFundIn3 = new BCA_CC_Record();
+		duplicateFundIn3.setAuthCd("duplicate");
+		duplicateFundIn3.setGrossAmt("5000");
+		duplicateFundIn3.setNettAmt("5000");
+		duplicateFundIn3.setDiscAmt("0");
+		
+		BCA_CC_Record duplicateFundIn4 = new BCA_CC_Record();
+		duplicateFundIn4.setAuthCd("duplicate");
+		duplicateFundIn4.setGrossAmt("5000");
+		duplicateFundIn4.setNettAmt("5000");
+		duplicateFundIn4.setDiscAmt("0");
+		
+		BCA_CC_Record duplicateFundIn5 = new BCA_CC_Record();
+		duplicateFundIn5.setAuthCd("duplicate");
+		duplicateFundIn5.setGrossAmt("5000");
+		duplicateFundIn5.setNettAmt("5000");
+		duplicateFundIn5.setDiscAmt("0");
+		
+		BCA_CC_Record duplicateFundIn6 = new BCA_CC_Record();
+		duplicateFundIn6.setAuthCd("duplicate");
+		duplicateFundIn6.setGrossAmt("5000");
+		duplicateFundIn6.setNettAmt("5000");
+		duplicateFundIn6.setDiscAmt("0");
+		
+		ArrayList<PojoInterface> fundInList = new ArrayList<PojoInterface>(8);
+		fundInList.add(duplicateFundIn1);
+		fundInList.add(fundIn1);
+		fundInList.add(fundIn2);
+		fundInList.add(duplicateFundIn2);
+		fundInList.add(duplicateFundIn3);
+		fundInList.add(duplicateFundIn4);
+		fundInList.add(duplicateFundIn5);
+		fundInList.add(duplicateFundIn6);
 		
 		return fundInList;
 	}
